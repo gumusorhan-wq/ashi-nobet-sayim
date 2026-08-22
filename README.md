@@ -4,7 +4,7 @@ ASHİ Nöbet Sayım, **Nöbet İçi Hareket Raporu** Excel dosyasını tek dosya
 
 ## Güncel dosya
 
-Güncel uygulama dosyası: [`ashi_surucu_nobet_sayim_0900.html`](./ashi_surucu_nobet_sayim_0900.html)
+Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.1.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v2026.08.23.1.html)
 
 Uygulama sürümü: **2026.08.23.1**
 
@@ -12,7 +12,7 @@ Uygulama sürümü: **2026.08.23.1**
 
 Uygulama açılışta ve üst başlıktaki **Güncellemeyi kontrol et** düğmesine basıldığında [`ashi-update.json`](./ashi-update.json) manifestini kontrol eder. Manifestteki sürüm yerel sürümden daha yeni ise uygulama uyarı gösterir ve **Yeni sürümü indir** düğmesini açar. Güncelleme işlemi kullanıcı tarafından başlatılır; eski HTML dosyası otomatik olarak üzerine yazılmaz.
 
-Manifestte yeni sürüm yayınlamak için `version` değerini artırın ve `downloadUrl` değerinin güncel HTML dosyasını göstermesini sağlayın. Kararlı kullanım için HTML dosya adını değiştirmeden güncellemek ve yalnızca manifest sürümünü artırmak önerilir.
+Manifestte yeni sürüm yayınlamak için `version` değerini artırın ve `downloadUrl` ile `fileName` değerlerini `HUSER ASHİ NÖBET SAYIM RAPORU v{sürüm}.html` biçimindeki yeni dosya adıyla eşleştirin. Böylece her indirme dosyası kendi sürüm numarasını taşır.
 
 | Manifest alanı | Açıklama |
 |---|---|
@@ -33,9 +33,9 @@ Bu depoya Excel raporları, personel listeleri, kişisel veriler veya GitHub eri
 
 ## Sonraki sürüm yayınlama adımları
 
-1. Yeni HTML dosyasını `ashi_surucu_nobet_sayim_0900.html` adıyla hazırlayın.
-2. HTML içindeki `ASHI_APP_VERSION` değerini yeni sürüm numarasına yükseltin.
-3. Bu depodaki HTML dosyasını yeni dosyayla değiştirin.
+1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` biçimindeki sürümlü adla hazırlayın.
+2. HTML içindeki `ASHI_APP_VERSION` değerini aynı yeni sürüm numarasına yükseltin.
+3. Yeni dosyayı bu depoya yeni adıyla ekleyin.
 4. `ashi-update.json` içindeki `version`, `downloadUrl`, `fileName` ve `notes` alanlarını güncelleyin.
 5. Değişiklikleri aynı ana dala gönderin.
 6. Kullanıcı uygulamayı açtığında veya **Güncellemeyi kontrol et** düğmesine bastığında yeni sürüm uyarısını görür.

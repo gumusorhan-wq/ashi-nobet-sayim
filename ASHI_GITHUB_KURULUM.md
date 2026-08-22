@@ -2,7 +2,7 @@
 
 ## 1. İlk kullanım
 
-GitHub’daki güncel ASHİ uygulama dosyasını indirin: `ashi_surucu_nobet_sayim_0900.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
+GitHub’daki güncel ASHİ uygulama dosyasını indirin: `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.1.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
 
 Uygulama açıldığında güncelleme manifesti varsayılan olarak şu GitHub adresinden takip edilir:
 
@@ -18,9 +18,9 @@ Kontrolü beklemek istemezseniz üst başlıktaki **Güncellemeyi kontrol et** d
 
 ## 3. Yeni sürümün GitHub’a yayınlanması
 
-Yeni bir sürüm hazırlandığında HTML içindeki `ASHI_APP_VERSION` değerini artırın. Güncel HTML dosyasını bu depodaki `ashi_surucu_nobet_sayim_0900.html` dosyasının yerine koyun. Ardından `ashi-update.json` dosyasında `version` değerini aynı yeni sürüm numarasına, `downloadUrl` değerini sabit HTML adresine ve `notes` değerini değişiklik açıklamasına göre güncelleyin.
+Yeni bir sürüm hazırlandığında HTML içindeki `ASHI_APP_VERSION` değerini artırın. Güncel HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` biçimindeki yeni sürüm adıyla hazırlayın. Ardından `ashi-update.json` dosyasında `version` değerini yeni sürüm numarasına, `downloadUrl` değerini yeni sürümlü HTML adresine, `fileName` değerini `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` adına ve `notes` değerini değişiklik açıklamasına göre güncelleyin.
 
-`version` değeri yerel uygulamadaki sürümden büyük olduğu anda kullanıcıya güncelleme bildirimi gösterilir. Kararlı kullanım için HTML dosya adını ve GitHub adresini değiştirmeyin; sonraki sürümlerde yalnızca HTML içeriğini ve manifest sürümünü güncelleyin.
+`version` değeri yerel uygulamadaki sürümden büyük olduğu anda kullanıcıya güncelleme bildirimi gösterilir. Yeni dosya her sürümde `HUSER ASHİ NÖBET SAYIM RAPORU v{sürüm}.html` biçiminde adlandırılır; uygulamanın indirme düğmesi manifestteki `fileName` değerini kullanır. Böylece indirilen dosya her zaman sürüm numarasını taşır.
 
 ## 4. Güvenlik sınırı
 
