@@ -2,13 +2,9 @@
 
 ## 1. İlk kullanım
 
-GitHub’daki güncel ASHİ uygulama dosyasını indirin: `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.1.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
+GitHub’daki güncel ASHİ uygulama dosyasını indirin: `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.2.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
 
-Uygulama açıldığında güncelleme manifesti varsayılan olarak şu GitHub adresinden takip edilir:
-
-`https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/ashi-update.json`
-
-Bu adresi ayrıca uygulamanın **Kılavuz > Sürüm güncelleme kontrolü** alanında görebilirsiniz. İsterseniz farklı bir manifest adresi yazabilirsiniz; adres tarayıcıda yerel olarak saklanır.
+Uygulama açıldığında güncelleme kaynağı uygulama içinde tanımlı güvenli GitHub adresinden otomatik olarak takip edilir. Bu adres kullanıcı arayüzünde ve **Kılavuz** bölümünde gösterilmez; kullanıcıdan ayrıca adres girmesi istenmez.
 
 ## 2. Güncelleme geldiğinde
 

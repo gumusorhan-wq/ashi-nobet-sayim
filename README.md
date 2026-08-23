@@ -4,9 +4,9 @@ ASHİ Nöbet Sayım, **Nöbet İçi Hareket Raporu** Excel dosyasını tek dosya
 
 ## Güncel dosya
 
-Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.1.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v2026.08.23.1.html)
+Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.2.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v2026.08.23.2.html)
 
-Uygulama sürümü: **2026.08.23.1**
+Uygulama sürümü: **2026.08.23.2**
 
 ## Güncelleme sistemi
 
