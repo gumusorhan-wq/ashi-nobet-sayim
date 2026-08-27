@@ -2,7 +2,7 @@
 
 ## 1. İlk kullanım
 
-GitHub’daki güncel ASHİ uygulama dosyasını indirin: `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.3.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
+GitHub’daki güncel ASHİ uygulama dosyasını indirin: `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.4.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
 
 Uygulama açıldığında güncelleme kaynağı uygulama içinde tanımlı güvenli GitHub adresinden otomatik olarak takip edilir. Bu adres kullanıcı arayüzünde ve **Kılavuz** bölümünde gösterilmez; kullanıcıdan ayrıca adres girmesi istenmez.
 
@@ -14,7 +14,7 @@ Kontrolü beklemek istemezseniz üst başlıktaki **Güncellemeyi kontrol et** d
 
 ## 3. Yeni sürümün GitHub’a yayınlanması
 
-Yeni bir sürüm hazırlandığında HTML içindeki `ASHI_APP_VERSION` değerini artırın. Güncel HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` biçimindeki yeni sürüm adıyla hazırlayın. Ardından `ashi-update.json` dosyasında `version` değerini yeni sürüm numarasına, `downloadUrl` değerini yeni sürümlü HTML adresine, `fileName` değerini `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` adına ve `notes` değerini değişiklik açıklamasına göre güncelleyin.
+Yeni bir sürüm hazırlandığında HTML içindeki `ASHI_APP_VERSION` değerini artırın. Güncel dosya v2026.08.23.4’tür. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` biçimindeki yeni sürüm adıyla hazırlayın. Ardından `ashi-update.json` dosyasında `version` değerini yeni sürüm numarasına, `downloadUrl` değerini yeni sürümlü HTML adresine, `fileName` değerini `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` adına ve `notes` değerini değişiklik açıklamasına göre güncelleyin.
 
 `version` değeri yerel uygulamadaki sürümden büyük olduğu anda kullanıcıya güncelleme bildirimi gösterilir. Yeni HTML dosyası her sürümde `HUSER ASHİ NÖBET SAYIM RAPORU v{sürüm}.html` biçiminde adlandırılır; uygulamanın indirme düğmesi manifestteki `fileName` değerini kullanır. Böylece indirilen dosya her zaman sürüm numarasını taşır.
 
@@ -26,4 +26,4 @@ Uygulama GitHub’dan yalnızca herkese açık `ashi-update.json` manifestini ve
 
 ## 5. Analiz kapsamı
 
-Uygulamanın nöbet hesaplamaları rapor ayının birinci günü saat 09:00 dahil, sonraki ayın birinci günü saat 09:00 hariç olacak şekilde yapılır. Ekip Şefi, YSP ve Sürücü branşları istasyon-gün bazında 24 saat hedefiyle kontrol edilir. Sürücü Düzeni analizinde başlangıcı 21:00 ve bitişi ertesi gün 09:00 olan 12 saatlik nöbetlerden art arda 3 gece; 24 saatlik nöbetlerden ise nöbet günleri 2 gün arayla gelen 1, 3, 5 örneği gibi en az 3 kayıtlı diziler bildirilir. iOS Excel yükleme, dosya adı ve başlık doğrulaması, filtreli analiz, çakışma ve eksik saat listeleri, 5 gün ve üzeri boşluk analizi, mobil kart görünümü ve Excel dışa aktarma özellikleri korunur.
+Uygulamanın nöbet hesaplamaları rapor ayının birinci günü saat 09:00 dahil, sonraki ayın birinci günü saat 09:00 hariç olacak şekilde yapılır. Ekip Şefi, YSP ve Sürücü branşları istasyon-gün bazında 24 saat hedefiyle kontrol edilir. Sürücü Düzeni analizinde başlangıcı 21:00 ve bitişi ertesi gün 09:00 olan 12 saatlik nöbetlerden art arda 3 gece; 24 saatlik nöbetlerden ise nöbet günleri 2 gün arayla gelen 1, 3, 5 örneği gibi en az 3 kayıtlı diziler bildirilir. iOS Excel yükleme, Nöbet İçi Hareket Raporu veya Nöbet Listesi Raporu dosya adı ve başlık doğrulaması, filtreli analiz, çakışma ve eksik saat listeleri, 5 gün ve üzeri boşluk analizi, mobil kart görünümü ve Excel dışa aktarma özellikleri korunur.
