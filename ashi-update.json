@@ -1,6 +1,6 @@
 {
-  "version": "01.07",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.07.html",
-  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.07.html",
-  "notes": "ASHİ Nöbet Sayım v01.07: Son 6 Ay Arşivi ilk açılış ekranında, Excel yükleme alanının altında görünür hale getirildi. Arşiv açma, aynı ay güncelleme onayı, çift kayıt önleme ve onaylı manuel silme korunmuştur. 09:00–09:00 sayım standardı ve mevcut analiz özellikleri korunmuştur."
+  "version": "01.08",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.08.html",
+  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.08.html",
+  "notes": "ASHİ Nöbet Sayım v01.08: Son 6 Ay Arşivi hem ilk açılış ekranında hem de Kılavuz bölümünde gösterilir; iki görünüm aynı yerel kayıtları kullanır. Arşiv açma, aynı ay güncelleme onayı, çift kayıt önleme ve onaylı manuel silme korunmuştur. 09:00–09:00 sayım standardı ve mevcut analiz özellikleri korunmuştur."
 }
