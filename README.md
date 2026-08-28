@@ -4,9 +4,9 @@ ASHİ Nöbet Sayım, **Nöbet İçi Hareket Raporu** veya **Nöbet Listesi Rapor
 
 ## Güncel dosya
 
-Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.4.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v2026.08.23.4.html)
+Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.04.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.04.html)
 
-Uygulama sürümü: **2026.08.23.4**
+Uygulama sürümü: **01.04**
 
 ## Güncelleme sistemi
 
@@ -33,7 +33,7 @@ Bu depoya Excel raporları, personel listeleri, kişisel veriler veya GitHub eri
 
 ## Sonraki sürüm yayınlama adımları
 
-1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v2026.08.23.4’tür.
+1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.05.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.04’tür; bundan sonraki sürümler v01.05, v01.06 şeklinde ilerletilir.
 2. HTML içindeki `ASHI_APP_VERSION` değerini aynı yeni sürüm numarasına yükseltin.
 3. Yeni dosyayı bu depoya yeni adıyla ekleyin.
 4. `ashi-update.json` içindeki `version`, `downloadUrl`, `fileName` ve `notes` alanlarını güncelleyin.

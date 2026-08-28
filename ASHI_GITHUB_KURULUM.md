@@ -2,7 +2,7 @@
 
 ## 1. İlk kullanım
 
-GitHub’daki güncel ASHİ uygulama dosyasını indirin: `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.23.4.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
+GitHub’daki güncel ASHİ uygulama dosyasını indirin: `HUSER ASHİ NÖBET SAYIM RAPORU v01.04.html`. Dosyayı Mac veya Windows bilgisayarınızda sabit bir klasöre kaydedin ve tarayıcıda bu dosyayı açın.
 
 Uygulama açıldığında güncelleme kaynağı uygulama içinde tanımlı güvenli GitHub adresinden otomatik olarak takip edilir. Bu adres kullanıcı arayüzünde ve **Kılavuz** bölümünde gösterilmez; kullanıcıdan ayrıca adres girmesi istenmez.
 
@@ -14,7 +14,7 @@ Kontrolü beklemek istemezseniz üst başlıktaki **Güncellemeyi kontrol et** d
 
 ## 3. Yeni sürümün GitHub’a yayınlanması
 
-Yeni bir sürüm hazırlandığında HTML içindeki `ASHI_APP_VERSION` değerini artırın. Güncel dosya v2026.08.23.4’tür. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` biçimindeki yeni sürüm adıyla hazırlayın. Ardından `ashi-update.json` dosyasında `version` değerini yeni sürüm numarasına, `downloadUrl` değerini yeni sürümlü HTML adresine, `fileName` değerini `HUSER ASHİ NÖBET SAYIM RAPORU v2026.08.24.1.html` adına ve `notes` değerini değişiklik açıklamasına göre güncelleyin.
+Yeni bir sürüm hazırlandığında HTML içindeki `ASHI_APP_VERSION` değerini artırın. Güncel dosya v01.04’tür; bundan sonraki sürümler `v01.05`, `v01.06` biçiminde ilerletilir. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.05.html` biçimindeki yeni sürüm adıyla hazırlayın. Ardından `ashi-update.json` dosyasında `version` değerini yeni sürüm numarasına, `downloadUrl` değerini yeni sürümlü HTML adresine, `fileName` değerini `HUSER ASHİ NÖBET SAYIM RAPORU v01.05.html` adına ve `notes` değerini değişiklik açıklamasına göre güncelleyin.
 
 `version` değeri yerel uygulamadaki sürümden büyük olduğu anda kullanıcıya güncelleme bildirimi gösterilir. Yeni HTML dosyası her sürümde `HUSER ASHİ NÖBET SAYIM RAPORU v{sürüm}.html` biçiminde adlandırılır; uygulamanın indirme düğmesi manifestteki `fileName` değerini kullanır. Böylece indirilen dosya her zaman sürüm numarasını taşır.
 
