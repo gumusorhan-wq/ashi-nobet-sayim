@@ -4,9 +4,9 @@ ASHİ Nöbet Sayım, **Nöbet İçi Hareket Raporu** veya **Nöbet Listesi Rapor
 
 ## Güncel dosya
 
-Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.04.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.04.html)
+Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.05.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.05.html)
 
-Uygulama sürümü: **01.04**
+Uygulama sürümü: **01.05**
 
 ## Güncelleme sistemi
 
@@ -21,6 +21,12 @@ Manifestte yeni sürüm yayınlamak için `version` değerini artırın ve `down
 | `fileName` | İndirme sırasında kullanılacak dosya adı |
 | `notes` | Kullanıcıya gösterilecek sürüm açıklaması |
 
+## Yerel son 6 ay arşivi
+
+v01.05 ile yüklenen rapor ayları, işlenmiş rapor verileriyle birlikte yalnızca kullanılan tarayıcının **IndexedDB** alanında son 6 ay olarak tutulur. Bu bilgiler GitHub’a, başka bir sunucuya veya ağ üzerinden herhangi bir hizmete gönderilmez. Tarayıcı site verileri temizlenirse yerel arşiv de silinir.
+
+Aynı rapor ayı yeniden yüklendiğinde uygulama mevcut kaydın güncellenmesi için onay ister. Onay verilmezse mevcut kayıt ve açık rapor korunur; onay verilirse aynı `YYYY-AA` anahtarı üzerine yazılır ve ikinci bir kayıt oluşturulmaz. Arşiv kartındaki **Aç** düğmesi kaydı rapor ekranına geri getirir. **Sil** düğmesi onay ister ve yalnızca seçilen yerel arşiv kopyasını kaldırır; açık rapor varsa ekranda kullanılmaya devam eder. Altıncı kayıttan sonra en eski ay otomatik olarak çıkarılır.
+
 ## Analiz standardı
 
 Tüm hesaplamalar rapor ayının birinci günü saat **09:00 dahil**, sonraki ayın birinci günü saat **09:00 hariç** olacak şekilde `[T0,T1)` penceresinde yapılır. Nöbet kayıtları Ekip Şefi, YSP ve Sürücü branşlarına göre istasyon-gün bazında değerlendirilir. Her branş ve istasyon-gün için hedef nöbet süresi 24 saattir.
@@ -33,7 +39,7 @@ Bu depoya Excel raporları, personel listeleri, kişisel veriler veya GitHub eri
 
 ## Sonraki sürüm yayınlama adımları
 
-1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.05.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.04’tür; bundan sonraki sürümler v01.05, v01.06 şeklinde ilerletilir.
+1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.06.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.05’tir; bundan sonraki sürümler v01.06, v01.07 şeklinde ilerletilir.
 2. HTML içindeki `ASHI_APP_VERSION` değerini aynı yeni sürüm numarasına yükseltin.
 3. Yeni dosyayı bu depoya yeni adıyla ekleyin.
 4. `ashi-update.json` içindeki `version`, `downloadUrl`, `fileName` ve `notes` alanlarını güncelleyin.
