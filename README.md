@@ -4,9 +4,9 @@ ASHİ Nöbet Sayım, **Nöbet İçi Hareket Raporu** veya **Nöbet Listesi Rapor
 
 ## Güncel dosya
 
-Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.05.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.05.html)
+Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.06.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.06.html)
 
-Uygulama sürümü: **01.05**
+Uygulama sürümü: **01.06**
 
 ## Güncelleme sistemi
 
@@ -23,7 +23,7 @@ Manifestte yeni sürüm yayınlamak için `version` değerini artırın ve `down
 
 ## Yerel son 6 ay arşivi
 
-v01.05 ile yüklenen rapor ayları, işlenmiş rapor verileriyle birlikte yalnızca kullanılan tarayıcının **IndexedDB** alanında son 6 ay olarak tutulur. Bu bilgiler GitHub’a, başka bir sunucuya veya ağ üzerinden herhangi bir hizmete gönderilmez. Tarayıcı site verileri temizlenirse yerel arşiv de silinir.
+v01.06 ile yüklenen rapor ayları, işlenmiş rapor verileriyle birlikte yalnızca kullanılan tarayıcının **IndexedDB** alanında son 6 ay olarak tutulur. Arşiv paneli ana rapor ekranında gösterilmez; rapor ekranındaki **Kılavuz** sekmesinden açılır. Bu bilgiler GitHub’a, başka bir sunucuya veya ağ üzerinden herhangi bir hizmete gönderilmez. Tarayıcı site verileri temizlenirse yerel arşiv de silinir.
 
 Aynı rapor ayı yeniden yüklendiğinde uygulama mevcut kaydın güncellenmesi için onay ister. Onay verilmezse mevcut kayıt ve açık rapor korunur; onay verilirse aynı `YYYY-AA` anahtarı üzerine yazılır ve ikinci bir kayıt oluşturulmaz. Arşiv kartındaki **Aç** düğmesi kaydı rapor ekranına geri getirir. **Sil** düğmesi onay ister ve yalnızca seçilen yerel arşiv kopyasını kaldırır; açık rapor varsa ekranda kullanılmaya devam eder. Altıncı kayıttan sonra en eski ay otomatik olarak çıkarılır.
 
@@ -39,7 +39,7 @@ Bu depoya Excel raporları, personel listeleri, kişisel veriler veya GitHub eri
 
 ## Sonraki sürüm yayınlama adımları
 
-1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.06.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.05’tir; bundan sonraki sürümler v01.06, v01.07 şeklinde ilerletilir.
+1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.07.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.06’tır; bundan sonraki sürümler v01.07, v01.08 şeklinde ilerletilir.
 2. HTML içindeki `ASHI_APP_VERSION` değerini aynı yeni sürüm numarasına yükseltin.
 3. Yeni dosyayı bu depoya yeni adıyla ekleyin.
 4. `ashi-update.json` içindeki `version`, `downloadUrl`, `fileName` ve `notes` alanlarını güncelleyin.
