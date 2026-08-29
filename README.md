@@ -4,9 +4,9 @@ ASHİ Nöbet Sayım, **Nöbet İçi Hareket Raporu** veya **Nöbet Listesi Rapor
 
 ## Güncel dosya
 
-Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.09.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.09.html)
+Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.10.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.10.html)
 
-Uygulama sürümü: **01.09**
+Uygulama sürümü: **01.10**
 
 ## Güncelleme sistemi
 
@@ -23,13 +23,13 @@ Manifestte yeni sürüm yayınlamak için `version` değerini artırın ve `down
 
 ## Yerel son 6 ay arşivi
 
-v01.09 ile yüklenen rapor ayları, işlenmiş rapor verileriyle birlikte yalnızca kullanılan tarayıcının **IndexedDB** alanında son 6 ay olarak tutulur. Arşiv paneli hem ilk açılış ekranında, Excel yükleme alanının altında hem de Kılavuz bölümünde gösterilir. İki görünüm aynı yerel kayıtları kullanır. Bu bilgiler GitHub’a, başka bir sunucuya veya ağ üzerinden herhangi bir hizmete gönderilmez. Tarayıcı site verileri temizlenirse yerel arşiv de silinir.
+v01.10 ile yüklenen rapor ayları, işlenmiş rapor verileriyle birlikte yalnızca kullanılan tarayıcının **IndexedDB** alanında son 6 ay olarak tutulur. Arşiv paneli hem ilk açılış ekranında, Excel yükleme alanının altında hem de Kılavuz bölümünde gösterilir. İki görünüm aynı yerel kayıtları kullanır. Bu bilgiler GitHub’a, başka bir sunucuya veya ağ üzerinden herhangi bir hizmete gönderilmez. Tarayıcı site verileri temizlenirse yerel arşiv de silinir.
 
 Aynı rapor ayı yeniden yüklendiğinde uygulama mevcut kaydın güncellenmesi için onay ister. Onay verilmezse mevcut kayıt ve açık rapor korunur; onay verilirse aynı `YYYY-AA` anahtarı üzerine yazılır ve ikinci bir kayıt oluşturulmaz. Arşiv kartındaki **Aç** düğmesi kaydı rapor ekranına geri getirir. **Sil** düğmesi onay ister ve yalnızca seçilen yerel arşiv kopyasını kaldırır; açık rapor varsa ekranda kullanılmaya devam eder. Altıncı kayıttan sonra en eski ay otomatik olarak çıkarılır.
 
 ## Çoklu İstasyon sayımı
 
-Çoklu İstasyon görünümünde sayım kişi sayısına göre yapılmaz. Aynı kişi farklı istasyonlarda nöbet tuttuğunda her istasyondaki nöbet ayrı kayıt olarak sayılır; özet ve Excel çıktısında toplam nöbet sayısı ile kişi sayısı ayrı gösterilir. İstasyon satırlarında ilgili istasyona ait nöbet adedi belirtilir.
+Çoklu İstasyon görünümünde sayım kişi sayısına göre yapılmaz. Kişinin asıl/kendi istasyonundaki nöbetleri sayım dışı bırakılır; yalnızca asıl istasyondan farklı istasyonlarda tuttuğu nöbetler sayılır. Özet ve Excel çıktısında toplam farklı istasyon nöbet sayısı ile kişi sayısı ayrı gösterilir; istasyon satırlarında yalnızca bu nöbetlerin adedi belirtilir.
 
 ## Analiz standardı
 
@@ -43,7 +43,7 @@ Bu depoya Excel raporları, personel listeleri, kişisel veriler veya GitHub eri
 
 ## Sonraki sürüm yayınlama adımları
 
-1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.10.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.09’dur; bundan sonraki sürümler v01.10, v01.11 şeklinde ilerletilir.
+1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.11.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.10’dur; bundan sonraki sürümler v01.11, v01.12 şeklinde ilerletilir.
 2. HTML içindeki `ASHI_APP_VERSION` değerini aynı yeni sürüm numarasına yükseltin.
 3. Yeni dosyayı bu depoya yeni adıyla ekleyin.
 4. `ashi-update.json` içindeki `version`, `downloadUrl`, `fileName` ve `notes` alanlarını güncelleyin.
