@@ -1,6 +1,6 @@
 {
-  "version": "01.10",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.10.html",
-  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.10.html",
-  "notes": "ASHİ Nöbet Sayım v01.10: Çoklu İstasyon sayımında kişinin asıl/kendi istasyonundaki nöbetler hariç tutulur; yalnızca farklı istasyonlarda tuttuğu nöbetler sayılır. Ekran ve Excel çıktısında farklı istasyon nöbet sayısı ile kişi sayısı ayrı gösterilir. Son 6 Ay Arşivi iki görünümde korunmuştur. 09:00–09:00 hesaplama standardı, analizler ve Excel desteği korunmuştur."
+  "version": "01.11",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.11.html",
+  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.11.html",
+  "notes": "ASHİ Nöbet Sayım v01.11: Normal nöbet listeleri bölümüne Komuta Kontrol Listesi ve Başhekimlik Listesi için ayrı butonlar eklendi. Bu görünümler şimdilik yalnızca ilgili nöbet kayıtlarını gösterir; sayım, analiz ve Excel dışa aktarımı uygulanmaz. Çoklu İstasyon, yerel arşiv, 09:00–09:00 hesaplama ve mevcut analiz özellikleri korunmuştur."
 }
