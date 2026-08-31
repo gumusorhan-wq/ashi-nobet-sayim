@@ -4,9 +4,9 @@ ASHİ Nöbet Sayım, **Nöbet İçi Hareket Raporu** veya **Nöbet Listesi Rapor
 
 ## Güncel dosya
 
-Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.12.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.12.html)
+Güncel uygulama dosyası: [`HUSER ASHİ NÖBET SAYIM RAPORU v01.13.html`](./HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.13.html)
 
-Uygulama sürümü: **01.12**
+Uygulama sürümü: **01.13**
 
 ## Güncelleme sistemi
 
@@ -23,13 +23,13 @@ Manifestte yeni sürüm yayınlamak için `version` değerini artırın ve `down
 
 ## Yerel son 6 ay arşivi
 
-v01.12 ile yüklenen rapor ayları, işlenmiş rapor verileriyle birlikte yalnızca kullanılan tarayıcının **IndexedDB** alanında son 6 ay olarak tutulur. Arşiv paneli hem ilk açılış ekranında, Excel yükleme alanının altında hem de Kılavuz bölümünde gösterilir. İki görünüm aynı yerel kayıtları kullanır. Bu bilgiler GitHub’a, başka bir sunucuya veya ağ üzerinden herhangi bir hizmete gönderilmez. Tarayıcı site verileri temizlenirse yerel arşiv de silinir.
+v01.13 ile yüklenen rapor ayları, işlenmiş rapor verileriyle birlikte yalnızca kullanılan tarayıcının **IndexedDB** alanında son 6 ay olarak tutulur. Arşiv paneli hem ilk açılış ekranında, Excel yükleme alanının altında hem de Kılavuz bölümünde gösterilir. İki görünüm aynı yerel kayıtları kullanır. Bu bilgiler GitHub’a, başka bir sunucuya veya ağ üzerinden herhangi bir hizmete gönderilmez. Tarayıcı site verileri temizlenirse yerel arşiv de silinir.
 
 Aynı rapor ayı yeniden yüklendiğinde uygulama mevcut kaydın güncellenmesi için onay ister. Onay verilmezse mevcut kayıt ve açık rapor korunur; onay verilirse aynı `YYYY-AA` anahtarı üzerine yazılır ve ikinci bir kayıt oluşturulmaz. Arşiv kartındaki **Aç** düğmesi kaydı rapor ekranına geri getirir. **Sil** düğmesi onay ister ve yalnızca seçilen yerel arşiv kopyasını kaldırır; açık rapor varsa ekranda kullanılmaya devam eder. Altıncı kayıttan sonra en eski ay otomatik olarak çıkarılır.
 
 ## Normal nöbet listeleri
 
-Normal nöbet listeleri bölümünde **Komuta Kontrol Listesi** ve **Başhekimlik Listesi** ayrı butonlarla görüntülenir. İstasyon adı alanındaki **Manisa Komuta Kontrol Merkezi** ve **Başhekimlik** birim kayıtları da bu listelere dahil edilir. Bu ekranlar yalnızca ilgili nöbet kayıtlarını listeler; şimdilik sayım, analiz ve Excel dışa aktarımı uygulanmaz.
+Normal nöbet listeleri bölümünde **Komuta Kontrol Listesi** ve **Başhekimlik Listesi** ayrı butonlarla görüntülenir. İstasyon adı alanındaki **Manisa Komuta Kontrol Merkezi** ve **Başhekimlik** birim kayıtları bu listelere dahil edilir. Her liste, sürücü grubundaki mantıkla personel bazında tek satır oluşturur ve toplam nöbet sayısını gösterir. Başhekimlik listesinde branş veya görev türü ayrımı yapılmaz; bu birimde nöbet tutan herkes listelenir. Özel listelerde ayrıca analiz ve Excel dışa aktarımı uygulanmaz.
 
 ## Çoklu İstasyon sayımı
 
@@ -47,7 +47,7 @@ Bu depoya Excel raporları, personel listeleri, kişisel veriler veya GitHub eri
 
 ## Sonraki sürüm yayınlama adımları
 
-1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.12.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.12’dir; bundan sonraki sürümler v01.13, v01.14 şeklinde ilerletilir.
+1. Yeni HTML dosyasını `HUSER ASHİ NÖBET SAYIM RAPORU v01.13.html` biçimindeki sürümlü adla hazırlayın. Güncel dosya v01.13’tür; bundan sonraki sürümler v01.14, v01.15 şeklinde ilerletilir.
 2. HTML içindeki `ASHI_APP_VERSION` değerini aynı yeni sürüm numarasına yükseltin.
 3. Yeni dosyayı bu depoya yeni adıyla ekleyin.
 4. `ashi-update.json` içindeki `version`, `downloadUrl`, `fileName` ve `notes` alanlarını güncelleyin.

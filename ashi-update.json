@@ -1,6 +1,6 @@
 {
-  "version": "01.12",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.12.html",
-  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.12.html",
-  "notes": "ASHİ Nöbet Sayım v01.12: Başhekimlik ve istasyon adı MANİSA KOMUTA KONTROL MERKEZİ olan kayıtlar genel İstasyon/İdari filtresinden ayrı işlenerek normal nöbet listelerinde doğru biçimde gösterilir. Komuta Kontrol Listesi ve Başhekimlik Listesi yalnızca ilgili nöbet kayıtlarını sunar; sayım, analiz ve Excel dışa aktarımı uygulanmaz. 09:00–09:00 hesaplama, Çoklu İstasyon ve yerel arşiv özellikleri korunmuştur."
+  "version": "01.13",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.13.html",
+  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.13.html",
+  "notes": "ASHİ Nöbet Sayım v01.13: Komuta Kontrol ve Başhekimlik listeleri artık sürücü grubundaki mantıkla personel bazında gruplanır; her personelin toplam nöbet sayısı ve toplam süresi gösterilir. Başhekimlik listesinde nöbet branşı veya görev türü ayrımı yapılmaz; Başhekimlik biriminde nöbet tutan tüm personel dahil edilir. Türkçe büyük İ/Ş karakterleri için birim adı eşleşmesi sağlamlaştırılmıştır. 09:00–09:00 hesaplama, Çoklu İstasyon ve yerel arşiv özellikleri korunmuştur."
 }
