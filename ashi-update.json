@@ -1,6 +1,6 @@
 {
-  "version": "01.13",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.13.html",
-  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.13.html",
-  "notes": "ASHİ Nöbet Sayım v01.13: Komuta Kontrol ve Başhekimlik listeleri artık sürücü grubundaki mantıkla personel bazında gruplanır; her personelin toplam nöbet sayısı ve toplam süresi gösterilir. Başhekimlik listesinde nöbet branşı veya görev türü ayrımı yapılmaz; Başhekimlik biriminde nöbet tutan tüm personel dahil edilir. Türkçe büyük İ/Ş karakterleri için birim adı eşleşmesi sağlamlaştırılmıştır. 09:00–09:00 hesaplama, Çoklu İstasyon ve yerel arşiv özellikleri korunmuştur."
+  "version": "01.15",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.15.html",
+  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.15.html",
+  "notes": "ASHİ Nöbet Sayım v01.15: Başhekimlik ve Komuta Kontrol kayıtları branş veya görev türü fark etmeksizin Excel satırlarının tüm sütunlarında aranır; Başhekimlik/Komuta personeli Sürücü ekranındaki gibi 12 saat, 24 saat, diğer süre, toplam saat ve toplam gün sütunlarıyla kişi bazında gösterilir. BAŞHEKİMLİĞİ gibi ekli Türkçe birim adları da eşleştirilir. 09:00–09:00 hesaplama, Çoklu İstasyon ve yerel arşiv özellikleri korunmuştur."
 }
