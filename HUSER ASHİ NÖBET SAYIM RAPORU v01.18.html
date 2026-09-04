@@ -89,14 +89,6 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 .search-row{display:flex;gap:10px;margin-bottom:8px;align-items:center}
 .search-input{flex:1;padding:9px 14px;border:1px solid var(--line);border-radius:8px;font-size:13px;outline:none;font-family:inherit}
 .search-input:focus{border-color:#16a34a}
-.special-list-toolbar{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;padding:12px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
-.special-list-field{display:flex;flex-direction:column;gap:4px;min-width:190px;flex:1 1 220px}
-.special-list-field label{font-size:10px;font-weight:800;letter-spacing:.06em;color:#64748b;text-transform:uppercase}
-.special-list-field input,.special-list-field select{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#1e293b;font:inherit;font-size:12px;outline:none}
-.special-list-field input:focus,.special-list-field select:focus{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.10)}
-.special-list-count{font-size:12px;color:#64748b;white-space:nowrap;padding:9px 2px}
-.special-list-export{margin-left:auto;white-space:nowrap}
-@media(max-width:640px){.special-list-field{min-width:100%;flex-basis:100%}.special-list-count,.special-list-export{width:100%;margin-left:0}.special-list-export{justify-content:center}}
 
 /* TABLE */
 .table-wrap{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
@@ -609,32 +601,19 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <strong id="specialListTitle">Normal Nöbet Listesi</strong><br>
           <span id="specialListSummary">Personel bazında 12 saat, 24 saat, diğer süre, toplam saat ve toplam gün gösterilir.</span>
         </div>
-        <div class="special-list-toolbar">
-          <div class="special-list-field">
-            <label for="specialListSearch">Personel veya birim ara</label>
-            <input id="specialListSearch" type="search" placeholder="Ad, soyad, TCKN veya birim ara…" oninput="renderSpecialDutyList(getActiveSpecialDutyKind())">
+        <div id="specialListToolbar" class="bosluk-toolbar">
+          <div class="bosluk-filter-row">
+            <div class="bosluk-filter wide">
+              <label class="bosluk-filter-label" for="specialListSearch">Personel veya TCKN</label>
+              <input id="specialListSearch" type="search" placeholder="Ad, soyad veya TCKN ara…" oninput="filterSpecialList()">
+            </div>
+            <div class="bosluk-filter">
+              <label class="bosluk-filter-label" for="specialListStationFilter">İstasyon / Birim</label>
+              <select id="specialListStationFilter" onchange="filterSpecialList()"><option value="">Tüm istasyonlar</option></select>
+            </div>
+            <button id="specialListClearBtn" class="btn-sec bosluk-clear" type="button" onclick="clearSpecialListFilters()">Filtreleri temizle</button>
           </div>
-          <div class="special-list-field">
-            <label for="specialListSort">Sıralama</label>
-            <select id="specialListSort" onchange="renderSpecialDutyList(getActiveSpecialDutyKind())">
-              <option value="count-desc">Toplam nöbet: büyükten küçüğe</option>
-              <option value="count-asc">Toplam nöbet: küçükten büyüğe</option>
-              <option value="s12-desc">12 saat: büyükten küçüğe</option>
-              <option value="s12-asc">12 saat: küçükten büyüğe</option>
-              <option value="s24-desc">24 saat: büyükten küçüğe</option>
-              <option value="s24-asc">24 saat: küçükten büyüğe</option>
-              <option value="sdiger-desc">Diğer süre: büyükten küçüğe</option>
-              <option value="sdiger-asc">Diğer süre: küçükten büyüğe</option>
-              <option value="hours-desc">Toplam saat: büyükten küçüğe</option>
-              <option value="hours-asc">Toplam saat: küçükten büyüğe</option>
-              <option value="days-desc">Toplam gün: büyükten küçüğe</option>
-              <option value="days-asc">Toplam gün: küçükten büyüğe</option>
-              <option value="name-asc">Personel adı: A’dan Z’ye</option>
-              <option value="name-desc">Personel adı: Z’den A’ya</option>
-            </select>
-          </div>
-          <span id="specialListSearchCount" class="special-list-count"></span>
-          <button class="btn-sec special-list-export" type="button" onclick="exportSpecialDutyExcel()">📥 Görünen Listeyi Excel’e Aktar</button>
+          <div id="specialListFilterSummary" class="bosluk-filter-summary"></div>
         </div>
         <table class="tbl" id="tblSpecialList">
           <thead><tr>
@@ -979,16 +958,13 @@ async function archiveSaveCurrentReport(fileName, options={}) {
   }
 }
 function archiveResetViewFilters() {
-  ['searchInput','specialListSearch','boslukSearch','boslukStationFilter','boslukMinDays','surucuDuzenSearch','surucuDuzenStationFilter','surucuDuzenTypeFilter'].forEach(id => {
+  ['searchInput','boslukSearch','boslukStationFilter','boslukMinDays','surucuDuzenSearch','surucuDuzenStationFilter','surucuDuzenTypeFilter','specialListSearch','specialListStationFilter'].forEach(id => {
     const el = document.getElementById(id);
     if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) el.value = '';
   });
   const search = document.getElementById('searchInput');
   if (search) search.value = '';
-  const specialSearch = document.getElementById('specialListSearch');
-  if (specialSearch) specialSearch.value = '';
-  const specialSort = document.getElementById('specialListSort');
-  if (specialSort) specialSort.value = 'count-desc';
+  specialListLastKind = null;
   currentPage = 1;
 }
 function refreshLoadedReportState() {
@@ -1514,55 +1490,85 @@ function buildSpecialDutyList(rows, kind) {
     totalDays:roundAnaliz(Number(person.totalHours || 0) / 24)
   })).sort((a,b) => b.count - a.count || trColl.compare(String(a.ad || '') + ' ' + String(a.soyad || ''), String(b.ad || '') + ' ' + String(b.soyad || '')));
 }
-function getActiveSpecialDutyKind() {
-  if (activeView === 'special-komuta') return 'komuta';
-  if (activeView === 'special-bashekimlik') return 'bashekimlik';
-  return null;
-}
-function getSpecialDutyVisibleRows(kind) {
-  const source = Array.isArray(specialDutyLists[kind]) ? [...specialDutyLists[kind]] : [];
-  const searchEl = document.getElementById('specialListSearch');
-  const sortEl = document.getElementById('specialListSort');
-  const query = String(searchEl?.value || '').trim().toLocaleLowerCase('tr-TR');
-  const sort = String(sortEl?.value || 'count-desc');
-  const filtered = query
-    ? source.filter(person => [person.tc, person.ad, person.soyad, person.station, ...(person.stations || [])].join(' ').toLocaleLowerCase('tr-TR').includes(query))
-    : source;
-  const numericValue = person => {
-    const key = sort.split('-')[0];
-    if (key === 's12') return Number(person.s12 || 0);
-    if (key === 's24') return Number(person.s24 || 0);
-    if (key === 'sdiger') return Number(person.sDiger || 0);
-    if (key === 'hours') return Number(person.totalHours || 0);
-    if (key === 'days') return Number(person.totalDays || 0);
-    return Number(person.count || 0);
-  };
-  const direction = sort.endsWith('-asc') ? 1 : -1;
-  return filtered.sort((a, b) => {
-    if (sort.startsWith('name-')) {
-      const an = (String(a.ad || '') + ' ' + String(a.soyad || '')).trim();
-      const bn = (String(b.ad || '') + ' ' + String(b.soyad || '')).trim();
-      return direction * trColl.compare(an, bn);
-    }
-    return direction * (numericValue(a) - numericValue(b)) || trColl.compare((String(a.ad || '') + ' ' + String(a.soyad || '')).trim(), (String(b.ad || '') + ' ' + String(b.soyad || '')).trim());
-  });
-}
+let activeSpecialKind = 'komuta';
+let specialListLastKind = null;
 function renderSpecialDutyList(kind) {
-  if (!kind) return;
+  activeSpecialKind = kind;
   const labels = {komuta:'Komuta Kontrol Nöbet Listesi', bashekimlik:'Başhekimlik Nöbet Listesi'};
-  const sourceList = specialDutyLists[kind] || [];
-  const list = getSpecialDutyVisibleRows(kind);
   const title = document.getElementById('specialListTitle');
+  if (title) title.textContent = labels[kind] || 'Normal Nöbet Listesi';
+
+  // Görev listesi değişince (komuta ↔ başhekimlik) filtreleri sıfırla; farklı listenin
+  // istasyon seçenekleri farklı olduğundan eski seçim yanıltıcı sonuç verebilir.
+  if (specialListLastKind !== kind) {
+    specialListLastKind = kind;
+    const searchEl = document.getElementById('specialListSearch');
+    if (searchEl) searchEl.value = '';
+    populateSpecialListStationFilter(kind);
+  }
+  applySpecialListFilters();
+}
+
+function populateSpecialListStationFilter(kind) {
+  const select = document.getElementById('specialListStationFilter');
+  if (!select) return;
+  const list = specialDutyLists[kind] || [];
+  const stations = [...new Set(list.flatMap(p => Array.isArray(p.stations) ? p.stations : []).filter(Boolean))]
+    .sort((a,b) => trColl.compare(a,b));
+  select.innerHTML = '<option value="">Tüm istasyonlar</option>' +
+    stations.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+}
+
+function filterSpecialList() {
+  applySpecialListFilters();
+}
+
+function clearSpecialListFilters() {
+  const searchEl = document.getElementById('specialListSearch');
+  const stationEl = document.getElementById('specialListStationFilter');
+  if (searchEl)  searchEl.value = '';
+  if (stationEl) stationEl.value = '';
+  applySpecialListFilters();
+}
+
+function applySpecialListFilters() {
+  const kind = activeSpecialKind;
+  const fullList = specialDutyLists[kind] || [];
+  const search = String(document.getElementById('specialListSearch')?.value || '').trim().toLocaleLowerCase('tr-TR');
+  const station = String(document.getElementById('specialListStationFilter')?.value || '').trim();
+
+  const filtered = fullList.filter(person => {
+    if (station && !(Array.isArray(person.stations) && person.stations.includes(station))) return false;
+    if (search) {
+      const haystack = (
+        String(person.tc || '') + ' ' +
+        String(person.ad || '') + ' ' +
+        String(person.soyad || '') + ' ' +
+        String(person.station || '')
+      ).toLocaleLowerCase('tr-TR');
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const summaryEl = document.getElementById('specialListFilterSummary');
+  if (summaryEl) {
+    summaryEl.innerHTML = (search || station)
+      ? `<strong>${filtered.length}</strong> / ${fullList.length} personel gösteriliyor (filtre uygulandı)`
+      : `<strong>${fullList.length}</strong> personel`;
+  }
+
+  renderSpecialListRows(filtered);
+}
+
+function renderSpecialListRows(list) {
   const summary = document.getElementById('specialListSummary');
   const tbody = document.getElementById('tbodySpecialList');
   const empty = document.getElementById('specialListEmpty');
   if (!tbody) return;
   const totalDuties = list.reduce((sum, person) => sum + Number(person.count || 0), 0);
   const totalHours = list.reduce((sum, person) => sum + Number(person.totalHours || 0), 0);
-  if (title) title.textContent = labels[kind] || 'Normal Nöbet Listesi';
-  if (summary) summary.textContent = (list.length === sourceList.length ? list.length : list.length + ' / ' + sourceList.length) + ' personel · ' + totalDuties + ' toplam nöbet · ' + roundAnaliz(totalHours) + ' toplam saat · ' + roundAnaliz(totalHours / 24) + ' toplam gün. Başhekimlikte branş/görev ayrımı yapılmaz.';
-  const searchCount = document.getElementById('specialListSearchCount');
-  if (searchCount) searchCount.textContent = list.length + ' / ' + sourceList.length + ' personel gösteriliyor';
+  if (summary) summary.textContent = list.length + ' personel · ' + totalDuties + ' toplam nöbet · ' + roundAnaliz(totalHours) + ' toplam saat · ' + roundAnaliz(totalHours / 24) + ' toplam gün. Başhekimlikte branş/görev ayrımı yapılmaz.';
   tbody.innerHTML = '';
   list.forEach((person, index) => {
     const tr = document.createElement('tr');
@@ -1570,10 +1576,7 @@ function renderSpecialDutyList(kind) {
     tr.innerHTML = '<td class="c mono">' + (index + 1) + '</td><td class="mono">' + escapeHtml(person.tc || '—') + '</td><td style="font-weight:600">' + escapeHtml((String(person.ad || '') + ' ' + String(person.soyad || '')).trim()) + '</td><td>' + escapeHtml(person.station || '—') + '</td><td class="c">' + badge(person.s12, '#dbeafe', '#1d4ed8') + '</td><td class="c">' + badge(person.s24, '#dcfce7', '#166534') + '</td><td class="c">' + badge(person.sDiger, '#f3e8ff', '#7e22ce') + '</td><td class="c" style="font-weight:700">' + escapeHtml(String(person.totalHours || 0)) + ' saat</td><td class="c" style="font-weight:700">' + escapeHtml(String(person.totalDays || 0)) + ' gün</td>';
     tbody.appendChild(tr);
   });
-  if (empty) {
-    empty.style.display = list.length ? 'none' : 'block';
-    empty.textContent = sourceList.length ? 'Seçilen arama veya sıralama ölçütlerine uyan personel bulunamadı.' : 'Bu rapor döneminde ilgili liste için kayıt bulunamadı.';
-  }
+  if (empty) empty.style.display = list.length ? 'none' : 'block';
 }
 function buildPersonelList(rows, tcAsilIst, tcIstAll) {
   const tcMap = {};
@@ -1623,10 +1626,13 @@ function buildPersonelList(rows, tcAsilIst, tcIstAll) {
     const asilIst  = tcAsilIst && tcAsilIst[p.tc]
       ? tcAsilIst[p.tc]
       : Object.keys(tcAllIst).reduce((a,b) => tcAllIst[a] >= tcAllIst[b] ? a : b);
-    // Çoklu istasyon: bu görev kapsamındaki istasyon sayısına göre
-    const istasyonlar = Object.keys(p.istCount);
-    const isCoklu = istasyonlar.length > 1;
+    // Çoklu istasyon: asıl istasyon TÜM görev türleri baz alınarak belirlendiği için,
+    // bu görev kapsamında kişinin tuttuğu herhangi bir nöbet asıl istasyondan farklıysa
+    // kişi çoklu istasyon sayılmalı — sadece bu görevdeki istasyon adedi (istasyonlar.length)
+    // yeterli değil, çünkü kişi bu görevde TEK istasyonda görünse bile o istasyon asıl
+    // istasyonundan farklı olabilir (eksik sayım hatasının kaynağı buydu).
     const farkliIstasyonNobetleri = p.nobetler.filter(n => n.ist !== asilIst);
+    const isCoklu = farkliIstasyonNobetleri.length > 0;
     const farkliIstasyonlar = [...new Set(farkliIstasyonNobetleri.map(n => n.ist).filter(Boolean))];
     const farkliIstCount = {};
     farkliIstasyonNobetleri.forEach(n => { farkliIstCount[n.ist] = (farkliIstCount[n.ist] || 0) + 1; });
@@ -3653,72 +3659,6 @@ function buildIstasyonOzetSheet(gorev) {
   return ws;
 }
 
-function buildSpecialDutySheet(kind, rows = null) {
-  const list = Array.isArray(rows) ? rows : (specialDutyLists[kind] || []);
-  const labels = {komuta:'Komuta Kontrol', bashekimlik:'Başhekimlik'};
-  const title = labels[kind] || 'Özel Nöbet Listesi';
-  const ws = {}; ws['!merges'] = []; ws['!images'] = [];
-  const S = (addr, cell) => ws[addr] = cell;
-  const COLS = 'ABCDEFGHI'.split('');
-  const reportTitle = document.getElementById('reportTitle')?.textContent || 'ASHİ Nöbet Sayım Raporu';
-  const totalDuties = list.reduce((sum, person) => sum + Number(person.count || 0), 0);
-  const totalHours = roundAnaliz(list.reduce((sum, person) => sum + Number(person.totalHours || 0), 0));
-  const totalDays = roundAnaliz(totalHours / 24);
-  const total12 = list.reduce((sum, person) => sum + Number(person.s12 || 0), 0);
-  const total24 = list.reduce((sum, person) => sum + Number(person.s24 || 0), 0);
-  const totalOther = list.reduce((sum, person) => sum + Number(person.sDiger || 0), 0);
-  const baseBorder = allBorder('medium', '0F1E33');
-
-  try {
-    ws['!images'].push({
-      name:'huser_logo.png', data:LOGO_B64.replace('data:image/png;base64,',''), opts:{base64:true},
-      position:{type:'twoCellAnchor',attrs:{editAs:'oneCell'},from:{col:0,colOff:0,row:0,rowOff:0},to:{col:1,colOff:0,row:3,rowOff:0}}
-    });
-  } catch(e) {}
-
-  S('A1', mkCell(`${reportTitle} — ${title} Nöbet Listesi`, {font:fn(13,true,'FFFFFF'), bg:PAL.hdrGreen, halign:'left', border:baseBorder}));
-  ws['!merges'].push({s:{r:0,c:0},e:{r:0,c:8}});
-  S('A2', mkCell(`${list.length} personel  |  ${totalDuties} toplam nöbet  |  ${totalHours} toplam saat  |  ${totalDays} toplam gün`, {font:fn(9,false,'E0F2FE'), bg:'1E6B8A', halign:'left'}));
-  ws['!merges'].push({s:{r:1,c:0},e:{r:1,c:8}});
-  for (let i=1;i<9;i++) S(COLS[i]+'2', mkCell('', {bg:'1E6B8A'}));
-  S('A3', mkCell('Başhekimlik ve Komuta Kontrol kayıtları branş/görev türü fark etmeksizin sayılır. Sayım aralığı: ilgili ayın 1’i 09:00 dahil, sonraki ayın 1’i 09:00 hariç.', {font:fn(8,false,'475569'), bg:'F8FAFC', halign:'left'}));
-  ws['!merges'].push({s:{r:2,c:0},e:{r:2,c:8}});
-
-  const hdrs = ['#','TCKN','AD SOYAD','İSTASYON / BİRİM','12 SAAT','24 SAAT','DİĞER SÜRE','TOPLAM SAAT','TOPLAM GÜN'];
-  hdrs.forEach((h,i) => S(COLS[i]+'4', mkCell(h, {font:fn(9,true,'FFFFFF'), bg:PAL.hdrBlue, halign:'center', border:baseBorder})));
-  list.forEach((person, i) => {
-    const row = i + 5;
-    const bg = i % 2 === 0 ? PAL.rowEven : PAL.rowOdd;
-    S('A'+row, mkCell(i+1, {bg, color:'9CA3AF', halign:'center'}));
-    S('B'+row, mkCell(person.tc || '—', {bg, font:fn(8,false,'6B7280'), halign:'center'}));
-    S('C'+row, mkCell((String(person.ad || '') + ' ' + String(person.soyad || '')).trim(), {bg, bold:true}));
-    S('D'+row, mkCell(person.station || '—', {bg, color:PAL.istText}));
-    S('E'+row, numCell(Number(person.s12 || 0), bg, PAL.c12));
-    S('F'+row, numCell(Number(person.s24 || 0), bg, PAL.c24));
-    S('G'+row, numCell(Number(person.sDiger || 0), bg, PAL.cDiger));
-    S('H'+row, mkCell(Number(person.totalHours || 0), {bg, color:'374151', bold:true, halign:'center'}));
-    S('I'+row, mkCell(Number(person.totalDays || 0), {bg, color:'166534', bold:true, halign:'center'}));
-  });
-  const totalRow = list.length + 5;
-  const totals = ['TOPLAM','','','',total12,total24,totalOther,totalHours,totalDays];
-  totals.forEach((v,i) => S(COLS[i]+totalRow, mkCell(v, {font:fn(9,true,PAL.totText), bg:PAL.totBg, halign:i>=4?'center':'left', border:baseBorder})));
-  ws['!ref'] = `A1:I${totalRow}`;
-  ws['!cols'] = [{wch:4},{wch:16},{wch:24},{wch:38},{wch:10},{wch:10},{wch:12},{wch:13},{wch:12}];
-  ws['!rows'] = [{hpt:24},{hpt:15},{hpt:20},{hpt:18}];
-  return ws;
-}
-
-function exportSpecialDutyExcel() {
-  const kind = getActiveSpecialDutyKind();
-  if (!kind) { alert('Önce Komuta Kontrol veya Başhekimlik listesini açın.'); return; }
-  const rows = getSpecialDutyVisibleRows(kind);
-  const wb = XLSX.utils.book_new();
-  const ws = buildSpecialDutySheet(kind, rows);
-  XLSX.utils.book_append_sheet(wb, ws, kind === 'komuta' ? 'Komuta Kontrol' : 'Başhekimlik');
-  const suffix = kind === 'komuta' ? 'komuta_kontrol' : 'bashekimlik';
-  XLSX.writeFile(wb, `ashi_nobet_${suffix}_gorunen_liste.xlsx`);
-}
-
 function exportExcelAll() {
   const wb = XLSX.utils.book_new();
   const labels = { ef:'Ekip Şefi', ysp:'YSP', sur:'Sürücü' };
@@ -3733,14 +3673,10 @@ function exportExcelAll() {
   // 3. İstasyon Özet - tüm görevler
   const wsI = buildIstasyonOzetSheet();
   XLSX.utils.book_append_sheet(wb, wsI, 'İstasyon Özet');
-  // 4. Branştan bağımsız özel birimler
-  XLSX.utils.book_append_sheet(wb, buildSpecialDutySheet('komuta'), 'Komuta Kontrol');
-  XLSX.utils.book_append_sheet(wb, buildSpecialDutySheet('bashekimlik'), 'Başhekimlik');
   XLSX.writeFile(wb, 'ashi_nobet_sayim_tumu.xlsx');
 }
 
 function exportExcelSingle() {
-  if (getActiveSpecialDutyKind()) { exportSpecialDutyExcel(); return; }
   const wb = XLSX.utils.book_new();
   const labels = { ef:'Ekip Şefi', ysp:'Yardımcı Sağlık Personeli', sur:'Sürücü' };
   const ws = buildSheet(allData[activeGorev], labels[activeGorev], allCoklu[activeGorev]);
@@ -3768,13 +3704,10 @@ function showError(m) { const b=document.getElementById('errorBox'); b.textConte
 function hideError() { document.getElementById('errorBox').style.display='none'; }
 function resetPage() {
   allData={ef:[],ysp:[],sur:[]}; allCoklu={ef:[],ysp:[],sur:[]}; specialDutyLists={komuta:[],bashekimlik:[]};
+  specialListLastKind = null;
   filteredRows=[]; currentPage=1;
   document.getElementById('tableBody').innerHTML='';
   document.getElementById('searchInput').value='';
-  const specialSearch = document.getElementById('specialListSearch');
-  if (specialSearch) specialSearch.value='';
-  const specialSort = document.getElementById('specialListSort');
-  if (specialSort) specialSort.value='count-desc';
   document.getElementById('fileInput').value='';
   document.getElementById('statsGrid').innerHTML='';
   _analizCache = null;
