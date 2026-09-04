@@ -612,6 +612,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
               <select id="specialListStationFilter" onchange="filterSpecialList()"><option value="">Tüm istasyonlar</option></select>
             </div>
             <button id="specialListClearBtn" class="btn-sec bosluk-clear" type="button" onclick="clearSpecialListFilters()">Filtreleri temizle</button>
+            <button id="specialListExportBtn" class="btn-sec bosluk-clear" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportSpecialListExcel(activeSpecialKind)">📥 Excel'e Aktar</button>
           </div>
           <div id="specialListFilterSummary" class="bosluk-filter-summary"></div>
         </div>
@@ -3673,10 +3674,24 @@ function exportExcelAll() {
   // 3. İstasyon Özet - tüm görevler
   const wsI = buildIstasyonOzetSheet();
   XLSX.utils.book_append_sheet(wb, wsI, 'İstasyon Özet');
+  // 4. Komuta Kontrol ve Başhekimlik listeleri (tüm kayıtlar, filtresiz)
+  const specialLabels = { komuta:'Komuta Kontrol', bashekimlik:'Başhekimlik' };
+  ['komuta','bashekimlik'].forEach(kind => {
+    const list = specialDutyLists[kind] || [];
+    if (!list.length) return;
+    const wsS = buildSpecialListSheet(kind, list);
+    XLSX.utils.book_append_sheet(wb, wsS, specialLabels[kind]);
+  });
   XLSX.writeFile(wb, 'ashi_nobet_sayim_tumu.xlsx');
 }
 
 function exportExcelSingle() {
+  // Başhekimlik / Komuta Kontrol sekimlerindeyken bu görünümdeki (filtrelenmiş) listeyi aktar
+  if (activeView === 'special-komuta' || activeView === 'special-bashekimlik') {
+    const kind = activeView === 'special-komuta' ? 'komuta' : 'bashekimlik';
+    exportSpecialListExcel(kind);
+    return;
+  }
   const wb = XLSX.utils.book_new();
   const labels = { ef:'Ekip Şefi', ysp:'Yardımcı Sağlık Personeli', sur:'Sürücü' };
   const ws = buildSheet(allData[activeGorev], labels[activeGorev], allCoklu[activeGorev]);
@@ -3688,6 +3703,109 @@ function exportExcelSingle() {
   const wsI = buildIstasyonOzetSheet(activeGorev);
   XLSX.utils.book_append_sheet(wb, wsI, 'İstasyon Özet');
   XLSX.writeFile(wb, `ashi_nobet_${activeGorev}.xlsx`);
+}
+
+// Komuta Kontrol / Başhekimlik listesini (o an ekranda görünen, filtrelenmiş haliyle) Excel'e aktarır
+function getSpecialListFiltered(kind) {
+  const fullList = specialDutyLists[kind] || [];
+  const search = String(document.getElementById('specialListSearch')?.value || '').trim().toLocaleLowerCase('tr-TR');
+  const station = String(document.getElementById('specialListStationFilter')?.value || '').trim();
+  // Filtre kutuları farklı bir sekmeye aitse (ör. hâlâ önceki kind için doluysa) uygulama yok say
+  if (activeSpecialKind !== kind) return fullList;
+  return fullList.filter(person => {
+    if (station && !(Array.isArray(person.stations) && person.stations.includes(station))) return false;
+    if (search) {
+      const haystack = (
+        String(person.tc || '') + ' ' +
+        String(person.ad || '') + ' ' +
+        String(person.soyad || '') + ' ' +
+        String(person.station || '')
+      ).toLocaleLowerCase('tr-TR');
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+}
+
+function buildSpecialListSheet(kind, list) {
+  const ws = {}; ws['!merges'] = []; ws['!images'] = [];
+  const S = (addr, cell) => ws[addr] = cell;
+  const COLS = 'ABCDEFGHI'.split('');
+  const labels = { komuta:'Komuta Kontrol Nöbet Listesi', bashekimlik:'Başhekimlik Nöbet Listesi' };
+  const baslik = labels[kind] || 'Normal Nöbet Listesi';
+
+  try {
+    ws['!images'].push({
+      name:'huser_logo.png', data:LOGO_B64.replace('data:image/png;base64,',''),
+      opts:{ base64:true },
+      position:{ type:'twoCellAnchor', attrs:{editAs:'oneCell'},
+        from:{col:0,colOff:0,row:0,rowOff:0}, to:{col:1,colOff:0,row:3,rowOff:0} }
+    });
+  } catch(e) {}
+
+  const raporAdi = document.getElementById('reportTitle').textContent || 'ASHİ Nöbet Sayım Raporu';
+  const totalDuties = list.reduce((sum, p) => sum + Number(p.count || 0), 0);
+  const totalHours  = list.reduce((sum, p) => sum + Number(p.totalHours || 0), 0);
+
+  // ── SATIR 1: Ana Başlık ──
+  S('A1', mkCell(`${raporAdi} — ${baslik}`, {
+    font:fn(13,true,'FFFFFF'), bg:PAL.hdrGreen, halign:'left',
+    border: allBorder('medium','285C3F') }));
+  ws['!merges'].push({s:{r:0,c:0},e:{r:0,c:8}});
+
+  // ── SATIR 2: Özet bilgi ──
+  S('A2', mkCell(`${list.length} personel  |  ${totalDuties} toplam nöbet  |  ${roundAnaliz(totalHours)} saat  |  ${roundAnaliz(totalHours/24)} gün`, {
+    font:fn(9,false,'E0F2FE'), bg:'1E6B8A', halign:'left' }));
+  ws['!merges'].push({s:{r:1,c:0},e:{r:1,c:8}});
+
+  // ── SATIR 3: Sütun Başlıkları ──
+  const hdrs = ['#','TCKN','Ad','Soyad','İstasyon / Birim','12 Saat','24 Saat','Diğer Süre','Toplam Saat'];
+  hdrs.forEach((h,i) => S(COLS[i]+'3', mkCell(h,{
+    font:fn(9,true,'FFFFFF'), bg:PAL.hdrBlue, halign:'center',
+    border:allBorder('medium','0F1E33') })));
+
+  // ── VERİ SATIRLARI ──
+  list.forEach((p,i) => {
+    const row = i+4;
+    const bg  = i%2===0 ? PAL.rowEven : PAL.rowOdd;
+    S(COLS[0]+row, mkCell(i+1,      {bg, color:'9CA3AF', halign:'center'}));
+    S(COLS[1]+row, mkCell(p.tc,     {bg, font:fn(8,false,'6B7280'), halign:'center'}));
+    S(COLS[2]+row, mkCell(p.ad,     {bg, bold:true, color:'111827'}));
+    S(COLS[3]+row, mkCell(p.soyad,  {bg, bold:true, color:'111827'}));
+    S(COLS[4]+row, mkCell(p.station||'—', {bg, color:PAL.istText}));
+    S(COLS[5]+row, numCell(p.s12,    bg, PAL.c12));
+    S(COLS[6]+row, numCell(p.s24,    bg, PAL.c24));
+    S(COLS[7]+row, numCell(p.sDiger, bg, PAL.cDiger));
+    S(COLS[8]+row, mkCell(p.totalHours, {bg, bold:true, color:'374151', halign:'center'}));
+  });
+
+  // ── TOPLAM SATIRI ──
+  const totRow = list.length+4;
+  const totVals = ['TOPLAM','','','','',
+    list.reduce((s,p)=>s+Number(p.s12||0),0), list.reduce((s,p)=>s+Number(p.s24||0),0),
+    list.reduce((s,p)=>s+Number(p.sDiger||0),0), roundAnaliz(totalHours)];
+  totVals.forEach((v,i) => S(COLS[i]+totRow, mkCell(v, {
+    font:fn(9,true,PAL.totText), bg:PAL.totBg, halign: i>=5?'center':'left',
+    border:allBorder('medium','0F1E33') })));
+
+  ws['!ref'] = `A1:I${totRow}`;
+  ws['!cols'] = [{wch:4},{wch:16},{wch:16},{wch:20},{wch:36},{wch:8},{wch:8},{wch:10},{wch:12}];
+  ws['!rows'] = [{hpt:24},{hpt:14},{hpt:18}];
+  return ws;
+}
+
+function exportSpecialListExcel(kind) {
+  const labels = { komuta:'Komuta Kontrol', bashekimlik:'Başhekimlik' };
+  const list = getSpecialListFiltered(kind);
+  if (!list.length) {
+    window.alert('Aktarılacak kayıt bulunamadı (filtreleri kontrol edin).');
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  const ws = buildSpecialListSheet(kind, list);
+  XLSX.utils.book_append_sheet(wb, ws, labels[kind] || 'Liste');
+  const fileSuffix = kind === 'komuta' ? 'komuta_kontrol' : 'basekimlik';
+  XLSX.writeFile(wb, `ashi_${fileSuffix}_listesi.xlsx`);
 }
 
 // ═══════════════════════════════════════════════════════════
