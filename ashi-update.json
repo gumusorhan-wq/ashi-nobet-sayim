@@ -1,6 +1,6 @@
 {
-  "version": "01.19",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.19.html",
-  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.19.html",
-  "notes": "İZİN / RAPOR sütununda personel adı ve T.C. kimlik numarası gösterilmez; yalnızca izin/rapor türü, başlangıç tarihi ve alınan gün bilgileri gösterilir."
+  "version": "01.20",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv01.20.html",
+  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv01.20.html",
+  "notes": "İstasyon listelerinde yalnızca Acil Sağlık Hizmetleri veya ASHİ içeren istasyonlar gösterilir. Nöbet tarihleri her tarih bir satırda, izin kayıtları tek satırda gösterilir; boşluk raporu ve modal düzenleri iyileştirildi."
 }
