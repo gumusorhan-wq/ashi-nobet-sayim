@@ -1,6 +1,6 @@
 {
-  "version": "01.18",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.18.html",
-  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.18.html",
-  "notes": "Kullanıcının sağladığı son ASHİ Nöbet Sayım HTML dosyası v01.18 olarak yayımlandı."
+  "version": "01.19",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSER%20ASH%C4%B0%20N%C3%96BET%20SAYIM%20RAPORU%20v01.19.html",
+  "fileName": "HUSER ASHİ NÖBET SAYIM RAPORU v01.19.html",
+  "notes": "İZİN / RAPOR sütununda personel adı ve T.C. kimlik numarası gösterilmez; yalnızca izin/rapor türü, başlangıç tarihi ve alınan gün bilgileri gösterilir."
 }
