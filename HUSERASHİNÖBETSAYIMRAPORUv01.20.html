@@ -315,6 +315,15 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-role-label{color:#1e3a5f;font-weight:900}
   .istasyon-personel-role-duties{display:grid;gap:4px}
   .istasyon-personel-role-duty{color:#475569;background:#f8fafc;border-radius:5px;padding:5px 7px}
+  .istasyon-personel-view-tabs{display:flex;gap:6px;padding:10px 18px 0;background:#fff;border-bottom:1px solid #e2e8f0}
+  .istasyon-personel-view-tabs button{border:1px solid #cbd5e1;border-bottom:0;border-radius:7px 7px 0 0;background:#f8fafc;color:#475569;font:inherit;font-size:11px;font-weight:800;padding:8px 12px;cursor:pointer}
+  .istasyon-personel-view-tabs button.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+  .istasyon-personel-summary-table-wrap{overflow:auto;border:1px solid #dbe4ee;border-radius:8px;background:#fff}
+  .istasyon-personel-summary-table{width:100%;min-width:900px;border-collapse:collapse;font-size:11px}
+  .istasyon-personel-summary-table th{padding:9px 8px;background:#1e3a5f;color:#fff;text-align:center;white-space:nowrap}
+  .istasyon-personel-summary-table th:first-child,.istasyon-personel-summary-table th:nth-child(2),.istasyon-personel-summary-table th:nth-child(3),.istasyon-personel-summary-table td:first-child,.istasyon-personel-summary-table td:nth-child(2),.istasyon-personel-summary-table td:nth-child(3){text-align:left}
+  .istasyon-personel-summary-table td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:center;white-space:nowrap;color:#334155}
+  .istasyon-personel-summary-table tr.station-summary-row td{background:#eff6ff;color:#1e3a5f;font-weight:900;text-align:left;border-top:2px solid #bfdbfe}
 </style>
 </head>
 <body>
@@ -688,7 +697,12 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
     </div>
     <div id="istasyonPersonelSummary" class="istasyon-personel-summary"></div>
+    <div class="istasyon-personel-view-tabs">
+      <button type="button" id="istasyonPersonelDetailTab" class="active" onclick="setIstasyonPersonelView('detail')">📅 Nöbet Detayları</button>
+      <button type="button" id="istasyonPersonelSummaryTab" onclick="setIstasyonPersonelView('summary')">📊 Personel Özeti</button>
+    </div>
     <div id="istasyonPersonelList" class="istasyon-personel-list"></div>
+    <div id="istasyonPersonelSummaryTable" class="istasyon-personel-list" style="display:none"></div>
   </div>
 </div>
 
@@ -2872,6 +2886,28 @@ function showIstasyonPersonelModal() {
 }
 function closeIstasyonPersonelModal(){ const modal=document.getElementById('istasyonPersonelModal'); if(modal) modal.style.display='none'; }
 function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); renderIstasyonPersonelList(); }
+function setIstasyonPersonelView(view){
+  const detail=view!=='summary';
+  const detailWrap=document.getElementById('istasyonPersonelList'), summaryWrap=document.getElementById('istasyonPersonelSummaryTable');
+  if(detailWrap) detailWrap.style.display=detail?'grid':'none';
+  if(summaryWrap) summaryWrap.style.display=detail?'none':'block';
+  document.getElementById('istasyonPersonelDetailTab')?.classList.toggle('active',detail);
+  document.getElementById('istasyonPersonelSummaryTab')?.classList.toggle('active',!detail);
+  if(!detail) renderIstasyonPersonelSummaryTable();
+}
+function renderIstasyonPersonelSummaryTable(){
+  const wrap=document.getElementById('istasyonPersonelSummaryTable'); if(!wrap)return;
+  const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const people=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  const grouped={};
+  people.forEach(p=>p.duties.forEach(n=>{const key=p.personKey+'|'+n.station;if(!grouped[n.station])grouped[n.station]={};if(!grouped[n.station][key])grouped[n.station][key]={tc:p.tc||'',name:`${p.ad} ${p.soyad}`.trim(),branch:p.brans||'',s12:0,s24:0,other:0,total:0,days:0};const x=grouped[n.station][key];const h=Number(n.hours)||0;if(Math.abs(h-12)<.01)x.s12++;else if(Math.abs(h-24)<.01)x.s24++;else if(h>0)x.other+=h;if(h>0){x.total+=h;x.days+=h/24;}}));
+  const stations=Object.entries(grouped).sort((a,b)=>trColl.compare(a[0],b[0]));
+  if(!stations.length){wrap.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>';return;}
+  const rows=stations.map(([station,items])=>{const values=Object.values(items).sort((a,b)=>trColl.compare(a.name,b.name));const head=`<tr class="station-summary-row"><td colspan="9">🏥 ${escapeHtml(station)} · ${values.length} personel</td></tr>`;const body=values.map(x=>`<tr><td>${escapeHtml(x.tc||'—')}</td><td>${escapeHtml(x.name||'Ad bilgisi yok')}</td><td>${escapeHtml(x.branch||'—')}</td><td>${x.s12||'—'}</td><td>${x.s24||'—'}</td><td>${x.other?x.other.toLocaleString('tr-TR',{maximumFractionDigits:2}):'—'}</td><td><strong>${x.total.toLocaleString('tr-TR',{maximumFractionDigits:2})}</strong></td><td>${(Math.round(x.days*100)/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</td></tr>`).join('');return head+body;}).join('');
+  wrap.innerHTML=`<div class="istasyon-personel-summary-table-wrap"><table class="istasyon-personel-summary-table"><thead><tr><th>TC NO</th><th>PERSONEL ADI SOYADI</th><th>BRANŞI</th><th>12 SAAT</th><th>24 SAAT</th><th>DİĞER SAATLER</th><th>TOPLAM ÇALIŞMA SAAT</th><th>TOPLAM GÜN</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
 function renderIstasyonPersonelList(){
   const list=document.getElementById('istasyonPersonelList'), summary=document.getElementById('istasyonPersonelSummary');
   if(!list||!summary)return;
@@ -2891,11 +2927,12 @@ function renderIstasyonPersonelList(){
   const stations=Object.entries(groups).sort((a,b)=>trColl.compare(a[0],b[0]));
   const duties=stations.flatMap(([,g])=>Object.values(g.people).flatMap(p=>p.duties));
   summary.innerHTML=`<span class="istasyon-personel-chip">${stations.length} istasyon</span><span class="istasyon-personel-chip">${new Set(people.map(p=>p.personKey)).size} personel</span><span class="istasyon-personel-chip">${duties.length} nöbet</span><span class="istasyon-personel-chip">${duties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</span>`;
-  if(!stations.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>';return;}
+  if(!stations.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>'; if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable(); return;}
   const roleOrder={ef:1,ysp:2,sur:3};
   list.innerHTML=stations.map(([station,g])=>{const stationPeople=Object.values(g.people).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));return `<section class="istasyon-personel-station-group"><div class="istasyon-personel-station-head"><div class="istasyon-personel-station-name">🏥 ${escapeHtml(station)}</div><div class="istasyon-personel-station-meta">${stationPeople.length} personel · ${g.duties} nöbet</div></div>${stationPeople.map(p=>{const total=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);const roleGroups={};p.duties.sort((a,b)=>(roleOrder[a.roleKey]||9)-(roleOrder[b.roleKey]||9)||(a.startMs||0)-(b.startMs||0)).forEach(n=>{if(!roleGroups[n.roleKey])roleGroups[n.roleKey]={label:n.role,items:[]};roleGroups[n.roleKey].items.push(n);});return `<div class="istasyon-personel-person-row"><div class="istasyon-personel-person-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${total.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div>${Object.values(roleGroups).map(r=>`<div class="istasyon-personel-role-line"><span class="istasyon-personel-role-label">${escapeHtml(r.label)}</span><div class="istasyon-personel-role-duties">${r.items.map(n=>`<div class="istasyon-personel-role-duty">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''} · <strong>${escapeHtml(n.duration||`${n.hours||'—'} saat`)}</strong></div>`).join('')}</div></div>`).join('')}</div>`}).join('')}</section>`}).join('');
 }
 
+  if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable();
 
 // ═══════════════════════════════════════════════════════════
 // NÖBET ANALİZİ — Branş × İstasyon × Gün bazında 24 saat kontrolü
