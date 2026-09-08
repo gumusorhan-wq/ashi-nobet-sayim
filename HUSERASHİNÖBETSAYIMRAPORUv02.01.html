@@ -166,23 +166,37 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 .surucu-duzen-table .surucu-duzen-dates{font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#475569;white-space:nowrap}
 .surucu-duzen-table .surucu-duzen-count{background:#ecfdf5;color:#047857;font-weight:900;text-align:center;white-space:nowrap}
 .tum-personel-duzen-table{width:max-content!important;min-width:0!important;table-layout:auto;border-spacing:0!important;border-collapse:collapse!important}
+.tum-personel-duzen-table,.tum-personel-duzen-table thead,.tum-personel-duzen-table tbody{display:block!important}
+.tum-personel-duzen-table tr{display:grid!important;grid-template-columns:190px 150px 145px 280px 105px 155px 300px 110px;column-gap:0!important;align-items:start}
+.tum-personel-duzen-table th,.tum-personel-duzen-table td{display:block!important;min-width:0!important}
 .tum-personel-duzen-table th,.tum-personel-duzen-table td{white-space:nowrap!important}
-.tum-personel-duzen-table th:nth-child(3),.tum-personel-duzen-table td:nth-child(3){padding-left:2px!important;padding-right:2px!important}
-.tum-personel-duzen-table th:nth-child(4),.tum-personel-duzen-table td:nth-child(4){padding-left:2px!important;padding-right:2px!important}
-.tum-personel-duzen-table th:nth-child(5),.tum-personel-duzen-table td:nth-child(5){padding-left:2px!important;padding-right:2px!important}
-.tum-personel-duzen-table th:nth-child(6),.tum-personel-duzen-table td:nth-child(6){padding-left:2px!important;padding-right:2px!important}
+.tum-personel-duzen-table th:nth-child(-n+4),.tum-personel-duzen-table td:nth-child(-n+4){white-space:normal!important;overflow-wrap:anywhere;word-break:normal;line-height:1.35}
+.tum-personel-duzen-table td:nth-child(1),.tum-personel-duzen-table td:nth-child(2),.tum-personel-duzen-table td:nth-child(3),.tum-personel-duzen-table td:nth-child(4){overflow:hidden}
+.tum-personel-duzen-table th:nth-child(3),.tum-personel-duzen-table td:nth-child(3),.tum-personel-duzen-table th:nth-child(4),.tum-personel-duzen-table td:nth-child(4),.tum-personel-duzen-table th:nth-child(5),.tum-personel-duzen-table td:nth-child(5),.tum-personel-duzen-table th:nth-child(6),.tum-personel-duzen-table td:nth-child(6),.tum-personel-duzen-table th:nth-child(7),.tum-personel-duzen-table td:nth-child(7){padding-left:0!important;padding-right:0!important}
 .tum-personel-duzen-table th,.tum-personel-duzen-table td{padding-left:5px!important;padding-right:5px!important}
-.tum-personel-duzen-table td:nth-child(3),.tum-personel-duzen-table td:nth-child(4){padding-left:2px!important;padding-right:2px!important}
-.tum-personel-duzen-table td:nth-child(5){padding-left:2px!important;padding-right:2px!important}
-.tum-personel-duty-head{grid-template-columns:78px 100px minmax(220px,1fr);column-gap:2px}
-.tum-personel-duty-day{grid-template-columns:78px 100px minmax(220px,1fr);column-gap:2px}
-.tum-personel-duty-head{display:grid;grid-template-columns:78px 110px minmax(330px,1fr);column-gap:3px;align-items:center;font-size:10px;color:#fff!important;background:#1e3a5f;font-weight:900;white-space:nowrap;padding:4px 6px;border-radius:3px}
-.tum-personel-duty-day{display:grid;grid-template-columns:78px 110px minmax(330px,1fr);column-gap:3px;align-items:start;margin:0 0 3px;padding:2px 0;border-bottom:1px solid #eef2f7}
+.tum-personel-duzen-table th:nth-child(3),.tum-personel-duzen-table td:nth-child(3),.tum-personel-duzen-table th:nth-child(4),.tum-personel-duzen-table td:nth-child(4),.tum-personel-duzen-table th:nth-child(5),.tum-personel-duzen-table td:nth-child(5){padding-left:0!important;padding-right:0!important}
+.tum-personel-duzen-table th:nth-child(6),.tum-personel-duzen-table td:nth-child(6),.tum-personel-duzen-table th:nth-child(7),.tum-personel-duzen-table td:nth-child(7){padding-left:0!important;padding-right:0!important}
+.tum-personel-duzen-table tbody td{padding-top:5px!important;padding-bottom:5px!important;box-sizing:border-box;vertical-align:top;line-height:1.35}
+.tum-personel-duzen-table tbody tr{min-height:58px;border-bottom:1px solid #cbd5e1;background:#fff;box-sizing:border-box}
+.tum-personel-duzen-table tbody tr:nth-child(even){background:#f8fafc}
+.tum-personel-duzen-table tbody tr td{background:transparent!important;border-bottom:0!important}
+.tum-personel-duzen-table tbody tr td:nth-child(5),.tum-personel-duzen-table tbody tr td:nth-child(6),.tum-personel-duzen-table tbody tr td:nth-child(7){line-height:1.55}
+.tum-personel-duty-head{display:grid;grid-template-columns:1fr;align-items:center;font-size:10px;color:#fff!important;background:#1e3a5f;font-weight:900;white-space:nowrap;padding:4px 0;border-radius:3px}
+.tum-personel-duty-day{display:block;margin:0 0 3px;padding:2px 0;border-bottom:1px solid #eef2f7}
 .tum-personel-duty-day:last-child{border-bottom:0}
 .tum-personel-duty-date{color:#1e3a5f;font-weight:800;white-space:nowrap}
 .tum-personel-duty-branch{color:#1d4ed8;font-weight:900;white-space:nowrap}
 .tum-personel-duty-time{color:#475569;white-space:nowrap}
-@media(max-width:900px){.tum-personel-duty-head,.tum-personel-duty-day{grid-template-columns:74px 100px minmax(280px,1fr);column-gap:3px}}
+@media(max-width:900px){.tum-personel-duzen-table tr{grid-template-columns:170px 135px 130px 240px 95px 145px 270px 100px}}
+.modal-overlay:has(#tumPersonelDuzenModal){padding:0!important;overflow:hidden!important}
+#tumPersonelDuzenModal>.modal-box{width:100vw!important;max-width:none!important;height:100vh;max-height:100vh;margin:0;border-radius:0;display:flex;flex-direction:column}
+#tumPersonelDuzenModal .modal-body{width:100%;max-width:none;min-width:0;flex:1;max-height:none!important;overflow:auto!important;padding:0!important;box-sizing:border-box}
+#tumPersonelDuzenModal .modal-body>div{width:100%;min-width:0!important;padding-left:20px!important;padding-right:20px!important;box-sizing:border-box;overflow-x:hidden!important}
+#tumPersonelDuzenModal .tum-personel-duzen-table{width:100%!important;min-width:0!important;max-width:none!important;table-layout:fixed!important}
+#tumPersonelDuzenModal .tum-personel-duzen-table tr{width:100%;grid-template-columns:13% 10% 10% 18% 8% 10% 21% 10%;}
+#tumPersonelDuzenModal .tum-personel-duzen-table th,#tumPersonelDuzenModal .tum-personel-duzen-table td{box-sizing:border-box;min-width:0!important;max-width:100%;overflow-wrap:anywhere;word-break:normal}
+#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(1),#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(2),#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(3),#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(4){white-space:normal!important;overflow:hidden}
+#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(5),#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(6),#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(7),#tumPersonelDuzenModal .tum-personel-duzen-table td:nth-child(8){white-space:normal!important;overflow:hidden}
 .istasyon-personel-main-section{display:none;width:min(98vw,1360px);margin:18px auto;background:#fff;border:1px solid #dbe4ee;border-radius:10px;box-shadow:0 2px 12px rgba(15,23,42,.08);overflow:hidden}
 .istasyon-personel-main-box{width:100%;max-height:none;overflow:visible}
 .analiz-modal-box{width:min(94vw,1180px);max-width:1180px;box-sizing:border-box}
@@ -2334,7 +2348,7 @@ function getTumPersonelDuzenFilteredRows(rows){
   const type=String(document.getElementById('tumPersonelDuzenTypeFilter')?.value||'').trim();
   return (rows||[]).filter(row=>(!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search))&&(!role||(row.roles||[]).includes(role))&&(!station||(row.stations||[]).includes(station))&&(!type||row.type===type));
 }
-function renderTumPersonelDuzenRows(rows){return (rows||[]).map(row=>`<tr><td><span class="surucu-duzen-type">${escapeHtml(row.typeLabel)}</span><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.description)}</span></td><td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc)}</span></td><td>${escapeHtml(row.roleText||'—')}</td><td>${escapeHtml(row.stationText)}</td><td class="surucu-duzen-dates">${(row.dutyLabels||[]).map(day=>`<div class="tum-personel-duty-day"><span class="tum-personel-duty-date">${escapeHtml(day.date)}</span><span class="tum-personel-duty-branch">${day.items.map(item=>`<span>${escapeHtml(item.role)}</span>`).join('<br>')}</span><span class="tum-personel-duty-time">${day.items.map(item=>escapeHtml(item.time)).join('<br>')}</span></div>`).join('')}</td><td class="surucu-duzen-count">${row.sequenceLength} nöbet</td></tr>`).join('');}
+function renderTumPersonelDuzenRows(rows){return (rows||[]).map(row=>{const days=row.dutyLabels||[];return `<tr><td><span class="surucu-duzen-type">${escapeHtml(row.typeLabel)}</span><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.description)}</span></td><td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc)}</span></td><td>${escapeHtml(row.roleText||'—')}</td><td>${escapeHtml(row.stationText)}</td><td class="surucu-duzen-dates">${days.map(day=>escapeHtml(day.date)).join('<br>')}</td><td class="tum-personel-duty-branch">${days.map(day=>day.items.map(item=>escapeHtml(item.role)).join('<br>')).join('<br>')}</td><td class="tum-personel-duty-time">${days.map(day=>day.items.map(item=>escapeHtml(item.time)).join('<br>')).join('<br>')}</td><td class="surucu-duzen-count">${row.sequenceLength} nöbet</td></tr>`}).join('');}
 function bindTumPersonelDuzenControls(){
   ['tumPersonelDuzenSearch','tumPersonelDuzenRoleFilter','tumPersonelDuzenStationFilter','tumPersonelDuzenTypeFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=e.onchange=()=>renderTumPersonelDuzenModal();});
   const clear=document.getElementById('tumPersonelDuzenClearBtn'); if(clear) clear.onclick=()=>{['tumPersonelDuzenSearch','tumPersonelDuzenRoleFilter','tumPersonelDuzenStationFilter','tumPersonelDuzenTypeFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderTumPersonelDuzenModal();};
@@ -2348,7 +2362,7 @@ function renderTumPersonelDuzenModal(){
   if(stationSelect){stationSelect.innerHTML='<option value="">Tüm istasyonlar</option>'+stations.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');if(stations.includes(stationCurrent))stationSelect.value=stationCurrent;}
   bindTumPersonelDuzenControls(); const visible=getTumPersonelDuzenFilteredRows(data.rows), summary=document.getElementById('tumPersonelDuzenOzet');
   if(summary)summary.textContent=`${visible.length} / ${data.rows.length} dizi gösteriliyor · Ekip fark etmeksizin kişi bazlı`; const filterSummary=document.getElementById('tumPersonelDuzenFilterSummary'); if(filterSummary)filterSummary.textContent=`${new Set(visible.map(r=>r.fullName)).size} personel · ${visible.reduce((s,r)=>s+r.sequenceLength,0)} nöbet`;
-  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan tüm personel düzeni bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table tum-personel-duzen-table"><thead><tr><th>DÜZEN TÜRÜ</th><th>PERSONEL</th><th>EKİP / BRANŞ</th><th>İSTASYON(LAR)</th><th><div class="tum-personel-duty-head"><span>TARİH</span><span>BRANŞ</span><span>SAAT</span></div></th><th style="text-align:center">NÖBET SAYISI</th></tr></thead><tbody>'+renderTumPersonelDuzenRows(visible)+'</tbody></table></div>';
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan tüm personel düzeni bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table tum-personel-duzen-table"><thead><tr><th>DÜZEN TÜRÜ</th><th>PERSONEL</th><th>EKİP / BRANŞ</th><th>İSTASYON(LAR)</th><th>TARİH</th><th>NÖBET BRANŞI</th><th>NÖBET GÜNLERİ VE SAATLERİ</th><th style="text-align:center">NÖBET SAYISI</th></tr></thead><tbody>'+renderTumPersonelDuzenRows(visible)+'</tbody></table></div>';
   const exportBtn=document.getElementById('exportTumPersonelDuzenExcelBtn');if(exportBtn)exportBtn.onclick=()=>exportTumPersonelDuzenExcel(data);
 }
 function showTumPersonelDuzenModal(){buildTumPersonelDuzenData(true);renderTumPersonelDuzenModal();const modal=document.getElementById('tumPersonelDuzenModal');if(modal)modal.style.display='block';}
