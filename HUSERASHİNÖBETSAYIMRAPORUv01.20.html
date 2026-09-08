@@ -304,6 +304,17 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-duty-info{color:#475569;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .istasyon-personel-duty-hours{color:#047857;font-weight:900;white-space:nowrap}
   @media(max-width:700px){.istasyon-personel-filters{grid-template-columns:1fr}.istasyon-personel-duty{grid-template-columns:1fr auto}.istasyon-personel-duty-info{grid-column:1/-1;grid-row:2}.istasyon-personel-modal-box{width:98vw}}
+  .istasyon-personel-station-group{border:1px solid #bfdbfe;border-radius:9px;background:#fff;overflow:hidden}
+  .istasyon-personel-station-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 13px;background:#eff6ff;border-bottom:1px solid #bfdbfe}
+  .istasyon-personel-station-name{color:#1e3a5f;font-size:14px;font-weight:900}
+  .istasyon-personel-station-meta{color:#1d4ed8;font-size:11px;font-weight:800;white-space:nowrap}
+  .istasyon-personel-person-row{padding:10px 13px;border-bottom:1px solid #e2e8f0}
+  .istasyon-personel-person-row:last-child{border-bottom:0}
+  .istasyon-personel-person-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
+  .istasyon-personel-role-line{display:grid;grid-template-columns:180px 1fr;gap:8px;align-items:start;padding:5px 0;font-size:11px}
+  .istasyon-personel-role-label{color:#1e3a5f;font-weight:900}
+  .istasyon-personel-role-duties{display:grid;gap:4px}
+  .istasyon-personel-role-duty{color:#475569;background:#f8fafc;border-radius:5px;padding:5px 7px}
 </style>
 </head>
 <body>
@@ -672,9 +683,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <button class="modal-close" onclick="closeIstasyonPersonelModal()">✕</button>
     </div>
     <div class="istasyon-personel-filters">
-      <label>İstasyon adı ile ara<input id="istasyonPersonelStation" type="text" placeholder="Örn. Demirci veya ASHİ" oninput="renderIstasyonPersonelList()"></label>
+      <label>İstasyon seç<select id="istasyonPersonelStation" onchange="renderIstasyonPersonelList()"><option value="">Tüm istasyonlar</option></select></label>
       <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="text" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
-      <label>Görev / branş<select id="istasyonPersonelRole" onchange="renderIstasyonPersonelList()"><option value="all">Tümü</option><option value="ef">Ekip Şefi</option><option value="ysp">Yardımcı Sağlık Personeli</option><option value="sur">Sürücü</option></select></label>
       <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
     </div>
     <div id="istasyonPersonelSummary" class="istasyon-personel-summary"></div>
@@ -2861,19 +2871,31 @@ function showIstasyonPersonelModal() {
   renderIstasyonPersonelList();
 }
 function closeIstasyonPersonelModal(){ const modal=document.getElementById('istasyonPersonelModal'); if(modal) modal.style.display='none'; }
-function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); const role=document.getElementById('istasyonPersonelRole');if(role)role.value='all'; renderIstasyonPersonelList(); }
+function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); renderIstasyonPersonelList(); }
 function renderIstasyonPersonelList(){
   const list=document.getElementById('istasyonPersonelList'), summary=document.getElementById('istasyonPersonelSummary');
   if(!list||!summary)return;
-  const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const stationSelect=document.getElementById('istasyonPersonelStation');
+  const selectedStation=stationSelect?.value||'現';
+  if(stationSelect){
+    const stations=[...new Set(getIstasyonPersonelRows().flatMap(p=>p.duties.map(n=>n.station)).filter(Boolean))].sort((a,b)=>trColl.compare(a,b));
+    const options='<option value="">Tüm istasyonlar</option>'+stations.map(st=>`<option value="${escapeHtml(st)}">${escapeHtml(st)}</option>`).join('');
+    if(stationSelect.innerHTML!==options) stationSelect.innerHTML=options;
+    if(selectedStation!=='現' && stations.includes(selectedStation)) stationSelect.value=selectedStation;
+  }
+  const stationQ=String(stationSelect?.value||'').trim().toLocaleLowerCase('tr-TR');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
-  const roleQ=document.getElementById('istasyonPersonelRole')?.value||'all';
-  const rows=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>(!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))&&(!roleQ||roleQ==='all'||n.roleKey===roleQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ))).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));
-  const duties=rows.flatMap(p=>p.duties), stations=new Set(duties.map(n=>n.station));
-  summary.innerHTML=`<span class="istasyon-personel-chip">${rows.length} personel</span><span class="istasyon-personel-chip">${stations.size} istasyon</span><span class="istasyon-personel-chip">${duties.length} nöbet</span><span class="istasyon-personel-chip">${duties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</span>`;
-  if(!rows.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun personel veya nöbet bulunamadı.</div>';return;}
-  list.innerHTML=rows.map(p=>{const hours=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);return `<article class="istasyon-personel-card"><div class="istasyon-personel-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${hours.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div><div class="istasyon-personel-duties">${p.duties.map(n=>`<div class="istasyon-personel-duty"><span class="istasyon-personel-duty-date">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''}</span><span class="istasyon-personel-duty-info">${escapeHtml(n.role)} · ${escapeHtml(n.station)}</span><span class="istasyon-personel-duty-hours">${n.hours!=null?escapeHtml(n.duration||`${n.hours} saat`):'—'}</span></div>`).join('')}</div></article>`}).join('');
+  const people=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  const groups={};
+  people.forEach(p=>p.duties.forEach(n=>{if(!groups[n.station])groups[n.station]={people:{},duties:0};if(!groups[n.station].people[p.personKey])groups[n.station].people[p.personKey]={...p,duties:[]};groups[n.station].people[p.personKey].duties.push(n);groups[n.station].duties++;}));
+  const stations=Object.entries(groups).sort((a,b)=>trColl.compare(a[0],b[0]));
+  const duties=stations.flatMap(([,g])=>Object.values(g.people).flatMap(p=>p.duties));
+  summary.innerHTML=`<span class="istasyon-personel-chip">${stations.length} istasyon</span><span class="istasyon-personel-chip">${new Set(people.map(p=>p.personKey)).size} personel</span><span class="istasyon-personel-chip">${duties.length} nöbet</span><span class="istasyon-personel-chip">${duties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</span>`;
+  if(!stations.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>';return;}
+  const roleOrder={ef:1,ysp:2,sur:3};
+  list.innerHTML=stations.map(([station,g])=>{const stationPeople=Object.values(g.people).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));return `<section class="istasyon-personel-station-group"><div class="istasyon-personel-station-head"><div class="istasyon-personel-station-name">🏥 ${escapeHtml(station)}</div><div class="istasyon-personel-station-meta">${stationPeople.length} personel · ${g.duties} nöbet</div></div>${stationPeople.map(p=>{const total=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);const roleGroups={};p.duties.sort((a,b)=>(roleOrder[a.roleKey]||9)-(roleOrder[b.roleKey]||9)||(a.startMs||0)-(b.startMs||0)).forEach(n=>{if(!roleGroups[n.roleKey])roleGroups[n.roleKey]={label:n.role,items:[]};roleGroups[n.roleKey].items.push(n);});return `<div class="istasyon-personel-person-row"><div class="istasyon-personel-person-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${total.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div>${Object.values(roleGroups).map(r=>`<div class="istasyon-personel-role-line"><span class="istasyon-personel-role-label">${escapeHtml(r.label)}</span><div class="istasyon-personel-role-duties">${r.items.map(n=>`<div class="istasyon-personel-role-duty">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''} · <strong>${escapeHtml(n.duration||`${n.hours||'—'} saat`)}</strong></div>`).join('')}</div></div>`).join('')}</div>`}).join('')}</section>`}).join('');
 }
+
 
 // ═══════════════════════════════════════════════════════════
 // NÖBET ANALİZİ — Branş × İstasyon × Gün bazında 24 saat kontrolü
