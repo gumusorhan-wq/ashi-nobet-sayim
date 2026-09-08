@@ -404,6 +404,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <button class="btn-sec btn-orange" onclick="showCokluModal()">🔄 <span id="btnCokluLbl">Çoklu İstasyon</span></button>
           <button class="btn-sec" id="btnBosluk" onclick="showBoslukModal()" style="background:#eef2ff;color:#3730a3;border-color:#c7d2fe">⏱️ <span id="btnBoslukLbl">5+ Gün Boşluk Analizi</span></button>
           <button class="btn-sec" id="btnSurucuDuzen" onclick="showSurucuDuzenModal()" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0">🚘 <span id="btnSurucuDuzenLbl">Sürücü Düzeni</span></button>
+          <button class="btn-sec" id="btnTumPersonelDuzen" onclick="showTumPersonelDuzenModal()" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe">👥 <span>Tüm Personel Düzeni</span></button>
         </div>
         <div class="control-group">
           <div class="control-group-title">Branş analizleri</div>
@@ -788,7 +789,6 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="modal-body" id="boslukModalBody" style="max-height:62vh;overflow-y:auto;padding:0"></div>
   </div>
 </div>
-
 <!-- SÜRÜCÜ NÖBET DÜZENİ MODAL -->
 <div id="surucuDuzenModal" class="modal-overlay">
   <div class="modal-box" style="max-width:1180px">
@@ -824,6 +824,24 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="modal-body" id="surucuDuzenModalBody" style="max-height:62vh;overflow-y:auto;padding:0"></div>
   </div>
 </div>
+<!-- TÜM PERSONEL NÖBET DÜZENİ MODAL -->
+<div id="tumPersonelDuzenModal" class="modal-overlay">
+  <div class="modal-box" style="max-width:1280px">
+    <div class="modal-head" style="background:#1d4ed8">
+      <div><span style="color:#fff;font-weight:700;font-size:15px">👥 Tüm Personel Nöbet Düzeni</span><div style="color:rgba(255,255,255,.8);font-size:11px;margin-top:3px">Ekip Şefi, Yardımcı Sağlık Personeli ve Sürücü nöbetleri kişi bazında birlikte değerlendirilir.</div></div>
+      <button class="modal-close" onclick="document.getElementById('tumPersonelDuzenModal').style.display='none'">✕</button>
+    </div>
+    <div style="padding:14px 20px;background:#eff6ff;border-bottom:1px solid #bfdbfe;display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div id="tumPersonelDuzenOzet" style="font-size:13px;color:#1e3a8a;font-weight:800"></div><button id="exportTumPersonelDuzenExcelBtn" class="btn-sec" style="margin-left:auto;background:#fff;color:#1d4ed8;border-color:#93c5fd">📥 Excel’e Aktar</button></div>
+    <div class="bosluk-toolbar"><div class="bosluk-filter-row">
+      <div class="bosluk-filter wide"><label class="bosluk-filter-label" for="tumPersonelDuzenSearch">Kişi veya TCKN</label><input id="tumPersonelDuzenSearch" type="search" placeholder="Ad, soyad veya TCKN ara…"></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="tumPersonelDuzenRoleFilter">Ekip / Branş</label><select id="tumPersonelDuzenRoleFilter"><option value="">Tüm ekipler</option></select></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="tumPersonelDuzenStationFilter">İstasyon</label><select id="tumPersonelDuzenStationFilter"><option value="">Tüm istasyonlar</option></select></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="tumPersonelDuzenTypeFilter">Düzen türü</label><select id="tumPersonelDuzenTypeFilter"><option value="">Tümü</option><option value="night12">12 saat · 3 gece arka arkaya</option><option value="day24">24 saat · 2 gün arayla</option></select></div>
+      <button id="tumPersonelDuzenClearBtn" class="btn-sec bosluk-clear" type="button">Filtreleri temizle</button>
+    </div><div id="tumPersonelDuzenFilterSummary" class="bosluk-filter-summary"></div></div>
+    <div class="modal-body" id="tumPersonelDuzenModalBody" style="max-height:62vh;overflow-y:auto;padding:0"></div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -849,6 +867,7 @@ let currentSourceFileName = '';
 let boslukDataCache = null;
 let boslukUIState = {view:'personel',sort:'desc'};
 let surucuDuzenDataCache = null;
+let tumPersonelDuzenDataCache = null;
 const BOSLUK_ESIK_GUN = 5;
 const PAGE_SIZE  = 100;
 const ASHI_ARCHIVE_DB_NAME = 'ashiNobetArchiveV1';
@@ -1505,6 +1524,7 @@ function processFile(file) {
       boslukDataCache = null;
       updateBoslukButton();
       surucuDuzenDataCache = null;
+      tumPersonelDuzenDataCache = null;
       updateSurucuDuzenButton();
 
       // Ay tespiti: tek bir ilk kayda değil, kayıtların çoğunluk ayına göre yap.
@@ -2222,6 +2242,7 @@ function buildSurucuDuzenRuns(records, kind) {
 function makeSurucuDuzenRow(person, run, kind) {
   const allRecords = run.flatMap(day => day.records);
   const stations = [...new Set(allRecords.map(record => record.station).filter(Boolean))];
+  const roles = [...new Set(allRecords.map(record => record.roleLabel).filter(Boolean))];
   const dateLabels = run.map(day => {
     const times = day.records.map(record => `${record.startText} → ${record.endText}`).join(' / ');
     return `${day.date} · ${times}`;
@@ -2239,6 +2260,8 @@ function makeSurucuDuzenRow(person, run, kind) {
     fullName:`${person.ad || ''} ${person.soyad || ''}`.trim(),
     stations,
     stationText:stations.length ? stations.join(' / ') : 'İstasyon bilgisi yok',
+    roles,
+    roleText:roles.join(' / '),
     dates:run.map(day => day.date),
     dateLabels,
     sequenceLength:run.length,
@@ -2262,6 +2285,46 @@ function buildSurucuDuzenData(force=false) {
   surucuDuzenDataCache = {bounds, rows};
   return surucuDuzenDataCache;
 }
+function buildTumPersonelDuzenData(force=false) {
+  if (tumPersonelDuzenDataCache && !force) return tumPersonelDuzenDataCache;
+  const bounds=getReportMonthBounds(), rows=[];
+  const roleLabels={ef:'Ekip Şefi',ysp:'Yardımcı Sağlık Personeli',sur:'Sürücü'};
+  const people={};
+  Object.entries(roleLabels).forEach(([gKey,roleLabel]) => (allData[gKey]||[]).forEach(person => {
+    const key=String(person.personKey||person.tc||`${person.ad}|${person.soyad}`);
+    if(!people[key]) people[key]={...person,tc:person.tc||'',ad:person.ad||'',soyad:person.soyad||'',records:[]};
+    (person.nobetler||[]).map(n=>getSurucuDuzenRecord(person,n,bounds)).filter(Boolean).forEach(record=>{record.roleLabel=roleLabel;people[key].records.push(record);});
+  }));
+  Object.values(people).forEach(person=>['night12','day24'].forEach(kind=>buildSurucuDuzenRuns(person.records,kind).forEach(run=>rows.push(makeSurucuDuzenRow(person,run,kind)))));
+  rows.sort((a,b)=>a.type.localeCompare(b.type)||trColl.compare(a.stationText,b.stationText)||trColl.compare(a.fullName,b.fullName)||a.firstDate.localeCompare(b.firstDate));
+  tumPersonelDuzenDataCache={bounds,rows}; return tumPersonelDuzenDataCache;
+}
+function getTumPersonelDuzenFilteredRows(rows){
+  const search=String(document.getElementById('tumPersonelDuzenSearch')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const role=String(document.getElementById('tumPersonelDuzenRoleFilter')?.value||'').trim();
+  const station=String(document.getElementById('tumPersonelDuzenStationFilter')?.value||'').trim();
+  const type=String(document.getElementById('tumPersonelDuzenTypeFilter')?.value||'').trim();
+  return (rows||[]).filter(row=>(!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search))&&(!role||(row.roles||[]).includes(role))&&(!station||(row.stations||[]).includes(station))&&(!type||row.type===type));
+}
+function renderTumPersonelDuzenRows(rows){return (rows||[]).map(row=>`<tr><td><span class="surucu-duzen-type">${escapeHtml(row.typeLabel)}</span><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.description)}</span></td><td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc)}</span></td><td>${escapeHtml(row.roleText||'—')}</td><td>${escapeHtml(row.stationText)}</td><td class="surucu-duzen-dates">${row.dateLabels.map(label=>escapeHtml(label)).join('<br>')}</td><td class="surucu-duzen-count">${row.sequenceLength} nöbet</td></tr>`).join('');}
+function bindTumPersonelDuzenControls(){
+  ['tumPersonelDuzenSearch','tumPersonelDuzenRoleFilter','tumPersonelDuzenStationFilter','tumPersonelDuzenTypeFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=e.onchange=()=>renderTumPersonelDuzenModal();});
+  const clear=document.getElementById('tumPersonelDuzenClearBtn'); if(clear) clear.onclick=()=>{['tumPersonelDuzenSearch','tumPersonelDuzenRoleFilter','tumPersonelDuzenStationFilter','tumPersonelDuzenTypeFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderTumPersonelDuzenModal();};
+}
+function renderTumPersonelDuzenModal(){
+  const data=buildTumPersonelDuzenData(), body=document.getElementById('tumPersonelDuzenModalBody'); if(!body)return;
+  const roles=[...new Set(data.rows.flatMap(r=>r.roles||[]))].sort((a,b)=>trColl.compare(a,b)), stations=[...new Set(data.rows.flatMap(r=>r.stations||[]))].sort((a,b)=>trColl.compare(a,b));
+  const roleSelect=document.getElementById('tumPersonelDuzenRoleFilter'), stationSelect=document.getElementById('tumPersonelDuzenStationFilter');
+  const roleCurrent=roleSelect?.value||'',stationCurrent=stationSelect?.value||'';
+  if(roleSelect){roleSelect.innerHTML='<option value="">Tüm ekipler</option>'+roles.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');if(roles.includes(roleCurrent))roleSelect.value=roleCurrent;}
+  if(stationSelect){stationSelect.innerHTML='<option value="">Tüm istasyonlar</option>'+stations.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');if(stations.includes(stationCurrent))stationSelect.value=stationCurrent;}
+  bindTumPersonelDuzenControls(); const visible=getTumPersonelDuzenFilteredRows(data.rows), summary=document.getElementById('tumPersonelDuzenOzet');
+  if(summary)summary.textContent=`${visible.length} / ${data.rows.length} dizi gösteriliyor · Ekip fark etmeksizin kişi bazlı`; const filterSummary=document.getElementById('tumPersonelDuzenFilterSummary'); if(filterSummary)filterSummary.textContent=`${new Set(visible.map(r=>r.fullName)).size} personel · ${visible.reduce((s,r)=>s+r.sequenceLength,0)} nöbet`;
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan tüm personel düzeni bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>DÜZEN TÜRÜ</th><th>PERSONEL</th><th>EKİP / BRANŞ</th><th>İSTASYON(LAR)</th><th>NÖBET GÜNLERİ VE SAATLERİ</th><th style="text-align:center">NÖBET SAYISI</th></tr></thead><tbody>'+renderTumPersonelDuzenRows(visible)+'</tbody></table></div>';
+  const exportBtn=document.getElementById('exportTumPersonelDuzenExcelBtn');if(exportBtn)exportBtn.onclick=()=>exportTumPersonelDuzenExcel(data);
+}
+function showTumPersonelDuzenModal(){buildTumPersonelDuzenData(true);renderTumPersonelDuzenModal();const modal=document.getElementById('tumPersonelDuzenModal');if(modal)modal.style.display='block';}
+function exportTumPersonelDuzenExcel(dataArg){const data=dataArg||buildTumPersonelDuzenData(true),rows=getTumPersonelDuzenFilteredRows(data.rows),aoa=[['DÜZEN TÜRÜ','PERSONEL','TCKN','EKİP / BRANŞ','İSTASYON(LAR)','NÖBET GÜNLERİ VE SAATLERİ','NÖBET SAYISI']];rows.forEach(r=>aoa.push([r.typeLabel,r.fullName,r.tc,r.roleText,r.stationText,r.dateLabels.join('\n'),r.sequenceLength]));const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);ws['!cols']=[{wch:28},{wch:28},{wch:16},{wch:28},{wch:42},{wch:70},{wch:14}];XLSX.utils.book_append_sheet(wb,ws,'Tüm Personel Düzeni');XLSX.writeFile(wb,'ashi_tum_personel_duzeni.xlsx');}
 
 function updateSurucuDuzenButton() {
   const label = document.getElementById('btnSurucuDuzenLbl');
