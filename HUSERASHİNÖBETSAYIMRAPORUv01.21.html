@@ -286,7 +286,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     .archive-item{align-items:flex-start}
   }
 
-  .istasyon-personel-modal-box{width:min(1240px,96vw);max-height:92vh;overflow:auto}
+  .istasyon-personel-modal-box{width:min(1360px,98vw);max-height:92vh;overflow:auto}
   .istasyon-personel-filters{display:grid;grid-template-columns:minmax(260px,1.6fr) minmax(180px,1fr) minmax(150px,.7fr) auto;gap:10px;align-items:end;padding:14px 18px;background:#eff6ff;border-bottom:1px solid #bfdbfe}
   .istasyon-personel-filters label{display:flex;flex-direction:column;gap:5px;color:#1e3a5f;font-size:11px;font-weight:800}
   .istasyon-personel-filters input,.istasyon-personel-filters select{height:36px;padding:0 10px;border:1px solid #bfdbfe;border-radius:7px;background:#fff;color:#1e293b;font:inherit;font-size:12px}
@@ -2931,9 +2931,8 @@ function renderIstasyonPersonelList(){
   if(!stations.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>'; if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable(); return;}
   const roleOrder={ef:1,ysp:2,sur:3};
   list.innerHTML=stations.map(([station,g])=>{const stationPeople=Object.values(g.people).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));return `<section class="istasyon-personel-station-group"><div class="istasyon-personel-station-head"><div class="istasyon-personel-station-name">🏥 ${escapeHtml(station)}</div><div class="istasyon-personel-station-meta">${stationPeople.length} personel · ${g.duties} nöbet</div></div>${stationPeople.map(p=>{const total=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);const roleGroups={};p.duties.sort((a,b)=>(roleOrder[a.roleKey]||9)-(roleOrder[b.roleKey]||9)||(a.startMs||0)-(b.startMs||0)).forEach(n=>{if(!roleGroups[n.roleKey])roleGroups[n.roleKey]={label:n.role,items:[]};roleGroups[n.roleKey].items.push(n);});return `<div class="istasyon-personel-person-row"><div class="istasyon-personel-person-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')} ${p.isMulti?'<span class="badge b-coklu" title="Birden fazla istasyonda nöbet tutuyor">↔ Çoklu</span>':''}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${total.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div>${Object.values(roleGroups).map(r=>`<div class="istasyon-personel-role-line"><span class="istasyon-personel-role-label">${escapeHtml(r.label)}</span><div class="istasyon-personel-role-duties">${r.items.map(n=>`<div class="istasyon-personel-role-duty">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''} · <strong>${escapeHtml(n.duration||`${n.hours||'—'} saat`)}</strong></div>`).join('')}</div></div>`).join('')}</div>`}).join('')}</section>`}).join('');
-}
-
   if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable();
+}
 
 // ═══════════════════════════════════════════════════════════
 // NÖBET ANALİZİ — Branş × İstasyon × Gün bazında 24 saat kontrolü
