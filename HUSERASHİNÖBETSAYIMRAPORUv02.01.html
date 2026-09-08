@@ -165,6 +165,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 .surucu-duzen-table .surucu-duzen-type{font-weight:900;white-space:nowrap}
 .surucu-duzen-table .surucu-duzen-dates{font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#475569;white-space:nowrap}
 .surucu-duzen-table .surucu-duzen-count{background:#ecfdf5;color:#047857;font-weight:900;text-align:center;white-space:nowrap}
+.tum-personel-duzen-table{width:max-content;min-width:1080px;table-layout:auto}
 .tum-personel-duty-head{display:grid;grid-template-columns:78px 110px minmax(330px,1fr);column-gap:3px;align-items:center;font-size:10px;color:#fff!important;background:#1e3a5f;font-weight:900;white-space:nowrap;padding:4px 6px;border-radius:3px}
 .tum-personel-duty-day{display:grid;grid-template-columns:78px 110px minmax(330px,1fr);column-gap:3px;align-items:start;margin:0 0 3px;padding:2px 0;border-bottom:1px solid #eef2f7}
 .tum-personel-duty-day:last-child{border-bottom:0}
@@ -2338,7 +2339,7 @@ function renderTumPersonelDuzenModal(){
   if(stationSelect){stationSelect.innerHTML='<option value="">Tüm istasyonlar</option>'+stations.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');if(stations.includes(stationCurrent))stationSelect.value=stationCurrent;}
   bindTumPersonelDuzenControls(); const visible=getTumPersonelDuzenFilteredRows(data.rows), summary=document.getElementById('tumPersonelDuzenOzet');
   if(summary)summary.textContent=`${visible.length} / ${data.rows.length} dizi gösteriliyor · Ekip fark etmeksizin kişi bazlı`; const filterSummary=document.getElementById('tumPersonelDuzenFilterSummary'); if(filterSummary)filterSummary.textContent=`${new Set(visible.map(r=>r.fullName)).size} personel · ${visible.reduce((s,r)=>s+r.sequenceLength,0)} nöbet`;
-  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan tüm personel düzeni bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>DÜZEN TÜRÜ</th><th>PERSONEL</th><th>EKİP / BRANŞ</th><th>İSTASYON(LAR)</th><th><div class="tum-personel-duty-head"><span>TARİH</span><span>BRANŞ</span><span>SAAT</span></div></th><th style="text-align:center">NÖBET SAYISI</th></tr></thead><tbody>'+renderTumPersonelDuzenRows(visible)+'</tbody></table></div>';
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan tüm personel düzeni bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table tum-personel-duzen-table"><thead><tr><th>DÜZEN TÜRÜ</th><th>PERSONEL</th><th>EKİP / BRANŞ</th><th>İSTASYON(LAR)</th><th><div class="tum-personel-duty-head"><span>TARİH</span><span>BRANŞ</span><span>SAAT</span></div></th><th style="text-align:center">NÖBET SAYISI</th></tr></thead><tbody>'+renderTumPersonelDuzenRows(visible)+'</tbody></table></div>';
   const exportBtn=document.getElementById('exportTumPersonelDuzenExcelBtn');if(exportBtn)exportBtn.onclick=()=>exportTumPersonelDuzenExcel(data);
 }
 function showTumPersonelDuzenModal(){buildTumPersonelDuzenData(true);renderTumPersonelDuzenModal();const modal=document.getElementById('tumPersonelDuzenModal');if(modal)modal.style.display='block';}
@@ -2974,10 +2975,14 @@ function getIstasyonPersonelRows() {
 }
 function showIstasyonPersonelModal() {
   if (!reportMonthInfo) { alert('Önce nöbet raporunu yükleyin.'); return; }
+  const report=document.getElementById('raporContent'); if(report) report.style.display='block';
+  const guide=document.getElementById('kilavuzSection'); if(guide) guide.style.display='none';
+  document.querySelectorAll('.gorev-tab').forEach(el=>el.classList.toggle('active',el.id==='tab-istasyon-personel'));
   const modal=document.getElementById('istasyonPersonelModal');
   if (modal) modal.style.display='block';
   renderIstasyonPersonelList();
   setIstasyonPersonelView('summary');
+  if(modal) setTimeout(()=>modal.scrollIntoView({behavior:'smooth',block:'start'}),0);
 }
 function closeIstasyonPersonelModal(){ const modal=document.getElementById('istasyonPersonelModal'); if(modal) modal.style.display='none'; }
 function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); renderIstasyonPersonelList(); }
