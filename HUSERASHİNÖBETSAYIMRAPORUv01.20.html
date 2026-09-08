@@ -285,6 +285,25 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     .archive-list{grid-template-columns:1fr}
     .archive-item{align-items:flex-start}
   }
+
+  .istasyon-personel-modal-box{width:min(1240px,96vw);max-height:92vh;overflow:auto}
+  .istasyon-personel-filters{display:grid;grid-template-columns:minmax(260px,1.6fr) minmax(180px,1fr) minmax(150px,.7fr) auto;gap:10px;align-items:end;padding:14px 18px;background:#eff6ff;border-bottom:1px solid #bfdbfe}
+  .istasyon-personel-filters label{display:flex;flex-direction:column;gap:5px;color:#1e3a5f;font-size:11px;font-weight:800}
+  .istasyon-personel-filters input,.istasyon-personel-filters select{height:36px;padding:0 10px;border:1px solid #bfdbfe;border-radius:7px;background:#fff;color:#1e293b;font:inherit;font-size:12px}
+  .istasyon-personel-summary{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
+  .istasyon-personel-chip{padding:6px 10px;border-radius:7px;background:#fff;border:1px solid #dbe4ee;color:#334155;font-size:11px;font-weight:800}
+  .istasyon-personel-list{padding:14px 18px;display:grid;gap:10px}
+  .istasyon-personel-card{border:1px solid #dbe4ee;border-radius:9px;background:#fff;overflow:hidden}
+  .istasyon-personel-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
+  .istasyon-personel-name{color:#1e3a5f;font-size:13px;font-weight:900}
+  .istasyon-personel-meta{color:#64748b;font-size:10px;margin-top:3px}
+  .istasyon-personel-total{color:#047857;font-size:11px;font-weight:900;text-align:right;white-space:nowrap}
+  .istasyon-personel-duties{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:7px;padding:9px 12px}
+  .istasyon-personel-duty{display:grid;grid-template-columns:95px 1fr auto;gap:8px;align-items:center;padding:7px 8px;border-radius:6px;background:#f8fafc;font-size:11px}
+  .istasyon-personel-duty-date{color:#1e3a5f;font-weight:800;white-space:nowrap}
+  .istasyon-personel-duty-info{color:#475569;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .istasyon-personel-duty-hours{color:#047857;font-weight:900;white-space:nowrap}
+  @media(max-width:700px){.istasyon-personel-filters{grid-template-columns:1fr}.istasyon-personel-duty{grid-template-columns:1fr auto}.istasyon-personel-duty-info{grid-column:1/-1;grid-row:2}.istasyon-personel-modal-box{width:98vw}}
 </style>
 </head>
 <body>
@@ -394,6 +413,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <button class="gorev-tab" id="tab-ef" onclick="switchGorev('ef')">👨‍💼 Ekip Şefi</button>
       <button class="gorev-tab" id="tab-ysp" onclick="switchGorev('ysp')">🏥 Yardımcı Sağlık Personeli</button>
       <button class="gorev-tab active" id="tab-sur" onclick="switchGorev('sur')">🚗 Sürücü</button>
+      <button class="gorev-tab" id="tab-istasyon-personel" onclick="showIstasyonPersonelModal()">🏥 İstasyon Listesi</button>
       <button class="gorev-tab" id="tab-kilavuz" onclick="switchGorev('kilavuz')" style="border-left:2px solid var(--line)">📖 Kılavuz</button>
     </div>
     <div class="gorev-shortcut-hint">Sekmeler: <kbd>Alt+1</kbd> Ekip Şefi · <kbd>Alt+2</kbd> YSP · <kbd>Alt+3</kbd> Sürücü</div>
@@ -641,6 +661,26 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     </div>
 
     </div><!-- /raporContent -->
+
+<!-- İSTASYON PERSONEL LİSTESİ MODAL -->
+<div id="istasyonPersonelModal" class="modal-overlay">
+  <div class="modal-box istasyon-personel-modal-box">
+    <div class="modal-head" style="background:#1e3a5f">
+      <div><span style="color:#fff;font-weight:700;font-size:15px">🏥 İstasyon Personel Listesi</span>
+        <div style="color:rgba(255,255,255,.75);font-size:11px;margin-top:3px">Seçilen istasyonda bu ay nöbet tutan tüm personel ve nöbet ayrıntıları</div>
+      </div>
+      <button class="modal-close" onclick="closeIstasyonPersonelModal()">✕</button>
+    </div>
+    <div class="istasyon-personel-filters">
+      <label>İstasyon adı ile ara<input id="istasyonPersonelStation" type="text" placeholder="Örn. Demirci veya ASHİ" oninput="renderIstasyonPersonelList()"></label>
+      <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="text" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
+      <label>Görev / branş<select id="istasyonPersonelRole" onchange="renderIstasyonPersonelList()"><option value="all">Tümü</option><option value="ef">Ekip Şefi</option><option value="ysp">Yardımcı Sağlık Personeli</option><option value="sur">Sürücü</option></select></label>
+      <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
+    </div>
+    <div id="istasyonPersonelSummary" class="istasyon-personel-summary"></div>
+    <div id="istasyonPersonelList" class="istasyon-personel-list"></div>
+  </div>
+</div>
 
 <!-- NÖBET ANALİZİ MODAL -->
 <div id="nobelAnaliziModal" class="modal-overlay">
@@ -2796,6 +2836,45 @@ function showCokluModal() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// İSTASYON PERSONEL LİSTESİ
+// ═══════════════════════════════════════════════════════════
+const ISTASYON_PERSONEL_ROLE_LABELS = {ef:'Ekip Şefi', ysp:'Yardımcı Sağlık Personeli', sur:'Sürücü'};
+function getIstasyonPersonelRows() {
+  const people = {};
+  Object.entries(ISTASYON_PERSONEL_ROLE_LABELS).forEach(([gKey, roleLabel]) => {
+    (allData[gKey] || []).forEach(p => (p.nobetler || []).forEach(n => {
+      const station = String(n.ist || '').trim();
+      if (!station) return;
+      const personKey = String(p.personKey || p.tc || `${p.ad}|${p.soyad}`);
+      const dutyKey = `${personKey}|${station}|${n.startMs ?? n.basRaw}|${n.sure_raw ?? n.saat}`;
+      if (!people[personKey]) people[personKey] = {personKey,tc:p.tc||'',ad:p.ad||'',soyad:p.soyad||'',brans:p.kadro_brans||'',duties:{}};
+      if (!people[personKey].duties[dutyKey]) people[personKey].duties[dutyKey] = {station, role:roleLabel, roleKey:gKey, branch:p.kadro_brans||'', startMs:n.startMs, start:n.basRaw||n.bas||'—', end:n.bitisRaw||'—', hours:n.saat, duration:n.sure_raw||'—'};
+    }));
+  });
+  return Object.values(people).map(p => ({...p,duties:Object.values(p.duties).sort((a,b)=>(a.startMs||0)-(b.startMs||0))}));
+}
+function showIstasyonPersonelModal() {
+  if (!reportMonthInfo) { alert('Önce nöbet raporunu yükleyin.'); return; }
+  const modal=document.getElementById('istasyonPersonelModal');
+  if (modal) modal.style.display='block';
+  renderIstasyonPersonelList();
+}
+function closeIstasyonPersonelModal(){ const modal=document.getElementById('istasyonPersonelModal'); if(modal) modal.style.display='none'; }
+function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); const role=document.getElementById('istasyonPersonelRole');if(role)role.value='all'; renderIstasyonPersonelList(); }
+function renderIstasyonPersonelList(){
+  const list=document.getElementById('istasyonPersonelList'), summary=document.getElementById('istasyonPersonelSummary');
+  if(!list||!summary)return;
+  const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const roleQ=document.getElementById('istasyonPersonelRole')?.value||'all';
+  const rows=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>(!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))&&(!roleQ||roleQ==='all'||n.roleKey===roleQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ))).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));
+  const duties=rows.flatMap(p=>p.duties), stations=new Set(duties.map(n=>n.station));
+  summary.innerHTML=`<span class="istasyon-personel-chip">${rows.length} personel</span><span class="istasyon-personel-chip">${stations.size} istasyon</span><span class="istasyon-personel-chip">${duties.length} nöbet</span><span class="istasyon-personel-chip">${duties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</span>`;
+  if(!rows.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun personel veya nöbet bulunamadı.</div>';return;}
+  list.innerHTML=rows.map(p=>{const hours=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);return `<article class="istasyon-personel-card"><div class="istasyon-personel-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${hours.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div><div class="istasyon-personel-duties">${p.duties.map(n=>`<div class="istasyon-personel-duty"><span class="istasyon-personel-duty-date">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''}</span><span class="istasyon-personel-duty-info">${escapeHtml(n.role)} · ${escapeHtml(n.station)}</span><span class="istasyon-personel-duty-hours">${n.hours!=null?escapeHtml(n.duration||`${n.hours} saat`):'—'}</span></div>`).join('')}</div></article>`}).join('');
+}
+
 // ═══════════════════════════════════════════════════════════
 // NÖBET ANALİZİ — Branş × İstasyon × Gün bazında 24 saat kontrolü
 // Her branşın her istasyonda her gün toplam 24 saat nöbeti olmalıdır.
