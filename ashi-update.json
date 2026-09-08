@@ -1,6 +1,6 @@
 {
-  "version": "01.21",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv01.21.html",
-  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv01.21.html",
-  "notes": "İstasyon Listesi açılışında Personel Özeti sekmesi gösterilir. Personel özeti istasyon bazlı filtreleme, kişi arama, adet bazlı 12/24/diğer süreler ve çoklu istasyon işareti içerir."
+  "version": "02.01",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.01.html",
+  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.01.html",
+  "notes": "Tüm Personel Düzeni ve Sürücü Düzeni branş bilgisi, YSP kısaltması, tarih-branş-saat hizalaması ve genişletilmiş pencere görünümü."
 }
