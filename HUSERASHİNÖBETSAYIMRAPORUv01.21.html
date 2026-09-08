@@ -695,6 +695,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <label>İstasyon seç<select id="istasyonPersonelStation" onchange="renderIstasyonPersonelList()"><option value="">Tüm istasyonlar</option></select></label>
       <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="text" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
       <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
+      <button class="btn-sec" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportIstasyonPersonelExcel()">📥 Excel'e Aktar</button>
     </div>
     <div id="istasyonPersonelSummary" class="istasyon-personel-summary"></div>
     <div class="istasyon-personel-view-tabs">
@@ -2887,6 +2888,37 @@ function showIstasyonPersonelModal() {
 }
 function closeIstasyonPersonelModal(){ const modal=document.getElementById('istasyonPersonelModal'); if(modal) modal.style.display='none'; }
 function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); renderIstasyonPersonelList(); }
+function getFilteredIstasyonPersonelRows(){
+  const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  return getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+}
+function exportIstasyonPersonelExcel(){
+  if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
+  const people=getFilteredIstasyonPersonelRows();
+  const summaryRows=[], detailRows=[];
+  people.forEach(p=>{
+    const grouped={};
+    p.duties.forEach(n=>{
+      const key=n.station;
+      if(!grouped[key]) grouped[key]={tc:p.tc||'',name:`${p.ad} ${p.soyad}`.trim(),branch:p.brans||'',station:n.station,isMulti:p.isMulti,s12:0,s24:0,other:0,total:0,days:0};
+      const x=grouped[key], h=Number(n.hours)||0;
+      if(Math.abs(h-12)<.01)x.s12++; else if(Math.abs(h-24)<.01)x.s24++; else if(h>0)x.other++;
+      if(h>0){x.total+=h;x.days+=h/24;}
+      detailRows.push({'İstasyon':n.station,'TCKN':p.tc||'','Personel Adı Soyadı':`${p.ad} ${p.soyad}`.trim(),'Branşı':p.brans||'','Görev':n.role,'Çoklu İstasyon':p.isMulti?'Evet':'Hayır','Nöbet Başlangıcı':n.start||'','Nöbet Bitişi':n.end||'','Süre':n.duration||`${h||0} saat`,'Saat':h});
+    });
+    Object.values(grouped).forEach(x=>summaryRows.push({'İstasyon':x.station,'TCKN':x.tc,'Personel Adı Soyadı':x.name,'Branşı':x.branch,'Çoklu İstasyon':x.isMulti?'Evet':'Hayır','12 Saat Adedi':x.s12,'24 Saat Adedi':x.s24,'Diğer Süre Adedi':x.other,'Toplam Çalışma Saat':Math.round(x.total*100)/100,'Toplam Gün':Math.round(x.days*100)/100}));
+  });
+  const wb=XLSX.utils.book_new();
+  const wsSummary=XLSX.utils.json_to_sheet(summaryRows.length?summaryRows:[{'Bilgi':'Filtreye uygun kayıt bulunamadı.'}]);
+  const wsDetail=XLSX.utils.json_to_sheet(detailRows.length?detailRows:[{'Bilgi':'Filtreye uygun kayıt bulunamadı.'}]);
+  wsSummary['!cols']=[{wch:38},{wch:16},{wch:28},{wch:24},{wch:16},{wch:14},{wch:14},{wch:16},{wch:22},{wch:14}];
+  wsDetail['!cols']=[{wch:38},{wch:16},{wch:28},{wch:24},{wch:22},{wch:16},{wch:22},{wch:22},{wch:18},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,wsSummary,'Personel Özeti');
+  XLSX.utils.book_append_sheet(wb,wsDetail,'Nöbet Detayları');
+  const station=document.getElementById('istasyonPersonelStation')?.value||'tum_istasyonlar';
+  XLSX.writeFile(wb,`ashi_istasyon_personel_${station.replace(/[^a-z0-9çğıöşüÇĞİÖŞÜ]+/gi,'_').slice(0,50)}.xlsx`);
+}
 function setIstasyonPersonelView(view){
   const detail=view!=='summary';
   const detailWrap=document.getElementById('istasyonPersonelList'), summaryWrap=document.getElementById('istasyonPersonelSummaryTable');
