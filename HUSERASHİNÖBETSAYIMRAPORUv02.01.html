@@ -718,12 +718,6 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- İSTASYON PERSONEL LİSTESİ -->
 <div id="istasyonPersonelModal" class="istasyon-personel-main-section">
   <div class="istasyon-personel-main-box">
-    <div class="modal-head" style="background:#1e3a5f">
-      <div><span style="color:#fff;font-weight:700;font-size:15px">🏥 İstasyon Personel Listesi</span>
-        <div style="color:rgba(255,255,255,.75);font-size:11px;margin-top:3px">Seçilen istasyonda bu ay nöbet tutan tüm personel ve nöbet ayrıntıları</div>
-      </div>
-      <button class="modal-close" onclick="closeIstasyonPersonelModal()">✕</button>
-    </div>
     <div class="istasyon-personel-filters">
       <label>İstasyon seç<select id="istasyonPersonelStation" onchange="renderIstasyonPersonelList()"><option value="">Tüm istasyonlar</option></select></label>
       <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="text" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
