@@ -165,7 +165,12 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 .surucu-duzen-table .surucu-duzen-type{font-weight:900;white-space:nowrap}
 .surucu-duzen-table .surucu-duzen-dates{font-family:'IBM Plex Mono',monospace;font-size:11px;line-height:1.6;color:#475569;white-space:nowrap}
 .surucu-duzen-table .surucu-duzen-count{background:#ecfdf5;color:#047857;font-weight:900;text-align:center;white-space:nowrap}
-.tum-personel-duzen-table{width:max-content!important;min-width:0!important;table-layout:auto}
+.tum-personel-duzen-table{width:max-content!important;min-width:0!important;table-layout:auto;border-spacing:0!important;border-collapse:collapse!important}
+.tum-personel-duzen-table th,.tum-personel-duzen-table td{white-space:nowrap!important}
+.tum-personel-duzen-table th:nth-child(3),.tum-personel-duzen-table td:nth-child(3){padding-left:2px!important;padding-right:2px!important}
+.tum-personel-duzen-table th:nth-child(4),.tum-personel-duzen-table td:nth-child(4){padding-left:2px!important;padding-right:2px!important}
+.tum-personel-duzen-table th:nth-child(5),.tum-personel-duzen-table td:nth-child(5){padding-left:2px!important;padding-right:2px!important}
+.tum-personel-duzen-table th:nth-child(6),.tum-personel-duzen-table td:nth-child(6){padding-left:2px!important;padding-right:2px!important}
 .tum-personel-duzen-table th,.tum-personel-duzen-table td{padding-left:5px!important;padding-right:5px!important}
 .tum-personel-duzen-table td:nth-child(3),.tum-personel-duzen-table td:nth-child(4){padding-left:2px!important;padding-right:2px!important}
 .tum-personel-duzen-table td:nth-child(5){padding-left:2px!important;padding-right:2px!important}
@@ -449,7 +454,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <button class="gorev-tab" id="tab-ef" onclick="switchGorev('ef')">👨‍💼 Ekip Şefi</button>
       <button class="gorev-tab" id="tab-ysp" onclick="switchGorev('ysp')">🏥 Yardımcı Sağlık Personeli</button>
       <button class="gorev-tab active" id="tab-sur" onclick="switchGorev('sur')">🚗 Sürücü</button>
-      <button class="gorev-tab" id="tab-istasyon-personel" onclick="showIstasyonPersonelModal()">🏥 İstasyon Listesi</button>
+      <button class="gorev-tab" id="tab-istasyon-personel" onclick="switchGorev('istasyon')">🏥 İstasyon Listesi</button>
       <button class="gorev-tab" id="tab-kilavuz" onclick="switchGorev('kilavuz')" style="border-left:2px solid var(--line)">📖 Kılavuz</button>
     </div>
     <div class="gorev-shortcut-hint">Sekmeler: <kbd>Alt+1</kbd> Ekip Şefi · <kbd>Alt+2</kbd> YSP · <kbd>Alt+3</kbd> Sürücü</div>
@@ -2476,15 +2481,25 @@ function getCokluNobetSayisi(list) {
 }
 
 function switchGorev(g) {
-  const stationPanel=document.getElementById('istasyonPersonelModal'); if(stationPanel) stationPanel.style.display='none';
+  const stationPanel=document.getElementById('istasyonPersonelModal');
   activeGorev = g;
-  ['ef','ysp','sur','kilavuz'].forEach(k => {
+  ['ef','ysp','sur','istasyon','kilavuz'].forEach(k => {
     const el = document.getElementById('tab-'+k);
     if (el) el.classList.toggle('active', k===g);
   });
 
   const kilavuzDiv  = document.getElementById('kilavuzSection');
   const raporDiv    = document.getElementById('raporContent');
+
+  if (g === 'istasyon') {
+    if (kilavuzDiv) kilavuzDiv.style.display='none';
+    if (raporDiv) raporDiv.style.display='block';
+    document.getElementById('reportSubtitle').textContent='İstasyon Personel Listesi';
+    if (raporDiv) Array.from(raporDiv.children).forEach(el => { el.style.display = el.id==='istasyonPersonelModal' ? 'block' : 'none'; });
+    if (stationPanel) { stationPanel.style.display='block'; renderIstasyonPersonelList(); setIstasyonPersonelView('summary'); }
+    return;
+  }
+
 
   if (g === 'kilavuz') {
     if (kilavuzDiv)  kilavuzDiv.style.display  = 'block';
@@ -2499,6 +2514,7 @@ function switchGorev(g) {
   if (kilavuzDiv) kilavuzDiv.style.display  = 'none';
   if (raporDiv)   raporDiv.style.display    = 'block';
 
+  if (raporDiv) Array.from(raporDiv.children).forEach(el => { if(el.id==='istasyonPersonelModal') el.style.display='none'; else el.style.display=''; });
   const labels = { ef:'Ekip Şefi', ysp:'Yardımcı Sağlık Personeli', sur:'Sürücü' };
   document.getElementById('reportSubtitle').textContent =
     `${labels[g]} · ${allData[g].length} personel`;
@@ -2980,6 +2996,8 @@ function getIstasyonPersonelRows() {
 }
 function showIstasyonPersonelModal() {
   if (!reportMonthInfo) { alert('Önce nöbet raporunu yükleyin.'); return; }
+  switchGorev('istasyon'); return;
+  /* legacy path */
   const report=document.getElementById('raporContent'); if(report) report.style.display='block';
   const guide=document.getElementById('kilavuzSection'); if(guide) guide.style.display='none';
   document.querySelectorAll('.gorev-tab').forEach(el=>el.classList.toggle('active',el.id==='tab-istasyon-personel'));
