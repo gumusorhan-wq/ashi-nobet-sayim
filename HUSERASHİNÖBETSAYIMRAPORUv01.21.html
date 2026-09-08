@@ -842,6 +842,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="modal-body" id="tumPersonelDuzenModalBody" style="max-height:62vh;overflow-y:auto;padding:0"></div>
   </div>
 </div>
+<!-- BRANŞ KARTI PERSONEL LİSTESİ MODAL -->
+<div id="bransPersonelModal" class="modal-overlay">
+  <div class="modal-box" style="max-width:900px">
+    <div class="modal-head" style="background:#1e3a5f"><div><span id="bransPersonelModalTitle" style="color:#fff;font-weight:700;font-size:15px">Branş Personel Listesi</span><div id="bransPersonelModalSummary" style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px"></div></div><button class="modal-close" onclick="closeBransPersonelModal()">✕</button></div>
+    <div id="bransPersonelModalBody" style="padding:16px 20px;max-height:68vh;overflow:auto"></div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -2244,7 +2251,7 @@ function makeSurucuDuzenRow(person, run, kind) {
   const stations = [...new Set(allRecords.map(record => record.station).filter(Boolean))];
   const roles = [...new Set(allRecords.map(record => record.roleLabel).filter(Boolean))];
   const dateLabels = run.map(day => {
-    const times = day.records.map(record => `${record.startText} → ${record.endText}`).join(' / ');
+    const times = day.records.map(record => `${record.roleLabel ? record.roleLabel + ' · ' : ''}${record.startText} → ${record.endText}`).join(' / ');
     return `${day.date} · ${times}`;
   });
   const typeLabel = kind === 'night12' ? '12 saat · 3 gece arka arkaya' : '24 saat · 2 gün arayla';
@@ -2320,7 +2327,7 @@ function renderTumPersonelDuzenModal(){
   if(stationSelect){stationSelect.innerHTML='<option value="">Tüm istasyonlar</option>'+stations.map(x=>`<option value="${escapeHtml(x)}">${escapeHtml(x)}</option>`).join('');if(stations.includes(stationCurrent))stationSelect.value=stationCurrent;}
   bindTumPersonelDuzenControls(); const visible=getTumPersonelDuzenFilteredRows(data.rows), summary=document.getElementById('tumPersonelDuzenOzet');
   if(summary)summary.textContent=`${visible.length} / ${data.rows.length} dizi gösteriliyor · Ekip fark etmeksizin kişi bazlı`; const filterSummary=document.getElementById('tumPersonelDuzenFilterSummary'); if(filterSummary)filterSummary.textContent=`${new Set(visible.map(r=>r.fullName)).size} personel · ${visible.reduce((s,r)=>s+r.sequenceLength,0)} nöbet`;
-  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan tüm personel düzeni bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>DÜZEN TÜRÜ</th><th>PERSONEL</th><th>EKİP / BRANŞ</th><th>İSTASYON(LAR)</th><th>NÖBET GÜNLERİ VE SAATLERİ</th><th style="text-align:center">NÖBET SAYISI</th></tr></thead><tbody>'+renderTumPersonelDuzenRows(visible)+'</tbody></table></div>';
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan tüm personel düzeni bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>DÜZEN TÜRÜ</th><th>PERSONEL</th><th>EKİP / BRANŞ</th><th>İSTASYON(LAR)</th><th>NÖBET GÜNLERİ · NÖBET BRANŞI · SAATLERİ</th><th style="text-align:center">NÖBET SAYISI</th></tr></thead><tbody>'+renderTumPersonelDuzenRows(visible)+'</tbody></table></div>';
   const exportBtn=document.getElementById('exportTumPersonelDuzenExcelBtn');if(exportBtn)exportBtn.onclick=()=>exportTumPersonelDuzenExcel(data);
 }
 function showTumPersonelDuzenModal(){buildTumPersonelDuzenData(true);renderTumPersonelDuzenModal();const modal=document.getElementById('tumPersonelDuzenModal');if(modal)modal.style.display='block';}
@@ -2517,10 +2524,10 @@ function renderStats(data) {
     { lbl:'En Fazla (Gün)',     val: mx + ' gün',           color:'#991b1b', bg:'#fee2e2' },
     { lbl:'En Az (Gün)',        val: mn + ' gün',           color:'#92400e', bg:'#fef3c7' },
     { lbl:'Ort. (Gün/Kişi)',    val: avg + ' gün',          color:'#5b21b6', bg:'#ede9fe' },
-    { lbl:'ATT (Kadro)',        val: bransMap.att.size,     color:'#1d4ed8', bg:'#dbeafe' },
-    { lbl:'AABT (Kadro)',       val: bransMap.aabt.size,    color:'#166534', bg:'#dcfce7' },
-    { lbl:'Sürücü (Kadro)',     val: bransMap.surucu.size,  color:'#92400e', bg:'#fef3c7' },
-    { lbl:'Diğer (Kadro)',      val: bransMap.diger.size,   color:'#6b21a8', bg:'#f3e8ff' },
+    { lbl:'ATT (Kadro)',        val: bransMap.att.size,     color:'#1d4ed8', bg:'#dbeafe', click:"showBransPersonelList('att')" },
+    { lbl:'AABT (Kadro)',       val: bransMap.aabt.size,    color:'#166534', bg:'#dcfce7', click:"showBransPersonelList('aabt')" },
+    { lbl:'Sürücü (Kadro)',     val: bransMap.surucu.size,  color:'#92400e', bg:'#fef3c7', click:"showBransPersonelList('surucu')" },
+    { lbl:'Diğer (Kadro)',      val: bransMap.diger.size,   color:'#6b21a8', bg:'#f3e8ff', click:"showBransPersonelList('diger')" },
   ];
 
   document.getElementById('statsGrid').innerHTML = stats.map(s =>
@@ -2530,6 +2537,17 @@ function renderStats(data) {
       <div class="stat-lbl">${s.lbl}</div>
     </div>`
   ).join('');
+}
+function closeBransPersonelModal(){const modal=document.getElementById('bransPersonelModal');if(modal)modal.style.display='none';}
+function showBransPersonelList(category){
+  const labels={att:'ATT (Kadro)',aabt:'AABT (Kadro)',surucu:'Sürücü (Kadro)',diger:'Diğer (Kadro)'};
+  const source=allData[activeGorev]||[]; const people={};
+  source.forEach(p=>{const b=String(p.kadro_brans||'').trim();const ok=category==='att'?/^att$/i.test(b):category==='aabt'?/^aabt$/i.test(b):category==='surucu'?/sürücü/i.test(b):!/^att$/i.test(b)&&!/^aabt$/i.test(b)&&!/sürücü/i.test(b);if(!ok)return;const key=String(p.personKey||p.tc||`${p.ad}|${p.soyad}`);if(!people[key])people[key]={tc:p.tc||'',name:`${p.ad||''} ${p.soyad||''}`.trim(),branch:b||'—',stations:new Set(),duties:0};(p.nobetler||[]).forEach(n=>{if(n.ist)people[key].stations.add(n.ist);people[key].duties++;});});
+  const rows=Object.values(people).sort((a,b)=>trColl.compare(a.name,b.name));
+  document.getElementById('bransPersonelModalTitle').textContent=`${labels[category]} Personel Listesi`;
+  document.getElementById('bransPersonelModalSummary').textContent=`${rows.length} personel · ${activeGorev==='ef'?'Ekip Şefi':activeGorev==='ysp'?'Yardımcı Sağlık Personeli':'Sürücü'} sekmesi`; 
+  document.getElementById('bransPersonelModalBody').innerHTML=rows.length?`<div style="overflow:auto"><table class="tbl"><thead><tr><th>#</th><th>TCKN</th><th>PERSONEL ADI SOYADI</th><th>BRANŞ</th><th>İSTASYON(LAR)</th><th>NÖBET SAYISI</th></tr></thead><tbody>${rows.map((p,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(p.tc||'—')}</td><td><strong>${escapeHtml(p.name||'Ad bilgisi yok')}</strong></td><td>${escapeHtml(p.branch)}</td><td>${escapeHtml([...p.stations].join(' / ')||'—')}</td><td>${p.duties}</td></tr>`).join('')}</tbody></table></div>`:'<div style="padding:30px;text-align:center;color:#64748b">Bu karta dahil personel bulunamadı.</div>';
+  const modal=document.getElementById('bransPersonelModal');if(modal)modal.style.display='block';
 }
 
 // ═══════════════════════════════════════════════════════════
