@@ -1,6 +1,6 @@
 {
-  "version": "02.01",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.01.html",
-  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.01.html",
-  "notes": "İstasyon Listesi ana sekme yapısı, Tüm Personel Düzeni 8 kolonlu hizalı görünüm, tam genişlik pencere, sağ-sol kesintisiz veri görünümü ve düzenli satır şeritleri."
+  "version": "02.02",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.02.html",
+  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.02.html",
+  "notes": "v02.02 güncel HTML sürümü; İstasyon Listesi mavi başlık kaldırıldı ve mevcut tüm rapor, filtre ve düzen görünümleri korunmuştur."
 }
