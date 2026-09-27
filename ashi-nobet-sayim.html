@@ -49,9 +49,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 .report-section{width:100%;max-width:none;box-sizing:border-box;margin:0;padding:14px clamp(10px,1.2vw,24px)}
 .report-header{width:100%;box-sizing:border-box;background:#fff;border-radius:16px;padding:16px clamp(14px,1.4vw,22px);margin-bottom:12px;display:flex;align-items:stretch;gap:20px;justify-content:flex-start;box-shadow:0 1px 10px rgba(15,23,42,.07);border:1px solid rgba(226,232,240,.9)}
 .report-header>div:first-child{flex:0 0 210px;width:210px;min-width:210px;max-width:210px;padding:2px 18px 2px 0;border-right:1px solid #eef1f5;display:flex;flex-direction:column;justify-content:center}
-.header-actions{flex:1 1 auto;width:auto;min-width:0;display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;justify-content:flex-start;gap:12px;margin-left:0}
-.control-group{min-width:230px;display:flex;flex-direction:row;flex-wrap:wrap;flex:1 1 250px;align-content:flex-start;align-items:stretch;gap:8px;padding:11px 14px 13px;background:#f8fafc;border:1px solid #e7ebf1;border-radius:12px}
-.header-actions .control-group:nth-child(3){flex:1.5 1 340px}
+.header-actions{flex:1 1 auto;width:auto;min-width:0;display:grid;grid-template-columns:minmax(280px,1fr) minmax(280px,1fr) minmax(320px,1.3fr);align-items:stretch;gap:12px;margin-left:0}
+.control-group{min-width:0;width:100%;box-sizing:border-box;display:flex;flex-direction:row;flex-wrap:wrap;align-content:flex-start;align-items:stretch;gap:8px;padding:11px 14px 13px;background:#f8fafc;border:1px solid #e7ebf1;border-radius:12px}
 .control-group-title{flex:1 1 100%;width:100%;font-size:10.5px;font-weight:800;letter-spacing:.09em;color:#64748b;text-transform:uppercase;padding-bottom:7px;margin-bottom:1px;border-bottom:1px solid #e3e8ee}
 #bransAnalizButtons{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:8px}
 .control-group .btn-sec,.control-group .brans-analiz-btn{height:auto;min-height:40px;min-width:0;flex:1 1 calc(33.333% - 6px);display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 10px;border-radius:9px;white-space:normal;text-align:center;line-height:1.25;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:background .15s,border-color .15s,box-shadow .15s,transform .15s;letter-spacing:0;font-size:12.5px;font-weight:600}
@@ -59,9 +58,15 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 .control-group .btn-sec:hover,.control-group .brans-analiz-btn:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(15,23,42,.10);filter:none}
 @media(max-width:1200px){#raporContent,.gorev-tabs{max-width:100%}.stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:1100px){.report-header{flex-direction:column}.report-header>div:first-child{flex:0 0 auto;width:auto;min-width:0;max-width:none;border-right:none;border-bottom:1px solid #eef1f5;padding:0 0 12px}.header-actions{width:100%;max-width:none;justify-content:flex-start}}
-@media(max-width:900px){.header-actions{flex-direction:column}.header-actions .control-group:nth-child(1),.header-actions .control-group:nth-child(2),.header-actions .control-group:nth-child(3){flex:1 1 auto;width:100%}.control-group .btn-sec,.control-group .brans-analiz-btn,.header-actions .control-group:nth-child(3) .btn-sec,.header-actions .control-group:nth-child(3) .brans-analiz-btn{flex:1 1 calc(25% - 6px);font-size:13px}}
+@media(max-width:900px){.header-actions{grid-template-columns:1fr}.control-group .btn-sec,.control-group .brans-analiz-btn,.header-actions .control-group:nth-child(3) .btn-sec,.header-actions .control-group:nth-child(3) .brans-analiz-btn{flex:1 1 calc(25% - 6px);font-size:13px}}
 @media(max-width:640px){.control-group .btn-sec,.control-group .brans-analiz-btn,.header-actions .control-group:nth-child(3) .btn-sec,.header-actions .control-group:nth-child(3) .brans-analiz-btn{flex:1 1 calc(50% - 4px);font-size:12px;padding:9px 8px}}
 @media(max-width:640px){.report-section{padding:12px}.report-header{padding:14px}.control-group{min-width:100%;width:100%}.gorev-tab{padding-left:6px;padding-right:6px;font-size:11px}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Üst sıra (row3) her zaman 3'lü, alt sıra (row2) her zaman 2'li — ekran genişliğinden bağımsız, sabit */
+.control-group .row3{flex:1 1 calc(33.333% - 6px)!important}
+.control-group .row2{flex:1 1 calc(50% - 5px)!important}
+.control-group .btn-textcol{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.control-group .btn-sub{font-size:10.5px;font-weight:800;opacity:.72;letter-spacing:.01em}
+.control-group .btn-sub:empty{display:none}
 .report-subtitle{font-size:13px;color:var(--muted);margin-top:3px}
 .btn-row{display:flex;gap:10px;flex-wrap:wrap}
 .btn-sec{display:inline-flex;align-items:center;gap:6px;background:#f1f5f9;color:var(--navy);border:1px solid var(--line);padding:8px 16px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
@@ -420,18 +425,21 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <div class="header-actions">
         <div class="control-group">
           <div class="control-group-title">Analiz ve kontroller</div>
-          <button class="btn-sec btn-orange" onclick="showCokluModal()">🔄 <span id="btnCokluLbl">Çoklu İstasyon</span></button>
-          <button class="btn-sec" id="btnBosluk" onclick="showBoslukModal()" style="background:#eef2ff;color:#3730a3;border-color:#c7d2fe">⏱️ <span id="btnBoslukLbl">5+ Gün Boşluk Analizi</span></button>
-          <button class="btn-sec" id="btnSurucuDuzen" onclick="showSurucuDuzenModal()" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0">🚘 <span id="btnSurucuDuzenLbl">Sürücü Düzeni</span></button>
-          <button class="btn-sec" id="btnTumPersonelDuzen" onclick="showTumPersonelDuzenModal()" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe">👥 <span>Tüm Personel Düzeni</span></button>
+          <button class="btn-sec btn-orange row3" onclick="showCokluModal()"><span class="btn-icon">🔄</span><span class="btn-textcol"><span>Farklı İstasyon Nöbetleri</span><span class="btn-sub" id="btnCokluLbl"></span></span></button>
+          <button class="btn-sec row3" id="btnBosluk" onclick="showBoslukModal()" style="background:#eef2ff;color:#3730a3;border-color:#c7d2fe"><span class="btn-icon">⏱️</span><span class="btn-textcol"><span>5+ Gün Boşluk Analizi</span><span class="btn-sub" id="btnBoslukLbl"></span></span></button>
+          <button class="btn-sec row3" id="btnSurucuDuzen" onclick="showSurucuDuzenModal()" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0"><span class="btn-icon">🚘</span><span class="btn-textcol"><span>Sürücü Nöbet Analizi</span><span class="btn-sub" id="btnSurucuDuzenLbl"></span></span></button>
+          <button class="btn-sec row2" id="btnTumPersonelDuzen" onclick="showTumPersonelDuzenModal()" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe">👥 <span>Tüm Personel Nöbet Analizi</span></button>
         </div>
         <div class="control-group">
           <div class="control-group-title">Branş analizleri</div>
           <div id="bransAnalizButtons" style="display:contents">
-            <button class="brans-analiz-btn" style="background:#fdf4ff;color:#7e22ce;border:1px solid #d8b4fe" data-analiz-gorev="ef" onclick="showAnalizModal('ef')">⚠️ Ekip Şefi Analizi</button>
-            <button class="brans-analiz-btn" style="background:#f0fdf4;color:#166534;border:1px solid #86efac" data-analiz-gorev="ysp" onclick="showAnalizModal('ysp')">⚠️ YSP Analizi</button>
-            <button class="brans-analiz-btn" style="background:#fef2f2;color:#991b1b;border:1px solid #fca5a5" data-analiz-gorev="sur" onclick="showAnalizModal('sur')">⚠️ Sürücü Analizi</button>
+            <button class="brans-analiz-btn row3" style="background:#fdf4ff;color:#7e22ce;border:1px solid #d8b4fe" data-analiz-gorev="ef" onclick="showAnalizModal('ef')"><span class="btn-icon" data-analiz-icon>⚠️</span><span class="btn-textcol"><span>Ekip Şefi Analizi</span><span class="btn-sub" data-analiz-sub></span></span></button>
+            <button class="brans-analiz-btn row3" style="background:#f0fdf4;color:#166534;border:1px solid #86efac" data-analiz-gorev="ysp" onclick="showAnalizModal('ysp')"><span class="btn-icon" data-analiz-icon>⚠️</span><span class="btn-textcol"><span>YSP Analizi</span><span class="btn-sub" data-analiz-sub></span></span></button>
+            <button class="brans-analiz-btn row3" style="background:#fef2f2;color:#991b1b;border:1px solid #fca5a5" data-analiz-gorev="sur" onclick="showAnalizModal('sur')"><span class="btn-icon" data-analiz-icon>⚠️</span><span class="btn-textcol"><span>Sürücü Analizi</span><span class="btn-sub" data-analiz-sub></span></span></button>
           </div>
+          <div style="flex:1 1 100%;height:0;border-top:1px dashed #e3e8ee;margin:2px 0"></div>
+          <button class="btn-sec row2" id="btnCokluTumPersonel" onclick="showCokluTumPersonelModal()" style="background:#fff7ed;color:#c2410c;border-color:#fdba74">🏥 <span>Çoklu İstasyon Analizi</span></button>
+          <button class="btn-sec row2" id="btnUygunPersonel" onclick="showUygunPersonelModal()" style="background:#f0fdfa;color:#0f766e;border-color:#99f6e4">🔍 <span>Nöbete Uygun Personel Bul</span></button>
         </div>
         <div class="control-group">
           <div class="control-group-title">Görünüm ve dosya</div>
@@ -440,7 +448,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <button class="btn-sec" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa" onclick="switchView('special-komuta')">🛰️ Komuta Kontrol Listesi</button>
           <button class="btn-sec" style="background:#fdf4ff;color:#7e22ce;border-color:#e9d5ff" onclick="switchView('special-bashekimlik')">🩺 Başhekimlik Listesi</button>
           <button class="btn-sec" onclick="exportExcelAll()">📥 Excel (Tümü)</button>
-          <button class="btn-sec" onclick="exportExcelSingle()">📥 Excel (Bu Sekme)</button>
+          <button class="btn-sec" onclick="exportExcelSingle()">📥 Excel (Bu Sayfa)</button>
           <button class="btn-sec" style="background:#fff7ed;color:#9a3412;border-color:#fdba74" onclick="openIzinRaporPicker()">📄 İzin/Rapor Dosyası</button>
           <input id="izinRaporFileInput" type="file" accept=".xls,.xlsx" style="display:none" onchange="handleIzinRaporFile(this.files[0])">
           <button class="btn-sec btn-danger" onclick="resetPage()">🔄 Yeni Dosya</button>
@@ -886,6 +894,46 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="modal-body" id="tumPersonelDuzenModalBody" style="max-height:62vh;overflow-y:auto;padding:0"></div>
   </div>
 </div>
+<!-- ÇOKLU İSTASYON ANALİZİ (TÜM PERSONEL) MODAL -->
+<div id="cokluTumPersonelModal" class="modal-overlay">
+  <div class="modal-box" style="width:min(98vw,1500px);max-width:1500px">
+    <div class="modal-head" style="background:#c2410c">
+      <div><span style="color:#fff;font-weight:700;font-size:15px">🏥 Çoklu İstasyon Analizi (Tüm Personel)</span><div style="color:rgba(255,255,255,.8);font-size:11px;margin-top:3px">Ekip Şefi, Yardımcı Sağlık Personeli ve Sürücü nöbetleri birlikte değerlendirilir; birden fazla istasyonda nöbet tutan tüm personel branşı fark etmeksizin listelenir.</div></div>
+      <button class="modal-close" onclick="document.getElementById('cokluTumPersonelModal').style.display='none'">✕</button>
+    </div>
+    <div style="padding:14px 20px;background:#fff7ed;border-bottom:1px solid #fdba74;display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div id="cokluTumPersonelOzet" style="font-size:13px;color:#9a3412;font-weight:800"></div><button id="exportCokluTumPersonelExcelBtn" class="btn-sec" style="margin-left:auto;background:#fff;color:#c2410c;border-color:#fdba74">📥 Excel'e Aktar</button></div>
+    <div class="bosluk-toolbar"><div class="bosluk-filter-row">
+      <div class="bosluk-filter wide"><label class="bosluk-filter-label" for="cokluTumPersonelSearch">Kişi veya TCKN</label><input id="cokluTumPersonelSearch" type="search" placeholder="Ad, soyad veya TCKN ara…"></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="cokluTumPersonelBransFilter">Branş (Kadro)</label><select id="cokluTumPersonelBransFilter"><option value="">Tüm branşlar</option></select></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="cokluTumPersonelStationFilter">Gidilen istasyon</label><select id="cokluTumPersonelStationFilter"><option value="">Tüm istasyonlar</option></select></div>
+      <button id="cokluTumPersonelClearBtn" class="btn-sec bosluk-clear" type="button">Filtreleri temizle</button>
+    </div><div id="cokluTumPersonelFilterSummary" class="bosluk-filter-summary"></div></div>
+    <div id="cokluTumPersonelRoleSummary" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 20px;background:#fff;border-bottom:1px solid #f1e4d6"></div>
+    <div class="modal-body" id="cokluTumPersonelModalBody" style="max-height:62vh;overflow-y:auto;padding:0"></div>
+  </div>
+</div>
+<!-- NÖBETE UYGUN PERSONEL BULMA MODAL -->
+<div id="uygunPersonelModal" class="modal-overlay">
+  <div class="modal-box" style="width:min(98vw,1500px);max-width:1500px">
+    <div class="modal-head" style="background:#0f766e">
+      <div><span style="color:#fff;font-weight:700;font-size:15px">🔍 Nöbete Uygun Personel Bulma</span><div style="color:rgba(255,255,255,.8);font-size:11px;margin-top:3px">Girilen tarihten bir gün önce ve bir gün sonrasında nöbeti (ve varsa izin/raporu) olmayan Ekip Şefi/YSP personelini tarar. Kadro branşı Sürücü olan personel bu aramaya dahil edilmez; onlar nöbet değil mesai tamamlar. Ay başı/sonu tarihlerinde, önceki/sonraki ay yerel arşivde varsa o nöbetler de otomatik dikkate alınır.</div></div>
+      <button class="modal-close" onclick="document.getElementById('uygunPersonelModal').style.display='none'">✕</button>
+    </div>
+    <div style="padding:14px 20px;background:#f0fdfa;border-bottom:1px solid #99f6e4;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="uygunPersonelDate">Nöbet tarihi</label><input id="uygunPersonelDate" type="date"></div>
+      <button id="uygunPersonelSearchBtn" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="runUygunPersonelSearch()">🔍 Uygun Personeli Bul</button>
+      <div id="uygunPersonelOzet" style="font-size:13px;color:#115e59;font-weight:800;margin-left:8px"></div>
+      <button id="exportUygunPersonelExcelBtn" class="btn-sec" style="margin-left:auto;background:#fff;color:#0f766e;border-color:#99f6e4">📥 Excel'e Aktar</button>
+    </div>
+    <div class="bosluk-toolbar"><div class="bosluk-filter-row">
+      <div class="bosluk-filter wide"><label class="bosluk-filter-label" for="uygunPersonelSearch">Kişi veya TCKN</label><input id="uygunPersonelSearch" type="search" placeholder="Ad, soyad veya TCKN ara…"></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="uygunPersonelBransFilter">Nöbet Branşı</label><select id="uygunPersonelBransFilter"><option value="">Tüm branşlar</option></select></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="uygunPersonelStationFilter">İstasyon</label><select id="uygunPersonelStationFilter"><option value="">Tüm istasyonlar</option></select></div>
+      <button id="uygunPersonelClearBtn" class="btn-sec bosluk-clear" type="button">Filtreleri temizle</button>
+    </div><div id="uygunPersonelFilterSummary" class="bosluk-filter-summary"></div></div>
+    <div class="modal-body" id="uygunPersonelModalBody" style="max-height:58vh;overflow-y:auto;padding:0"></div>
+  </div>
+</div>
 <!-- BRANŞ KARTI PERSONEL LİSTESİ MODAL -->
 <div id="bransPersonelModal" class="modal-overlay">
   <div class="modal-box" style="max-width:900px">
@@ -909,6 +957,10 @@ let allCoklu  = { ef:[], ysp:[], sur:[] };
 let specialDutyLists = { komuta:[], bashekimlik:[] };
 let izinRaporRecords = [];
 let izinRaporFileName = '';
+let boundaryDutyByTc = {}; // Sınır Ay Verisi: {tc: [{ist,startMs,endMs,saat,basRaw,bitisRaw,isBoundary:true}, ...]}
+let boundaryFileName = '';
+let boundaryRecordCount = 0;
+let boundaryArchiveSourceLabel = ''; // arşivden otomatik alınan ay(lar)ın etiketi (örn. "Ağustos 2026, Ekim 2026")
 let activeGorev = 'sur';
 let lastValidGorev = 'sur'; // 'ef'/'ysp'/'sur' dışına (istasyon/kılavuz) geçildiğinde son geçerli görev grubunu hatırlar
 let activeView  = 'liste';   // 'liste' | 'personel' | 'istasyon'
@@ -1129,7 +1181,7 @@ async function archiveSaveCurrentReport(fileName, options={}) {
   }
 }
 function archiveResetViewFilters() {
-  ['searchInput','boslukSearch','boslukStationFilter','boslukMinDays','surucuDuzenSearch','surucuDuzenStationFilter','surucuDuzenTypeFilter','specialListSearch','specialListBransFilter'].forEach(id => {
+  ['searchInput','boslukSearch','boslukStationFilter','boslukMinDays','surucuDuzenSearch','surucuDuzenStationFilter','surucuDuzenTypeFilter','specialListSearch','specialListBransFilter','cokluTumPersonelSearch','cokluTumPersonelBransFilter','cokluTumPersonelStationFilter','uygunPersonelSearch','uygunPersonelBransFilter','uygunPersonelStationFilter'].forEach(id => {
     const el = document.getElementById(id);
     if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) el.value = '';
   });
@@ -1144,15 +1196,24 @@ function refreshLoadedReportState() {
   _analizCache = null;
   boslukDataCache = null;
   surucuDuzenDataCache = null;
+  tumPersonelDuzenDataCache = null;
+  mergedPersonelAllGorevCache = null; mergedPersonelAllGorevWithBoundaryCache = null;
+  cokluTumPersonelDataCache = null; cokluTumPersonelRoleFilter='';
+  uygunPersonelResultsCache = null;
+  // Her yeni rapor (dosya veya arşivden) yüklendiğinde sınır ay verisi bu ay için sıfırdan belirlenir;
+  // önceki görüntülenen aya ait sınır verisi bir sonrakine taşınmaz.
+  boundaryDutyByTc = {}; boundaryFileName = ''; boundaryRecordCount = 0; boundaryArchiveSourceLabel = '';
   updateAnalizButtons();
   updateBoslukButton();
   updateSurucuDuzenButton();
+  updateSinirAyButton();
   const g = ['ef','ysp','sur'].includes(activeGorev) ? activeGorev : 'sur';
   activeGorev = g;
   document.getElementById('uploadSection').style.display = 'none';
   document.getElementById('reportSection').style.display = 'block';
   switchGorev(g);
   renderArchivePanel();
+  autoFillBoundaryFromArchive();
 }
 async function loadArchivedMonth(key) {
   try {
@@ -1587,7 +1648,14 @@ function processFile(file) {
       updateBoslukButton();
       surucuDuzenDataCache = null;
       tumPersonelDuzenDataCache = null;
+      mergedPersonelAllGorevCache = null; mergedPersonelAllGorevWithBoundaryCache = null;
+      cokluTumPersonelDataCache = null; cokluTumPersonelRoleFilter='';
+      uygunPersonelResultsCache = null;
       updateSurucuDuzenButton();
+      // Her yeni dosya yüklemesinde sınır ay verisi bu ay için sıfırdan belirlenir, sonra arşivden otomatik doldurulur.
+      boundaryDutyByTc = {}; boundaryFileName = ''; boundaryRecordCount = 0; boundaryArchiveSourceLabel = '';
+      updateSinirAyButton();
+      autoFillBoundaryFromArchive();
 
       // Ay tespiti: tek bir ilk kayda değil, kayıtların çoğunluk ayına göre yap.
       const TR_AYLAR = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
@@ -1716,6 +1784,96 @@ function handleIzinRaporFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
+function boundaryRecordKey(n) {
+  return `${n.ist}|${n.startMs}|${n.saat}`;
+}
+function mergeIntoBoundaryDutyByTc(newRecordsByTc) {
+  Object.entries(newRecordsByTc || {}).forEach(([tc, records]) => {
+    if (!boundaryDutyByTc[tc]) boundaryDutyByTc[tc] = [];
+    const existingKeys = new Set(boundaryDutyByTc[tc].map(r => r.key));
+    records.forEach(r => { if (!existingKeys.has(r.key)) { boundaryDutyByTc[tc].push(r); existingKeys.add(r.key); } });
+  });
+}
+function recountBoundaryRecords() {
+  boundaryRecordCount = Object.values(boundaryDutyByTc).reduce((sum, arr) => sum + arr.length, 0);
+}
+function invalidateBoundaryDependentCaches() {
+  boslukDataCache = null; surucuDuzenDataCache = null; tumPersonelDuzenDataCache = null;
+  mergedPersonelAllGorevCache = null; mergedPersonelAllGorevWithBoundaryCache = null; cokluTumPersonelDataCache = null; uygunPersonelResultsCache = null;
+  updateBoslukButton(); updateSurucuDuzenButton();
+  if (document.getElementById('boslukModal')?.style.display === 'block') renderBoslukModal();
+  if (document.getElementById('surucuDuzenModal')?.style.display === 'block') renderSurucuDuzenModal();
+  if (document.getElementById('uygunPersonelModal')?.style.display === 'block') renderUygunPersonelModal();
+}
+// Önceki ve sonraki ay, daha önce bu tarayıcının yerel arşivine kaydedilmişse (bir başka rapor
+// yüklemesinden), sınır ay verisini KULLANICIDAN AYRI BİR DOSYA İSTEMEDEN otomatik olarak oradan alır.
+// Arşivde bulunmayan taraf için kullanıcı manuel "Sınır Ay Verisi" yükleyebilir (tamamlayıcı, üzerine yazmaz).
+async function autoFillBoundaryFromArchive() {
+  if (!reportMonthInfo || !archiveSupported()) return;
+  const prevInfo = reportMonthInfo.month === 1 ? {year:reportMonthInfo.year-1, month:12} : {year:reportMonthInfo.year, month:reportMonthInfo.month-1};
+  const nextInfo = reportMonthInfo.month === 12 ? {year:reportMonthInfo.year+1, month:1} : {year:reportMonthInfo.year, month:reportMonthInfo.month+1};
+  const prevKey = archiveKeyFromInfo(prevInfo);
+  const nextKey = archiveKeyFromInfo(nextInfo);
+  const currentKey = archiveKeyFromInfo(reportMonthInfo);
+  let anyFound = false;
+  const sourceLabels = [];
+  try {
+    const [prevSnap, nextSnap] = await Promise.all([
+      prevKey ? archiveGet(prevKey).catch(() => null) : Promise.resolve(null),
+      nextKey ? archiveGet(nextKey).catch(() => null) : Promise.resolve(null)
+    ]);
+    [prevSnap, nextSnap].forEach(snap => {
+      if (!snap || !snap.allData || snap.key === currentKey) return;
+      anyFound = true;
+      sourceLabels.push(archiveMonthLabel(snap.reportMonthInfo));
+      const byTc = {};
+      ['ef','ysp','sur'].forEach(gKey => {
+        (snap.allData[gKey] || []).forEach(p => {
+          const tc = String(p.tc || '').trim();
+          if (!tc) return;
+          if (!byTc[tc]) byTc[tc] = [];
+          (p.nobetler || []).forEach(n => {
+            if (!Number.isFinite(n.startMs) || !Number.isFinite(n.endMs) || n.endMs <= n.startMs) return;
+            byTc[tc].push({
+              ist:n.ist, startMs:n.startMs, endMs:n.endMs, saat:n.saat,
+              basRaw:n.basRaw, bitisRaw:n.bitisRaw, key:boundaryRecordKey(n), isBoundary:true
+            });
+          });
+        });
+      });
+      mergeIntoBoundaryDutyByTc(byTc);
+    });
+  } catch (err) {
+    console.warn('Sınır ay verisi arşivden alınamadı:', err);
+  }
+  if (anyFound) {
+    recountBoundaryRecords();
+    boundaryArchiveSourceLabel = sourceLabels.join(', ');
+    updateSinirAyButton();
+    invalidateBoundaryDependentCaches();
+  }
+}
+function updateSinirAyButton() {
+  // Manuel "Sınır Ay Verisi" butonu kaldırıldı; önceki/sonraki ay verisi artık tamamen
+  // otomatik olarak yerel arşivden alınıyor (bkz. autoFillBoundaryFromArchive). Bu fonksiyon,
+  // eski çağrı noktalarının zararsız kalması için no-op olarak bırakıldı.
+}
+// Bir kişinin nobetler dizisini, Sınır Ay Verisi'nden gelen (rapor ayı dışındaki) ek kayıtlarla genişletir.
+// Sadece boşluk/dizi tespiti için kullanılır; ana listelerde bu ekstra kayıtlar gösterilmez.
+function getExtendedNobetler(person, bounds) {
+  const base = person.nobetler || [];
+  const tc = String(person.tc || '').trim();
+  const extra = tc && boundaryDutyByTc[tc] ? boundaryDutyByTc[tc] : [];
+  if (!extra.length) return base;
+  const existingKeys = new Set(base.map(n => n.key));
+  const additions = extra.filter(n => {
+    // Rapor ayı içine denk gelen kayıtlar zaten ana veride var; yalnızca ay dışındaki kayıtları ekle.
+    if (bounds && n.startMs >= bounds.monthStartMs && n.startMs < bounds.monthEndMs) return false;
+    return !existingKeys.has(n.key);
+  });
+  if (!additions.length) return base;
+  return base.concat(additions);
+}
 function getLeaveMatchesForGap(row) {
   const tc = normalizeTcValue(row.tc);
   if (!tc || !izinRaporRecords.length) return [];
@@ -2024,14 +2182,14 @@ function buildBoslukData(force=false) {
       if (!people[personKey]) people[personKey] = {
         tc:p.tc || '', ad:p.ad || '', soyad:p.soyad || '', records:[]
       };
-      (p.nobetler || []).forEach(n => {
+      // Sınır Ay Verisi yüklendiyse, önceki ay sonu / sonraki ay başı nöbetleri de
+      // (ay sınırında kesilmeden) dahil edilir — böylece ay başı/sonundaki gerçek
+      // boşluklar doğru tespit edilir. Bu ek kayıtlar ay dışına taşsa bile kırpılmaz.
+      getExtendedNobetler(p, bounds).forEach(n => {
         if (!Number.isFinite(n.startMs) || !Number.isFinite(n.endMs) || n.endMs <= n.startMs) return;
-        const startMs = Math.max(n.startMs, bounds.monthStartMs);
-        const endMs = Math.min(n.endMs, bounds.monthEndMs);
-        if (endMs <= startMs) return;
         people[personKey].records.push({
-          startMs, endMs, station:String(n.ist || '').trim(), branch:labels[gKey],
-          hours:roundAnaliz((endMs-startMs)/EXCEL_HOUR_MS)
+          startMs:n.startMs, endMs:n.endMs, station:String(n.ist || '').trim(), branch:labels[gKey],
+          hours:roundAnaliz((n.endMs-n.startMs)/EXCEL_HOUR_MS), isBoundary:!!n.isBoundary
         });
       });
     });
@@ -2054,6 +2212,9 @@ function buildBoslukData(force=false) {
     for (let i=0; i<blocks.length-1; i++) {
       const previous = blocks[i];
       const next = blocks[i+1];
+      // Boşluğun her iki ucu da rapor ayının dışındaysa (tamamen önceki veya sonraki ayda kalıyorsa)
+      // bu ayın raporuyla ilgisizdir, atla. En az bir uç rapor ayına değiyorsa dahil et.
+      if (next.startMs <= bounds.monthStartMs || previous.endMs >= bounds.monthEndMs) continue;
       const gapHours = (next.startMs - previous.endMs) / EXCEL_HOUR_MS;
       const gapDays = gapHours / DUTY_DAY_HOURS;
       if (gapDays + ANALIZ_EPSILON < BOSLUK_ESIK_GUN) continue;
@@ -2068,7 +2229,8 @@ function buildBoslukData(force=false) {
         previousLabel:getBoslukBlockLabel(previous), nextLabel:getBoslukBlockLabel(next),
         previousStations:[...new Set(previous.items.map(item => item.station).filter(Boolean))],
         nextStations:[...new Set(next.items.map(item => item.station).filter(Boolean))],
-        gapHours:roundAnaliz(gapHours), gapDays:roundAnaliz(gapDays)
+        gapHours:roundAnaliz(gapHours), gapDays:roundAnaliz(gapDays),
+        crossesBoundary: previous.items.some(it=>it.isBoundary) || next.items.some(it=>it.isBoundary)
       });
     }
   });
@@ -2081,9 +2243,7 @@ function updateBoslukButton() {
   const btn = document.getElementById('btnBoslukLbl');
   if (!btn) return;
   const data = buildBoslukData(true);
-  btn.textContent = data.rows.length
-    ? `5+ Gün Boşluk Analizi · ${data.rows.length} boşluk`
-    : '5+ Gün Boşluk Analizi · Yok';
+  btn.textContent = data.rows.length ? `${data.rows.length} boşluk` : 'Yok';
 }
 
 function getBoslukRowStations(row) {
@@ -2132,7 +2292,7 @@ function applyBoslukSort() {
 
 function renderBoslukGapRows(rows) {
   return rows.map(row => `<tr>
-    <td><strong>${escapeHtml(`${row.ad} ${row.soyad}`.trim())}</strong><br><span class="mono">${escapeHtml(row.tc)}</span></td>
+    <td><strong>${escapeHtml(`${row.ad} ${row.soyad}`.trim())}</strong><br><span class="mono">${escapeHtml(row.tc)}</span>${row.crossesBoundary?'<br><span style="font-size:10.5px;font-weight:800;color:#7c3aed;background:#f5f3ff;border:1px solid #ddd6fe;border-radius:5px;padding:1px 5px;display:inline-block;margin-top:3px">Sınır ay verisiyle tespit edildi</span>':''}</td>
     <td><strong>${escapeHtml(row.previousLabel)}</strong><br><span class="mono">${row.previousStart} → ${row.previousEnd}</span></td>
     <td class="izin-rapor-cell">${formatLeaveMatchesHtml(row)}</td>
     <td><strong>${escapeHtml(row.nextLabel)}</strong><br><span class="mono">${row.nextStart} → ${row.nextEnd}</span></td>
@@ -2257,7 +2417,10 @@ function getSurucuDuzenRecord(p, n, bounds) {
   const start = new Date(n.startMs);
   const end = new Date(n.endMs);
   const startDayMs = getDutyWindowStartMs(n.startMs);
-  if (!Number.isFinite(startDayMs) || startDayMs < bounds.monthStartMs || startDayMs >= bounds.monthEndMs) return null;
+  if (!Number.isFinite(startDayMs)) return null;
+  // Sınır Ay Verisi'nden gelen (ay dışı) kayıtlar, dizi sürekliliğini tespit edebilmek için
+  // ay sınırı kontrolünden muaf tutulur; sadece normal (ay içi olması gereken) kayıtlar kısıtlanır.
+  if (!n.isBoundary && (startDayMs < bounds.monthStartMs || startDayMs >= bounds.monthEndMs)) return null;
   const durationHours = (n.endMs - n.startMs) / EXCEL_HOUR_MS;
   const isExact12Night = n.saat === 12 && start.getUTCHours() === 21 && start.getUTCMinutes() === 0 &&
     end.getUTCHours() === 9 && Math.abs(durationHours - 12) < 0.05;
@@ -2272,7 +2435,8 @@ function getSurucuDuzenRecord(p, n, bounds) {
     endMs: n.endMs,
     startText: formatDateTime(start),
     endText: formatDateTime(end),
-    kind: isExact12Night ? 'night12' : 'day24'
+    kind: isExact12Night ? 'night12' : 'day24',
+    isBoundary: !!n.isBoundary
   };
 }
 
@@ -2310,9 +2474,10 @@ function makeSurucuDuzenRow(person, run, kind) {
   const roles = [...new Set(allRecords.map(record => abbrRoleLabel(record.roleLabel)).filter(Boolean))];
   const dateLabels = run.map(day => {
     const times = day.records.map(record => `${record.roleLabel ? record.roleLabel + ' · ' : ''}${record.startText} → ${record.endText}`).join(' / ');
-    return `${day.date} · ${times}`;
+    const boundaryTag = day.records.some(r=>r.isBoundary) ? ' (sınır ay)' : '';
+    return `${day.date}${boundaryTag} · ${times}`;
   });
-  const dutyLabels = run.map(day => ({date:day.date, items:day.records.map(record => ({role:abbrRoleLabel(record.roleLabel) || '—', time:`${record.startText} → ${record.endText}`}))}));
+  const dutyLabels = run.map(day => ({date:day.date + (day.records.some(r=>r.isBoundary) ? ' (sınır ay)' : ''), items:day.records.map(record => ({role:abbrRoleLabel(record.roleLabel) || '—', time:`${record.startText} → ${record.endText}`}))}));
   const typeLabel = kind === 'night12' ? '12 saat · 3 gece arka arkaya' : '24 saat · 2 gün arayla';
   const description = kind === 'night12'
     ? `${run.length} gece arka arkaya · her nöbet 21:00–ertesi gün 09:00`
@@ -2344,9 +2509,12 @@ function buildSurucuDuzenData(force=false) {
   const bounds = getReportMonthBounds();
   const rows = [];
   (allData.sur || []).forEach(person => {
-    const records = (person.nobetler || []).map(n => { const record = getSurucuDuzenRecord(person, n, bounds); if (record) record.roleLabel = 'Sürücü'; return record; }).filter(Boolean);
+    const records = getExtendedNobetler(person, bounds).map(n => { const record = getSurucuDuzenRecord(person, n, bounds); if (record) record.roleLabel = 'Sürücü'; return record; }).filter(Boolean);
     ['night12','day24'].forEach(kind => {
-      buildSurucuDuzenRuns(records, kind).forEach(run => rows.push(makeSurucuDuzenRow(person, run, kind)));
+      buildSurucuDuzenRuns(records, kind).forEach(run => {
+        if (!run.some(day => day.records.some(r => !r.isBoundary))) return; // tamamen ay dışı dizi gösterilmez
+        rows.push(makeSurucuDuzenRow(person, run, kind));
+      });
     });
   });
   rows.sort((a,b) => a.type.localeCompare(b.type) || trColl.compare(a.stationText,b.stationText) || trColl.compare(a.fullName,b.fullName) || a.firstDate.localeCompare(b.firstDate));
@@ -2361,9 +2529,12 @@ function buildTumPersonelDuzenData(force=false) {
   Object.entries(roleLabels).forEach(([gKey,roleLabel]) => (allData[gKey]||[]).forEach(person => {
     const key=String(person.personKey||person.tc||`${person.ad}|${person.soyad}`);
     if(!people[key]) people[key]={...person,tc:person.tc||'',ad:person.ad||'',soyad:person.soyad||'',records:[]};
-    (person.nobetler||[]).map(n=>getSurucuDuzenRecord(person,n,bounds)).filter(Boolean).forEach(record=>{record.roleLabel=roleLabel;people[key].records.push(record);});
+    getExtendedNobetler(person, bounds).map(n=>getSurucuDuzenRecord(person,n,bounds)).filter(Boolean).forEach(record=>{record.roleLabel=roleLabel;people[key].records.push(record);});
   }));
-  Object.values(people).forEach(person=>['night12','day24'].forEach(kind=>buildSurucuDuzenRuns(person.records,kind).forEach(run=>rows.push(makeSurucuDuzenRow(person,run,kind)))));
+  Object.values(people).forEach(person=>['night12','day24'].forEach(kind=>buildSurucuDuzenRuns(person.records,kind).forEach(run=>{
+    if (!run.some(day => day.records.some(r => !r.isBoundary))) return; // tamamen ay dışı dizi gösterilmez
+    rows.push(makeSurucuDuzenRow(person,run,kind));
+  })));
   rows.sort((a,b)=>a.type.localeCompare(b.type)||trColl.compare(a.stationText,b.stationText)||trColl.compare(a.fullName,b.fullName)||a.firstDate.localeCompare(b.firstDate));
   tumPersonelDuzenDataCache={bounds,rows}; return tumPersonelDuzenDataCache;
 }
@@ -2422,11 +2593,393 @@ function exportTumPersonelDuzenExcel(dataArg){
   XLSX.writeFile(wb,'ashi_tum_personel_duzeni.xlsx');
 }
 
+// ═══════════════════════════════════════════════════════════
+// İNSAN KAYNAKLARI ORTAK YARDIMCI: Ekip Şefi/YSP/Sürücü verilerini kişi bazında birleştirir.
+// Her kişi için TÜM nöbet kayıtları (12/24 saatlik dizi filtrelemesi olmadan, ham hâliyle) toplanır.
+// ═══════════════════════════════════════════════════════════
+let mergedPersonelAllGorevCache = null;
+let mergedPersonelAllGorevWithBoundaryCache = null;
+function buildMergedPersonelListAllGorev(force=false, includeBoundary=false){
+  if(includeBoundary){
+    if(mergedPersonelAllGorevWithBoundaryCache && !force) return mergedPersonelAllGorevWithBoundaryCache;
+  } else if(mergedPersonelAllGorevCache && !force) return mergedPersonelAllGorevCache;
+  const bounds = includeBoundary ? getReportMonthBounds() : null;
+  const roleLabels={ef:'Ekip Şefi',ysp:'Yardımcı Sağlık Personeli',sur:'Sürücü'};
+  const people={};
+  Object.entries(roleLabels).forEach(([gKey,roleLabel])=>(allData[gKey]||[]).forEach(person=>{
+    const key=String(person.personKey||person.tc||`${person.ad}|${person.soyad}`);
+    if(!people[key]) people[key]={tc:person.tc||'',ad:person.ad||'',soyad:person.soyad||'',kadro_brans:person.kadro_brans||'',asilIst:person.asilIst||'',nobetler:[],roles:new Set()};
+    const p=people[key];
+    p.roles.add(roleLabel);
+    if(!p.kadro_brans && person.kadro_brans) p.kadro_brans=person.kadro_brans;
+    if(!p.asilIst && person.asilIst) p.asilIst=person.asilIst;
+    // Nöbete Uygun Personel Bulma gibi ay sınırı farkında hesaplamalar için, yerel arşivden
+    // otomatik gelen önceki/sonraki ay nöbetleri de (varsa) buraya dahil edilir.
+    const sourceNobetler = includeBoundary ? getExtendedNobetler(person, bounds) : (person.nobetler||[]);
+    sourceNobetler.forEach(n=>{
+      // Tarih/saat bazlı tekilleştirme: aynı zaman aralığındaki nöbet, farklı bir istasyonda
+      // kayıtlı olsa bile TEK nöbet sayılır — istasyon burada önemli değil, sadece tarih/saat önemli
+      // (Sürücü/Tüm Personel Düzeni'ndeki dizi tespitiyle aynı mantık).
+      const timeKey=`${n.startMs}|${n.endMs}`;
+      if(p.nobetler.some(existing=>existing.timeKey===timeKey)) return;
+      p.nobetler.push({...n, roleLabel, timeKey});
+    });
+  }));
+  const result=Object.values(people).map(p=>({
+    ...p, roles:[...p.roles],
+    fullName:`${p.ad||''} ${p.soyad||''}`.trim()||'Ad bilgisi yok',
+    nobetler:p.nobetler.filter(n=>Number.isFinite(n.startMs)&&Number.isFinite(n.endMs)&&n.endMs>n.startMs).sort((a,b)=>a.startMs-b.startMs)
+  })).sort((a,b)=>trColl.compare(a.fullName,b.fullName));
+  if(includeBoundary) mergedPersonelAllGorevWithBoundaryCache=result;
+  else mergedPersonelAllGorevCache=result;
+  return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ÇOKLU İSTASYON ANALİZİ (TÜM PERSONEL) — branş fark etmeksizin birden fazla istasyonda nöbet tutanlar
+// ═══════════════════════════════════════════════════════════
+let cokluTumPersonelDataCache = null;
+let cokluTumPersonelRoleFilter = ''; // özet rozetine tıklanınca seçilen görev branşı (Ekip Şefi/YSP/Sürücü) filtresi
+function buildCokluTumPersonelData(force=false){
+  if(cokluTumPersonelDataCache && !force) return cokluTumPersonelDataCache;
+  const people=buildMergedPersonelListAllGorev(force);
+  const rows=people.map(p=>{
+    const asilIst=p.asilIst||'';
+    const stationCounts={};
+    const extraRecords=[]; // {ist, role} — sadece asıl istasyon dışındaki nöbetler, görev branşıyla birlikte
+    // Sadece kişinin ASIL istasyonu dışında (ekstra) gittiği istasyonlar sayılır; kendi istasyonundaki nöbetler hariç tutulur.
+    p.nobetler.forEach(n=>{
+      const ist=String(n.ist||'').trim();
+      if(!ist || ist===asilIst) return;
+      stationCounts[ist]=(stationCounts[ist]||0)+1;
+      extraRecords.push({ist, role:n.roleLabel||'Diğer'});
+    });
+    const stations=Object.keys(stationCounts).sort((a,b)=>trColl.compare(a,b));
+    return {
+      tc:p.tc, fullName:p.fullName, kadroBrans:p.kadro_brans||'', asilIst:asilIst||'—',
+      roles:p.roles, roleText:p.roles.join(' / '),
+      stations, stationCounts, stationCount:stations.length,
+      totalDuty:p.nobetler.length,
+      extraDuty:Object.values(stationCounts).reduce((sum,v)=>sum+v,0),
+      extraRecords
+    };
+  }).filter(r=>r.stationCount>=1)
+    .sort((a,b)=>b.stationCount-a.stationCount || trColl.compare(a.fullName,b.fullName));
+  cokluTumPersonelDataCache={rows};
+  return cokluTumPersonelDataCache;
+}
+// Görev branşına göre (Ekip Şefi / YSP / Sürücü) kaç kişi kaç ekstra nöbet almış özetini çıkarır.
+// stationFilter verilmişse, sadece o istasyondaki ekstra nöbetler sayılır.
+function computeCokluRoleSummary(rows, stationFilter){
+  const roleOrder=['Ekip Şefi','Yardımcı Sağlık Personeli','Sürücü'];
+  const stats={}; roleOrder.forEach(r=>stats[r]={people:new Set(), nobet:0});
+  const totalPeople=new Set(); let totalNobet=0;
+  (rows||[]).forEach(row=>{
+    const recs = stationFilter ? row.extraRecords.filter(r=>r.ist===stationFilter) : row.extraRecords;
+    if(!recs.length) return;
+    const personKey=row.tc||row.fullName;
+    totalPeople.add(personKey);
+    totalNobet+=recs.length;
+    recs.forEach(r=>{
+      if(!stats[r.role]) stats[r.role]={people:new Set(), nobet:0};
+      stats[r.role].people.add(personKey);
+      stats[r.role].nobet++;
+    });
+  });
+  return {totalPeople:totalPeople.size, totalNobet, stats, roleOrder};
+}
+function renderCokluTumPersonelRoleSummary(rows, stationFilter){
+  const el=document.getElementById('cokluTumPersonelRoleSummary'); if(!el) return;
+  const s=computeCokluRoleSummary(rows, stationFilter);
+  const roleColors={'Ekip Şefi':['#fdf4ff','#7e22ce','#e9d5ff'],'Yardımcı Sağlık Personeli':['#f0fdf4','#166534','#bbf7d0'],'Sürücü':['#fef2f2','#991b1b','#fca5a5']};
+  const roleShort={'Ekip Şefi':'Ekip Şefi','Yardımcı Sağlık Personeli':'YSP','Sürücü':'Sürücü'};
+  const active=cokluTumPersonelRoleFilter;
+  const activeRing='box-shadow:0 0 0 2px #1f2937 inset;';
+  let html=`<span onclick="setCokluTumPersonelRoleFilter('')" style="cursor:pointer;background:#1f2937;color:#fff;border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:800;${!active?activeRing:''}">Toplam: ${s.totalPeople} kişi · ${s.totalNobet} nöbet</span>`;
+  s.roleOrder.forEach(role=>{
+    const st=s.stats[role]||{people:new Set(),nobet:0};
+    const [bg,fg,bd]=roleColors[role]||['#f1f5f9','#334155','#e2e8f0'];
+    const isActive=active===role;
+    html+=`<span onclick="setCokluTumPersonelRoleFilter('${role.replace(/'/g,"\\'")}')" style="cursor:pointer;background:${bg};color:${fg};border:1px solid ${bd};border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:800;${isActive?activeRing:''}">${escapeHtml(roleShort[role]||role)}: ${st.people.size} kişi · ${st.nobet} nöbet</span>`;
+  });
+  el.innerHTML=html;
+}
+function setCokluTumPersonelRoleFilter(role){
+  cokluTumPersonelRoleFilter = (cokluTumPersonelRoleFilter === role) ? '' : role;
+  renderCokluTumPersonelModal();
+}
+function getCokluTumPersonelFilteredRows(rows, ignoreRoleFilter){
+  const search=String(document.getElementById('cokluTumPersonelSearch')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const brans=String(document.getElementById('cokluTumPersonelBransFilter')?.value||'').trim();
+  const station=String(document.getElementById('cokluTumPersonelStationFilter')?.value||'').trim();
+  const roleFilter=ignoreRoleFilter?'':cokluTumPersonelRoleFilter;
+  return (rows||[]).filter(row=>
+    (!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search)) &&
+    (!brans||row.kadroBrans===brans) &&
+    (!station||(row.stations||[]).includes(station)) &&
+    (!roleFilter||(row.extraRecords||[]).some(r=>r.role===roleFilter && (!station||r.ist===station)))
+  );
+}
+function renderCokluTumPersonelRows(rows, stationFilter, roleFilter){
+  const roleShortMap={'Ekip Şefi':'Ekip Şefi','Yardımcı Sağlık Personeli':'YSP','Sürücü':'Sürücü'};
+  return (rows||[]).map(row=>{
+    // İstasyon ve/veya görev branşı (özet rozeti) filtresi seçiliyse, satırda sadece o kritere uyan ekstra nöbetler gösterilir
+    const recs=(row.extraRecords||[]).filter(r=>(!stationFilter||r.ist===stationFilter)&&(!roleFilter||r.role===roleFilter));
+    const grouped={};
+    recs.forEach(r=>{ if(!grouped[r.ist]) grouped[r.ist]={count:0, roles:new Set()}; grouped[r.ist].count++; grouped[r.ist].roles.add(r.role); });
+    const stationList=Object.keys(grouped).sort((a,b)=>trColl.compare(a,b));
+    const stationCount=stationList.length;
+    const extraDuty=recs.length;
+    const istHtml=stationList.map(st=>{
+      const roleLabel=[...grouped[st].roles].map(r=>roleShortMap[r]||r).join('/');
+      return `<div class="tp-duty-line"><span class="tp-duty-date" style="min-width:0">${escapeHtml(st)}</span><span class="tp-duty-role" style="min-width:0">${grouped[st].count} nöbet${roleFilter?'':` · ${escapeHtml(roleLabel)}`}</span></div>`;
+    }).join('');
+    return `<tr>
+      <td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc||'—')}</span></td>
+      <td><strong>${escapeHtml(row.kadroBrans||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.roleText||'—')}</span></td>
+      <td>${escapeHtml(row.asilIst||'—')}</td>
+      <td class="tp-duty-cell">${istHtml}</td>
+      <td class="surucu-duzen-count">${stationCount} istasyon</td>
+      <td class="c" style="font-weight:700">${extraDuty} nöbet</td>
+    </tr>`;
+  }).join('');
+}
+function bindCokluTumPersonelControls(){
+  ['cokluTumPersonelSearch','cokluTumPersonelBransFilter','cokluTumPersonelStationFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=e.onchange=()=>renderCokluTumPersonelModal();});
+  const clear=document.getElementById('cokluTumPersonelClearBtn'); if(clear) clear.onclick=()=>{['cokluTumPersonelSearch','cokluTumPersonelBransFilter','cokluTumPersonelStationFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});cokluTumPersonelRoleFilter='';renderCokluTumPersonelModal();};
+  const exp=document.getElementById('exportCokluTumPersonelExcelBtn'); if(exp) exp.onclick=()=>exportCokluTumPersonelExcel();
+}
+function renderCokluTumPersonelModal(){
+  const data=buildCokluTumPersonelData(), body=document.getElementById('cokluTumPersonelModalBody'); if(!body)return;
+  const branslar=[...new Set(data.rows.map(r=>r.kadroBrans).filter(Boolean))].sort((a,b)=>trColl.compare(a,b));
+  const stations=[...new Set(data.rows.flatMap(r=>r.stations||[]))].sort((a,b)=>trColl.compare(a,b));
+  const bransSel=document.getElementById('cokluTumPersonelBransFilter'), stSel=document.getElementById('cokluTumPersonelStationFilter');
+  if(bransSel && bransSel.dataset.filled!=='1'){ bransSel.innerHTML='<option value="">Tüm branşlar</option>'+branslar.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join(''); bransSel.dataset.filled='1'; }
+  if(stSel && stSel.dataset.filled!=='1'){ stSel.innerHTML='<option value="">Tüm istasyonlar</option>'+stations.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join(''); stSel.dataset.filled='1'; }
+  const visible=getCokluTumPersonelFilteredRows(data.rows);
+  const summaryRows=getCokluTumPersonelFilteredRows(data.rows, true);
+  const activeStationFilter=String(document.getElementById('cokluTumPersonelStationFilter')?.value||'').trim();
+  renderCokluTumPersonelRoleSummary(summaryRows, activeStationFilter);
+  const ozet=document.getElementById('cokluTumPersonelOzet');
+  if(ozet) ozet.textContent=`${visible.length} / ${data.rows.length} kişi gösteriliyor · Birden fazla istasyonda nöbet tutan tüm personel`;
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen filtrelere uyan çoklu istasyon kaydı bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>PERSONEL</th><th>BRANŞ (KADRO)</th><th>ASIL İSTASYON</th><th>EKSTRA GİDİLEN İSTASYONLAR</th><th style="text-align:center">EKSTRA İSTASYON SAYISI</th><th style="text-align:center">EKSTRA NÖBET</th></tr></thead><tbody>'+renderCokluTumPersonelRows(visible, activeStationFilter, cokluTumPersonelRoleFilter)+'</tbody></table></div>';
+}
+function showCokluTumPersonelModal(){
+  buildCokluTumPersonelData(true);
+  cokluTumPersonelRoleFilter='';
+  const bransSel=document.getElementById('cokluTumPersonelBransFilter'), stSel=document.getElementById('cokluTumPersonelStationFilter');
+  if(bransSel) bransSel.dataset.filled='0'; if(stSel) stSel.dataset.filled='0';
+  bindCokluTumPersonelControls();
+  renderCokluTumPersonelModal();
+  const modal=document.getElementById('cokluTumPersonelModal'); if(modal) modal.style.display='block';
+}
+function exportCokluTumPersonelExcel(){
+  const data=buildCokluTumPersonelData(), rows=getCokluTumPersonelFilteredRows(data.rows);
+  const stationFilter=String(document.getElementById('cokluTumPersonelStationFilter')?.value||'').trim();
+  const roleFilter=cokluTumPersonelRoleFilter;
+  const aoa=[['PERSONEL','TCKN','BRANŞ (KADRO)','ASIL İSTASYON','EKSTRA GİDİLEN İSTASYONLAR','EKSTRA İSTASYON SAYISI','EKSTRA NÖBET']];
+  rows.forEach(r=>{
+    const recs=(r.extraRecords||[]).filter(rec=>(!stationFilter||rec.ist===stationFilter)&&(!roleFilter||rec.role===roleFilter));
+    const grouped={};
+    recs.forEach(rec=>{ grouped[rec.ist]=(grouped[rec.ist]||0)+1; });
+    const stationList=Object.keys(grouped).sort((a,b)=>trColl.compare(a,b));
+    aoa.push([r.fullName,r.tc,r.kadroBrans||'—',r.asilIst||'—',stationList.map(s=>`${s} (${grouped[s]})`).join('\n'),stationList.length,recs.length]);
+  });
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:28},{wch:16},{wch:22},{wch:26},{wch:44},{wch:14},{wch:14}];
+  const headerStyle={fill:{fgColor:{rgb:'C2410C'}},font:{bold:true,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center',wrapText:true}};
+  ['A','B','C','D','E','F','G'].forEach(col=>{ if(ws[`${col}1`]) ws[`${col}1`].s=headerStyle; });
+  for(let r=2;r<=aoa.length;r++){ ['A','B','C','D','E','F','G'].forEach(col=>{ if(ws[`${col}${r}`]) ws[`${col}${r}`].s={alignment:{vertical:'top',wrapText:true}}; }); }
+  XLSX.utils.book_append_sheet(wb,ws,'Çoklu İstasyon');
+  XLSX.writeFile(wb,'ashi_coklu_istasyon_analizi.xlsx');
+}
+
+// ═══════════════════════════════════════════════════════════
+// NÖBETE UYGUN PERSONEL BULMA — girilen tarihten bir gün önce ve bir gün sonrasında
+// nöbeti olmayan (tüm ekipler taranarak) personeli listeler.
+// ═══════════════════════════════════════════════════════════
+let uygunPersonelResultsCache = null;
+function dutyOverlapsCalendarDay(n, dayStartMs, dayEndMs){
+  return Number.isFinite(n.startMs) && Number.isFinite(n.endMs) && n.startMs < dayEndMs && n.endMs > dayStartMs;
+}
+function formatUygunDutyInfo(n){
+  if(!n) return null;
+  return { date: formatDutyDate(getDutyWindowStartMs(n.startMs)), station: n.ist||'—', role: n.roleLabel||'—', start: n.basRaw||'—', end: n.bitisRaw||'—', saat: n.saat||null };
+}
+function buildUygunPersonelResults(dateStr){
+  const target = parseHtmlDateInput(dateStr);
+  if(!target) return {rows:[], targetDate:null};
+  const DAY_MS = 24*60*60*1000;
+  const dStart = target.getTime();
+  const dEnd = dStart + DAY_MS;
+  const beforeStart = dStart - DAY_MS, beforeEnd = dStart;
+  const afterStart = dEnd, afterEnd = dEnd + DAY_MS;
+  // Ay sınırı farkında: önceki/sonraki ay yerel arşivde varsa (otomatik), o nöbetler de dikkate alınır.
+  const people = buildMergedPersonelListAllGorev(false, true);
+  const rows = [];
+  people.forEach(p=>{
+    // Kadro branşı Sürücü olan personel bu aramaya dahil edilmez — onlar nöbet değil, sadece mesai tamamlıyor.
+    if (/^s[üu]r[üu]c[üu]/i.test(String(p.kadro_brans||'').trim())) return;
+    const hasBefore = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, beforeStart, beforeEnd));
+    const hasAfter  = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, afterStart, afterEnd));
+    const hasOnDay  = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, dStart, dEnd));
+    // İzin/Rapor dosyası yüklendiyse: girilen tarihten bir gün önce, kendisi veya bir gün sonrasında
+    // izin/rapor kaydı olan personeli de uygun olmayanlar arasına al.
+    const tcNorm = normalizeTcValue(p.tc);
+    const hasLeave = tcNorm && izinRaporRecords.length
+      ? izinRaporRecords.some(rec => rec.tc === tcNorm && rec.startMs < afterEnd + ANALIZ_EPSILON*EXCEL_HOUR_MS && rec.endMs > beforeStart - ANALIZ_EPSILON*EXCEL_HOUR_MS)
+      : false;
+    if(hasBefore || hasAfter || hasOnDay || hasLeave) return; // uygun değil
+    // Son nöbeti (girilen tarihten önceki en yakın nöbet) ve sonraki nöbeti (girilen tarihten sonraki en yakın nöbet)
+    let lastDuty=null, nextDuty=null;
+    p.nobetler.forEach(n=>{
+      if(n.endMs<=dStart && (!lastDuty || n.endMs>lastDuty.endMs)) lastDuty=n;
+      if(n.startMs>=dEnd && (!nextDuty || n.startMs<nextDuty.startMs)) nextDuty=n;
+    });
+    const gapBeforeDays = lastDuty ? Math.round(((dStart-lastDuty.endMs)/DAY_MS)*100)/100 : null;
+    const gapAfterDays  = nextDuty ? Math.round(((nextDuty.startMs-dEnd)/DAY_MS)*100)/100 : null;
+    // Asıl "gün farkı": kişinin SON nöbeti ile SONRAKİ nöbeti arasındaki gerçek boş gün sayısı
+    // (ör. 24.09 09:00 çıkış, 29.09 09:00 sonraki nöbet → 24,25,26,27,28 boş = 5 gün boşluk).
+    const totalGapDays = (lastDuty && nextDuty) ? Math.round(((nextDuty.startMs - lastDuty.endMs)/DAY_MS)*100)/100 : null;
+    // Bu boşluk aralığında (son nöbet bitişi ile sonraki nöbet başlangıcı arasında) izin/rapor kaydı var mı?
+    const araIzinVar = (lastDuty && nextDuty && tcNorm && izinRaporRecords.length)
+      ? izinRaporRecords.some(rec => rec.tc===tcNorm && rec.startMs < nextDuty.startMs && rec.endMs > lastDuty.endMs)
+      : false;
+    let uyumNotu;
+    if (totalGapDays != null) {
+      uyumNotu = `${totalGapDays} gün boşluk (son nöbet → sonraki nöbet)`;
+      if (araIzinVar) uyumNotu += ' · aralarda izin/rapor kaydı var';
+    } else if (lastDuty && !nextDuty) {
+      uyumNotu = 'Sonraki nöbeti bu ay içinde yok (açık uçlu boşluk)';
+    } else if (!lastDuty && nextDuty) {
+      uyumNotu = 'Bu tarihten önce bu ay nöbeti yok';
+    } else {
+      uyumNotu = 'Bu ay hiç nöbeti yok';
+    }
+    let hedefUyum = '';
+    if (gapBeforeDays != null) {
+      if (lastDuty.saat===24 && Math.abs(gapBeforeDays-2)<0.15) hedefUyum = `Aranan tarih son nöbetten ${gapBeforeDays} gün sonra · 24 saatlik düzenine uygun`;
+      else if (lastDuty.saat===12 && Math.abs(gapBeforeDays)<0.15) hedefUyum = `Aranan tarih son nöbetten ${gapBeforeDays} gün sonra · 12 saatlik gece düzenine uygun`;
+      else hedefUyum = `Aranan tarih son nöbetten ${gapBeforeDays} gün sonra`;
+    }
+    rows.push({
+      tc:p.tc, fullName:p.fullName, kadroBrans:p.kadro_brans||'', asilIst:p.asilIst||'—', roles:p.roles, roleText:p.roles.join(' / '),
+      lastDuty: formatUygunDutyInfo(lastDuty), nextDuty: formatUygunDutyInfo(nextDuty),
+      gapBeforeDays, gapAfterDays, totalGapDays, araIzinVar, uyumNotu, hedefUyum
+    });
+  });
+  rows.sort((a,b)=>trColl.compare(a.asilIst,b.asilIst)||trColl.compare(a.fullName,b.fullName));
+  return { rows, targetDate: target };
+}
+function parseHtmlDateInput(str){
+  if(!str) return null;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(str).trim());
+  if(!m) return null;
+  // Nöbet günü sınırı 09:00'dır (bkz. DUTY_START_HOUR); girilen tarihin nöbet penceresi
+  // o günün 09:00'ından bir sonraki günün 09:00'ına kadar sürer.
+  const ms = dutyDateMs(Number(m[1]), Number(m[2]), Number(m[3]));
+  const d = new Date(ms);
+  return Number.isFinite(d.getTime()) ? d : null;
+}
+function getUygunPersonelFilteredRows(rows){
+  const search=String(document.getElementById('uygunPersonelSearch')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const brans=String(document.getElementById('uygunPersonelBransFilter')?.value||'').trim();
+  const station=String(document.getElementById('uygunPersonelStationFilter')?.value||'').trim();
+  return (rows||[]).filter(row=>
+    (!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search)) &&
+    (!brans||(row.roles||[]).includes(brans)) &&
+    (!station||row.asilIst===station)
+  );
+}
+function renderUygunPersonelDutyCell(info){
+  if(!info) return '<span style="color:#94a3b8">Bu ay kaydı yok</span>';
+  return `<div><strong>${escapeHtml(info.date)}</strong> · ${escapeHtml(info.role)}<br><span style="font-size:11px;color:#64748b">${escapeHtml(info.station)} · ${escapeHtml(info.start)} → ${escapeHtml(info.end)}</span></div>`;
+}
+function renderUygunPersonelRows(rows){
+  return (rows||[]).map(row=>`<tr>
+    <td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc||'—')}</span></td>
+    <td><strong>${escapeHtml(row.roleText||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.kadroBrans||'—')}</span></td>
+    <td>${escapeHtml(row.asilIst||'—')}</td>
+    <td>${renderUygunPersonelDutyCell(row.lastDuty)}</td>
+    <td>${renderUygunPersonelDutyCell(row.nextDuty)}</td>
+    <td><div style="font-weight:700;color:${row.araIzinVar?'#b45309':'#0f766e'}">${escapeHtml(row.uyumNotu||'—')}</div>${row.hedefUyum?`<div style="font-size:11px;color:#64748b;margin-top:2px">${escapeHtml(row.hedefUyum)}</div>`:''}</td>
+  </tr>`).join('');
+}
+function populateUygunPersonelFilters(data){
+  const branslar=[...new Set(data.rows.flatMap(r=>r.roles||[]))].sort((a,b)=>trColl.compare(a,b));
+  const stations=[...new Set(data.rows.map(r=>r.asilIst).filter(Boolean))].sort((a,b)=>trColl.compare(a,b));
+  const bransSel=document.getElementById('uygunPersonelBransFilter'), stSel=document.getElementById('uygunPersonelStationFilter');
+  if(bransSel){ bransSel.innerHTML='<option value="">Tüm branşlar</option>'+branslar.map(b=>`<option value="${escapeHtml(b)}">${escapeHtml(b)}</option>`).join(''); }
+  if(stSel){ stSel.innerHTML='<option value="">Tüm istasyonlar</option>'+stations.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join(''); }
+}
+function bindUygunPersonelControls(){
+  ['uygunPersonelSearch','uygunPersonelBransFilter','uygunPersonelStationFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.oninput=e.onchange=()=>renderUygunPersonelModal();});
+  const clear=document.getElementById('uygunPersonelClearBtn'); if(clear) clear.onclick=()=>{['uygunPersonelSearch','uygunPersonelBransFilter','uygunPersonelStationFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});renderUygunPersonelModal();};
+  const exp=document.getElementById('exportUygunPersonelExcelBtn'); if(exp) exp.onclick=()=>exportUygunPersonelExcel();
+}
+function renderUygunPersonelModal(){
+  const body=document.getElementById('uygunPersonelModalBody'); if(!body)return;
+  if(!uygunPersonelResultsCache || !uygunPersonelResultsCache.targetDate){
+    body.innerHTML='<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Bir nöbet tarihi seçip "Uygun Personeli Bul" butonuna basın.</div>';
+    const ozet=document.getElementById('uygunPersonelOzet'); if(ozet) ozet.textContent='';
+    return;
+  }
+  // NOT: filtre <select> kutuları yalnızca yeni bir arama yapıldığında (runUygunPersonelSearch)
+  // dolduruluyor — her render'da yeniden doldurulursa kullanıcının seçtiği filtre sıfırlanırdı.
+  const data=uygunPersonelResultsCache;
+  const visible=getUygunPersonelFilteredRows(data.rows);
+  const ozet=document.getElementById('uygunPersonelOzet');
+  if(ozet) ozet.textContent=`${formatDutyDate(data.targetDate.getTime())} için ${visible.length} / ${data.rows.length} uygun personel`;
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen tarih ve filtrelere uyan uygun personel bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>PERSONEL</th><th>NÖBET BRANŞI</th><th>ASIL İSTASYON</th><th>SON NÖBETİ</th><th>SONRAKİ NÖBETİ</th><th>GÜN FARKI (SON → SONRAKİ)</th></tr></thead><tbody>'+renderUygunPersonelRows(visible)+'</tbody></table></div>';
+}
+function runUygunPersonelSearch(){
+  const dateEl=document.getElementById('uygunPersonelDate');
+  const dateStr=dateEl?dateEl.value:'';
+  if(!dateStr){ alert('Lütfen bir nöbet tarihi seçin.'); return; }
+  uygunPersonelResultsCache = buildUygunPersonelResults(dateStr);
+  ['uygunPersonelSearch','uygunPersonelBransFilter','uygunPersonelStationFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  populateUygunPersonelFilters(uygunPersonelResultsCache);
+  renderUygunPersonelModal();
+}
+function showUygunPersonelModal(){
+  uygunPersonelResultsCache = null;
+  bindUygunPersonelControls();
+  const dateEl=document.getElementById('uygunPersonelDate');
+  if(dateEl){
+    const info=reportMonthInfo||getAnalizMonthInfo();
+    const pad=n=>String(n).padStart(2,'0');
+    const minStr=`${info.year}-${pad(info.month)}-01`;
+    const lastDay=new Date(info.year, info.month, 0).getDate();
+    const maxStr=`${info.year}-${pad(info.month)}-${pad(lastDay)}`;
+    dateEl.min=minStr; dateEl.max=maxStr;
+    if(!dateEl.value) dateEl.value=minStr;
+  }
+  renderUygunPersonelModal();
+  const modal=document.getElementById('uygunPersonelModal'); if(modal) modal.style.display='block';
+}
+function exportUygunPersonelExcel(){
+  if(!uygunPersonelResultsCache || !uygunPersonelResultsCache.targetDate){ alert('Önce bir tarih seçip arama yapın.'); return; }
+  const data=uygunPersonelResultsCache, rows=getUygunPersonelFilteredRows(data.rows);
+  const fmtDuty=info=>info?`${info.date} · ${info.role} · ${info.station} · ${info.start} → ${info.end}`:'Bu ay kaydı yok';
+  const aoa=[[`Nöbet Tarihi: ${formatDutyDate(data.targetDate.getTime())}`],['PERSONEL','TCKN','NÖBET BRANŞI','KADRO BRANŞI','ASIL İSTASYON','SON NÖBETİ','SONRAKİ NÖBETİ','GÜN FARKI (SON→SONRAKİ)','ARANAN TARİH UYUMU']];
+  rows.forEach(r=>aoa.push([r.fullName,r.tc,r.roleText||'—',r.kadroBrans||'—',r.asilIst||'—',fmtDuty(r.lastDuty),fmtDuty(r.nextDuty),r.uyumNotu||'—',r.hedefUyum||'—']));
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:28},{wch:16},{wch:22},{wch:26},{wch:22},{wch:42},{wch:42},{wch:34},{wch:34}];
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:8}}];
+  const titleStyle={fill:{fgColor:{rgb:'0F766E'}},font:{bold:true,color:{rgb:'FFFFFF'}},alignment:{vertical:'center'}};
+  const headerStyle={fill:{fgColor:{rgb:'134E4A'}},font:{bold:true,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center',wrapText:true}};
+  if(ws['A1']) ws['A1'].s=titleStyle;
+  ['A','B','C','D','E','F','G','H','I'].forEach(col=>{ if(ws[`${col}2`]) ws[`${col}2`].s=headerStyle; });
+  for(let r=3;r<=aoa.length;r++){ ['A','B','C','D','E','F','G','H','I'].forEach(col=>{ if(ws[`${col}${r}`]) ws[`${col}${r}`].s={alignment:{vertical:'top',wrapText:true}}; }); }
+  XLSX.utils.book_append_sheet(wb,ws,'Uygun Personel');
+  XLSX.writeFile(wb,'ashi_nobete_uygun_personel.xlsx');
+}
+
 function updateSurucuDuzenButton() {
   const label = document.getElementById('btnSurucuDuzenLbl');
   if (!label) return;
   const data = buildSurucuDuzenData(true);
-  label.textContent = data.rows.length ? `Sürücü Düzeni · ${data.rows.length} dizi` : 'Sürücü Düzeni · Yok';
+  label.textContent = data.rows.length ? `${data.rows.length} dizi` : 'Yok';
 }
 
 function getSurucuDuzenFilteredRows(rows) {
@@ -2611,7 +3164,7 @@ function switchGorev(g) {
     `${labels[g]} · ${allData[g].length} personel`;
   const cokluNobetSayisi = getCokluNobetSayisi(allCoklu[g]);
   document.getElementById('btnCokluLbl').textContent =
-    `Farklı İstasyon Nöbetleri (${cokluNobetSayisi} nöbet · ${allCoklu[g].length} kişi)`;
+    `${cokluNobetSayisi} nöbet · ${allCoklu[g].length} kişi`;
   renderStats(allData[g]);
   switchView('liste');  // sekme değişince liste görünümüne dön
 }
@@ -3383,16 +3936,22 @@ function updateAnalizButtons() {
     const btn = document.querySelector(`[data-analiz-gorev="${gKey}"]`);
     if (!btn) return;
     const data = paket.branches[gKey];
-    btn.textContent = data && data.missingDayCount > 0
-      ? `⚠️ ${def.label} Analizi · ${data.missingDayCount} sorunlu gün`
-      : `✅ ${def.label} Analizi · Tam`;
+    const icon = btn.querySelector('[data-analiz-icon]');
+    const sub = btn.querySelector('[data-analiz-sub]');
+    const sorunVar = data && data.missingDayCount > 0;
+    if (icon) icon.textContent = sorunVar ? '⚠️' : '✅';
+    if (sub) sub.textContent = sorunVar ? `${data.missingDayCount} sorunlu gün` : 'Tam';
   });
 }
 
 function resetAnalizButtons() {
   Object.entries(ANALIZ_GOREVLER).forEach(([gKey, def]) => {
     const btn = document.querySelector(`[data-analiz-gorev="${gKey}"]`);
-    if (btn) btn.textContent = `⚠️ ${def.label} Analizi`;
+    if (!btn) return;
+    const icon = btn.querySelector('[data-analiz-icon]');
+    const sub = btn.querySelector('[data-analiz-sub]');
+    if (icon) icon.textContent = '⚠️';
+    if (sub) sub.textContent = '';
   });
 }
 
@@ -4388,7 +4947,9 @@ function showError(m) { const b=document.getElementById('errorBox'); b.textConte
 function hideError() { document.getElementById('errorBox').style.display='none'; }
 function resetPage() {
   allData={ef:[],ysp:[],sur:[]}; allCoklu={ef:[],ysp:[],sur:[]}; specialDutyLists={komuta:[],bashekimlik:[]};
+  mergedPersonelAllGorevCache=null; mergedPersonelAllGorevWithBoundaryCache=null; cokluTumPersonelDataCache=null; cokluTumPersonelRoleFilter=''; uygunPersonelResultsCache=null;
   izinRaporRecords=[]; izinRaporFileName=''; updateIzinRaporButton();
+  boundaryDutyByTc={}; boundaryFileName=''; boundaryRecordCount=0; boundaryArchiveSourceLabel=''; updateSinirAyButton();
   specialListLastKind = null;
   filteredRows=[]; currentPage=1;
   document.getElementById('tableBody').innerHTML='';
@@ -4405,9 +4966,9 @@ function resetPage() {
   analizUIState = {gKey:null,data:null,filters:{search:'',personel:'',department:'',status:'all',issue:'all',station:'',minOverlap:0,sort:'desc'},view:'table'};
   resetAnalizButtons();
   const gapLabel = document.getElementById('btnBoslukLbl');
-  if (gapLabel) gapLabel.textContent = '5+ Gün Boşluk Analizi';
+  if (gapLabel) gapLabel.textContent = '';
   const surucuDuzenLabel = document.getElementById('btnSurucuDuzenLbl');
-  if (surucuDuzenLabel) surucuDuzenLabel.textContent = 'Sürücü Düzeni';
+  if (surucuDuzenLabel) surucuDuzenLabel.textContent = '';
   document.getElementById('reportSection').style.display='none';
   document.getElementById('uploadSection').style.display='block';
   hideError();
@@ -4419,7 +4980,7 @@ function resetPage() {
 // ═══════════════════════════════════════════════════════════
 // UZAK SÜRÜM KONTROLÜ VE YENİ SÜRÜM İNDİRME
 // ═══════════════════════════════════════════════════════════
-const ASHI_APP_VERSION = '02.02';
+const ASHI_APP_VERSION = '02.03';
 const ASHI_DEFAULT_UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/ashi-update.json';
 const ASHI_UPDATE_CONFIG_KEY = 'ashiNobetUpdateConfigV1';
 function getVersionedAppFileName(version=ASHI_APP_VERSION){
