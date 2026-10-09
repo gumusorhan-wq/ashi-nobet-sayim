@@ -22,7 +22,7 @@ body{font-family:'IBM Plex Sans',sans-serif;background:var(--gray);color:var(--t
 .topbar-sub{color:rgba(255,255,255,.65);font-size:12px;margin-top:2px}
 
 /* UPLOAD */
-.upload-section{max-width:820px;margin:48px auto 0;padding:0 24px}
+.upload-section{max-width:1280px;margin:48px auto 0;padding:0 24px}
 .upload-card{background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.07);overflow:hidden}
 .upload-header{background:var(--navy);padding:18px 28px;color:#fff;font-size:14px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px}
 .dropzone{border:2px dashed var(--line);border-radius:12px;margin:28px;padding:48px 24px;text-align:center;cursor:pointer;transition:.2s}
@@ -287,7 +287,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     .update-actions{justify-content:flex-start}
   }
   /* ARŞİV */
-  .arc-card{max-width:1180px;margin:14px auto 0;padding:16px 18px;background:#fff;border:1px solid #dbe4ee;border-radius:12px;box-shadow:0 2px 10px rgba(15,23,42,.05)}
+  .arc-card{max-width:1280px;margin:14px auto 0;padding:16px 18px;background:#fff;border:1px solid #dbe4ee;border-radius:12px;box-shadow:0 2px 10px rgba(15,23,42,.05)}
   .arc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .arc-title{font-weight:900;color:#1e3a5f;font-size:18px}
   .arc-sub{margin-top:3px;color:#64748b;font-size:12px}
@@ -350,6 +350,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .arc-drive-msg{margin-top:9px;padding:7px 10px;border-radius:8px;background:#e0f2fe;color:#075985;font-size:12px;line-height:1.4}
   .arc-drive-msg.ok{background:#dcfce7;color:#166534}
   .arc-drive-msg.err{background:#fee2e2;color:#991b1b}
+  .arc-drive-kimlik{margin-top:9px}
+  .arc-drive-kimlik summary{cursor:pointer;font-weight:800;font-size:12.5px;color:#075985}
   .arc-drive-pick{margin-top:10px;border:1px solid #bae6fd;border-radius:10px;background:#fff;padding:8px 10px}
   .arc-drive-pick summary{cursor:pointer;font-weight:800;font-size:12.5px;color:#075985}
   .arc-pick-count{font-weight:600;color:#64748b;margin-left:8px}
@@ -363,6 +365,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .arc-pick-m.done{background:#ecfdf5;border-color:#a7f3d0;color:#047857;cursor:default}
   .arc-pick-m.off{opacity:.35;cursor:default}
   @media(max-width:560px){.arc-pick-months{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  .arc-drive-pwchg{margin-top:12px;padding-top:10px;border-top:1px dashed #bae6fd;font-size:12.5px;color:#0f172a}
+  .arc-drive-pwchg .arc-drive-row input[type=password]{flex:1 1 180px;min-width:150px}
   .arc-drive-link{border:none;background:transparent;color:#475569;font:inherit;font-size:12px;cursor:pointer;text-decoration:underline dotted}
   .arc-drive-admin{margin-top:12px;border-top:1px solid #bae6fd;padding-top:10px}
   .arc-drive-admin summary{cursor:pointer;font-size:13px;font-weight:700;color:#0c4a6e}
@@ -413,6 +417,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 </head>
 <body>
 <input id="archiveIzinFileInput" type="file" accept=".xls,.xlsx" style="display:none" onchange="archiveIzinInputChanged(this)">
+<input id="topIzinFileInput" type="file" accept=".xls,.xlsx" style="display:none" onchange="topIzinInputChanged(this)">
 <input id="archiveBackupInput" type="file" accept=".json,application/json" style="display:none" onchange="archiveImportBackup(this.files[0])">
 <div id="archiveSlotModal" class="arc-modal" role="dialog" aria-modal="true">
   <div class="arc-modal-box">
@@ -464,6 +469,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <span class="btn-primary">📂 Dosya Seç</span>
           <input type="file" id="fileInput" name="ashiNobetRaporu" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="processFile(this.files[0])">
         </label>
+        <button type="button" class="btn-sec" style="margin-top:16px;background:#fff7ed;color:#9a3412;border-color:#fdba74" onclick="event.stopPropagation();openTopIzinPicker()" title="İzin/muafiyet/rapor Excel dosyasını yükler; ayı dosyadaki tarihlerden belirler ve arşive kaydeder">📄 İzin/Rapor Dosyası Yükle</button>
         <button type="button" class="btn-sec" style="margin-top:16px;background:#eef2ff;color:#3730a3;border-color:#c7d2fe" onclick="event.stopPropagation();openGuide()">📖 Kılavuzu Aç</button>
       </div>
       <div id="selectedFileName" class="dropzone-sub" style="display:none;margin-top:10px;color:#475569"></div>
@@ -1642,14 +1648,17 @@ const ashiDrive = (() => {
     return true;
   }
   const sahipKapat = () => LS.set('ashi_drive_sahip', null);
-  async function parolaDogrula(pw, L) { if (!L.kontrol) return false; await coz(await indir(L.kontrol.id), pw); return true; }
-  async function kontrolYaz(pw, L) { if (L.kontrol) return; await yukle(KONTROL, await sifrele({kontrol:true, t:new Date().toISOString()}, pw), null); }
+  async function kontrolOku(pw, L) { if (!L.kontrol) return null; const kc = await coz(await indir(L.kontrol.id), pw); LS.set('ashi_drive_tk', kc && kc.tk ? kc.tk : null); return kc; }
+  async function parolaDogrula(pw, L) { if (!L.kontrol) return false; await kontrolOku(pw, L); return true; }
+  async function kontrolYaz(pw, L) { if (L.kontrol) return; await yukle(KONTROL, await sifrele({kontrol:true, t:new Date().toISOString(), tk:pw}, pw), null); LS.set('ashi_drive_tk', pw); }
 
 
   // ── Kişisel veri maskeleme: Drive'a giden pakette TC "187*****14-a3f9c1b" biçimine (anahtarlı kısa özet eklenerek
   // aylar arası eşleşme korunur), ad/soyad "B***" biçimine çevrilir. Yerel kayıtlar değişmez.
   const tokCache = new Map();
-  async function hmacHex(pw, msg) {
+  const tk = () => LS.get('ashi_drive_tk') || parola();   // anonim jeton anahtarı: parola değişse de sabit kalır (kontrol dosyasında saklanır)
+  async function hmacHex(pw0, msg) {
+    const pw = tk() || pw0;
     const ck = pw + '\u0000' + msg;
     if (tokCache.has(ck)) return tokCache.get(ck);
     const k = await crypto.subtle.importKey('raw', enc.encode(pw), {name:'HMAC', hash:'SHA-256'}, false, ['sign']);
@@ -1739,7 +1748,7 @@ const ashiDrive = (() => {
     if (KILIT) return KILIT;
     KILIT = (async () => {
       const L = await listele();
-      if (L.kontrol) await coz(await indir(L.kontrol.id), pw);
+      if (L.kontrol) await kontrolOku(pw, L);
       const sync = syncMap(), pub = pubMap();
       // Otomatik eşitlemede yalnızca en güncel ay yoksa/değiştiyse iner; yerelde zaten bulunan aylar değişirse güncellenir.
       // Diğer aylar kullanıcı seçerek (keys) indirilir.
@@ -1751,24 +1760,27 @@ const ashiDrive = (() => {
         if (Array.isArray(keys)) { if (keys.includes(f.ym)) is.push(f); }
         else if (yerel ? (degisti || yildizli) : f.ym === enGuncel) is.push(f);
       }
-      const alinan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0, kimlikYok = 0;
+      const alinan = [], okunamayan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0, kimlikYok = 0;
       for (let i = 0; i < is.length; i++) {
         const f = is[i];
         onIlerleme && onIlerleme(`${f.ym} indiriliyor (${i + 1}/${is.length})…`);
-        let p = await coz(await indir(f.id), pw);
+        let p;
+        try { p = await coz(await indir(f.id), pw); }
+        catch (e) { if (e && e.parola) { okunamayan.push(f.ym); continue; } throw e; }   // eski parolayla kalmış paket: atlanır
         if (!p || p.key !== f.ym || !p.slots) throw new Error(f.ym + ': paket içeriği geçersiz');
+        const kimVar = !!p.kimlik;
         const ac = await paketiAc(p);
         if (ac.acildi) acilan++; else if (ac.yanlis) kimlikYanlis = true; else if (!ac.var && ashiDrive.kimlikParola()) kimlikYok++; else if (ac.var) kimlikKapali++;
         p = ac.p;
         const merged = birlestir(await archiveGet(f.ym), p);
         await archivePut(merged);
-        sync[f.ym] = {id:f.id, mod:f.modifiedTime};
+        sync[f.ym] = {id:f.id, mod:f.modifiedTime, kim:kimVar};
         pub[f.ym] = imza(p);
         alinan.push(f.ym);
       }
       LS.set('ashi_drive_sync', JSON.stringify(sync));
       LS.set('ashi_drive_pub', JSON.stringify(pub));
-      return {liste:L, alinan, acilan, kimlikYanlis, kimlikKapali, kimlikYok, enGuncel};
+      return {liste:L, alinan, acilan, kimlikYanlis, kimlikKapali, kimlikYok, enGuncel, okunamayan};
     })();
     try { return await KILIT; } finally { KILIT = null; }
   }
@@ -1786,6 +1798,60 @@ const ashiDrive = (() => {
     LS.set('ashi_drive_sahip', '1');
     return o;
   }
+  async function cozDene(u8, liste) {
+    let son;
+    for (const pw of liste.filter(Boolean)) { try { return await coz(u8, pw); } catch (e) { son = e; } }
+    throw son || new Error('Parola yanlış');
+  }
+  // Eski parola biliniyorsa: Drive'daki tüm paketler eski parolayla açılıp yeni parolayla (ve istenirse yeni kimlik parolasıyla) yeniden şifrelenir.
+  async function parolaDegistir({eski, yeni, kimEski, kimYeni}, onIlerleme) {
+    if (!parolaGuclu(yeni)) throw new Error('Yeni parola en az 12 karakter olmalı (en az 6 farklı karakter).');
+    if (kimYeni && (!parolaGuclu(kimYeni) || kimYeni === yeni)) throw new Error('Kimlik parolası en az 12 karakter olmalı ve ekip parolasından farklı olmalı.');
+    const L = await listele();
+    let tkDeger = eski;
+    if (L.kontrol) {
+      const u8 = await indir(L.kontrol.id);
+      let kc; try { kc = await coz(u8, eski); } catch (e) { try { kc = await coz(u8, yeni); } catch { throw new Error('Mevcut (eski) ekip parola yanlış.'); } }
+      tkDeger = kc.tk || eski;
+    }
+    onIlerleme && onIlerleme('Google girişi bekleniyor…');
+    await token();
+    let n = 0, atlanan = 0, kimSilinen = 0;
+    for (let i = 0; i < L.length; i++) {
+      const f = L[i];
+      onIlerleme && onIlerleme(`${f.ym} yeniden şifreleniyor (${i + 1}/${L.length})…`);
+      let p;
+      try { p = await cozDene(await indir(f.id), [eski, yeni]); } catch { atlanan++; continue; }
+      if (p.kimlik && kimYeni) {
+        try { const id = await cozDene(unb64(p.kimlik), [kimEski, kimYeni, kimlikParola()]); p.kimlik = b64(await sifrele(id, kimYeni)); }
+        catch { delete p.kimlik; kimSilinen++; }
+      }
+      await yukle(dosyaAdi(f.ym), await sifrele(p, yeni), f.id);
+      n++;
+    }
+    await yukle(KONTROL, await sifrele({kontrol:true, t:new Date().toISOString(), tk:tkDeger}, yeni), L.kontrol && L.kontrol.id);
+    parolaAyarla(yeni, true); LS.set('ashi_drive_tk', tkDeger);
+    if (kimYeni) kimlikParolaAyarla(kimYeni);
+    LS.set('ashi_drive_sync', null);
+    return {n, atlanan, kimSilinen};
+  }
+  // Eski parola bilinmiyorsa: kontrol dosyası yeni parolayla yenilenir, bu cihazdaki ham verili aylar yeni parolayla yeniden yayınlanır.
+  async function parolaSifirla({yeni, kimYeni}, recs, onIlerleme) {
+    if (!parolaGuclu(yeni)) throw new Error('Yeni parola en az 12 karakter olmalı (en az 6 farklı karakter).');
+    if (kimYeni && (!parolaGuclu(kimYeni) || kimYeni === yeni)) throw new Error('Kimlik parolası en az 12 karakter olmalı ve ekip parolasından farklı olmalı.');
+    const L = await listele();
+    onIlerleme && onIlerleme('Google girişi bekleniyor…');
+    await token();
+    await yukle(KONTROL, await sifrele({kontrol:true, t:new Date().toISOString(), tk:yeni}, yeni), L.kontrol && L.kontrol.id);
+    parolaAyarla(yeni, true); LS.set('ashi_drive_tk', yeni);
+    if (kimYeni) kimlikParolaAyarla(kimYeni);
+    for (let i = 0; i < recs.length; i++) {
+      onIlerleme && onIlerleme(`${recs[i].key} yeni parolayla yayınlanıyor (${i + 1}/${recs.length})…`);
+      await yayinla(recs[i], yeni, L.find(e => e.ym === recs[i].key));
+    }
+    LS.set('ashi_drive_sync', null);
+    return {n:recs.length, kalan:L.filter(f => !recs.some(x => x.key === f.ym)).map(f => f.ym)};
+  }
   async function topluYayinla(recs, pw, onIlerleme) {
     if (!parolaGuclu(pw)) throw new Error('Yayınlamak için ekip parolası en az 12 karakter olmalı.');
     const L = await listele();
@@ -1798,7 +1864,7 @@ const ashiDrive = (() => {
     }
     return recs.length;
   }
-  return {kimlikParola, kimlikParolaAyarla, yoneticiDogrula, sahipKapat, tokenMap, CFG, LS, klasor, klasorAyikla, parola, parolaAyarla, parolaGuclu, sahip, oto, otoAyarla, tokenVar, bekleyenler, esitle, topluYayinla, syncMap, pubMap, imza};
+  return {parolaDegistir, parolaSifirla, kimlikParola, kimlikParolaAyarla, yoneticiDogrula, sahipKapat, tokenMap, CFG, LS, klasor, klasorAyikla, parola, parolaAyarla, parolaGuclu, sahip, oto, otoAyarla, tokenVar, bekleyenler, esitle, topluYayinla, syncMap, pubMap, imza};
 })();
 
 let driveMsg = {text:'', kind:''};
@@ -1848,6 +1914,32 @@ function driveSaveApw() {
   driveSync(true);
 }
 function driveForgetApw() { ashiDrive.kimlikParolaAyarla(null); driveSetMsg('Kimlik parolası silindi (yeni eşitlemelerde yıldızlı görünür).', 'ok'); renderArchivePanel(); }
+async function driveChangePw() {
+  if (driveBusy) return;
+  const v = id => (document.getElementById(id)?.value || '');
+  const eski = v('drivePwOld'), yeni = v('drivePwNew1'), yeni2 = v('drivePwNew2'), kimEski = v('driveKimOld'), kimYeni = v('driveKimNew');
+  if (!ashiDrive.parolaGuclu(yeni)) { driveSetMsg('Yeni ekip parolası en az 12 karakter olmalı (en az 6 farklı karakter içermeli).', 'err'); return; }
+  if (yeni !== yeni2) { driveSetMsg('Yeni parola ile tekrarı aynı değil.', 'err'); return; }
+  if (kimYeni && (!ashiDrive.parolaGuclu(kimYeni) || kimYeni === yeni)) { driveSetMsg('Yeni kimlik parolası en az 12 karakter olmalı ve ekip parolasından farklı olmalı.', 'err'); return; }
+  driveBusy = true;
+  try {
+    if (eski) {
+      if (!window.confirm('Drive’daki tüm aylar yeni parolayla yeniden şifrelenecek. Diğer cihazlar yeni parolayı bir kez girmek zorunda kalacak. Devam edilsin mi?')) return;
+      const r = await ashiDrive.parolaDegistir({eski, yeni, kimEski, kimYeni}, m => driveSetMsg('🔑 ' + m, ''));
+      driveSetMsg(`Parola değiştirildi: ${r.n} ay yeniden şifrelendi${r.atlanan ? `, ${r.atlanan} paket açılamadığı için atlandı` : ''}${r.kimSilinen ? `, ${r.kimSilinen} pakette eski kimlik parolası bilinmediği için kimlik tablosu silindi (↻ Hepsini yeniden yayınla ile eklenir)` : ''}. Diğer cihazlar yeni parolayı girmeli.`, 'ok');
+    } else {
+      const all = (await archiveGetAll()).filter(x => (x.slots?.basi && !x.slots.basi.anon) || (x.slots?.sonu && !x.slots.sonu.anon) || (x.izin && !x.izin.anon));
+      if (!all.length) { driveSetMsg('Eski parola bilinmiyorsa bu cihazda ham verisi olan (kendi yüklediğiniz) ay bulunmalı; hiçbiri yok. Eski parolayı girin veya önce ayları bu cihaza yükleyin.', 'err'); return; }
+      if (!window.confirm(`Eski parola kullanılmadan sıfırlanacak. Bu cihazdaki ${all.length} ay yeni parolayla Drive’a yeniden yayınlanacak; bu cihazda ham verisi olmayan aylar eski parolayla kalıp okunamayacak. Devam edilsin mi?`)) return;
+      const r = await ashiDrive.parolaSifirla({yeni, kimYeni}, all, m => driveSetMsg('🔑 ' + m, ''));
+      driveSetMsg(`Parola sıfırlandı: ${r.n} ay yeni parolayla yayınlandı.${r.kalan.length ? ` Okunamayan aylar (eski parolayla): ${r.kalan.join(', ')} — bunları ham verisi olan cihazdan yeniden yayınlayın.` : ''} Diğer cihazlar yeni parolayı girmeli.`, 'ok');
+    }
+    ['drivePwOld', 'drivePwNew1', 'drivePwNew2', 'driveKimOld', 'driveKimNew'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
+    drivePwDraft = null;
+    await renderArchivePanel();
+  } catch (err) { driveSetMsg('Parola değiştirilemedi: ' + (err.message || err), 'err'); }
+  finally { driveBusy = false; }
+}
 function drivePickToggle(ym) { driveSel.has(ym) ? driveSel.delete(ym) : driveSel.add(ym); renderArchivePanel(); }
 async function drivePickYear(y) {
   const yerel = new Set((await archiveGetAll()).map(x => x.key));
@@ -1882,7 +1974,8 @@ async function driveSync(silent, keys) {
     const kimlikNot = r.acilan ? ` · ${r.acilan} ayda kimlik açıldı` : (r.kimlikYanlis ? ' · Kimlik parolası yanlış, yıldızlı kaldı' : (r.kimlikYok ? ` · ${r.kimlikYok} pakette kimlik tablosu yok: yönetici kimlik parolasını kaydedip “Hepsini yeniden yayınla”ya basmalı` : ''));
     const yerelAnahtar = new Set((await archiveGetAll()).map(x => x.key));
     const digerSayi = driveRemote.filter(ym => !yerelAnahtar.has(ym)).length;
-    const digerNot = digerSayi ? ` · Drive’da indirilmemiş ${digerSayi} ay daha var; aşağıdan seçip eşitleyebilirsiniz.` : '';
+    const okunmaNot = (r.okunamayan || []).length ? ` · ${r.okunamayan.join(', ')} okunamadı (eski parolayla şifreli; yönetici yeniden yayınlamalı)` : '';
+    const digerNot = okunmaNot + (digerSayi ? ` · Drive’da indirilmemiş ${digerSayi} ay daha var; aşağıdan seçip eşitleyebilirsiniz.` : '');
     driveSetMsg(r.alinan.length ? `Drive’dan ${r.alinan.length} ay alındı: ${r.alinan.join(', ')}${kimlikNot}${digerNot}` : (r.liste.length ? `Drive’da ${r.liste.length} aylık paket var; yerel arşiv güncel.${digerNot}` : 'Drive klasöründe henüz ASHİ arşiv paketi yok (klasör: …' + ashiDrive.klasor().slice(-6) + ').'), 'ok');
     await renderArchivePanel();
     // Açık olan arşiv ayı güncellendiyse (ör. kimlikler açıldıysa) ekrandaki rapor yeniden yüklenir.
@@ -1929,10 +2022,13 @@ function driveHtml(records) {
       <button type="button" onclick="driveSavePw()">Parolayı Kaydet</button>
     </div>`;
   const kpw = ashiDrive.kimlikParola();
-  const kimlikBox = kpw ? `<div class="arc-drive-row"><span class="arc-drive-note" style="margin:0">🔓 Kimlik parolası kayıtlı: eşitlenen aylarda TC ve ad/soyad açık görünür.</span><button type="button" class="arc-drive-link" onclick="driveForgetApw()">Kimlik parolasını unut</button></div>`
+  const anonAylar = (records || []).filter(x => Object.values(x.slots || {}).some(sl => sl && sl.anon) || x.izin?.anon).map(x => x.key).sort();
+  const kimYok = anonAylar.filter(k => (ashiDrive.syncMap()[k] || {}).kim === false), kimVarAmaKapali = anonAylar.filter(k => (ashiDrive.syncMap()[k] || {}).kim);
+  const kimlikDurum = anonAylar.length ? `<div class="arc-drive-msg err" style="display:block">${kimYok.length ? `⚠ ${kimYok.join(', ')}: Drive’daki pakette gerçek kimlik tablosu yok, bu yüzden yıldızlı. Yönetici cihazında kimlik parolasını kaydedip <b>↻ Hepsini yeniden yayınla</b>’ya basmalı.` : ''}${kimVarAmaKapali.length ? ` ${kimVarAmaKapali.join(', ')}: pakette kimlik tablosu var ama ${kpw ? 'girdiğiniz kimlik parolası uymuyor (yöneticiden doğrusunu alın)' : 'kimlik parolası girilmedi'}.` : ''}${!kimYok.length && !kimVarAmaKapali.length ? `Yıldızlı aylar: ${anonAylar.join(', ')} — “⟳ Yenile”ye basın.` : ''}</div>` : '';
+  const kimlikBox = kimlikDurum + (kpw ? `<div class="arc-drive-row"><span class="arc-drive-note" style="margin:0">🔓 Kimlik parolası kayıtlı: eşitlenen aylarda TC ve ad/soyad açık görünür.</span><button type="button" class="arc-drive-link" onclick="driveForgetApw()">Kimlik parolasını unut</button></div>`
     : `<details class="arc-drive-kimlik"><summary>🔓 TC ve ad/soyad’ı açık görmek için (yetkili personel)</summary>
       <div class="arc-drive-note">Ortak arşivde kimlikler yıldızlıdır. Yönetici ayrıca bir <b>kimlik parolası</b> belirleyip sadece yetkili arkadaşlarıyla paylaşırsa, bu parolayı girenler gerçek TC ve ad/soyadı görür. Kimlik tablosu ekip parolasından bağımsız şifrelenir; parolayı bilmeyen kimse açamaz.</div>
-      <div class="arc-drive-row"><input type="password" class="arc-drive-pw" autocomplete="off" placeholder="Kimlik parolası (en az 12 karakter)" oninput="driveApwDraft=this.value"><button type="button" onclick="driveSaveApw()">Kaydet</button></div></details>`;
+      <div class="arc-drive-row"><input type="password" class="arc-drive-pw" autocomplete="off" placeholder="Kimlik parolası (en az 12 karakter)" oninput="driveApwDraft=this.value"><button type="button" onclick="driveSaveApw()">Kaydet</button></div></details>`);
   const localKeys = new Set((records || []).map(x => x.key));
   const AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   const years = [...new Set(driveRemote.map(ym => ym.slice(0, 4)))].sort().reverse();
@@ -1959,6 +2055,20 @@ function driveHtml(records) {
         <button type="button" onclick="drivePublishAll()" title="Tüm aylar yeniden şifrelenip yüklenir ve paylaşım izni onarılır">↻ Hepsini yeniden yayınla</button>
         <button type="button" onclick="driveChangeFolder()" title="${escapeHtml(folder)}">📁 Klasör</button>
         <button type="button" onclick="driveAdminExit()">Yönetici modundan çık</button>
+      </div>
+      <div class="arc-drive-pwchg">
+        <b>🔑 Ekip ve kimlik parolasını değiştir / sıfırla</b>
+        <div class="arc-drive-note">Mevcut parolayı biliyorsanız Drive’daki tüm aylar eski parolayla açılıp yeni parolayla yeniden şifrelenir (bu cihazda ham veri gerekmez). <b>Eski parolayı bilmiyorsanız “mevcut parola” kutusunu boş bırakın</b>: kontrol dosyası yenilenir ve bu cihazdaki ham verili aylar yeni parolayla yeniden yayınlanır. Kimlik (TC/ad-soyad) parolasını da değiştirmek için son kutuyu doldurun.</div>
+        <div class="arc-drive-row">
+          <input type="password" id="drivePwOld" autocomplete="off" placeholder="Mevcut ekip parolası (bilmiyorsanız boş)">
+          <input type="password" id="drivePwNew1" autocomplete="off" placeholder="Yeni ekip parolası (en az 12 karakter)">
+          <input type="password" id="drivePwNew2" autocomplete="off" placeholder="Yeni ekip parolası (tekrar)">
+        </div>
+        <div class="arc-drive-row">
+          <input type="password" id="driveKimOld" autocomplete="off" placeholder="Mevcut kimlik parolası (varsa)">
+          <input type="password" id="driveKimNew" autocomplete="off" placeholder="Yeni kimlik parolası (isteğe bağlı)">
+          <button type="button" class="pri" onclick="driveChangePw()">Parolayı değiştir</button>
+        </div>
       </div>
     </details>` : '';
   const loginLink = !admin ? `<div class="arc-drive-login"><button type="button" onclick="driveAdminLogin()">🔑 Yönetici girişi</button></div>` : '';
@@ -2405,6 +2515,8 @@ function updateIzinRaporButton() {
   btn.title = izinRaporFileName ? izinRaporFileName + ' · ' + izinRaporRecords.length + ' kayıt' : 'İzin/Muafiyet/Rapor Excel dosyası yükle';
 }
 
+function openTopIzinPicker() { const i = document.getElementById('topIzinFileInput'); if (i) { i.value = ''; i.click(); } }
+function topIzinInputChanged(input) { const f = input.files && input.files[0]; if (f) handleIzinRaporFile(f); }
 function openIzinRaporPicker() {
   if (!reportMonthInfo) {
     alert('Önce nöbet raporunu yükleyin.');
@@ -2490,8 +2602,14 @@ async function handleIzinRaporFile(file, targetKey) {
   try {
     const records = await readIzinRaporFile(file);
     const curKey = archiveKeyFromInfo(reportMonthInfo);
-    const key = targetKey || curKey;
-    if (!key) throw new Error('Önce nöbet raporunu yükleyin veya arşivde bir ay seçin.');
+    let key = targetKey || curKey;
+    if (!key) {
+      // Nöbet raporu açık değilse ay, izin kayıtlarının başlangıç tarihlerinden (en çok kaydın düştüğü ay) belirlenir.
+      const cnt = {};
+      records.forEach(rc => { const d = new Date(rc.startMs); const k = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`; cnt[k] = (cnt[k] || 0) + 1; });
+      key = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
+      if (!key) throw new Error('İzin/Rapor dosyasında ay belirlenemedi.');
+    }
     let archived = true;
     try { await archiveSaveIzin(key, {records, fileName:file.name}); }
     catch (err) { archived = false; console.warn('İzin/Rapor arşive kaydedilemedi:', err); }
