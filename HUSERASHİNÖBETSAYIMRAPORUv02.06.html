@@ -407,6 +407,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-view-tabs{display:flex;gap:6px;padding:10px 18px 0;background:#fff;border-bottom:1px solid #e2e8f0}
   .istasyon-personel-view-tabs button{border:1px solid #cbd5e1;border-bottom:0;border-radius:7px 7px 0 0;background:#f8fafc;color:#475569;font:inherit;font-size:11px;font-weight:800;padding:8px 12px;cursor:pointer}
   .istasyon-personel-view-tabs button.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+  .ozet-not{font-size:9.5px;font-weight:600;color:#64748b;line-height:1.2;margin-top:2px}
   .istasyon-personel-summary-table-wrap{overflow:auto;border:1px solid #dbe4ee;border-radius:8px;background:#fff}
   .istasyon-personel-summary-table{width:100%;min-width:900px;border-collapse:collapse;font-size:11px}
   .istasyon-personel-summary-table th{padding:9px 8px;background:#1e3a5f;color:#fff;text-align:center;white-space:nowrap}
@@ -1507,6 +1508,7 @@ const ashiDrive = (() => {
   const dosyaAdi = ym => `ashi-nobet-arsiv-${ym}.ashienc`;
   const ymBul = n => { const m = /^ashi-nobet-arsiv-(\d{4}-\d{2})\.ashienc$/.exec(n || ''); return m ? m[1] : null; };
   let oturumPw = null, tok = null, tokSon = 0, KILIT = null;
+  const izinHatalari = [];   // son yayınlamada dosyaya “herkese açık okuma” izni verilemediyse nedenleri
 
   const klasor = () => LS.get('ashi_drive_folder') || CFG.folder || '';
   const klasorAyikla = v => { const t = String(v || '').trim(), r = /folders\/([\w-]{10,})/.exec(t) || /[?&]id=([\w-]{10,})/.exec(t); return r ? r[1] : (/^[\w-]{10,}$/.test(t) ? t : ''); };
@@ -1599,8 +1601,10 @@ const ashiDrive = (() => {
     return L;
   }
   async function indir(id) {
-    const r = await fetch(`${API}/${id}?alt=media&key=${CFG.key}`);
-    if (!r.ok) throw new Error('Dosya indirilemedi (' + r.status + ')');
+    let r;
+    try { r = await fetch(`${API}/${id}?alt=media&key=${CFG.key}`); }
+    catch (e) { throw new Error('Drive dosyası indirilemedi (ağ/CORS hatası: ' + (e && e.message || e) + '). Dosya veya klasör “Bağlantıya sahip herkes – Görüntüleyen” olarak paylaşılmamış olabilir; yönetici klasörün paylaşımını kontrol edip ↻ Hepsini yeniden yayınla’ya basmalı.'); }
+    if (!r.ok) throw new Error('Dosya indirilemedi (' + r.status + (r.status === 403 || r.status === 404 ? ': dosya herkese açık değil — klasör paylaşımını “Bağlantıya sahip herkes – Görüntüleyen” yapın' : '') + ')');
     return new Uint8Array(await r.arrayBuffer());
   }
   function gisYukle() {
@@ -1635,7 +1639,10 @@ const ashiDrive = (() => {
     if (!r.ok) { let e = ''; try { e = (await r.json()).error.message; } catch {} throw new Error('Drive’a yüklenemedi (' + r.status + ') ' + e); }
     const out = await r.json();
     // Paket şifrelidir; diğer kullanıcıların (anahtarla) okuyabilmesi için dosyayı "bağlantıya sahip herkes: görüntüleyen" yap.
-    try { await fetch(`${API}/${out.id}/permissions?supportsAllDrives=true`, {method:'POST', headers:{Authorization:'Bearer ' + t, 'Content-Type':'application/json'}, body:JSON.stringify({role:'reader', type:'anyone'})}); } catch (e) { console.warn('Paylaşım izni verilemedi', e); }
+    try {
+      const pr = await fetch(`${API}/${out.id}/permissions?supportsAllDrives=true`, {method:'POST', headers:{Authorization:'Bearer ' + t, 'Content-Type':'application/json'}, body:JSON.stringify({role:'reader', type:'anyone'})});
+      if (!pr.ok) { let m = ''; try { m = (await pr.json()).error.message; } catch {} izinHatalari.push(`HTTP ${pr.status} ${m}`.trim()); }
+    } catch (e) { console.warn('Paylaşım izni verilemedi', e); izinHatalari.push(String(e && e.message || e)); }
     return out;
   }
   async function yoneticiDogrula() {
@@ -1857,6 +1864,7 @@ const ashiDrive = (() => {
     const L = await listele();
     if (L.kontrol && !(await parolaDogrula(pw, L).catch(() => false))) throw new Error('Bu cihazdaki parola ortak arşivin parolasıyla aynı değil; yayınlama durduruldu.');
     onIlerleme && onIlerleme('Google girişi bekleniyor…');
+    izinHatalari.length = 0;
     await kontrolYaz(pw, L);
     for (let i = 0; i < recs.length; i++) {
       onIlerleme && onIlerleme(`${recs[i].key} şifreleniyor ve yükleniyor (${i + 1}/${recs.length})…`);
@@ -1864,7 +1872,7 @@ const ashiDrive = (() => {
     }
     return recs.length;
   }
-  return {parolaDegistir, parolaSifirla, kimlikParola, kimlikParolaAyarla, yoneticiDogrula, sahipKapat, tokenMap, CFG, LS, klasor, klasorAyikla, parola, parolaAyarla, parolaGuclu, sahip, oto, otoAyarla, tokenVar, bekleyenler, esitle, topluYayinla, syncMap, pubMap, imza};
+  return {izinHatalari,parolaDegistir, parolaSifirla, kimlikParola, kimlikParolaAyarla, yoneticiDogrula, sahipKapat, tokenMap, CFG, LS, klasor, klasorAyikla, parola, parolaAyarla, parolaGuclu, sahip, oto, otoAyarla, tokenVar, bekleyenler, esitle, topluYayinla, syncMap, pubMap, imza};
 })();
 
 let driveMsg = {text:'', kind:''};
@@ -1922,6 +1930,7 @@ async function driveChangePw() {
   if (yeni !== yeni2) { driveSetMsg('Yeni parola ile tekrarı aynı değil.', 'err'); return; }
   if (kimYeni && (!ashiDrive.parolaGuclu(kimYeni) || kimYeni === yeni)) { driveSetMsg('Yeni kimlik parolası en az 12 karakter olmalı ve ekip parolasından farklı olmalı.', 'err'); return; }
   driveBusy = true;
+  ashiDrive.izinHatalari.length = 0;
   try {
     if (eski) {
       if (!window.confirm('Drive’daki tüm aylar yeni parolayla yeniden şifrelenecek. Diğer cihazlar yeni parolayı bir kez girmek zorunda kalacak. Devam edilsin mi?')) return;
@@ -1934,6 +1943,7 @@ async function driveChangePw() {
       const r = await ashiDrive.parolaSifirla({yeni, kimYeni}, all, m => driveSetMsg('🔑 ' + m, ''));
       driveSetMsg(`Parola sıfırlandı: ${r.n} ay yeni parolayla yayınlandı.${r.kalan.length ? ` Okunamayan aylar (eski parolayla): ${r.kalan.join(', ')} — bunları ham verisi olan cihazdan yeniden yayınlayın.` : ''} Diğer cihazlar yeni parolayı girmeli.`, 'ok');
     }
+    if (ashiDrive.izinHatalari.length) driveSetMsg(driveMsg.text + ` ⚠ Dosyalara herkese açık okuma izni verilemedi (${ashiDrive.izinHatalari[0]}); Drive klasörünü elle “Bağlantıya sahip herkes – Görüntüleyen” yapın.`, 'err');
     ['drivePwOld', 'drivePwNew1', 'drivePwNew2', 'driveKimOld', 'driveKimNew'].forEach(id => { const e = document.getElementById(id); if (e) e.value = ''; });
     drivePwDraft = null;
     await renderArchivePanel();
@@ -1999,7 +2009,8 @@ async function drivePublish(onlyKeys) {
     if (!recs.length) { driveSetMsg('Yayınlanacak yeni değişiklik yok.', 'ok'); return; }
     const n = await ashiDrive.topluYayinla(recs, pw, m => driveSetMsg('⬆ ' + m, ''));
     if (drivePwDraft != null && !ashiDrive.parola()) ashiDrive.parolaAyarla(pw, driveRememberDraft);
-    driveSetMsg(`${n} ay ortak arşive yayınlandı: ${recs.map(r => r.key).join(', ')}`, 'ok');
+    const ih = ashiDrive.izinHatalari.length ? ` ⚠ Dosyalara herkese açık okuma izni verilemedi (${ashiDrive.izinHatalari[0]}). Drive klasörünü elle “Paylaş → Bağlantıya sahip herkes → Görüntüleyen” yapın; aksi halde diğer cihazlar dosyaları indiremez.` : '';
+    driveSetMsg(`${n} ay ortak arşive yayınlandı: ${recs.map(r => r.key).join(', ')}.${ih}`, ih ? 'err' : 'ok');
     renderArchivePanel();
   } catch (err) {
     driveSetMsg('Drive’a yayınlanamadı: ' + (err.message || err), 'err');
@@ -2805,6 +2816,7 @@ function buildSpecialDutyList(rows, kind, bransLookup) {
     return {
       tc:getTCKN(r), ad:getAd(r), soyad:getSoyad(r), ist:getIstasyon(r),
       brans:getKadroBrans(r), gorev:getGorev(r), saat, sure_raw:getSure(r),
+      istihdam:getRowExtra(r,'istihdam'), unvan:getRowExtra(r,'unvan'), il:getRowExtra(r,'il'), ofBrans:getRowExtra(r,'ofBrans'),
       startMs, endMs, basRaw:startDate ? formatDateTime(startDate) : getBas(r),
       bitisRaw:endMs != null ? formatDateTime(new Date(endMs)) : '—'
     };
@@ -4585,6 +4597,21 @@ function ashiKadroSaati(tc, istihdam, info) {
   return Math.round(total * 100) / 100;
 }
 const ISTASYON_PERSONEL_ROLE_LABELS = {ef:'Ekip Şefi', ysp:'Yardımcı Sağlık Personeli', sur:'Sürücü'};
+// Komuta Kontrol / Başhekimlik kayıtlarındaki REFAKATÇİ nöbetleri: kişinin listesine ve Döküm Cetveli'ne işlenir,
+// istasyon toplamlarına/kapsama analizine işlenmez (bu kayıtlar zaten allData dışında tutulur).
+function ashiRefakatExtra() {
+  const out = [];
+  ['komuta', 'bashekimlik'].forEach(k => ((specialDutyLists || {})[k] || []).forEach(p => (p.records || []).forEach(n => {
+    if (!/refakat/i.test(String(n.gorev || ''))) return;
+    const hours = reportMonthInfo ? clipIntervalToReportMonth(n.startMs, n.endMs, reportMonthInfo) : Number(n.saat) || 0;
+    if (!(hours > ANALIZ_EPSILON)) return;
+    const tc = String(n.tc || '').trim();
+    const personKey = tc ? 'tc:' + tc : 'name:' + `${n.ad || ''}|${n.soyad || ''}`.trim().toLocaleUpperCase('tr-TR');
+    out.push({personKey, tc, ad:n.ad || '', soyad:n.soyad || '', brans:n.brans || p.kadro_brans || '', istihdam:n.istihdam || '', unvan:n.unvan || '', il:n.il || '', ofBrans:n.ofBrans || '',
+      ist:String(n.ist || '').trim(), saat:Number(n.saat) || hours, hours, startMs:n.startMs, endMs:n.endMs, basRaw:n.basRaw, bitisRaw:n.bitisRaw, sure_raw:n.sure_raw});
+  })));
+  return out;
+}
 function getIstasyonPersonelRows() {
   const people = {};
   Object.entries(ISTASYON_PERSONEL_ROLE_LABELS).forEach(([gKey, roleLabel]) => {
@@ -4593,10 +4620,17 @@ function getIstasyonPersonelRows() {
       if (!station) return;
       const personKey = String(p.personKey || p.tc || `${p.ad}|${p.soyad}`);
       const dutyKey = `${personKey}|${station}|${n.startMs ?? n.basRaw}|${n.sure_raw ?? n.saat}`;
-      if (!people[personKey]) people[personKey] = {personKey,tc:p.tc||'',ad:p.ad||'',soyad:p.soyad||'',brans:p.kadro_brans||'',istihdam:p.istihdam||'',duties:{}};
+      if (!people[personKey]) people[personKey] = {personKey,tc:p.tc||'',ad:p.ad||'',soyad:p.soyad||'',brans:p.kadro_brans||'',istihdam:p.istihdam||'',asilIst:p.asilIst||'',duties:{}};
       if (!people[personKey].istihdam && p.istihdam) people[personKey].istihdam = p.istihdam;
-      if (!people[personKey].duties[dutyKey]) people[personKey].duties[dutyKey] = {station, role:roleLabel, roleKey:gKey, branch:p.kadro_brans||'', startMs:n.startMs, start:n.basRaw||n.bas||'—', end:n.bitisRaw||'—', hours:n.saat, duration:n.sure_raw||'—'};
+      if (!people[personKey].asilIst && p.asilIst) people[personKey].asilIst = p.asilIst;
+      if (!people[personKey].duties[dutyKey]) people[personKey].duties[dutyKey] = {station, role:roleLabel, roleKey:gKey, refakat:!!n.refakat, branch:p.kadro_brans||'', startMs:n.startMs, start:n.basRaw||n.bas||'—', end:n.bitisRaw||'—', hours:n.saat, duration:n.sure_raw||'—'};
     }));
+  });
+  ashiRefakatExtra().forEach(n => {
+    if (!n.ist) return;
+    if (!people[n.personKey]) people[n.personKey] = {personKey:n.personKey,tc:n.tc,ad:n.ad,soyad:n.soyad,brans:n.brans,istihdam:n.istihdam,duties:{}};
+    const dk = `${n.personKey}|ref|${n.ist}|${n.startMs}`;
+    if (!people[n.personKey].duties[dk]) people[n.personKey].duties[dk] = {station:n.ist, role:'Refakatçi', roleKey:'ref', refakat:true, branch:n.brans, startMs:n.startMs, start:n.basRaw||'—', end:n.bitisRaw||'—', hours:n.hours, duration:n.sure_raw||'—'};
   });
   return Object.values(people).map(p => { const duties=Object.values(p.duties).sort((a,b)=>(a.startMs||0)-(b.startMs||0)); const stations=[...new Set(duties.map(n=>n.station).filter(Boolean))]; return {...p,duties,stations,isMulti:stations.length>1}; });
 }
@@ -4615,10 +4649,48 @@ function showIstasyonPersonelModal() {
 }
 function closeIstasyonPersonelModal(){ const modal=document.getElementById('istasyonPersonelModal'); if(modal) modal.style.display='none'; }
 function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); renderIstasyonPersonelList(); }
+// Personel Özeti satırları: kişi başka istasyonda da nöbet tuttuysa
+//  • ASIL istasyonundaki satırda toplam çalışma saatine diğer istasyonlardaki saatleri de eklenir (Kadro/Fark bu satırda hesaplanır),
+//  • diğer (misafir) istasyon satırlarında çalışma saati ve fark "—" gösterilir; o satır yalnızca o istasyondaki nöbeti gösterir.
+// Bu toplama sadece kişiyi etkiler; istasyon bazlı toplamlar/analizler değişmez.
+function ashiOzetGruplari(people, stationQ) {
+  const grouped = {};
+  const hrs = n => Number(n.hours) || 0;
+  people.forEach(p => {
+    const all = p.allDuties || p.duties;
+    const counts = {}; all.forEach(n => { counts[n.station] = (counts[n.station] || 0) + 1; });
+    const stationsAll = Object.keys(counts);
+    const multi = stationsAll.length > 1;
+    const home = p.asilIst || stationsAll.sort((a, b) => counts[b] - counts[a])[0] || '';
+    const totalAll = all.reduce((t, n) => t + hrs(n), 0);
+    const kadro = ashiKadroSaati(p.tc, p.istihdam);
+    const key = p.personKey || p.tc || `${p.ad}|${p.soyad}`;
+    const mk = st => (grouped[st] || (grouped[st] = {}))[key] || (grouped[st][key] = {tc:p.tc || '', name:`${p.ad} ${p.soyad}`.trim(), branch:p.brans || '', isMulti:p.isMulti, station:st, s12:0, s24:0, other:0, total:0, days:0, kadro:null, extra:0, misafir:false, sentetik:false});
+    p.duties.forEach(n => {
+      const x = mk(n.station), h = hrs(n);
+      if (Math.abs(h - 12) < .01) x.s12++; else if (Math.abs(h - 24) < .01) x.s24++; else if (h > 0) x.other++;
+      if (h > 0) { x.total += h; x.days += h / 24; }
+    });
+    if (!multi) { const x = grouped[stationsAll[0]] && grouped[stationsAll[0]][key]; if (x) x.kadro = kadro; return; }
+    // çoklu istasyon
+    const matches = !stationQ || String(home).toLocaleLowerCase('tr-TR').includes(stationQ);
+    Object.keys(grouped).forEach(st => { const x = grouped[st][key]; if (x && st !== home) x.misafir = true; });
+    if (grouped[home] && grouped[home][key] || matches) {
+      const x = mk(home);
+      const own = all.filter(n => n.station === home).reduce((t, n) => t + hrs(n), 0);
+      if (!grouped[home][key].total && !p.duties.some(n => n.station === home)) x.sentetik = true;
+      x.extra = totalAll - own;
+      x.total = own + x.extra;
+      x.days = x.total / 24;
+      x.kadro = kadro; x.misafir = false;
+    }
+  });
+  return grouped;
+}
 function getFilteredIstasyonPersonelRows(){
   const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
-  return getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  return getIstasyonPersonelRows().map(p=>({...p,allDuties:p.duties,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -4695,6 +4767,14 @@ function buildDokumCetveliAoa() {
       if (n.ist) x.istCount[n.ist] = (x.istCount[n.ist] || 0) + 1;
     });
   }));
+  ashiRefakatExtra().forEach(n => {
+    if (!n.ist) return;
+    if (!people[n.personKey]) people[n.personKey] = {tc:n.tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans, istCount:{}, duties:new Map()};
+    const x = people[n.personKey];
+    if (!x.istihdam && n.istihdam) x.istihdam = n.istihdam;
+    const dk = `${n.startMs}|${n.endMs}`;
+    if (!x.duties.has(dk)) { x.duties.set(dk, {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) || n.hours, ist:n.ist}); x.istCount[n.ist] = (x.istCount[n.ist] || 0) + 1; }
+  });
   const list = Object.values(people).map(x => {
     const asil = x.asilIst || Object.keys(x.istCount).sort((a,b) => x.istCount[b] - x.istCount[a])[0] || '';
     return {...x, asil};
@@ -4755,22 +4835,17 @@ function exportIstasyonPersonelExcel(){
   if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
   const people=getFilteredIstasyonPersonelRows();
   const summaryRows=[], detailRows=[];
-  people.forEach(p=>{
-    const grouped={};
-    p.duties.forEach(n=>{
-      const key=n.station;
-      if(!grouped[key]) grouped[key]={tc:p.tc||'',name:`${p.ad} ${p.soyad}`.trim(),branch:p.brans||'',kadro:ashiKadroSaati(p.tc,p.istihdam),station:n.station,isMulti:p.isMulti,s12:0,s24:0,other:0,total:0,days:0};
-      const x=grouped[key], h=Number(n.hours)||0;
-      if(Math.abs(h-12)<.01)x.s12++; else if(Math.abs(h-24)<.01)x.s24++; else if(h>0)x.other++;
-      if(h>0){x.total+=h;x.days+=h/24;}
-      detailRows.push({'İstasyon':n.station,'TCKN':p.tc||'','Personel Adı Soyadı':`${p.ad} ${p.soyad}`.trim(),'Branşı':p.brans||'','Görev':n.role,'Çoklu İstasyon':p.isMulti?'Evet':'Hayır','Nöbet Başlangıcı':n.start||'','Nöbet Bitişi':n.end||'','Süre':n.duration||`${h||0} saat`,'Saat':h});
-    });
-    Object.values(grouped).forEach(x=>summaryRows.push({'İstasyon':x.station,'TCKN':x.tc,'Personel Adı Soyadı':x.name,'Branşı':x.branch,'Çoklu İstasyon':x.isMulti?'Evet':'Hayır','12 Saat Adedi':x.s12,'24 Saat Adedi':x.s24,'Diğer Süre Adedi':x.other,'Çalışma Saati':x.kadro,'Toplam Çalışma Saat':Math.round(x.total*100)/100,'Fark':Math.round((x.total-x.kadro)*100)/100,'Toplam Gün':Math.round(x.days*100)/100}));
-  });
+  const stationQx=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  people.forEach(p=>p.duties.forEach(n=>{
+    const h=Number(n.hours)||0;
+    detailRows.push({'İstasyon':n.station,'TCKN':p.tc||'','Personel Adı Soyadı':`${p.ad} ${p.soyad}`.trim(),'Branşı':p.brans||'','Görev':n.role,'Çoklu İstasyon':p.isMulti?'Evet':'Hayır','Nöbet Başlangıcı':n.start||'','Nöbet Bitişi':n.end||'','Süre':n.duration||`${h||0} saat`,'Saat':h});
+  }));
+  const ozet=ashiOzetGruplari(people,stationQx);
+  Object.entries(ozet).sort((a,b)=>trColl.compare(a[0],b[0])).forEach(([st,items])=>Object.values(items).sort((a,b)=>trColl.compare(a.name,b.name)).forEach(x=>summaryRows.push({'İstasyon':st,'TCKN':x.tc,'Personel Adı Soyadı':x.name,'Branşı':x.branch,'Çoklu İstasyon':x.isMulti?'Evet':'Hayır','12 Saat Adedi':x.s12,'24 Saat Adedi':x.s24,'Diğer Süre Adedi':x.other,'Çalışma Saati':x.kadro==null?'-':x.kadro,'Toplam Çalışma Saat':Math.round(x.total*100)/100,'Fark':x.kadro==null?'-':Math.round((x.total-x.kadro)*100)/100,'Toplam Gün':Math.round(x.days*100)/100,'Not':x.misafir?'Misafir (asıl istasyonu başka)':(x.extra>0?`Diğer istasyonlardan +${Math.round(x.extra*100)/100} saat dahil`:'')})));
   const wb=XLSX.utils.book_new();
   const wsSummary=XLSX.utils.json_to_sheet(summaryRows.length?summaryRows:[{'Bilgi':'Filtreye uygun kayıt bulunamadı.'}]);
   const wsDetail=XLSX.utils.json_to_sheet(detailRows.length?detailRows:[{'Bilgi':'Filtreye uygun kayıt bulunamadı.'}]);
-  wsSummary['!cols']=[{wch:38},{wch:16},{wch:28},{wch:24},{wch:16},{wch:14},{wch:14},{wch:16},{wch:14},{wch:22},{wch:12},{wch:14}];
+  wsSummary['!cols']=[{wch:38},{wch:16},{wch:28},{wch:24},{wch:16},{wch:14},{wch:14},{wch:16},{wch:14},{wch:22},{wch:12},{wch:14},{wch:34}];
   wsDetail['!cols']=[{wch:38},{wch:16},{wch:28},{wch:24},{wch:22},{wch:16},{wch:22},{wch:22},{wch:18},{wch:10}];
   XLSX.utils.book_append_sheet(wb,wsSummary,'Personel Özeti');
   XLSX.utils.book_append_sheet(wb,wsDetail,'Nöbet Detayları');
@@ -4791,12 +4866,11 @@ function renderIstasyonPersonelSummaryTable(){
   const wrap=document.getElementById('istasyonPersonelSummaryTable'); if(!wrap)return;
   const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
-  const people=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
-  const grouped={};
-  people.forEach(p=>p.duties.forEach(n=>{const key=p.personKey+'|'+n.station;if(!grouped[n.station])grouped[n.station]={};if(!grouped[n.station][key])grouped[n.station][key]={tc:p.tc||'',name:`${p.ad} ${p.soyad}`.trim(),branch:p.brans||'',kadro:ashiKadroSaati(p.tc,p.istihdam),isMulti:p.isMulti,s12:0,s24:0,other:0,total:0,days:0};const x=grouped[n.station][key];const h=Number(n.hours)||0;if(Math.abs(h-12)<.01)x.s12++;else if(Math.abs(h-24)<.01)x.s24++;else if(h>0)x.other++;if(h>0){x.total+=h;x.days+=h/24;}}));
+  const people=getFilteredIstasyonPersonelRows();
+  const grouped=ashiOzetGruplari(people,stationQ);
   const stations=Object.entries(grouped).sort((a,b)=>trColl.compare(a[0],b[0]));
   if(!stations.length){wrap.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>';return;}
-  const rows=stations.map(([station,items])=>{const values=Object.values(items).sort((a,b)=>trColl.compare(a.name,b.name));const head=`<tr class="station-summary-row"><td colspan="10">🏥 ${escapeHtml(station)} · ${values.length} personel</td></tr>`;const body=values.map(x=>`<tr><td>${escapeHtml(x.tc||'—')}</td><td>${escapeHtml(x.name||'Ad bilgisi yok')} ${x.isMulti?'<span class="badge b-coklu" title="Birden fazla istasyonda nöbet tutuyor">↔ Çoklu</span>':''}</td><td>${escapeHtml(x.branch||'—')}</td><td>${x.s12||'—'}</td><td>${x.s24||'—'}</td><td>${x.other?x.other.toLocaleString('tr-TR',{maximumFractionDigits:2}):'—'}</td><td>${x.kadro.toLocaleString('tr-TR',{maximumFractionDigits:2})}</td><td><strong>${x.total.toLocaleString('tr-TR',{maximumFractionDigits:2})}</strong></td><td class="fark-cell" style="font-weight:700;color:${x.total-x.kadro<0?'#b91c1c':'#047857'}">${(Math.round((x.total-x.kadro)*100)/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</td><td>${(Math.round(x.days*100)/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</td></tr>`).join('');return head+body;}).join('');
+  const rows=stations.map(([station,items])=>{const values=Object.values(items).sort((a,b)=>trColl.compare(a.name,b.name));const head=`<tr class="station-summary-row"><td colspan="10">🏥 ${escapeHtml(station)} · ${values.length} personel</td></tr>`;const body=values.map(x=>`<tr><td>${escapeHtml(x.tc||'—')}</td><td>${escapeHtml(x.name||'Ad bilgisi yok')} ${x.isMulti?'<span class="badge b-coklu" title="Birden fazla istasyonda nöbet tutuyor">↔ Çoklu</span>':''}</td><td>${escapeHtml(x.branch||'—')}</td><td>${x.s12||'—'}</td><td>${x.s24||'—'}</td><td>${x.other?x.other.toLocaleString('tr-TR',{maximumFractionDigits:2}):'—'}</td><td>${x.kadro==null?'—':x.kadro.toLocaleString('tr-TR',{maximumFractionDigits:2})}</td><td><strong>${x.total.toLocaleString('tr-TR',{maximumFractionDigits:2})}</strong>${x.extra>0?`<div class="ozet-not" title="Başka istasyonlarda tuttuğu nöbetler asıl istasyonundaki toplamına eklenir; istasyon toplamlarını etkilemez">+${x.extra.toLocaleString('tr-TR',{maximumFractionDigits:2})} diğer ist.</div>`:''}${x.misafir?'<div class="ozet-not" title="Bu kişinin asıl istasyonu başkası; bu satırdaki saatler asıl istasyonundaki toplamına eklenir">↗ misafir</div>':''}</td><td class="fark-cell" style="font-weight:700;color:${x.kadro==null?'#64748b':(x.total-x.kadro<0?'#b91c1c':'#047857')}">${x.kadro==null?'—':(Math.round((x.total-x.kadro)*100)/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</td><td>${(Math.round(x.days*100)/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</td></tr>`).join('');return head+body;}).join('');
   wrap.innerHTML=`<div class="istasyon-personel-summary-table-wrap"><table class="istasyon-personel-summary-table"><thead><tr><th>TC NO</th><th>PERSONEL ADI SOYADI</th><th>BRANŞI</th><th>12 SAAT</th><th>24 SAAT</th><th>DİĞER SAATLER</th><th title="Aylık kadro süresi: memur hafta içi ×8 sa; işçi hafta içi+cumartesi ×7,5 sa; resmi tatil sayılmaz; izin/rapor günleri düşülür">ÇALIŞMA SAATİ</th><th>TOPLAM ÇALIŞMA SAAT</th><th title="Toplam çalışma saati − çalışma saati (kadro süresi)">FARK</th><th>TOPLAM GÜN</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -4817,10 +4891,11 @@ function renderIstasyonPersonelList(){
   const groups={};
   people.forEach(p=>p.duties.forEach(n=>{if(!groups[n.station])groups[n.station]={people:{},duties:0};if(!groups[n.station].people[p.personKey])groups[n.station].people[p.personKey]={...p,duties:[]};groups[n.station].people[p.personKey].duties.push(n);groups[n.station].duties++;}));
   const stations=Object.entries(groups).sort((a,b)=>trColl.compare(a[0],b[0]));
-  const duties=stations.flatMap(([,g])=>Object.values(g.people).flatMap(p=>p.duties));
-  summary.innerHTML=`<span class="istasyon-personel-chip">${stations.length} istasyon</span><span class="istasyon-personel-chip">${new Set(people.map(p=>p.personKey)).size} personel</span><span class="istasyon-personel-chip">${duties.length} nöbet</span><span class="istasyon-personel-chip">${duties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</span>`;
+  const allDuties=stations.flatMap(([,g])=>Object.values(g.people).flatMap(p=>p.duties));
+  const duties=allDuties.filter(n=>!n.refakat), refDuties=allDuties.filter(n=>n.refakat);
+  summary.innerHTML=`<span class="istasyon-personel-chip">${stations.length} istasyon</span><span class="istasyon-personel-chip">${new Set(people.map(p=>p.personKey)).size} personel</span><span class="istasyon-personel-chip">${duties.length} nöbet</span><span class="istasyon-personel-chip">${duties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</span>${refDuties.length?`<span class="istasyon-personel-chip" title="Refakatçi nöbetleri kişinin toplamına eklenir, istasyon toplamına eklenmez">+ ${refDuties.length} refakatçi nöbeti (${refDuties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat, istasyon toplamı dışı)</span>`:''}`;
   if(!stations.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>'; if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable(); return;}
-  const roleOrder={ef:1,ysp:2,sur:3};
+  const roleOrder={ef:1,ysp:2,sur:3,ref:4};
   list.innerHTML=stations.map(([station,g])=>{const stationPeople=Object.values(g.people).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));return `<section class="istasyon-personel-station-group"><div class="istasyon-personel-station-head"><div class="istasyon-personel-station-name">🏥 ${escapeHtml(station)}</div><div class="istasyon-personel-station-meta">${stationPeople.length} personel · ${g.duties} nöbet</div></div>${stationPeople.map(p=>{const total=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);const roleGroups={};p.duties.sort((a,b)=>(roleOrder[a.roleKey]||9)-(roleOrder[b.roleKey]||9)||(a.startMs||0)-(b.startMs||0)).forEach(n=>{if(!roleGroups[n.roleKey])roleGroups[n.roleKey]={label:n.role,items:[]};roleGroups[n.roleKey].items.push(n);});return `<div class="istasyon-personel-person-row"><div class="istasyon-personel-person-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')} ${p.isMulti?'<span class="badge b-coklu" title="Birden fazla istasyonda nöbet tutuyor">↔ Çoklu</span>':''}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${total.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div>${Object.values(roleGroups).map(r=>`<div class="istasyon-personel-role-line"><span class="istasyon-personel-role-label">${escapeHtml(r.label)}</span><div class="istasyon-personel-role-duties">${r.items.map(n=>`<div class="istasyon-personel-role-duty">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''} · <strong>${escapeHtml(n.duration||`${n.hours||'—'} saat`)}</strong></div>`).join('')}</div></div>`).join('')}</div>`}).join('')}</section>`}).join('');
   if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable();
 }
