@@ -1757,15 +1757,15 @@ const ashiDrive = (() => {
       const L = await listele();
       if (L.kontrol) await kontrolOku(pw, L);
       const sync = syncMap(), pub = pubMap();
-      // Otomatik eşitlemede yalnızca en güncel ay yoksa/değiştiyse iner; yerelde zaten bulunan aylar değişirse güncellenir.
-      // Diğer aylar kullanıcı seçerek (keys) indirilir.
+      // Otomatik eşitlemede (parola/kimlik parolası girilince veya değişince de) yalnızca en güncel ay iner.
+      // Diğer aylar kullanıcı seçerek (keys) indirilir/güncellenir.
       const kp = kimlikParola(), is = [], enGuncel = L[0] && L[0].ym;
       for (const f of L) {
         const yerel = await archiveGet(f.ym);
         const degisti = !sync[f.ym] || sync[f.ym].mod !== f.modifiedTime;
         const yildizli = !!kp && !!yerel && (Object.values(yerel.slots || {}).some(sl => sl && sl.anon) || !!yerel.izin?.anon);
         if (Array.isArray(keys)) { if (keys.includes(f.ym)) is.push(f); }
-        else if (yerel ? (degisti || yildizli) : f.ym === enGuncel) is.push(f);
+        else if (f.ym === enGuncel && (!yerel || degisti || yildizli)) is.push(f);   // otomatik: yalnızca en güncel ay; diğerleri seçilerek
       }
       const alinan = [], okunamayan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0, kimlikYok = 0;
       for (let i = 0; i < is.length; i++) {
@@ -1916,8 +1916,7 @@ function driveSaveApw() {
   if (!ashiDrive.parolaGuclu(pw)) { driveSetMsg('Kimlik parolası en az 12 karakter olmalı (en az 6 farklı karakter içermeli).', 'err'); return; }
   if (pw === ashiDrive.parola()) { driveSetMsg('Kimlik parolası ekip parolasından farklı olmalı.', 'err'); return; }
   ashiDrive.kimlikParolaAyarla(pw); driveApwDraft = null;
-  ashiDrive.LS.set('ashi_drive_sync', null);   // paketler yeniden indirilip açılsın
-  driveSetMsg('Kimlik parolası kaydedildi. Aylar yeniden alınıyor…', 'ok');
+  driveSetMsg('Kimlik parolası kaydedildi. En güncel ay yeniden alınıyor; diğer ayları aşağıdan seçerek güncelleyebilirsiniz.', 'ok');
   renderArchivePanel();
   driveSync(true);
 }
@@ -2051,7 +2050,7 @@ function driveHtml(records) {
           <div class="arc-pick-months">${AYK.map((n, i) => {
             const ym = `${y}-${String(i + 1).padStart(2, '0')}`;
             if (!driveRemote.includes(ym)) return `<span class="arc-pick-m off">${n}</span>`;
-            if (localKeys.has(ym)) return `<span class="arc-pick-m done" title="Bu cihazda var">${n} ✓</span>`;
+            if (localKeys.has(ym)) return `<button type="button" class="arc-pick-m done${driveSel.has(ym) ? ' sel' : ''}" title="Bu cihazda var; seçip eşitlerseniz Drive’daki güncel hâliyle (ör. kimlikler açık) yenilenir" onclick="drivePickToggle('${ym}')">${n} ✓</button>`;
             return `<button type="button" class="arc-pick-m${driveSel.has(ym) ? ' sel' : ''}" onclick="drivePickToggle('${ym}')">${n}</button>`;
           }).join('')}</div></div>`;
       }).join('')}
@@ -2436,6 +2435,7 @@ function processFile(file) {
         komuta: buildSpecialDutyList(specialReportValid, 'komuta', tcBransLookup),
         bashekimlik: buildSpecialDutyList(specialReportValid, 'bashekimlik', tcBransLookup)
       };
+      try { specialDutyLists.mesai = ashiBuildMesaiList(sourceRows, tcBransLookup); } catch (e) { console.warn('Eğitim/koordinasyon kayıtları okunamadı', e); specialDutyLists.mesai = []; }
       izinRaporRecords = [];
       izinRaporFileName = '';
       updateIzinRaporButton();
@@ -4612,6 +4612,28 @@ function ashiRefakatExtra() {
   })));
   return out;
 }
+// Eğitim ve Koordinasyon Sorumlusu kayıtları: yalnızca Nöbet Döküm Cetveli'nde kullanılır (istasyon/personel toplamlarına işlenmez).
+function ashiBuildMesaiList(rows, bransLookup) {
+  const out = [], seen = new Set();
+  (rows || []).forEach(r => {
+    const gorev = getGorev(r);
+    const tur = /e[ğg]itim/i.test(gorev) ? 'egitim' : (/koordinasyon/i.test(gorev) ? 'koord' : '');
+    if (!tur) return;
+    const sd = getBasDateTime(r), ed = getBitisDateTime(r);
+    const startMs = sd ? sd.getTime() : null, rawEnd = ed ? ed.getTime() : null;
+    if (!Number.isFinite(startMs)) return;
+    let saat = parseSure(getSure(r));
+    if (saat == null && Number.isFinite(rawEnd) && rawEnd > startMs) saat = (rawEnd - startMs) / EXCEL_HOUR_MS;
+    if (!(saat > 0)) return;
+    const endMs = Number.isFinite(rawEnd) && rawEnd > startMs ? rawEnd : startMs + saat * EXCEL_HOUR_MS;
+    const tc = getTCKN(r);
+    const k = `${tc || getAd(r) + getSoyad(r)}|${tur}|${startMs}|${endMs}`;
+    if (seen.has(k)) return; seen.add(k);
+    out.push({tc, ad:getAd(r), soyad:getSoyad(r), ist:getIstasyon(r), brans:getKadroBrans(r) || (bransLookup && bransLookup[tc]) || '', gorev, tur, saat, startMs, endMs,
+      istihdam:getRowExtra(r,'istihdam'), unvan:getRowExtra(r,'unvan'), il:getRowExtra(r,'il'), ofBrans:getRowExtra(r,'ofBrans')});
+  });
+  return out;
+}
 function getIstasyonPersonelRows() {
   const people = {};
   Object.entries(ISTASYON_PERSONEL_ROLE_LABELS).forEach(([gKey, roleLabel]) => {
@@ -4775,6 +4797,17 @@ function buildDokumCetveliAoa() {
     const dk = `${n.startMs}|${n.endMs}`;
     if (!x.duties.has(dk)) { x.duties.set(dk, {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) || n.hours, ist:n.ist}); x.istCount[n.ist] = (x.istCount[n.ist] || 0) + 1; }
   });
+  ((specialDutyLists || {}).mesai || []).forEach(n => {
+    const tc = String(n.tc || '').trim();
+    const personKey = tc ? 'tc:' + tc : 'name:' + `${n.ad || ''}|${n.soyad || ''}`.trim().toLocaleUpperCase('tr-TR');
+    let x = people[personKey] || (tc && people[tc]) || Object.values(people).find(q => tc && q.tc === tc);
+    if (!x) {
+      x = people[personKey] = {tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans, istCount:{}, duties:new Map()};
+      if (n.ist) x.istCount[n.ist] = 1;
+    }
+    if (!x.istihdam && n.istihdam) x.istihdam = n.istihdam;
+    (x.mesai = x.mesai || []).push(n);
+  });
   const list = Object.values(people).map(x => {
     const asil = x.asilIst || Object.keys(x.istCount).sort((a,b) => x.istCount[b] - x.istCount[a])[0] || '';
     return {...x, asil};
@@ -4795,15 +4828,27 @@ function buildDokumCetveliAoa() {
       cells[dt.getUTCDate() - 1].push(dokumCellCode(d.hours, d.startMs));
       total += d.hours; night += dokumNightHours(d.startMs, d.endMs);
     });
+    let egHi = 0, egHs = 0;
+    (x.mesai || []).slice().sort((a,b) => a.startMs - b.startMs).forEach(m => {
+      const dt = new Date(m.startMs);
+      if (dt.getUTCFullYear() !== year || dt.getUTCMonth() + 1 !== month) return;
+      const h = Math.round(m.saat * 100) / 100, txt = Number.isInteger(h) ? String(h) : String(h).replace(',', '.');
+      if (m.tur === 'koord') { cells[dt.getUTCDate() - 1].push(`${txt} K`); total += h; night += dokumNightHours(m.startMs, m.endMs); }
+      else { cells[dt.getUTCDate() - 1].push(`${txt} E`); const wd = dt.getUTCDay(); if (wd === 0 || wd === 6) egHs += h; else egHi += h; }
+    });
     const row = [i + 1, x.tc, `${x.ad} ${x.soyad}`.trim(), x.il || 'MANİSA', x.asil, ' ', 'İASB İstasyon', x.istihdam, x.unvan, x.ofBrans || x.brans];
     cells.forEach(c => row.push(c.join('\n')));
     const r2 = v => Math.round(v * 100) / 100;
     const tailVals = DOKUM_TAIL_HEADERS.map(() => '');
     const kadro = ashiKadroSaati(x.tc, x.istihdam, info);
     tailVals[0] = kadro;       // Kadro Süresi (*)
-    tailVals[1] = r2(total);   // Çalışma Süresi (*)
+    const egT = egHi + egHs;   // Eğitim mesaisi: nöbet dışı; koordinasyon nöbet süresine dahil
+    tailVals[1] = r2(total);   // Çalışma Süresi (*) — eğitim etkilemez
     tailVals[2] = r2(total - kadro);   // Fark (*)
-    tailVals[3] = r2(total);   // Nöbet Çalışma Süresi
+    tailVals[3] = r2(total);   // Nöbet Çalışma Süresi (koordinasyon dahil)
+    tailVals[4] = r2(egT);     // Nöbet Dışı Toplam Mesai Süresi (eğitim)
+    tailVals[DOKUM_TAIL_HEADERS.indexOf('Hafta İçi Eğitim  Mesaisi Toplamı')] = r2(egHi);
+    tailVals[DOKUM_TAIL_HEADERS.indexOf('Hafta Sonu Eğitim Mesaisi Toplamı')] = r2(egHs);
     tailVals[5] = r2(night);   // 20.00 ile 08.00 arası çalışma süresi
     Object.entries(izg.counts).forEach(([alan, n]) => { const ti = DOKUM_TAIL_HEADERS.indexOf(alan); if (ti >= 0) tailVals[ti] = n; });
     tailVals.forEach(v => row.push(v));
