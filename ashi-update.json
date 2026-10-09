@@ -1,6 +1,6 @@
 {
-  "version": "02.04",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.04.html",
-  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.04.html",
-  "notes": "v02.04: Arşiv yeniden tasarlandı (yıl filtreli tablo, her aydan Ay Başı + Ay Sonu Excel'i, yüklerken seçim penceresi, ay sınırı kaldırıldı); izin/muafiyet dosyası arşive alındı ve ay açılınca otomatik gelir; Ortak Arşiv (Google Drive): parola korumalı, TC ve ad-soyad yıldızlı paketlerle yayınla/eşitle; JSON yedek al/yükle; yeni Arşiv sekmesi; sınır ay verisi Ay Sonu/Ay Başı önceliğiyle arşivden otomatik alınır; yükleme seçim penceresi görünürlük düzeltmesi."
+  "version": "02.05",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.05.html",
+  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.05.html",
+  "notes": "v02.05: Drive Ortak Arşiv yönetici girişli düzene alındı (normal kullanıcı yalnızca parola + Şimdi eşitle; yayınlama, klasör ve otomatik yayın yönetici girişiyle açılır); Kılavuz arşiv notu güncellendi."
 }
