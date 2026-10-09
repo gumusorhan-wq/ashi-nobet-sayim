@@ -1,6 +1,6 @@
 {
-  "version": "02.05",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.05.html",
-  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.05.html",
-  "notes": "v02.05: Drive Ortak Arşiv yönetici girişli düzene alındı (normal kullanıcı yalnızca parola + Şimdi eşitle; yayınlama, klasör ve otomatik yayın yönetici girişiyle açılır); Kılavuz arşiv notu güncellendi."
+  "version": "02.06",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.06.html",
+  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.06.html",
+  "notes": "v02.06: Personel Özeti'ne ÇALIŞMA SAATİ (kadro süresi: memur 8 sa hafta içi, işçi 7,5 sa hafta içi+cumartesi, resmi tatil/arife ve izin-rapor dahil) ve FARK sütunları; Nöbet Döküm Cetveli sayfası (Kadro Süresi/Fark dolu); arşiv tablosu tek satır; Drive paylaşım izni onarımı ve 'Hepsini yeniden yayınla'; ayrı kimlik parolasıyla gerçek TC/ad-soyad görme."
 }
