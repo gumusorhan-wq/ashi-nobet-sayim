@@ -1729,14 +1729,14 @@ const ashiDrive = (() => {
       if (L.kontrol) await coz(await indir(L.kontrol.id), pw);
       const sync = syncMap(), pub = pubMap();
       const is = L.filter(f => !sync[f.ym] || sync[f.ym].mod !== f.modifiedTime);
-      const alinan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0;
+      const alinan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0, kimlikYok = 0;
       for (let i = 0; i < is.length; i++) {
         const f = is[i];
         onIlerleme && onIlerleme(`${f.ym} indiriliyor (${i + 1}/${is.length})…`);
         let p = await coz(await indir(f.id), pw);
         if (!p || p.key !== f.ym || !p.slots) throw new Error(f.ym + ': paket içeriği geçersiz');
         const ac = await paketiAc(p);
-        if (ac.acildi) acilan++; else if (ac.yanlis) kimlikYanlis = true; else if (ac.var) kimlikKapali++;
+        if (ac.acildi) acilan++; else if (ac.yanlis) kimlikYanlis = true; else if (!ac.var && ashiDrive.kimlikParola()) kimlikYok++; else if (ac.var) kimlikKapali++;
         p = ac.p;
         const merged = birlestir(await archiveGet(f.ym), p);
         await archivePut(merged);
@@ -1746,7 +1746,7 @@ const ashiDrive = (() => {
       }
       LS.set('ashi_drive_sync', JSON.stringify(sync));
       LS.set('ashi_drive_pub', JSON.stringify(pub));
-      return {liste:L, alinan, acilan, kimlikYanlis, kimlikKapali};
+      return {liste:L, alinan, acilan, kimlikYanlis, kimlikKapali, kimlikYok};
     })();
     try { return await KILIT; } finally { KILIT = null; }
   }
@@ -1841,10 +1841,12 @@ async function driveSync(silent) {
   try {
     driveSetMsg('Ortak arşiv kontrol ediliyor…', '');
     const r = await ashiDrive.esitle(pw, m => driveSetMsg('⬇ ' + m, ''));
-    const kimlikNot = r.acilan ? ` · ${r.acilan} ayda kimlik açıldı` : (r.kimlikYanlis ? ' · Kimlik parolası yanlış, yıldızlı kaldı' : '');
+    const kimlikNot = r.acilan ? ` · ${r.acilan} ayda kimlik açıldı` : (r.kimlikYanlis ? ' · Kimlik parolası yanlış, yıldızlı kaldı' : (r.kimlikYok ? ` · ${r.kimlikYok} pakette kimlik tablosu yok: yönetici kimlik parolasını kaydedip “Hepsini yeniden yayınla”ya basmalı` : ''));
     driveSetMsg(r.alinan.length ? `Drive’dan ${r.alinan.length} ay alındı: ${r.alinan.join(', ')}${kimlikNot}` : (r.liste.length ? `Drive’da ${r.liste.length} aylık paket var (${r.liste.map(f => f.ym).join(', ')}); yerel arşiv zaten güncel.` : 'Drive klasöründe henüz ASHİ arşiv paketi yok (klasör: …' + ashiDrive.klasor().slice(-6) + ').'), 'ok');
     await renderArchivePanel();
-    if (r.alinan.length && archiveKeyFromInfo(reportMonthInfo)) autoFillBoundaryFromArchive();
+    // Açık olan arşiv ayı güncellendiyse (ör. kimlikler açıldıysa) ekrandaki rapor yeniden yüklenir.
+    if (archiveActiveKey && r.alinan.includes(archiveActiveKey)) await loadArchivedMonth(archiveActiveKey, archiveActiveSlot);
+    else if (r.alinan.length && archiveKeyFromInfo(reportMonthInfo)) autoFillBoundaryFromArchive();
   } catch (err) {
     console.warn('[ortak arşiv]', err);
     if (err && err.parola) ashiDrive.parolaAyarla(null, false);
@@ -2064,7 +2066,7 @@ function isIstasyon(row) { const c=window.__ci; return /İstasyon/i.test(String(
 // Görev eşleştirme
 const GOREV_MAP = {
   ef:  r => /Ekip Sorumlusu/i.test(getGorev(r)),
-  ysp: r => /Yardımcı Sağlık Personeli/i.test(getGorev(r)),
+  ysp: r => /Yardımcı Sağlık Personeli|Refakat[çc][ıi]/i.test(getGorev(r)),   // Refakatçi nöbetleri de YSP listesinde sayılır
   sur: r => /Sürücü/i.test(getGorev(r)),
 };
 
@@ -2326,7 +2328,16 @@ function parseLeaveNumber(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+// İzin/rapor verisi değiştiğinde istasyon personel listesi/özeti (çalışma saati, fark) güncel veriyle yeniden çizilir.
+function refreshIstasyonPersonelViews() {
+  try {
+    if (!document.getElementById('istasyonPersonelList')) return;
+    renderIstasyonPersonelList();
+    if (document.getElementById('istasyonPersonelSummaryTab')?.classList.contains('active')) renderIstasyonPersonelSummaryTable();
+  } catch (err) { console.warn('İstasyon personel görünümü yenilenemedi:', err); }
+}
 function updateIzinRaporButton() {
+  setTimeout(refreshIstasyonPersonelViews, 0);
   const btn = document.querySelector('button[onclick="openIzinRaporPicker()"]');
   if (!btn) return;
   btn.textContent = izinRaporRecords.length
@@ -2770,8 +2781,9 @@ function buildPersonelList(rows, tcAsilIst, tcIstAll) {
     // Duplikat kontrolü: aynı kişi + istasyon + başlangıç zamanı + süre → atla
     const key = `${ist}|${startMs ?? bas}|${sure_raw}`;
     if (tcMap[personKey].nobetler.some(n => n.key === key)) return;
+    const refakat = /refakat/i.test(getGorev(r));   // Refakatçi: kişiye sayılır, istasyon toplamlarına/kapsama analizine işlenmez
     tcMap[personKey].nobetler.push({
-      ist, saat, bas, sure_raw, key,
+      ist, saat, bas, sure_raw, key, ...(refakat ? {refakat:true} : {}),
       startMs, endMs,
       basNum:startMs, bitisNum:endMs,
       basRaw:startDate ? formatDateTime(startDate) : bas,
@@ -4043,7 +4055,7 @@ function buildIstasyonData(gorev) {
   govrevler.forEach(g => {
     (allData[g] || []).forEach(p => {
       (p.nobetler || []).forEach(n => {
-        if (!n.ist || n.saat == null) return;
+        if (!n.ist || n.saat == null || n.refakat) return;
         const startMs = n.startMs;
         const endMs = n.endMs != null ? n.endMs : (startMs != null && n.saat != null ? startMs + n.saat * EXCEL_HOUR_MS : null);
         const effectiveHours = clipIntervalToReportMonth(startMs, endMs, monthInfo);
@@ -4436,6 +4448,33 @@ function getFilteredIstasyonPersonelRows(){
 // NÖBET DÖKÜM CETVELİ (Excel sayfası) — her kişi yalnızca ASIL İSTASYONUNDA tek satır;
 // başka istasyonlarda tuttuğu nöbetler de asıl istasyonundaki satırına yazılır. İstasyonlar alt alta sıralanır.
 // ═══════════════════════════════════════════════════════════
+// İzin/rapor günlerini gün gün çıkarır (Döküm Cetveli için). Memur: takvim günü olarak (hafta sonu dahil);
+// İşçi: pazar ve resmi tatil günleri sayılmaz. Hücre kodu "1 <kod>": Yİ yıllık, HeR rapor, Eİ evlilik, Çİ çalışma izni, Sİ diğer sosyal izin.
+function ashiIzinTuru(type) {
+  const t = String(type || '').toLocaleLowerCase('tr-TR');
+  if (/y[ıi]ll[ıi]k/.test(t)) return {kod:'Yİ', alan:'Yıllık İzin Gün Sayısı'};
+  if (/rapor|hastal|istirahat|ana?l[ıi]k|do[ğg]um/.test(t)) return {kod:'HeR', alan:'Raporlu Gun Sayisi'};
+  if (/çal[ıi][şs]ma\s*izn|calisma\s*izn/.test(t)) return {kod:'Çİ', alan:'Çalışma İzinli Gün Sayısı'};
+  if (/evlilik/.test(t)) return {kod:'Eİ', alan:'Sosyal Izinli Gun Sayisi'};
+  return {kod:'Sİ', alan:'Sosyal Izinli Gun Sayisi'};
+}
+function ashiIzinGunleri(tc, istihdam, info) {
+  const days = new Date(Date.UTC(info.year, info.month, 0)).getUTCDate();
+  const isci = ashiIsIsci(istihdam), tcN = normalizeTcValue(tc);
+  const leaves = tcN ? (izinRaporRecords || []).filter(r => r.tc === tcN) : [];
+  const perDay = Array.from({length:days}, () => ''), counts = {};
+  if (!leaves.length) return {perDay, counts};
+  for (let i = 1; i <= days; i++) {
+    const ds = Date.UTC(info.year, info.month - 1, i), de = ds + 86400000;
+    if (isci) { const dow = new Date(ds).getUTCDay(), w = ASHI_RESMI_TATIL[new Date(ds).toISOString().slice(0, 10)]; if (dow === 0 || w === 0) continue; }
+    const rec = leaves.filter(r => r.startMs < de && r.endMs > ds).sort((a, b) => a.startMs - b.startMs)[0];
+    if (!rec) continue;
+    const t = ashiIzinTuru(rec.type);
+    perDay[i - 1] = '1 ' + t.kod;
+    counts[t.alan] = (counts[t.alan] || 0) + 1;
+  }
+  return {perDay, counts};
+}
 const DOKUM_TAIL_HEADERS = ["Kadro Süresi (*)", "Çalışma Süresi (*)", "Fark (*)", "Nöbet Çalışma Süresi", "Nöbet Dışı Toplam Mesai Süresi", "20.00 ile 08.00 Saatleri Arası Çalışma Süresi", "Aylık Kadro Süresini Tamamladıktan Sonraki Nöbetlerinin 20.00 ile 08.00 Saatleri Arası Çalışma Saati", "Aylık Kadro Süresini Tamamladıktan Sonraki Milli ve Dini Bayram Nöbetlerinin (Arife Dahil) 20.00 ile 08.00 Saatleri Arası Çalışma Saati", "Yıllık İzin Gün Sayısı", "Raporlu Gun Sayisi", "Sosyal Izinli Gun Sayisi", "Çalışma İzinli Gün Sayısı", "Dini Bayram", "Milli Bayram", "Resmi Tatil", "Hafta İçi Eğitim  Mesaisi Toplamı", "Hafta Sonu Eğitim Mesaisi Toplamı", "Önceki Ay Fark", "Yıllık Toplam Fark"];
 const DOKUM_AY_ADLARI = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const DOKUM_GUN_ADLARI = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
@@ -4490,6 +4529,8 @@ function buildDokumCetveliAoa() {
   const rows = [header];
   list.forEach((x, i) => {
     const cells = Array.from({length:days}, () => []);
+    const izg = ashiIzinGunleri(x.tc, x.istihdam, info);
+    izg.perDay.forEach((c, di) => { if (c) cells[di].push(c); });
     let total = 0, night = 0;
     [...x.duties.values()].sort((a,b) => a.startMs - b.startMs).forEach(d => {
       const dt = new Date(d.startMs);
@@ -4507,6 +4548,7 @@ function buildDokumCetveliAoa() {
     tailVals[2] = r2(total - kadro);   // Fark (*)
     tailVals[3] = r2(total);   // Nöbet Çalışma Süresi
     tailVals[5] = r2(night);   // 20.00 ile 08.00 arası çalışma süresi
+    Object.entries(izg.counts).forEach(([alan, n]) => { const ti = DOKUM_TAIL_HEADERS.indexOf(alan); if (ti >= 0) tailVals[ti] = n; });
     tailVals.forEach(v => row.push(v));
     rows.push(row);
   });
@@ -4726,7 +4768,7 @@ function buildAnalizData(force=false) {
     (allData[gKey] || []).forEach(p => {
       (p.nobetler || []).forEach(n => {
         const station = String(n.ist || '').trim();
-        if (!station || n.saat == null) return;
+        if (!station || n.saat == null || n.refakat) return;
         const startMs = n.startMs;
         const endMs = n.endMs != null ? n.endMs : (startMs != null ? startMs + Number(n.saat) * EXCEL_HOUR_MS : null);
         distributeDutyInterval(startMs, endMs, (windowStartMs, hours, overlapStartMs, overlapEndMs) => {
