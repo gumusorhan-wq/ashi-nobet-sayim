@@ -1,6 +1,6 @@
 {
-  "version": "02.03",
-  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.03.html",
-  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.03.html",
-  "notes": "v02.03: Sınır ay otomatik arşiv desteği (5+ Gün Boşluk, Sürücü/Tüm Personel Nöbet Analizi ve Nöbete Uygun Personel Bul ay sınırındaki önceki/sonraki ay nöbetlerini yerel arşivden otomatik alır); Çoklu İstasyon Analizi (Tüm Personel) branş rozetleriyle tıklanabilir filtreleme; nöbet branşı/istasyon filtre düzeltmeleri; buton düzeni ve isimlendirme güncellemeleri."
+  "version": "02.04",
+  "downloadUrl": "https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/HUSERASHI%CC%87NO%CC%88BETSAYIMRAPORUv02.04.html",
+  "fileName": "HUSERASHİNÖBETSAYIMRAPORUv02.04.html",
+  "notes": "v02.04: Arşiv yeniden tasarlandı (yıl filtreli tablo, her aydan Ay Başı + Ay Sonu Excel'i, yüklerken seçim penceresi, ay sınırı kaldırıldı); izin/muafiyet dosyası arşive alındı ve ay açılınca otomatik gelir; Ortak Arşiv (Google Drive): parola korumalı, TC ve ad-soyad yıldızlı paketlerle yayınla/eşitle; JSON yedek al/yükle; yeni Arşiv sekmesi; sınır ay verisi Ay Sonu/Ay Başı önceliğiyle arşivden otomatik alınır; yükleme seçim penceresi görünürlük düzeltmesi."
 }
