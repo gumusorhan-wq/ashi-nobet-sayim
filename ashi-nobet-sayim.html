@@ -369,6 +369,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .arc-pick-count.ok{color:#047857}.arc-pick-count.warn{color:#b45309}
   .arc-drive-dtbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
   .arc-drive-dtbl th,.arc-drive-dtbl td{border-bottom:1px solid #e2e8f0;padding:4px 6px;text-align:left}
+  .arc-drive-dtbl tr.yil td{background:#f0f9ff;padding:6px}.arc-drive-dtbl tr.yil button{margin-left:8px;font-size:11px;padding:2px 8px}.arc-drive-yok{color:#047857;font-weight:700;margin-left:8px}
   .arc-drive-dtbl tr.ok td:last-child{color:#047857;font-weight:700}.arc-drive-dtbl tr.warn td:last-child{color:#b45309;font-weight:700}.arc-drive-dtbl tr.info td:last-child{color:#0369a1;font-weight:700}
   .arc-pick-m.done{background:#ecfdf5;border-color:#a7f3d0;color:#047857;cursor:default}
   .arc-pick-m.off{opacity:.35;cursor:default}
@@ -702,7 +703,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span>Ekip parolası girildiğinde Drive’daki <strong>en güncel ay otomatik iner</strong> (Eşitle’ye basmak gerekmez). Diğer aylar “Drive’daki aylar” bölümünden seçilip <strong>Seçilenleri eşitle</strong> ile indirilir veya güncellenir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span>Ortak arşivde TC kimlik no yıldızlanır, ad/soyad yalnızca ilk harfle görünür; paketler ekip parolasıyla AES-256 şifrelenir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span><strong>Kimlik parolası</strong> girilirse gerçek TC ve ad-soyad görünür. Girildiğinde veya değiştirildiğinde yalnızca en güncel ay yeniden yüklenir; eski aylar seçilerek yenilenir. Ekip ve kimlik parolası farklı olmalıdır (en az 12 karakter)</li>
-              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span><strong>Ay durumları</strong> tablosu her ay için yerel kayıt ile Drive güncelleme zamanını karşılaştırır: <strong>✓ Güncel</strong>, <strong>⟳ Drive’da daha yeni: güncellenmeli</strong>, <strong>⬆ Yerel daha yeni: Drive’a yayınlanmalı</strong> veya <strong>⬇ Drive’da var, bu cihazda yok</strong>. “Güncellenmesi gerekenleri eşitle” düğmesi gerekli ayları tek seferde indirir</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span><strong>Ay durumları</strong> tablosu her ay için yerel kayıt ile Drive güncelleme zamanını karşılaştırır: <strong>✓ Güncel</strong>, <strong>⟳ Drive’da daha yeni: güncellenmeli</strong>, <strong>⬆ Yerel daha yeni: Drive’a yayınlanmalı</strong> veya <strong>⬇ Drive’da var, bu cihazda yok</strong>. Her yılın başlığındaki <strong>yılı eşitle</strong> düğmesi ve ay seçimindeki <strong>Tüm yıl</strong> düğmesi o yılın aylarını topluca işler. Yeni sürümle açıldığında eski yapıda kaydedilmiş yerel aylar, Drive’da yeni yapıda varsa kendiliğinden yenilenir; Drive’da da eski ise ay durumunda uyarı görünür ve nöbet dosyasının yeniden yüklenmesi gerekir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span>Yönetici bölümü iki açılır başlıktır: <strong>aylarımı ortak arşive yayınla</strong> (Drive’a Yayınla, otomatik yayınla, Hepsini yeniden yayınla, Klasör) ve <strong>ekip/kimlik parolasını değiştir / sıfırla</strong></li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span>Parolayı biliyorsanız tüm aylar yeni parolayla yeniden şifrelenir; bilinmiyorsa “mevcut parola” boş bırakılıp ham verili aylar yeni parolayla yayınlanır</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#15803d;font-weight:700">→</span>Drive dosyaları “bağlantıya sahip herkes – görüntüleyen” olarak paylaşılmalıdır; paylaşım hataları ekranda bildirilir. “Hepsini yeniden yayınla” izinleri onarır</li>
@@ -1276,6 +1277,9 @@ function archiveShortDate(value) {
 }
 // Arşiv ay sınırı yok; eski aylar otomatik silinmez.
 async function pruneArchive() { return archiveGetAll(); }
+// Eğitim/koordinasyon okumasından (v02.06) önce kaydedilmiş slotlarda specialDutyLists.mesai hiç yoktur.
+function ashiSlotEski(slot) { return !!slot && !(slot.specialDutyLists && Array.isArray(slot.specialDutyLists.mesai)); }
+function ashiKayitEski(rec) { return !!rec && Object.values(rec.slots || {}).some(sl => ashiSlotEski(sl)); }
 function makeArchiveSlot(fileName) {
   return {
     sourceFileName: String(fileName || currentSourceFileName || '').trim(),
@@ -1790,7 +1794,7 @@ const ashiDrive = (() => {
     const out = local ? {...local, slots:{...(local.slots || {})}} : {key:remote.key, reportMonthInfo:remote.reportMonthInfo, savedAt:remote.savedAt, slots:{}, izin:null};
     ['basi','sonu'].forEach(sl => {
       const r = remote.slots?.[sl], l = out.slots[sl];
-      if (r && (!l || String(r.savedAt || '') > String(l.savedAt || '') || (l.anon && !r.anon && String(r.savedAt || '') >= String(l.savedAt || '')) || (zorla && String(r.savedAt || '') >= String(l.savedAt || '') && !(r.anon && !l.anon)))) out.slots[sl] = r;
+      if (r && (!l || String(r.savedAt || '') > String(l.savedAt || '') || (l.anon && !r.anon && String(r.savedAt || '') >= String(l.savedAt || '')) || (zorla && String(r.savedAt || '') >= String(l.savedAt || '') && !(r.anon && !l.anon)) || (ashiSlotEski(l) && !ashiSlotEski(r) && String(r.savedAt || '') >= String(l.savedAt || '') && !(r.anon && !l.anon)))) out.slots[sl] = r;
     });
     if (remote.izin && (!out.izin || String(remote.izin.savedAt || '') > String(out.izin.savedAt || '') || (out.izin.anon && !remote.izin.anon && String(remote.izin.savedAt || '') >= String(out.izin.savedAt || '')) || (zorla && String(remote.izin.savedAt || '') >= String(out.izin.savedAt || '') && !(remote.izin.anon && !out.izin.anon)))) out.izin = remote.izin;
     if (!out.reportMonthInfo) out.reportMonthInfo = remote.reportMonthInfo;
@@ -1805,13 +1809,14 @@ const ashiDrive = (() => {
       const sync = syncMap(), pub = pubMap();
       // Otomatik eşitlemede (parola/kimlik parolası girilince veya değişince de) yalnızca en güncel ay iner.
       // Diğer aylar kullanıcı seçerek (keys) indirilir/güncellenir.
-      const kp = kimlikParola(), is = [], enGuncel = L[0] && L[0].ym;
+      const kp = kimlikParola(), is = [], enGuncel = L[0] && L[0].ym, eskiDeneme = jget('ashi_drive_eski', {});
       for (const f of L) {
         const yerel = await archiveGet(f.ym);
         const degisti = !sync[f.ym] || sync[f.ym].mod !== f.modifiedTime;
         const yildizli = !!kp && !!yerel && (Object.values(yerel.slots || {}).some(sl => sl && sl.anon) || !!yerel.izin?.anon);
         if (Array.isArray(keys)) { if (keys.includes(f.ym)) is.push(f); }
-        else if (f.ym === enGuncel && (!yerel || degisti || yildizli)) is.push(f);   // otomatik: yalnızca en güncel ay; diğerleri seçilerek
+        else if (f.ym === enGuncel && (!yerel || degisti || yildizli)) is.push(f);   // otomatik: en güncel ay
+        else if (yerel && ashiKayitEski(yerel) && eskiDeneme[f.ym] !== ASHI_APP_VERSION) { is.push(f); eskiDeneme[f.ym] = ASHI_APP_VERSION; }   // yeni sürüm: eski yapıdaki yerel aylar Drive'daki yeni yapıyla bir kez yenilenir
       }
       const alinan = [], okunamayan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0, kimlikYok = 0;
       for (let i = 0; i < is.length; i++) {
@@ -1833,6 +1838,7 @@ const ashiDrive = (() => {
       }
       LS.set('ashi_drive_sync', JSON.stringify(sync));
       LS.set('ashi_drive_pub', JSON.stringify(pub));
+      LS.set('ashi_drive_eski', JSON.stringify(eskiDeneme));
       return {liste:L, alinan, acilan, kimlikYanlis, kimlikKapali, kimlikYok, enGuncel, okunamayan};
     })();
     try { return await KILIT; } finally { KILIT = null; }
@@ -1999,11 +2005,15 @@ async function driveChangePw() {
 }
 function drivePickToggle(ym) { driveSel.has(ym) ? driveSel.delete(ym) : driveSel.add(ym); renderArchivePanel(); }
 async function drivePickYear(y) {
-  const yerel = new Set((await archiveGetAll()).map(x => x.key));
-  const ind = driveRemote.filter(ym => ym.startsWith(y) && !yerel.has(ym));
+  const ind = driveRemote.filter(ym => ym.startsWith(y));
   const hepsi = ind.every(ym => driveSel.has(ym));
   ind.forEach(ym => hepsi ? driveSel.delete(ym) : driveSel.add(ym));
   renderArchivePanel();
+}
+async function driveSyncYear(y) {
+  const recs = new Map((await archiveGetAll()).map(r => [r.key, r]));
+  const keys = Object.keys(driveRemoteMod).filter(ym => ym.startsWith(y) && driveAyDurum(ym, recs.get(ym), driveRemoteMod[ym]).gunc);
+  if (keys.length) driveSync(false, keys);
 }
 function driveDownloadSelected() { return driveSel.size ? driveSync(false, [...driveSel]) : undefined; }
 function driveForgetPw() { ashiDrive.parolaAyarla(null, false); drivePwDraft = null; driveSetMsg('Parola bu cihazdan silindi.', 'ok'); renderArchivePanel(); }
@@ -2073,6 +2083,11 @@ function driveAutoPublish(key) {
   } catch (err) { console.warn(err); }
 }
 function driveAyDurum(ym, rec, remoteMod) {
+  const d = driveAyDurum0(ym, rec, remoteMod);
+  if (rec && ashiKayitEski(rec) && d.k === 'ok') return {k:'warn', t:'⚠ Eski sürümle kaydedilmiş: eğitim/koordinasyon yok. Nöbet dosyasını yeniden yükleyin', gunc:false};
+  return d;
+}
+function driveAyDurum0(ym, rec, remoteMod) {
   const sy = ashiDrive.syncMap()[ym];
   const bekl = !!rec && ashiDrive.bekleyenler([rec]).length > 0;
   if (remoteMod && rec) {
@@ -2105,7 +2120,11 @@ function driveDurumHtml(records) {
   return `<details class="arc-drive-durum"${sorunlu ? ' open' : ''}>
       <summary>📊 Ay durumları: online ↔ yerel <span class="arc-pick-count${sorunlu ? ' warn' : ' ok'}">${escapeHtml(ozet)}</span></summary>
       <table class="arc-drive-dtbl"><thead><tr><th>Ay</th><th>Yerel kayıt</th><th>Drive güncelleme</th><th>Durum</th></tr></thead><tbody>${
-        rows.map(r => `<tr class="${r.d.k}"><td><b>${escapeHtml(r.ym)}</b></td><td>${r.rec ? escapeHtml(driveFmtTime(r.rec.savedAt)) : '—'}</td><td>${escapeHtml(driveFmtTime(driveRemoteMod[r.ym]))}</td><td>${escapeHtml(r.d.t)}</td></tr>`).join('')
+        [...new Set(rows.map(r => r.ym.slice(0, 4)))].map(y => {
+          const yr = rows.filter(r => r.ym.startsWith(y)), ng = yr.filter(r => r.d.gunc).length;
+          return `<tr class="yil"><td colspan="4"><b>${y}</b> · ${yr.length} ay ${ng ? `<button type="button" class="pri" onclick="driveSyncYear('${y}')">⟳ ${y} yılını eşitle (${ng} ay)</button>` : (yr.every(r => r.d.k === 'ok') ? '<span class="arc-drive-yok">✓ yıl güncel</span>' : '')}</td></tr>` +
+            yr.map(r => `<tr class="${r.d.k}"><td><b>${escapeHtml(r.ym)}</b></td><td>${r.rec ? escapeHtml(driveFmtTime(r.rec.savedAt)) : '—'}</td><td>${escapeHtml(driveFmtTime(driveRemoteMod[r.ym]))}</td><td>${escapeHtml(r.d.t)}</td></tr>`).join('');
+        }).join('')
       }</tbody></table>
       ${guncSay ? `<div class="arc-drive-row"><button type="button" class="pri" onclick="driveUpdateAll()">⟳ Güncellenmesi gerekenleri eşitle (${guncSay})</button><span class="arc-drive-note" style="margin:0">Drive’da daha yeni olan veya bu cihazda bulunmayan aylar indirilir.</span></div>` : ''}
     </details>`;
@@ -2142,7 +2161,7 @@ function driveHtml(records) {
       <summary>📥 Drive’daki aylar: seçerek indir <span class="arc-pick-count">${driveSel.size} ay seçili</span></summary>
       ${years.map(y => {
         const yms = driveRemote.filter(ym => ym.startsWith(y)), ind = yms.filter(ym => !localKeys.has(ym));
-        return `<div class="arc-pick-year"><div class="arc-pick-yhead"><b>${y}</b><span>${yms.length} ay${ind.length ? ` · ${ind.length} indirilmemiş` : ''}</span>${ind.length ? `<button type="button" onclick="drivePickYear('${y}')">Tüm yıl</button>` : ''}</div>
+        return `<div class="arc-pick-year"><div class="arc-pick-yhead"><b>${y}</b><span>${yms.length} ay${ind.length ? ` · ${ind.length} indirilmemiş` : ''}</span><button type="button" onclick="drivePickYear('${y}')">Tüm yıl</button></div>
           <div class="arc-pick-months">${AYK.map((n, i) => {
             const ym = `${y}-${String(i + 1).padStart(2, '0')}`;
             if (!driveRemote.includes(ym)) return `<span class="arc-pick-m off">${n}</span>`;
