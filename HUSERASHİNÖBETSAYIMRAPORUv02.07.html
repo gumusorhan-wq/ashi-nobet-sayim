@@ -2003,12 +2003,22 @@ async function driveChangePw() {
   } catch (err) { driveSetMsg('Parola değiştirilemedi: ' + (err.message || err), 'err'); }
   finally { driveBusy = false; }
 }
-function drivePickToggle(ym) { driveSel.has(ym) ? driveSel.delete(ym) : driveSel.add(ym); renderArchivePanel(); }
+function drivePickToggle(ym) { driveSel.has(ym) ? driveSel.delete(ym) : driveSel.add(ym); driveSelUi(); }
+// Seçim değişince paneli yeniden çizmeden (bölümler açık kalsın) yalnızca ilgili öğeleri günceller.
+async function driveSelUi() {
+  document.querySelectorAll('.arc-pick-m[data-ym]').forEach(b => b.classList.toggle('sel', driveSel.has(b.getAttribute('data-ym'))));
+  document.querySelectorAll('.arc-pick-count-sel').forEach(e => { e.textContent = `${driveSel.size} ay seçili`; });
+  document.querySelectorAll('.arc-pick-go').forEach(b => { b.disabled = !driveSel.size; b.textContent = `⬇ Seçilenleri eşitle${driveSel.size ? ` (${driveSel.size})` : ''}`; });
+  let recs = [];
+  try { recs = await archiveGetAll(); } catch (e) {}
+  const txt = driveSel.size ? 'Seçili: ' + [...driveSel].sort().map(ym => { const rr = recs.find(x => x.key === ym); return ym + ' — ' + (rr ? driveAyDurum(ym, rr, driveRemoteMod[ym]).t : '⬇ indirilecek'); }).join(' · ') : '';
+  document.querySelectorAll('.arc-pick-note').forEach(e => { e.textContent = txt; e.style.display = txt ? 'block' : 'none'; });
+}
 async function drivePickYear(y) {
   const ind = driveRemote.filter(ym => ym.startsWith(y));
   const hepsi = ind.every(ym => driveSel.has(ym));
   ind.forEach(ym => hepsi ? driveSel.delete(ym) : driveSel.add(ym));
-  renderArchivePanel();
+  driveSelUi();
 }
 async function driveSyncYear(y) {
   const recs = new Map((await archiveGetAll()).map(r => [r.key, r]));
@@ -2118,7 +2128,7 @@ function driveDurumHtml(records) {
   const ozet = !Object.keys(driveRemoteMod).length ? 'Drive durumu henüz kontrol edilmedi'
     : (sorunlu ? `${sorunlu} ayda dikkat edilecek durum var` : `✓ Online ve yerel arşiv güncel (${rows.length} ay)`);
   return `<details class="arc-drive-durum"${(driveAcik.durum == null ? sorunlu : driveAcik.durum) ? ' open' : ''} ontoggle="driveAcik.durum=this.open">
-      <summary>📊 Ay durumları: online ↔ yerel <span class="arc-pick-count${sorunlu ? ' warn' : ' ok'}">${escapeHtml(ozet)}</span></summary>
+      <summary onclick="driveAcik.durum=!this.parentNode.open">📊 Ay durumları: online ↔ yerel <span class="arc-pick-count${sorunlu ? ' warn' : ' ok'}">${escapeHtml(ozet)}</span></summary>
       <table class="arc-drive-dtbl"><thead><tr><th>Ay</th><th>Yerel kayıt</th><th>Drive güncelleme</th><th>Durum</th></tr></thead><tbody>${
         [...new Set(rows.map(r => r.ym.slice(0, 4)))].map(y => {
           const yr = rows.filter(r => r.ym.startsWith(y)), ng = yr.filter(r => r.d.gunc).length;
@@ -2158,19 +2168,19 @@ function driveHtml(records) {
   const AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   const years = [...new Set(driveRemote.map(ym => ym.slice(0, 4)))].sort().reverse();
   const pickBox = years.length ? `<details class="arc-drive-pick"${(driveAcik.sec == null ? (driveRemote.some(ym => !localKeys.has(ym)) || driveSel.size > 0) : driveAcik.sec) ? ' open' : ''} ontoggle="driveAcik.sec=this.open">
-      <summary>📥 Drive’daki aylar: seçerek indir <span class="arc-pick-count">${driveSel.size} ay seçili</span></summary>
+      <summary onclick="driveAcik.sec=!this.parentNode.open">📥 Drive’daki aylar: seçerek indir <span class="arc-pick-count arc-pick-count-sel">${driveSel.size} ay seçili</span></summary>
       ${years.map(y => {
         const yms = driveRemote.filter(ym => ym.startsWith(y)), ind = yms.filter(ym => !localKeys.has(ym));
         return `<div class="arc-pick-year"><div class="arc-pick-yhead"><b>${y}</b><span>${yms.length} ay${ind.length ? ` · ${ind.length} indirilmemiş` : ''}</span><button type="button" onclick="drivePickYear('${y}')">Tüm yıl</button></div>
           <div class="arc-pick-months">${AYK.map((n, i) => {
             const ym = `${y}-${String(i + 1).padStart(2, '0')}`;
             if (!driveRemote.includes(ym)) return `<span class="arc-pick-m off">${n}</span>`;
-            if (localKeys.has(ym)) { const dd = driveAyDurum(ym, (records || []).find(x => x.key === ym), driveRemoteMod[ym]); return `<button type="button" class="arc-pick-m done${dd.gunc ? ' upd' : ''}${driveSel.has(ym) ? ' sel' : ''}" title="${escapeHtml(dd.t)} — seçip eşitlerseniz Drive’daki güncel hâliyle yenilenir" onclick="drivePickToggle('${ym}')">${n} ${dd.gunc ? '⟳' : '✓'}</button>`; }
-            return `<button type="button" class="arc-pick-m${driveSel.has(ym) ? ' sel' : ''}" onclick="drivePickToggle('${ym}')">${n}</button>`;
+            if (localKeys.has(ym)) { const dd = driveAyDurum(ym, (records || []).find(x => x.key === ym), driveRemoteMod[ym]); return `<button type="button" data-ym="${ym}" class="arc-pick-m done${dd.gunc ? ' upd' : ''}${driveSel.has(ym) ? ' sel' : ''}" title="${escapeHtml(dd.t)} — seçip eşitlerseniz Drive’daki güncel hâliyle yenilenir" onclick="drivePickToggle('${ym}')">${n} ${dd.gunc ? '⟳' : '✓'}</button>`; }
+            return `<button type="button" data-ym="${ym}" class="arc-pick-m${driveSel.has(ym) ? ' sel' : ''}" onclick="drivePickToggle('${ym}')">${n}</button>`;
           }).join('')}</div></div>`;
       }).join('')}
-      ${driveSel.size ? `<div class="arc-drive-note" style="margin:6px 0">Seçili: ${[...driveSel].sort().map(ym => { const rr = (records || []).find(x => x.key === ym); return escapeHtml(ym + ' — ' + (rr ? driveAyDurum(ym, rr, driveRemoteMod[ym]).t : '⬇ indirilecek')); }).join(' · ')}</div>` : ''}
-      <div class="arc-drive-row"><button type="button" class="pri" ${driveSel.size ? '' : 'disabled'} onclick="driveDownloadSelected()">⬇ Seçilenleri eşitle${driveSel.size ? ` (${driveSel.size})` : ''}</button><span class="arc-drive-note" style="margin:0">En güncel ay otomatik iner; diğer ayları seçip “Seçilenleri eşitle”ye basın.</span></div>
+      <div class="arc-drive-note arc-pick-note" style="margin:6px 0;display:${driveSel.size ? 'block' : 'none'}">${driveSel.size ? 'Seçili: ' + [...driveSel].sort().map(ym => { const rr = (records || []).find(x => x.key === ym); return escapeHtml(ym + ' — ' + (rr ? driveAyDurum(ym, rr, driveRemoteMod[ym]).t : '⬇ indirilecek')); }).join(' · ') : ''}</div>
+      <div class="arc-drive-row"><button type="button" class="pri arc-pick-go" ${driveSel.size ? '' : 'disabled'} onclick="driveDownloadSelected()">⬇ Seçilenleri eşitle${driveSel.size ? ` (${driveSel.size})` : ''}</button><span class="arc-drive-note" style="margin:0">En güncel ay otomatik iner; diğer ayları seçip “Seçilenleri eşitle”ye basın.</span></div>
     </details>` : '';
   const adminBox = admin ? `<details class="arc-drive-admin"${driveAcik.yayin !== false ? ' open' : ''} ontoggle="driveAcik.yayin=this.open">
       <summary>Yönetici: aylarımı ortak arşive yayınla</summary>
@@ -2201,7 +2211,7 @@ function driveHtml(records) {
     </details>` : '';
   const loginLink = !admin ? `<div class="arc-drive-login"><button type="button" onclick="driveAdminLogin()">🔑 Yönetici girişi</button></div>` : '';
   return `<div class="arc-drive">
-    <div class="arc-drive-head"><b>🌐 Ortak Arşiv (Google Drive)</b>${hasPw ? '<button type="button" class="arc-drive-link" onclick="driveForgetPw()">Parolayı unut</button>' : ''}</div>
+    <div class="arc-drive-head"><b>🌐 Ortak Arşiv (Google Drive)</b> <span class="arc-drive-note" style="margin:0 0 0 6px">v${ASHI_APP_VERSION} · yapı ${ASHI_APP_BUILD}</span>${hasPw ? '<button type="button" class="arc-drive-link" onclick="driveForgetPw()">Parolayı unut</button>' : ''}</div>
     ${pwBox}
     ${kimlikBox}
     ${driveDurumHtml(records)}
@@ -6327,6 +6337,7 @@ function resetPage() {
 // UZAK SÜRÜM KONTROLÜ VE YENİ SÜRÜM İNDİRME
 // ═══════════════════════════════════════════════════════════
 const ASHI_APP_VERSION = '02.07';
+const ASHI_APP_BUILD = '20261010.2';   // aynı sürüm numarasında hangi yapının açık olduğunu görmek için
 const ASHI_DEFAULT_UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/ashi-update.json';
 const ASHI_UPDATE_CONFIG_KEY = 'ashiNobetUpdateConfigV1';
 // Gömülü kullanım: bu adreslerde uygulama canlı sürümü otomatik yükleyiciyle çalışır; güncelleme kontrolü/indirme gösterilmez ve yapılmaz.
@@ -6384,7 +6395,7 @@ function compareVersions(a,b){
 }
 function setUpdateVersionText(){
   const el=document.getElementById('updateVersion');
-  if(el) el.textContent = `Yerel sürüm ${ASHI_APP_VERSION}`;
+  if(el) el.textContent = `Yerel sürüm ${ASHI_APP_VERSION} · yapı ${ASHI_APP_BUILD}`;
 }
 function applySavedUpdateUrl(){
   const cfg=readUpdateConfig();
