@@ -1934,7 +1934,7 @@ let driveApwDraft = null;
 let driveRemote = [];
 let driveRemoteMod = {};
 const driveSel = new Set();
-const driveAcik = {yayin:true, parola:false};
+const driveAcik = {yayin:true, parola:false, sec:null, durum:null};   // null = otomatik (duruma göre), true/false = kullanıcı seçimi
 const driveYearOpen = new Set();
 let driveRememberDraft = true;
 function driveSetMsg(text, kind) {
@@ -2089,7 +2089,7 @@ function driveAyDurum(ym, rec, remoteMod) {
 }
 function driveAyDurum0(ym, rec, remoteMod) {
   const sy = ashiDrive.syncMap()[ym];
-  const bekl = !!rec && ashiDrive.bekleyenler([rec]).length > 0;
+  const bekl = !!rec && ashiDrive.sahip() && ashiDrive.bekleyenler([rec]).length > 0;   // yayın yetkisi yalnızca yöneticide; diğer cihazlarda yerel ek (ör. izin dosyası) uyarı sayılmaz
   if (remoteMod && rec) {
     const uzakYeni = !sy || sy.mod !== remoteMod;
     if (bekl && uzakYeni) return {k:'warn', t:'⚠ Hem yerelde hem Drive’da değişiklik var', gunc:true};
@@ -2117,7 +2117,7 @@ function driveDurumHtml(records) {
   const guncSay = rows.filter(r => r.d.gunc).length;
   const ozet = !Object.keys(driveRemoteMod).length ? 'Drive durumu henüz kontrol edilmedi'
     : (sorunlu ? `${sorunlu} ayda dikkat edilecek durum var` : `✓ Online ve yerel arşiv güncel (${rows.length} ay)`);
-  return `<details class="arc-drive-durum"${sorunlu ? ' open' : ''}>
+  return `<details class="arc-drive-durum"${(driveAcik.durum == null ? sorunlu : driveAcik.durum) ? ' open' : ''} ontoggle="driveAcik.durum=this.open">
       <summary>📊 Ay durumları: online ↔ yerel <span class="arc-pick-count${sorunlu ? ' warn' : ' ok'}">${escapeHtml(ozet)}</span></summary>
       <table class="arc-drive-dtbl"><thead><tr><th>Ay</th><th>Yerel kayıt</th><th>Drive güncelleme</th><th>Durum</th></tr></thead><tbody>${
         [...new Set(rows.map(r => r.ym.slice(0, 4)))].map(y => {
@@ -2157,7 +2157,7 @@ function driveHtml(records) {
   const localKeys = new Set((records || []).map(x => x.key));
   const AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   const years = [...new Set(driveRemote.map(ym => ym.slice(0, 4)))].sort().reverse();
-  const pickBox = years.length ? `<details class="arc-drive-pick"${driveRemote.some(ym => !localKeys.has(ym)) ? ' open' : ''}>
+  const pickBox = years.length ? `<details class="arc-drive-pick"${(driveAcik.sec == null ? (driveRemote.some(ym => !localKeys.has(ym)) || driveSel.size > 0) : driveAcik.sec) ? ' open' : ''} ontoggle="driveAcik.sec=this.open">
       <summary>📥 Drive’daki aylar: seçerek indir <span class="arc-pick-count">${driveSel.size} ay seçili</span></summary>
       ${years.map(y => {
         const yms = driveRemote.filter(ym => ym.startsWith(y)), ind = yms.filter(ym => !localKeys.has(ym));
@@ -2169,6 +2169,7 @@ function driveHtml(records) {
             return `<button type="button" class="arc-pick-m${driveSel.has(ym) ? ' sel' : ''}" onclick="drivePickToggle('${ym}')">${n}</button>`;
           }).join('')}</div></div>`;
       }).join('')}
+      ${driveSel.size ? `<div class="arc-drive-note" style="margin:6px 0">Seçili: ${[...driveSel].sort().map(ym => { const rr = (records || []).find(x => x.key === ym); return escapeHtml(ym + ' — ' + (rr ? driveAyDurum(ym, rr, driveRemoteMod[ym]).t : '⬇ indirilecek')); }).join(' · ')}</div>` : ''}
       <div class="arc-drive-row"><button type="button" class="pri" ${driveSel.size ? '' : 'disabled'} onclick="driveDownloadSelected()">⬇ Seçilenleri eşitle${driveSel.size ? ` (${driveSel.size})` : ''}</button><span class="arc-drive-note" style="margin:0">En güncel ay otomatik iner; diğer ayları seçip “Seçilenleri eşitle”ye basın.</span></div>
     </details>` : '';
   const adminBox = admin ? `<details class="arc-drive-admin"${driveAcik.yayin !== false ? ' open' : ''} ontoggle="driveAcik.yayin=this.open">
