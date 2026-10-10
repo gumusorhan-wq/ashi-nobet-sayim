@@ -1807,8 +1807,8 @@ const ashiDrive = (() => {
       const L = await listele();
       if (L.kontrol) await kontrolOku(pw, L);
       const sync = syncMap(), pub = pubMap();
-      // Otomatik eşitlemede (parola/kimlik parolası girilince veya değişince de) yalnızca en güncel ay iner.
-      // Diğer aylar kullanıcı seçerek (keys) indirilir/güncellenir.
+      // Otomatik eşitleme: en güncel ay (yoksa/değiştiyse/kimlikleri açılacaksa) + daha önce seçilip indirilmiş ayların Drive'daki değişiklikleri.
+      // Hiç seçilmemiş aylar kendiliğinden gelmez; kullanıcı seçerek (keys) indirir.
       const kp = kimlikParola(), is = [], enGuncel = L[0] && L[0].ym, eskiDeneme = jget('ashi_drive_eski', {});
       for (const f of L) {
         const yerel = await archiveGet(f.ym);
@@ -1816,6 +1816,7 @@ const ashiDrive = (() => {
         const yildizli = !!kp && !!yerel && (Object.values(yerel.slots || {}).some(sl => sl && sl.anon) || !!yerel.izin?.anon);
         if (Array.isArray(keys)) { if (keys.includes(f.ym)) is.push(f); }
         else if (f.ym === enGuncel && (!yerel || degisti || yildizli)) is.push(f);   // otomatik: en güncel ay
+        else if (yerel && degisti) is.push(f);   // daha önce seçilip indirilmiş aylar Drive'da değişirse girişte otomatik güncellenir (seçilmemiş aylar gelmez)
         else if (yerel && ashiKayitEski(yerel) && eskiDeneme[f.ym] !== ASHI_APP_VERSION) { is.push(f); eskiDeneme[f.ym] = ASHI_APP_VERSION; }   // yeni sürüm: eski yapıdaki yerel aylar Drive'daki yeni yapıyla bir kez yenilenir
       }
       const alinan = [], okunamayan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0, kimlikYok = 0;
@@ -6337,7 +6338,7 @@ function resetPage() {
 // UZAK SÜRÜM KONTROLÜ VE YENİ SÜRÜM İNDİRME
 // ═══════════════════════════════════════════════════════════
 const ASHI_APP_VERSION = '02.07';
-const ASHI_APP_BUILD = '20261010.2';   // aynı sürüm numarasında hangi yapının açık olduğunu görmek için
+const ASHI_APP_BUILD = '20261010.3';   // aynı sürüm numarasında hangi yapının açık olduğunu görmek için
 const ASHI_DEFAULT_UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/ashi-update.json';
 const ASHI_UPDATE_CONFIG_KEY = 'ashiNobetUpdateConfigV1';
 // Gömülü kullanım: bu adreslerde uygulama canlı sürümü otomatik yükleyiciyle çalışır; güncelleme kontrolü/indirme gösterilmez ve yapılmaz.
@@ -6438,8 +6439,15 @@ async function checkForAppUpdate(silent){
     const remoteVersion=manifest.version || manifest.latestVersion;
     const remoteUrl=manifest.downloadUrl || manifest.url;
     if(!remoteVersion || !remoteUrl) throw new Error('Manifest içinde version ve downloadUrl bulunamadı.');
-    latestUpdate={version:String(remoteVersion),downloadUrl:String(remoteUrl),fileName:manifest.fileName||getVersionedAppFileName(remoteVersion),notes:manifest.notes||manifest.releaseNotes||''};
-    if(compareVersions(latestUpdate.version,ASHI_APP_VERSION)>0){
+    latestUpdate={version:String(remoteVersion),downloadUrl:String(remoteUrl),fileName:manifest.fileName||getVersionedAppFileName(remoteVersion),notes:manifest.notes||manifest.releaseNotes||'',build:String(manifest.build||'')};
+    const yeniYapi = compareVersions(latestUpdate.version,ASHI_APP_VERSION)===0 && latestUpdate.build && latestUpdate.build > ASHI_APP_BUILD;
+    if(yeniYapi){
+      latestUpdate.reload=true;
+      if(downloadBtn){ downloadBtn.style.display='inline-flex'; downloadBtn.textContent='Yeni yapıyı yükle (sayfayı yenile)'; }
+      updateText(`Aynı sürümde yeni yapı hazır: ${latestUpdate.build}`,'new');
+      if(!silent) alert(`Aynı sürümün (${ASHI_APP_VERSION}) yeni yapısı hazır: ${latestUpdate.build}\nSayfayı yenilemek için “Yeni yapıyı yükle” düğmesine basın.`);
+    } else if(compareVersions(latestUpdate.version,ASHI_APP_VERSION)>0){
+      if(downloadBtn) downloadBtn.textContent='Yeni sürümü indir';
       if(downloadBtn) downloadBtn.style.display='inline-flex';
       updateText(`Yeni sürüm hazır: ${latestUpdate.version}`,'new');
       if(!silent) alert(`Yeni sürüm bulundu: ${latestUpdate.version}${latestUpdate.notes?'\\n'+latestUpdate.notes:''}`);
@@ -6461,6 +6469,7 @@ async function checkForAppUpdate(silent){
   }
 }
 async function downloadLatestVersion(){
+  if(latestUpdate?.reload){ location.href = location.pathname + '?v=' + Date.now(); return; }   // aynı sürümün yeni yapısı: önbellek atlanarak yeniden yüklenir
   if(!latestUpdate?.downloadUrl){ updateText('Önce güncelleme kontrolü yapın.','error'); return; }
   const target=latestUpdate.downloadUrl;
   const filename=latestUpdate.fileName||getVersionedAppFileName(latestUpdate.version);
