@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HUSER ASHİ Nöbet Sayım Raporu</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f1f5f9;color:#0f172a;display:flex;min-height:100vh;align-items:center;justify-content:center}
+  .box{max-width:420px;padding:28px;text-align:center}
+  .box a{color:#0369a1;font-weight:700}
+</style>
+</head>
+<body>
+<div class="box" id="msg">Uygulamanın güncel sürümü yükleniyor…</div>
+<script>
+// 112stoktakip.com için yükleyici: canlıya alınan en son sürümü her açılışta otomatik getirir.
+// Bu dosyayı sitenize bir kez koymanız yeterlidir; sürüm güncellemeleri için tekrar dosya yüklemeniz gerekmez.
+(function () {
+  var CANLI = 'https://ashi.manisa112-bashekimlik.com.tr/ashi-nobet-sayim.html';
+  var YEDEK = 'https://gumusorhan-wq.github.io/ashi-nobet-sayim/ashi-nobet-sayim.html';
+  var ONBELLEK = 'ashiYukleyiciSonSurum';
+  function goster(html) { document.open(); document.write(html); document.close(); }
+  function getir(url) {
+    return fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now(), {cache: 'no-store'}).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    }).then(function (t) {
+      if (t.indexOf('ASHI_APP_VERSION') < 0) throw new Error('Geçersiz içerik');
+      return t;
+    });
+  }
+  getir(CANLI).catch(function () { return getir(YEDEK); }).then(function (html) {
+    try { localStorage.setItem(ONBELLEK, html); } catch (e) {}
+    goster(html);
+  }).catch(function () {
+    var eski = null;
+    try { eski = localStorage.getItem(ONBELLEK); } catch (e) {}
+    if (eski) { goster(eski); return; }
+    document.getElementById('msg').innerHTML = 'Uygulama şu an yüklenemedi (internet bağlantısı yok olabilir).<br><br><a href="' + CANLI + '">Doğrudan açmak için tıklayın</a>';
+  });
+})();
+</script>
+</body>
+</html>

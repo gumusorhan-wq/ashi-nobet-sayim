@@ -6328,6 +6328,9 @@ function resetPage() {
 const ASHI_APP_VERSION = '02.07';
 const ASHI_DEFAULT_UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/ashi-update.json';
 const ASHI_UPDATE_CONFIG_KEY = 'ashiNobetUpdateConfigV1';
+// Gömülü kullanım: bu adreslerde uygulama canlı sürümü otomatik yükleyiciyle çalışır; güncelleme kontrolü/indirme gösterilmez ve yapılmaz.
+const ASHI_YERLESIK_HOSTLAR = ['112stoktakip.com', 'www.112stoktakip.com'];
+const ASHI_YERLESIK = ASHI_YERLESIK_HOSTLAR.includes(String(location.hostname || '').toLowerCase());
 function getVersionedAppFileName(version=ASHI_APP_VERSION){
   const safeVersion=String(version||ASHI_APP_VERSION).trim() || ASHI_APP_VERSION;
   return `HUSER ASHİ NÖBET SAYIM RAPORU v${safeVersion}.html`;
@@ -6391,6 +6394,7 @@ function saveUpdateManifestUrl(){
   if(value) checkForAppUpdate(false);
 }
 async function checkForAppUpdate(silent){
+  if(ASHI_YERLESIK) return {status:'yerlesik'};
   const cfg=readUpdateConfig();
   const checkBtn=document.getElementById('checkUpdateBtn');
   const downloadBtn=document.getElementById('downloadUpdateBtn');
@@ -6452,6 +6456,7 @@ async function downloadLatestVersion(){
   }
 }
 function initUpdateControls(){
+  if(ASHI_YERLESIK){ ['updateWidget','updateGuideCard'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display='none'; }); }
   applySavedUpdateUrl();
   setTimeout(()=>renderArchivePanel(),100);
   setTimeout(()=>{ if (ashiDrive.parolaGuclu(ashiDrive.parola()) && ashiDrive.klasor()) driveSync(true); }, 2500);
@@ -6463,7 +6468,7 @@ function initUpdateControls(){
     if (ashiDrive.parolaGuclu(ashiDrive.parola()) && ashiDrive.klasor()) driveSync(true);
   });
   const cfg=readUpdateConfig();
-  if(cfg.manifestUrl) setTimeout(()=>checkForAppUpdate(true),700);
+  if(cfg.manifestUrl && !ASHI_YERLESIK) setTimeout(()=>checkForAppUpdate(true),700);
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initUpdateControls); else initUpdateControls();
 </script>
