@@ -1639,11 +1639,17 @@ const ashiDrive = (() => {
     return JSON.parse(new TextDecoder().decode(await akis(z, new DecompressionStream('gzip'))));
   }
 
+  // Ağ isteği 30 sn içinde yanıt vermezse hata verir (arayüz “kontrol ediliyor…” üzerinde takılı kalmasın).
+  const fetchT = (url, opt, ms = 30000) => {
+    const ac = typeof AbortController === 'function' ? new AbortController() : null;
+    const t = ac ? setTimeout(() => ac.abort(), ms) : null;
+    return fetch(url, Object.assign({}, opt, ac ? {signal: ac.signal} : {})).catch(e => { throw (e && e.name === 'AbortError') ? new Error('Drive 30 saniyede yanıt vermedi (bağlantı yavaş ya da engelleniyor)') : e; }).finally(() => { if (t) clearTimeout(t); });
+  };
   async function listele() {
     const f = klasor();
     if (!f) throw new Error('Ortak arşiv klasörü tanımlı değil');
     const q = encodeURIComponent(`'${f}' in parents and trashed=false`);
-    const r = await fetch(`${API}?q=${q}&fields=files(id,name,modifiedTime,size)&pageSize=1000&key=${CFG.key}&_=${Date.now()}`, {cache:'no-store'}).catch(() => { throw new Error('Drive’a bağlanılamadı (internet bağlantısı ya da erişim izni yok).'); });
+    const r = await fetchT(`${API}?q=${q}&fields=files(id,name,modifiedTime,size)&pageSize=1000&key=${CFG.key}&_=${Date.now()}`, {cache:'no-store'}).catch(() => { throw new Error('Drive’a bağlanılamadı (internet bağlantısı ya da erişim izni yok).'); });
     if (!r.ok) throw new Error((location.protocol === 'file:' && (r.status === 400 || r.status === 403) ? 'Bilgisayardan açılan sürümde Drive’a erişim izni yok; siteyi (GitHub Pages) kullanın. — ' : '') + 'Drive listesi alınamadı (' + r.status + ')' + (r.status === 403 ? ' — klasör “bağlantıya sahip herkes” ile paylaşılmamış ya da API anahtarı bu sayfa adresine izinli değil' : ''));
     const j = await r.json(), F = j.files || [];
     const L = F.map(e => ({...e, ym:ymBul(e.name)})).filter(e => e.ym).sort((a, b) => b.ym.localeCompare(a.ym));
@@ -1652,7 +1658,7 @@ const ashiDrive = (() => {
   }
   async function indir(id) {
     let r;
-    try { r = await fetch(`${API}/${id}?alt=media&key=${CFG.key}&_=${Date.now()}`, {cache:'no-store'}); }
+    try { r = await fetchT(`${API}/${id}?alt=media&key=${CFG.key}&_=${Date.now()}`, {cache:'no-store'}, 60000); }
     catch (e) { throw new Error('Drive dosyası indirilemedi (ağ/CORS hatası: ' + (e && e.message || e) + '). Dosya veya klasör “Bağlantıya sahip herkes – Görüntüleyen” olarak paylaşılmamış olabilir; yönetici klasörün paylaşımını kontrol edip ↻ Hepsini yeniden yayınla’ya basmalı.'); }
     if (!r.ok) throw new Error('Dosya indirilemedi (' + r.status + (r.status === 403 || r.status === 404 ? ': dosya herkese açık değil — klasör paylaşımını “Bağlantıya sahip herkes – Görüntüleyen” yapın' : '') + ')');
     return new Uint8Array(await r.arrayBuffer());
@@ -2063,7 +2069,8 @@ async function driveSync(silent, keys) {
   } catch (err) {
     console.warn('[ortak arşiv]', err);
     if (err && err.parola) ashiDrive.parolaAyarla(null, false);
-    if (!silent || (err && err.parola)) driveSetMsg('Drive eşitlenemedi: ' + (err.message || err), 'err');
+    driveSetMsg('Drive eşitlenemedi: ' + (err.message || err), 'err');   // sessiz (otomatik) eşitlemede de gösterilir; “kontrol ediliyor…” üzerinde takılı kalmasın
+    renderArchivePanel();
   } finally { driveBusy = false; }
 }
 async function drivePublish(onlyKeys) {
@@ -2168,7 +2175,7 @@ function driveHtml(records) {
   const localKeys = new Set((records || []).map(x => x.key));
   const AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   const years = [...new Set(driveRemote.map(ym => ym.slice(0, 4)))].sort().reverse();
-  const pickBox = years.length ? `<details class="arc-drive-pick"${(driveAcik.sec == null ? (driveRemote.some(ym => !localKeys.has(ym)) || driveSel.size > 0) : driveAcik.sec) ? ' open' : ''} ontoggle="driveAcik.sec=this.open">
+  const pickBox = !years.length ? (hasPw ? `<details class="arc-drive-pick" open><summary>📥 Drive’daki aylar: seçerek indir</summary><div class="arc-drive-note">Drive’daki aylar henüz alınamadı. ⟳ Yenile’ye basın; sorun sürerse yukarıdaki hata mesajına bakın.</div></details>` : '') : `<details class="arc-drive-pick"${(driveAcik.sec == null ? (driveRemote.some(ym => !localKeys.has(ym)) || driveSel.size > 0) : driveAcik.sec) ? ' open' : ''} ontoggle="driveAcik.sec=this.open">
       <summary onclick="driveAcik.sec=!this.parentNode.open">📥 Drive’daki aylar: seçerek indir <span class="arc-pick-count arc-pick-count-sel">${driveSel.size} ay seçili</span></summary>
       ${years.map(y => {
         const yms = driveRemote.filter(ym => ym.startsWith(y)), ind = yms.filter(ym => !localKeys.has(ym));
@@ -2182,7 +2189,7 @@ function driveHtml(records) {
       }).join('')}
       <div class="arc-drive-note arc-pick-note" style="margin:6px 0;display:${driveSel.size ? 'block' : 'none'}">${driveSel.size ? 'Seçili: ' + [...driveSel].sort().map(ym => { const rr = (records || []).find(x => x.key === ym); return escapeHtml(ym + ' — ' + (rr ? driveAyDurum(ym, rr, driveRemoteMod[ym]).t : '⬇ indirilecek')); }).join(' · ') : ''}</div>
       <div class="arc-drive-row"><button type="button" class="pri arc-pick-go" ${driveSel.size ? '' : 'disabled'} onclick="driveDownloadSelected()">⬇ Seçilenleri eşitle${driveSel.size ? ` (${driveSel.size})` : ''}</button><span class="arc-drive-note" style="margin:0">En güncel ay otomatik iner; diğer ayları seçip “Seçilenleri eşitle”ye basın.</span></div>
-    </details>` : '';
+    </details>`;
   const adminBox = admin ? `<details class="arc-drive-admin"${driveAcik.yayin !== false ? ' open' : ''} ontoggle="driveAcik.yayin=this.open">
       <summary>Yönetici: aylarımı ortak arşive yayınla</summary>
       <div class="arc-drive-note">Bu cihazdaki arşiv aylarından TC kimlik no yıldızlanır, ad/soyad ilk harf dışında gizlenir; paket ekip parolasıyla (AES-256) şifrelenip Drive klasörüne yüklenir. Yayınlamak için Google girişi istenir.${hasPw ? '' : ' <strong>Önce yukarıdan ekip parolasını kaydedin.</strong>'} ${kpw ? 'Kimlik parolası kayıtlı: paketlere şifreli kimlik tablosu da eklenir.' : '<strong>Kimlik tablosu eklenmeyecek</strong> (gerçek TC/ad görülebilsin istiyorsanız yukarıdan kimlik parolasını kaydedip “Hepsini yeniden yayınla”ya basın).'}</div>
@@ -3871,10 +3878,20 @@ function buildUygunPersonelResults(dateStr){
     const araIzinVar = (lastDuty && nextDuty && tcNorm && izinRaporRecords.length)
       ? izinRaporRecords.some(rec => rec.tc===tcNorm && rec.startMs < nextDuty.startMs && rec.endMs > lastDuty.endMs)
       : false;
+    // Boşluk aralığındaki (son nöbet bitişi → sonraki nöbet başlangıcı; uç yoksa ay sınırı) tüm izin/rapor kayıtları: tür, başlangıç, gün
+    const izinler = [];
+    if (tcNorm && izinRaporRecords.length) {
+      const b = getReportMonthBounds();
+      const gS = lastDuty ? lastDuty.endMs : (b ? b.monthStartMs : -Infinity);
+      const gE = nextDuty ? nextDuty.startMs : (b ? b.monthEndMs : Infinity);
+      izinRaporRecords.filter(rec => rec.tc === tcNorm && rec.startMs < gE && rec.endMs > gS)
+        .sort((x, y) => x.startMs - y.startMs)
+        .forEach(rec => izinler.push({type:rec.type || 'İzin/Rapor', start:rec.start || '', end:rec.end || '', days:rec.days}));
+    }
     let uyumNotu;
     if (totalGapDays != null) {
       uyumNotu = `${totalGapDays} gün boşluk (son nöbet → sonraki nöbet)`;
-      if (araIzinVar) uyumNotu += ' · aralarda izin/rapor kaydı var';
+      if (izinler.length) uyumNotu += ' · aralarda izin/rapor kaydı var';
     } else if (lastDuty && !nextDuty) {
       uyumNotu = 'Sonraki nöbeti bu ay içinde yok (açık uçlu boşluk)';
     } else if (!lastDuty && nextDuty) {
@@ -3891,7 +3908,7 @@ function buildUygunPersonelResults(dateStr){
     rows.push({
       tc:p.tc, fullName:p.fullName, kadroBrans:p.kadro_brans||'', asilIst:p.asilIst||'—', roles:p.roles, roleText:p.roles.join(' / '),
       lastDuty: formatUygunDutyInfo(lastDuty), nextDuty: formatUygunDutyInfo(nextDuty),
-      gapBeforeDays, gapAfterDays, totalGapDays, araIzinVar, uyumNotu, hedefUyum
+      gapBeforeDays, gapAfterDays, totalGapDays, araIzinVar, izinler, uyumNotu, hedefUyum
     });
   });
   rows.sort((a,b)=>trColl.compare(a.asilIst,b.asilIst)||trColl.compare(a.fullName,b.fullName));
@@ -3921,6 +3938,7 @@ function renderUygunPersonelDutyCell(info){
   if(!info) return '<span style="color:#94a3b8">Bu ay kaydı yok</span>';
   return `<div><strong>${escapeHtml(info.date)}</strong> · ${escapeHtml(info.role)}<br><span style="font-size:11px;color:#64748b">${escapeHtml(info.station)} · ${escapeHtml(info.start)} → ${escapeHtml(info.end)}</span></div>`;
 }
+function uygunIzinMetni(z){ return `${z.type} · Başlangıç: ${z.start}${z.end ? ' · Bitiş: ' + z.end : ''} · Alınan gün: ${z.days}`; }
 function renderUygunPersonelRows(rows){
   return (rows||[]).map(row=>`<tr>
     <td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc||'—')}</span></td>
@@ -3929,6 +3947,7 @@ function renderUygunPersonelRows(rows){
     <td>${renderUygunPersonelDutyCell(row.lastDuty)}</td>
     <td>${renderUygunPersonelDutyCell(row.nextDuty)}</td>
     <td><div style="font-weight:700;color:${row.araIzinVar?'#b45309':'#0f766e'}">${escapeHtml(row.uyumNotu||'—')}</div>${row.hedefUyum?`<div style="font-size:11px;color:#64748b;margin-top:2px">${escapeHtml(row.hedefUyum)}</div>`:''}</td>
+    <td>${(row.izinler && row.izinler.length) ? row.izinler.map(z=>`<span class="izin-rapor-item">${escapeHtml(uygunIzinMetni(z))}</span>`).join('') : '—'}</td>
   </tr>`).join('');
 }
 function populateUygunPersonelFilters(data){
@@ -3956,7 +3975,7 @@ function renderUygunPersonelModal(){
   const visible=getUygunPersonelFilteredRows(data.rows);
   const ozet=document.getElementById('uygunPersonelOzet');
   if(ozet) ozet.textContent=`${formatDutyDate(data.targetDate.getTime())} için ${visible.length} / ${data.rows.length} uygun personel`;
-  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen tarih ve filtrelere uyan uygun personel bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>PERSONEL</th><th>NÖBET BRANŞI</th><th>ASIL İSTASYON</th><th>SON NÖBETİ</th><th>SONRAKİ NÖBETİ</th><th>GÜN FARKI (SON → SONRAKİ)</th></tr></thead><tbody>'+renderUygunPersonelRows(visible)+'</tbody></table></div>';
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen tarih ve filtrelere uyan uygun personel bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>PERSONEL</th><th>NÖBET BRANŞI</th><th>ASIL İSTASYON</th><th>SON NÖBETİ</th><th>SONRAKİ NÖBETİ</th><th>GÜN FARKI (SON → SONRAKİ)</th><th>İZİN / RAPOR (BOŞLUKTA)</th></tr></thead><tbody>'+renderUygunPersonelRows(visible)+'</tbody></table></div>';
 }
 function runUygunPersonelSearch(){
   const dateEl=document.getElementById('uygunPersonelDate');
@@ -3987,16 +4006,16 @@ function exportUygunPersonelExcel(){
   if(!uygunPersonelResultsCache || !uygunPersonelResultsCache.targetDate){ alert('Önce bir tarih seçip arama yapın.'); return; }
   const data=uygunPersonelResultsCache, rows=getUygunPersonelFilteredRows(data.rows);
   const fmtDuty=info=>info?`${info.date} · ${info.role} · ${info.station} · ${info.start} → ${info.end}`:'Bu ay kaydı yok';
-  const aoa=[[`Nöbet Tarihi: ${formatDutyDate(data.targetDate.getTime())}`],['PERSONEL','TCKN','NÖBET BRANŞI','KADRO BRANŞI','ASIL İSTASYON','SON NÖBETİ','SONRAKİ NÖBETİ','GÜN FARKI (SON→SONRAKİ)','ARANAN TARİH UYUMU']];
-  rows.forEach(r=>aoa.push([r.fullName,r.tc,r.roleText||'—',r.kadroBrans||'—',r.asilIst||'—',fmtDuty(r.lastDuty),fmtDuty(r.nextDuty),r.uyumNotu||'—',r.hedefUyum||'—']));
+  const aoa=[[`Nöbet Tarihi: ${formatDutyDate(data.targetDate.getTime())}`],['PERSONEL','TCKN','NÖBET BRANŞI','KADRO BRANŞI','ASIL İSTASYON','SON NÖBETİ','SONRAKİ NÖBETİ','GÜN FARKI (SON→SONRAKİ)','ARANAN TARİH UYUMU','İZİN / RAPOR (BOŞLUKTA)']];
+  rows.forEach(r=>aoa.push([r.fullName,r.tc,r.roleText||'—',r.kadroBrans||'—',r.asilIst||'—',fmtDuty(r.lastDuty),fmtDuty(r.nextDuty),r.uyumNotu||'—',r.hedefUyum||'—',(r.izinler&&r.izinler.length)?r.izinler.map(uygunIzinMetni).join('\n'):'—']));
   const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:28},{wch:16},{wch:22},{wch:26},{wch:22},{wch:42},{wch:42},{wch:34},{wch:34}];
-  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:8}}];
+  ws['!cols']=[{wch:28},{wch:16},{wch:22},{wch:26},{wch:22},{wch:42},{wch:42},{wch:34},{wch:34},{wch:46}];
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:9}}];
   const titleStyle={fill:{fgColor:{rgb:'0F766E'}},font:{bold:true,color:{rgb:'FFFFFF'}},alignment:{vertical:'center'}};
   const headerStyle={fill:{fgColor:{rgb:'134E4A'}},font:{bold:true,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center',wrapText:true}};
   if(ws['A1']) ws['A1'].s=titleStyle;
-  ['A','B','C','D','E','F','G','H','I'].forEach(col=>{ if(ws[`${col}2`]) ws[`${col}2`].s=headerStyle; });
-  for(let r=3;r<=aoa.length;r++){ ['A','B','C','D','E','F','G','H','I'].forEach(col=>{ if(ws[`${col}${r}`]) ws[`${col}${r}`].s={alignment:{vertical:'top',wrapText:true}}; }); }
+  ['A','B','C','D','E','F','G','H','I','J'].forEach(col=>{ if(ws[`${col}2`]) ws[`${col}2`].s=headerStyle; });
+  for(let r=3;r<=aoa.length;r++){ ['A','B','C','D','E','F','G','H','I','J'].forEach(col=>{ if(ws[`${col}${r}`]) ws[`${col}${r}`].s={alignment:{vertical:'top',wrapText:true}}; }); }
   XLSX.utils.book_append_sheet(wb,ws,'Uygun Personel');
   XLSX.writeFile(wb,'ashi_nobete_uygun_personel.xlsx');
 }
@@ -6338,7 +6357,7 @@ function resetPage() {
 // UZAK SÜRÜM KONTROLÜ VE YENİ SÜRÜM İNDİRME
 // ═══════════════════════════════════════════════════════════
 const ASHI_APP_VERSION = '02.07';
-const ASHI_APP_BUILD = '20261010.3';   // aynı sürüm numarasında hangi yapının açık olduğunu görmek için
+const ASHI_APP_BUILD = '20261014.1';   // aynı sürüm numarasında hangi yapının açık olduğunu görmek için
 const ASHI_DEFAULT_UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/ashi-update.json';
 const ASHI_UPDATE_CONFIG_KEY = 'ashiNobetUpdateConfigV1';
 // Gömülü kullanım: bu adreslerde uygulama canlı sürümü otomatik yükleyiciyle çalışır; güncelleme kontrolü/indirme gösterilmez ve yapılmaz.
