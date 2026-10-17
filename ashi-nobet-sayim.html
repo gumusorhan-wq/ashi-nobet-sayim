@@ -613,6 +613,9 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#166534;font-weight:700">✓</span><strong>Toplam Gün</strong> = (12s + 24s + Diğer süreler) ÷ 24</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#166534;font-weight:700">✓</span>Diğer süreler: 4, 8, 9.5, 16, 20 saat gibi değerler</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#dc2626;font-weight:700">✗</span><strong>Mesai</strong> ve <strong>Diğer</strong> yazanlar toplama dahil edilmez</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span><strong>Mesai</strong> (nöbet görevinde süresi yazılmamış) ve <strong>Diğer</strong> görevli kayıtlar nöbetlerle karıştırılmaz: toplam saat/gün, kapsama (eksik/fazla), 5+ gün boşluk, Sürücü/Tüm Personel Düzeni, asıl ve çoklu istasyon hesaplarına girmez. Personel tablosundaki <strong>Mesai / Diğer</strong> sütununda bilgi olarak görünür; Excel (Tümü) içindeki <strong>Nöbet Dışı ve Muafiyet</strong> sayfasında kişi bazında listelenir</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>Boşluk analizinde iki nöbet arasındaki boşluk yalnızca gerçek nöbetlerden hesaplanır; boşluğun içine denk gelen mesai günü sayısı ayrıca belirtilir. <strong>Nöbete Uygun Personel Bul</strong> aramasında mesai günü olanlar eskisi gibi uygun sayılmaz</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>İzin/muafiyet dosyasında <strong>Nöbet Muafiyeti</strong> kaydı olan personel Personel tablosunda <strong>Muafiyet</strong> sütununda işaretlenir (dilekçe ile nöbet tutanları ayırt etmek için); nöbet hesaplarını etkilemez</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#166534;font-weight:700">✓</span>Toplam Saat = tüm sayılan nöbet sürelerinin saatler cinsinden toplamı</li>
             </ul>
           </div>
@@ -643,7 +646,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
             <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>Ekip Şefi, YSP ve Sürücü nöbetleri <strong>branş bağımsız</strong>, kişi bazında zaman sırasına göre birleştirilir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>İki ardışık nöbet arasındaki boşluk, girilen <strong>minimum gün</strong> eşiğini geçerse listelenir (varsayılan 5 gün)</li>
-              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>Boşluğa denk gelen izin/rapor kayıtları (varsa) İZİN/RAPOR sütununda gösterilir</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>Boşluğa denk gelen izin/rapor kayıtları ile mesai, eğitim, koordinasyon ve diğer görev çalışmaları (varsa) İZİN/RAPOR/ÇALIŞMA sütununda gösterilir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span><strong>Personel</strong> ve <strong>İstasyon</strong> görünümleri arasında geçiş yapılabilir; istasyon görünümünde boşluk, önceki/sonraki istasyon geçişi bazında tekilleştirilir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>Görünen (filtrelenmiş) boşluk listesi Excel’e aktarılabilir</li>
             </ul>
@@ -772,6 +775,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
             <th>Diğer Süre</th>
             <th>Toplam Saat</th>
             <th>Toplam (Gün)</th>
+            <th>Mesai / Diğer</th>
+            <th>Muafiyet</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -2396,6 +2401,13 @@ function sureKategori(saat) {
   if (saat === 24) return 's24';
   return 'sdiger';
 }
+// Tek kural: yalnızca süresi (saat) yazılı Ekip Şefi/YSP/Sürücü kayıtları NÖBETtir.
+// "Mesai" (süresi yazılmamış) kayıtlar ve "Diğer" görevli kayıtlar nöbet hesaplarına (toplam, kapsama, boşluk,
+// düzen, asıl/çoklu istasyon) karıştırılmaz; yalnızca bilgi olarak listelenir.
+function ashiNobetMi(n) { return !!n && Number(n.saat) > 0; }
+function ashiNobetSatiri(r) {
+  return parseSure(getSure(r)) > 0 && (GOREV_MAP.ef(r) || GOREV_MAP.ysp(r) || GOREV_MAP.sur(r));
+}
 
 // ═══════════════════════════════════════════════════════════
 // TÜM SATIRLARI TUTAN GLOBAL MAP (istasyon tespiti için)
@@ -2517,7 +2529,7 @@ function processFile(file) {
         return clipIntervalToReportMonth(interval.startMs, interval.endMs, reportMonthInfo) > ANALIZ_EPSILON;
       });
       if (!reportValid.length) throw new Error('Rapor ayının 1’i 09:00–sonraki ayın 1’i 09:00 aralığında ASHİ istasyonu uygun kaydı bulunamadı.');
-      buildGlobalIstCount(reportValid);
+      buildGlobalIstCount(reportValid.filter(ashiNobetSatiri));
       const archiveConflict = await archiveChooseSlot(reportMonthInfo);
       if (!archiveConflict.allowed) {
         window.__ci = previousCi;
@@ -2535,7 +2547,7 @@ function processFile(file) {
 
       // Yalnızca aylık 09:00–09:00 aralığına giren satırlardan kişi başına istasyon sayısını hesapla.
       const tcIstAll = {};
-      reportValid.forEach(r => {
+      reportValid.filter(ashiNobetSatiri).forEach(r => {
         const tc  = getPersonKey(r);
         const ist = getIstasyon(r);
         if (!tc || !ist) return;
@@ -2573,6 +2585,7 @@ function processFile(file) {
         bashekimlik: buildSpecialDutyList(specialReportValid, 'bashekimlik', tcBransLookup)
       };
       try { specialDutyLists.mesai = ashiBuildMesaiList(sourceRows, tcBransLookup); } catch (e) { console.warn('Eğitim/koordinasyon kayıtları okunamadı', e); specialDutyLists.mesai = []; }
+      try { specialDutyLists.diger = ashiBuildDigerList(sourceRows.filter(r => isIstasyon(r) && isAmbulans(r) && isASHI(r)), tcBransLookup); } catch (e) { console.warn('Diğer görevli kayıtlar okunamadı', e); specialDutyLists.diger = []; }
       izinRaporRecords = [];
       izinRaporFileName = '';
       updateIzinRaporButton();
@@ -2766,6 +2779,7 @@ async function handleIzinRaporFile(file, targetKey) {
       izinRaporFileName = file.name;
       updateIzinRaporButton();
       invalidateBoundaryDependentCaches();
+      try { renderTable(); } catch (e) {}
     }
     const [y, m] = [Number(key.slice(0,4)), Number(key.slice(5,7))];
     alert(`${records.length} izin/rapor kaydı yüklendi (${archiveMonthLabel({year:y, month:m})}).` + (archived ? '\nArşive kaydedildi; bu ay açıldığında otomatik yüklenir.' : '\nUyarı: arşive kaydedilemedi, yalnızca bu oturumda geçerli.'));
@@ -2834,7 +2848,7 @@ async function autoFillBoundaryFromArchive() {
           if (!tc) return;
           if (!byTc[tc]) byTc[tc] = [];
           (p.nobetler || []).forEach(n => {
-            if (!Number.isFinite(n.startMs) || !Number.isFinite(n.endMs) || n.endMs <= n.startMs) return;
+            if (!ashiNobetMi(n) || !Number.isFinite(n.startMs) || !Number.isFinite(n.endMs) || n.endMs <= n.startMs) return;
             byTc[tc].push({
               ist:n.ist, startMs:n.startMs, endMs:n.endMs, saat:n.saat,
               basRaw:n.basRaw, bitisRaw:n.bitisRaw, key:boundaryRecordKey(n), isBoundary:true
@@ -2890,7 +2904,7 @@ function updateSinirAyButton() {
 // Bir kişinin nobetler dizisini, Sınır Ay Verisi'nden gelen (rapor ayı dışındaki) ek kayıtlarla genişletir.
 // Sadece boşluk/dizi tespiti için kullanılır; ana listelerde bu ekstra kayıtlar gösterilmez.
 function getExtendedNobetler(person, bounds) {
-  const base = person.nobetler || [];
+  const base = (person.nobetler || []).filter(ashiNobetMi);
   const tc = String(person.tc || '').trim();
   const extra = tc && boundaryDutyByTc[tc] ? boundaryDutyByTc[tc] : [];
   if (!extra.length) return base;
@@ -2912,17 +2926,34 @@ function getLeaveMatchesForGap(row) {
   return izinRaporRecords.filter(record => record.tc === tc && record.startMs < gapEnd + ANALIZ_EPSILON * EXCEL_HOUR_MS && record.endMs > gapStart - ANALIZ_EPSILON * EXCEL_HOUR_MS);
 }
 
+// Boşluğun içine denk gelen nöbet dışı çalışma (Mesai / Eğitim / Koordinasyon / Diğer görev) özeti: "Mesai: 3 gün (06.10, 07.10, 08.10)"
+function getCalismaSummaryForGap(row) {
+  const groups = {};
+  (row.calisma || []).forEach(c => {
+    const key = c.tur;
+    const g = groups[key] || (groups[key] = {days:new Set(), saat:0});
+    g.days.add(formatDateOnly(new Date(c.startMs)).slice(0, 5));
+    if (c.saat > 0) g.saat += c.saat;
+  });
+  return ['Mesai', 'Eğitim', 'Koordinasyon', 'Diğer görev'].filter(k => groups[k]).map(k => {
+    const g = groups[k];
+    const days = [...g.days];
+    return k + ': ' + days.length + ' gün (' + days.slice(0, 6).join(', ') + (days.length > 6 ? ' …' : '') + ')' + (g.saat ? ' · ' + roundAnaliz(g.saat) + ' saat' : '');
+  });
+}
 function formatLeaveMatches(row) {
   const matches = getLeaveMatchesForGap(row);
-  if (!matches.length) return '';
-  return matches.map(record => {
+  const parts = matches.map(record => {
     return record.type + ' · Başlangıç: ' + record.start + ' · Alınan gün: ' + record.days;
-  }).join(' | ');
+  }).concat(getCalismaSummaryForGap(row).map(t => 'ÇALIŞMA · ' + t));
+  return parts.join(' | ');
 }
 function formatLeaveMatchesHtml(row) {
   const matches = getLeaveMatchesForGap(row);
-  if (!matches.length) return '—';
-  return matches.map(record => `<span class="izin-rapor-item">${escapeHtml(record.type + ' · Başlangıç: ' + record.start + ' · Alınan gün: ' + record.days)}</span>`).join('');
+  const calisma = getCalismaSummaryForGap(row);
+  if (!matches.length && !calisma.length) return '—';
+  return matches.map(record => `<span class="izin-rapor-item">${escapeHtml(record.type + ' · Başlangıç: ' + record.start + ' · Alınan gün: ' + record.days)}</span>`).join('')
+    + calisma.map(t => `<span class="izin-rapor-item" style="display:block;color:#1e40af;background:#eff6ff;border-radius:4px;padding:1px 6px;margin-top:2px">${escapeHtml('Çalışma · ' + t)}</span>`).join('');
 }
 
 function buildSpecialDutyList(rows, kind, bransLookup) {
@@ -3132,7 +3163,7 @@ function buildPersonelList(rows, tcAsilIst, tcIstAll) {
     // kişi çoklu istasyon sayılmalı — sadece bu görevdeki istasyon adedi (istasyonlar.length)
     // yeterli değil, çünkü kişi bu görevde TEK istasyonda görünse bile o istasyon asıl
     // istasyonundan farklı olabilir (eksik sayım hatasının kaynağı buydu).
-    const farkliIstasyonNobetleri = p.nobetler.filter(n => n.ist !== asilIst);
+    const farkliIstasyonNobetleri = p.nobetler.filter(n => ashiNobetMi(n) && n.ist !== asilIst);
     const isCoklu = farkliIstasyonNobetleri.length > 0;
     const farkliIstasyonlar = [...new Set(farkliIstasyonNobetleri.map(n => n.ist).filter(Boolean))];
     const farkliIstCount = {};
@@ -3213,8 +3244,10 @@ function buildBoslukData(force=false) {
     (allData[gKey] || []).forEach(p => {
       const personKey = getBoslukPersonKey(p);
       if (!people[personKey]) people[personKey] = {
-        tc:p.tc || '', ad:p.ad || '', soyad:p.soyad || '', records:[]
+        tc:p.tc || '', ad:p.ad || '', soyad:p.soyad || '', records:[], mesai:[]
       };
+      // Mesai (süresi yazılmamış) kayıtlar nöbet sayılmaz ve boşluğu bölmez; yalnızca boşluğun içine denk gelen mesai günü bilgi olarak sayılır.
+      (p.nobetler || []).forEach(n => { if (!ashiNobetMi(n) && Number.isFinite(n.startMs) && !people[personKey].mesai.some(m => m.startMs === n.startMs && m.tur === 'Mesai')) people[personKey].mesai.push({tur:'Mesai', startMs:n.startMs, endMs:n.endMs, saat:null}); });
       // Sınır Ay Verisi yüklendiyse, önceki ay sonu / sonraki ay başı nöbetleri de
       // (ay sınırında kesilmeden) dahil edilir — böylece ay başı/sonundaki gerçek
       // boşluklar doğru tespit edilir. Bu ek kayıtlar ay dışına taşsa bile kırpılmaz.
@@ -3228,8 +3261,14 @@ function buildBoslukData(force=false) {
     });
   });
 
+  // Nöbet dışı çalışma kayıtları (eğitim, koordinasyon, diğer görev): boşluğu bölmez, yalnızca boşluğun içindeki çalışmayı göstermek için eklenir.
+  const calismaByTc = {};
+  const addCalisma = (tc, tur, n) => { if (!tc || !Number.isFinite(n.startMs)) return; (calismaByTc[tc] = calismaByTc[tc] || []).push({tur, startMs:n.startMs, endMs:n.endMs, saat:n.saat > 0 ? n.saat : null}); };
+  ((specialDutyLists || {}).mesai || []).forEach(n => addCalisma(String(n.tc || '').trim(), n.tur === 'koord' ? 'Koordinasyon' : 'Eğitim', n));
+  ((specialDutyLists || {}).diger || []).forEach(n => addCalisma(String(n.tc || '').trim(), 'Diğer görev', n));
   const gaps = [];
   Object.values(people).forEach(person => {
+    const extraCalisma = calismaByTc[String(person.tc || '').trim()] || [];
     const records = person.records.slice().sort((a,b) => a.startMs-b.startMs || a.endMs-b.endMs);
     if (records.length < 2) return;
     const blocks = [];
@@ -3263,7 +3302,9 @@ function buildBoslukData(force=false) {
         previousStations:[...new Set(previous.items.map(item => item.station).filter(Boolean))],
         nextStations:[...new Set(next.items.map(item => item.station).filter(Boolean))],
         gapHours:roundAnaliz(gapHours), gapDays:roundAnaliz(gapDays),
-        crossesBoundary: previous.items.some(it=>it.isBoundary) || next.items.some(it=>it.isBoundary)
+        crossesBoundary: previous.items.some(it=>it.isBoundary) || next.items.some(it=>it.isBoundary),
+        calisma: person.mesai.concat(extraCalisma).filter(c => c.startMs >= previous.endMs && c.startMs < next.startMs).sort((a,b) => a.startMs-b.startMs),
+        mesaiGun: person.mesai.filter(c => c.startMs >= previous.endMs && c.startMs < next.startMs).length
       });
     }
   });
@@ -3334,7 +3375,7 @@ function renderBoslukGapRows(rows) {
 }
 
 function renderBoslukPersonView(rows) {
-  return `<div style="overflow:auto;padding:0 20px 18px"><table class="tbl bosluk-table"><colgroup><col style="width:11%"><col style="width:23%"><col style="width:30%"><col style="width:23%"><col style="width:13%"></colgroup><thead><tr><th>PERSONEL</th><th>ÖNCEKİ NÖBET BLOĞU</th><th>İZİN / RAPOR</th><th>SONRAKİ NÖBET BLOĞU</th><th style="text-align:center">BOŞLUK</th></tr></thead><tbody>${renderBoslukGapRows(rows)}</tbody></table></div>`;
+  return `<div style="overflow:auto;padding:0 20px 18px"><table class="tbl bosluk-table"><colgroup><col style="width:11%"><col style="width:23%"><col style="width:30%"><col style="width:23%"><col style="width:13%"></colgroup><thead><tr><th>PERSONEL</th><th>ÖNCEKİ NÖBET BLOĞU</th><th>İZİN / RAPOR / ÇALIŞMA</th><th>SONRAKİ NÖBET BLOĞU</th><th style="text-align:center">BOŞLUK</th></tr></thead><tbody>${renderBoslukGapRows(rows)}</tbody></table></div>`;
 }
 
 function renderBoslukStationView(rows) {
@@ -3348,7 +3389,7 @@ function renderBoslukStationView(rows) {
   });
   const sections = Object.keys(groups).sort((a,b) => trColl.compare(a,b)).map(station => `<section class="bosluk-station-group">
     <div class="bosluk-station-head"><span>🏥 ${escapeHtml(station)}</span><small>${groups[station].length} kayıt</small></div>
-    <div style="overflow:auto;padding:0 20px 18px"><table class="tbl bosluk-table"><colgroup><col style="width:11%"><col style="width:23%"><col style="width:30%"><col style="width:23%"><col style="width:13%"></colgroup><thead><tr><th>PERSONEL</th><th>ÖNCEKİ NÖBET BLOĞU</th><th>İZİN / RAPOR</th><th>SONRAKİ NÖBET BLOĞU</th><th style="text-align:center">BOŞLUK</th></tr></thead><tbody>${renderBoslukGapRows(groups[station])}</tbody></table></div>
+    <div style="overflow:auto;padding:0 20px 18px"><table class="tbl bosluk-table"><colgroup><col style="width:11%"><col style="width:23%"><col style="width:30%"><col style="width:23%"><col style="width:13%"></colgroup><thead><tr><th>PERSONEL</th><th>ÖNCEKİ NÖBET BLOĞU</th><th>İZİN / RAPOR / ÇALIŞMA</th><th>SONRAKİ NÖBET BLOĞU</th><th style="text-align:center">BOŞLUK</th></tr></thead><tbody>${renderBoslukGapRows(groups[station])}</tbody></table></div>
   </section>`).join('');
   return sections || '<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Filtreye uyan istasyon kaydı bulunamadı.</div>';
 }
@@ -3429,7 +3470,7 @@ function exportBoslukExcel(dataArg) {
   const aoa = [
     ['ASHİ Nöbet Analizi — Branş Bağımsız 5+ Gün Boşluklar'],
     [`Görünen sonuç: ${rows.length}/${data.rows.length} · Sayım aralığı: ${formatDateTime(new Date(bounds.monthStartMs))} → ${formatDateTime(new Date(bounds.monthEndMs))} · Minimum: ${formatBoslukDays(getBoslukMinDays())}`],
-    ['TC KİMLİK NO','AD SOYAD','ÖNCEKİ NÖBET GÖREV/İSTASYON','ÖNCEKİ BAŞLANGIÇ','ÖNCEKİ BİTİŞ','İZİN / RAPOR','SONRAKİ NÖBET GÖREV/İSTASYON','SONRAKİ BAŞLANGIÇ','SONRAKİ BİTİŞ','BOŞLUK (GÜN)','BOŞLUK (SAAT)']
+    ['TC KİMLİK NO','AD SOYAD','ÖNCEKİ NÖBET GÖREV/İSTASYON','ÖNCEKİ BAŞLANGIÇ','ÖNCEKİ BİTİŞ','İZİN / RAPOR / ÇALIŞMA','SONRAKİ NÖBET GÖREV/İSTASYON','SONRAKİ BAŞLANGIÇ','SONRAKİ BİTİŞ','BOŞLUK (GÜN)','BOŞLUK (SAAT)']
   ];
   rows.forEach(row => aoa.push([
     row.tc, String(row.ad || '') + ' ' + String(row.soyad || '').trim(), row.previousLabel, row.previousStart, row.previousEnd, formatLeaveMatches(row),
@@ -3641,13 +3682,14 @@ function buildMergedPersonelListAllGorev(force=false, includeBoundary=false){
   const people={};
   Object.entries(roleLabels).forEach(([gKey,roleLabel])=>(allData[gKey]||[]).forEach(person=>{
     const key=String(person.personKey||person.tc||`${person.ad}|${person.soyad}`);
-    if(!people[key]) people[key]={tc:person.tc||'',ad:person.ad||'',soyad:person.soyad||'',kadro_brans:person.kadro_brans||'',asilIst:person.asilIst||'',nobetler:[],roles:new Set()};
+    if(!people[key]) people[key]={tc:person.tc||'',ad:person.ad||'',soyad:person.soyad||'',kadro_brans:person.kadro_brans||'',asilIst:person.asilIst||'',nobetler:[],mesaiNobetler:[],roles:new Set()};
     const p=people[key];
     p.roles.add(roleLabel);
     if(!p.kadro_brans && person.kadro_brans) p.kadro_brans=person.kadro_brans;
     if(!p.asilIst && person.asilIst) p.asilIst=person.asilIst;
     // Nöbete Uygun Personel Bulma gibi ay sınırı farkında hesaplamalar için, yerel arşivden
     // otomatik gelen önceki/sonraki ay nöbetleri de (varsa) buraya dahil edilir.
+    (person.nobetler||[]).forEach(n=>{ if(!ashiNobetMi(n) && Number.isFinite(n.startMs) && Number.isFinite(n.endMs) && n.endMs>n.startMs) p.mesaiNobetler.push({startMs:n.startMs,endMs:n.endMs,ist:n.ist}); });
     const sourceNobetler = includeBoundary ? getExtendedNobetler(person, bounds) : (person.nobetler||[]);
     sourceNobetler.forEach(n=>{
       // Tarih/saat bazlı tekilleştirme: aynı zaman aralığındaki nöbet, farklı bir istasyonda
@@ -3853,9 +3895,11 @@ function buildUygunPersonelResults(dateStr){
   people.forEach(p=>{
     // Kadro branşı Sürücü olan personel bu aramaya dahil edilmez — onlar nöbet değil, sadece mesai tamamlıyor.
     if (/^s[üu]r[üu]c[üu]/i.test(String(p.kadro_brans||'').trim())) return;
-    const hasBefore = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, beforeStart, beforeEnd));
-    const hasAfter  = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, afterStart, afterEnd));
-    const hasOnDay  = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, dStart, dEnd));
+    // Mesai günü olanlar (genelde nöbet tutamayan personel) eskisi gibi uygun sayılmaz; ancak son/sonraki nöbet ve boşluk yalnızca gerçek nöbetlerden hesaplanır.
+    const mz = p.mesaiNobetler || [];
+    const hasBefore = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, beforeStart, beforeEnd)) || mz.some(n=>dutyOverlapsCalendarDay(n, beforeStart, beforeEnd));
+    const hasAfter  = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, afterStart, afterEnd)) || mz.some(n=>dutyOverlapsCalendarDay(n, afterStart, afterEnd));
+    const hasOnDay  = p.nobetler.some(n=>dutyOverlapsCalendarDay(n, dStart, dEnd)) || mz.some(n=>dutyOverlapsCalendarDay(n, dStart, dEnd));
     // İzin/Rapor dosyası yüklendiyse: girilen tarihten bir gün önce, kendisi veya bir gün sonrasında
     // izin/rapor kaydı olan personeli de uygun olmayanlar arasına al.
     const tcNorm = normalizeTcValue(p.tc);
@@ -4373,7 +4417,7 @@ function recalculatePersonTotalsForReportMonth() {
       if (hours <= ANALIZ_EPSILON) return;
       const kat = sureKategori(n.saat);
       if (kat === 's12') s12++; else if (kat === 's24') s24++; else if (kat === 'sdiger') sDiger++; else sMesai++;
-      toplamSaat += hours;
+      if (kat !== 'mesai') toplamSaat += hours;
     });
     p.s12=s12; p.s24=s24; p.sDiger=sDiger; p.sMesai=sMesai;
     p.toplamSaat=roundAnaliz(toplamSaat);
@@ -4577,11 +4621,21 @@ function filterTable() {
   renderTable();
 }
 
+function ashiNobetDisiHucre(r, map) {
+  const x = (map || {})[String(r.tc || `${r.ad}|${r.soyad}`).trim()] || {};
+  const chip = (txt, bg, fg, title) => `<span title="${escapeHtml(title)}" style="display:inline-block;background:${bg};color:${fg};border-radius:99px;padding:1px 8px;font-size:11px;font-weight:700;margin:1px">${escapeHtml(txt)}</span>`;
+  const parts = [];
+  if (x.mesai) parts.push(chip(x.mesai + ' mesai', '#f3f4f6', '#4b5563', 'Nöbet görevinde süresi yazılmamış (Mesai) kayıt; nöbet hesaplarına girmez'));
+  if (x.diger) parts.push(chip(x.diger + ' diğer', '#fef3c7', '#92400e', 'Diğer görevli kayıt' + (x.digerSaat ? ' · ' + x.digerSaat + ' saat' : '') + '; nöbet hesaplarına girmez'));
+  const mu = x.muaf ? chip('Muafiyet', '#fee2e2', '#991b1b', x.muaf + ' · dilekçe ile nöbet tutuyor olabilir') : '<span style="color:#cbd5e1">—</span>';
+  return `<td class="c">${parts.join('') || '<span style="color:#cbd5e1">—</span>'}</td><td class="c">${mu}</td>`;
+}
 function renderTable() {
   const start = (currentPage-1)*PAGE_SIZE;
   const page  = filteredRows.slice(start, start+PAGE_SIZE);
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
+  const ndMap = ashiNobetDisiOzet();
   page.forEach((r,i) => {
     const n  = r.toplam;
     const bc = n >= 30 ? 'cnt-high' : (n >= 15 ? 'cnt-mid' : 'cnt-low');
@@ -4604,7 +4658,8 @@ function renderTable() {
       <td class="c">${r.s24>0?`<span class="badge b-h24">${r.s24}</span>`:'<span style="color:#cbd5e1">—</span>'}</td>
       <td class="c">${r.sDiger>0?`<span class="badge b-hd">${r.sDiger}</span>`:'<span style="color:#cbd5e1">—</span>'}</td>
       <td class="c"><span style="font-size:12px;font-weight:600;color:#374151">${r.toplamSaat} saat</span></td>
-      <td class="c"><span class="badge ${bc}" title="${r.toplamStr}">${r.toplam} gün</span></td>`;
+      <td class="c"><span class="badge ${bc}" title="${r.toplamStr}">${r.toplam} gün</span></td>
+      ${ashiNobetDisiHucre(r, ndMap)}`;
     tbody.appendChild(tr);
   });
   renderPagination();
@@ -4646,7 +4701,7 @@ function showCokluModal() {
   const toplamCokluNobet = getCokluNobetSayisi(list);
   body.innerHTML = `<div style="margin:0 0 14px;padding:10px 14px;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;color:#9a3412;font-size:12px"><strong>${toplamCokluNobet} nöbet</strong>, ${list.length} kişinin asıl istasyonu dışındaki istasyonlarda gerçekleştirdiği nöbetlerdir. Kişinin kendi/asıl istasyonundaki nöbetler bu sayıya dahil değildir.</div>` + list.map(p => {
     const istHtml = p.istasyonlar.map(ist => {
-      const nb = p.nobetler.filter(n => n.ist === ist);
+      const nb = p.nobetler.filter(n => ashiNobetMi(n) && n.ist === ist);
       const parcalar = nb.flatMap(n => getCokluModalDutyPieces(n).map(part => ({...part, sure_raw:n.sure_raw||'—'})));
       const tarihHtml = parcalar
         .slice().sort((a,b) => a.startMs - b.startMs)
@@ -4783,6 +4838,64 @@ function ashiBuildMesaiList(rows, bransLookup) {
       istihdam:getRowExtra(r,'istihdam'), unvan:getRowExtra(r,'unvan'), il:getRowExtra(r,'il'), ofBrans:getRowExtra(r,'ofBrans')});
   });
   return out;
+}
+// "Diğer" görevli kayıtlar (süresi yazılı ya da "Mesai"): nöbet sayılmaz, yalnızca bilgi olarak listelenir.
+function ashiBuildDigerList(rows, bransLookup) {
+  const out = [], seen = new Set();
+  (rows || []).forEach(r => {
+    const gn = String(getGorev(r) || '').trim().toLocaleLowerCase('tr-TR').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i');
+    if (gn !== 'diger') return;
+    const iv = getRowDutyInterval(r);
+    if (!Number.isFinite(iv.startMs) || !Number.isFinite(iv.endMs)) return;
+    if (reportMonthInfo && !(clipIntervalToReportMonth(iv.startMs, iv.endMs, reportMonthInfo) > ANALIZ_EPSILON)) return;
+    const tc = getTCKN(r);
+    const k = `${tc || getAd(r) + getSoyad(r)}|${getIstasyon(r)}|${iv.startMs}|${getSure(r)}`;
+    if (seen.has(k)) return; seen.add(k);
+    const saat = parseSure(getSure(r));
+    out.push({tc, ad:getAd(r), soyad:getSoyad(r), ist:getIstasyon(r), brans:getKadroBrans(r) || (bransLookup && bransLookup[tc]) || '', saat: saat > 0 ? saat : null, sure_raw:String(getSure(r) || ''), startMs:iv.startMs, endMs:iv.endMs});
+  });
+  return out;
+}
+// Kişi bazında nöbet dışı bilgi: mesai (nöbet görevinde süresi yazılmamış), diğer görev, eğitim, koordinasyon, nöbet muafiyeti.
+function ashiNobetDisiOzet() {
+  const map = {};
+  const get = (tc, ad, soyad, brans, ist) => {
+    const k = String(tc || `${ad}|${soyad}`).trim();
+    if (!map[k]) map[k] = {tc:tc || '', ad:ad || '', soyad:soyad || '', brans:brans || '', ist:ist || '', nobet:0, mesai:0, diger:0, digerSaat:0, egitim:0, koord:0, muaf:''};
+    const x = map[k];
+    if (!x.brans && brans) x.brans = brans; if (!x.ist && ist) x.ist = ist;
+    return x;
+  };
+  ['ef','ysp','sur'].forEach(g => (allData[g] || []).forEach(p => {
+    const x = get(String(p.tc || '').trim(), p.ad, p.soyad, p.kadro_brans, p.asilIst);
+    const seenM = x._m || (x._m = new Set());
+    (p.nobetler || []).forEach(n => {
+      if (ashiNobetMi(n)) { x.nobet++; return; }
+      if (Number.isFinite(n.startMs) && !seenM.has(n.startMs)) { seenM.add(n.startMs); x.mesai++; }
+    });
+  }));
+  ((specialDutyLists || {}).diger || []).forEach(n => {
+    const x = get(String(n.tc || '').trim(), n.ad, n.soyad, n.brans, n.ist);
+    x.diger++; if (n.saat > 0) x.digerSaat += n.saat;
+  });
+  ((specialDutyLists || {}).mesai || []).forEach(n => {
+    const x = get(String(n.tc || '').trim(), n.ad, n.soyad, n.brans, n.ist);
+    if (n.tur === 'egitim') x.egitim++; else if (n.tur === 'koord') x.koord++;
+  });
+  ['komuta','bashekimlik'].forEach(kind => ((specialDutyLists || {})[kind] || []).forEach(sp => {
+    const x = get(String(sp.tc || '').trim(), sp.ad, sp.soyad, sp.kadro_brans || sp.brans, (sp.stations || [])[0]);
+    (sp.records || []).forEach(n => { if (Number(n.saat) > 0 && !/refakat|koordinasyon|e[ğg]itim/i.test(String(n.gorev || ''))) x.nobet++; });
+  }));
+  const b = (typeof getReportMonthBounds === 'function') ? getReportMonthBounds() : null;
+  (izinRaporRecords || []).forEach(rec => {
+    if (!/n[öo]bet\s*muafiyeti/i.test(String(rec.type || ''))) return;
+    if (b && !(rec.startMs < b.monthEndMs && rec.endMs > b.monthStartMs)) return;
+    const x = map[String(rec.tc || '').trim()];
+    if (!x) return;
+    x.muaf = 'Nöbet muafiyeti (bitiş ' + formatDutyDate(rec.endMs) + ')';
+  });
+  Object.values(map).forEach(x => { delete x._m; x.digerSaat = roundAnaliz(x.digerSaat); });
+  return map;
 }
 function getIstasyonPersonelRows() {
   const people = {};
@@ -6156,6 +6269,19 @@ function buildIstasyonOzetSheet(gorev) {
   return ws;
 }
 
+function buildNobetDisiSheet() {
+  const map = ashiNobetDisiOzet();
+  const list = Object.values(map).filter(x => x.mesai || x.diger || x.egitim || x.koord || x.muaf)
+    .sort((a, b) => trColl.compare(`${a.soyad} ${a.ad}`, `${b.soyad} ${b.ad}`));
+  const aoa = [['NÖBET DIŞI KAYITLAR VE NÖBET MUAFİYETİ (nöbet hesaplarına girmez, bilgi amaçlıdır)'],
+    ['TCKN','AD','SOYAD','BRANŞ (KADRO)','ASIL İSTASYON','NÖBET (KAYIT)','MESAİ (GÜN)','DİĞER GÖREV (KAYIT)','DİĞER GÖREV (SAAT)','EĞİTİM (GÜN)','KOORDİNASYON (GÜN)','NÖBET MUAFİYETİ (DİLEKÇE İLE NÖBET)']];
+  list.forEach(x => aoa.push([x.tc, x.ad, x.soyad, x.brans, x.ist, x.nobet, x.mesai, x.diger, x.digerSaat, x.egitim, x.koord, x.muaf && x.nobet ? x.muaf + (' · ' + x.nobet + ' nöbet yazılmış') : x.muaf]));
+  if (!list.length) aoa.push(['Kayıt yok']);
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [{wch:14},{wch:16},{wch:18},{wch:14},{wch:40},{wch:12},{wch:12},{wch:14},{wch:14},{wch:12},{wch:16},{wch:48}];
+  ws['!merges'] = [{s:{r:0,c:0},e:{r:0,c:11}}];
+  return ws;
+}
 function exportExcelAll() {
   const wb = XLSX.utils.book_new();
   const labels = { ef:'Ekip Şefi', ysp:'YSP', sur:'Sürücü' };
@@ -6178,6 +6304,7 @@ function exportExcelAll() {
     const wsS = buildSpecialListSheet(kind, list);
     XLSX.utils.book_append_sheet(wb, wsS, specialLabels[kind]);
   });
+  try { XLSX.utils.book_append_sheet(wb, buildNobetDisiSheet(), 'Nöbet Dışı ve Muafiyet'); } catch (err) { console.warn('Nöbet Dışı sayfası oluşturulamadı:', err); }
   XLSX.writeFile(wb, 'ashi_nobet_sayim_tumu.xlsx');
 }
 
