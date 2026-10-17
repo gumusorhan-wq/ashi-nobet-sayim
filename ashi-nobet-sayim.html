@@ -140,6 +140,21 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   /* BOŞLUK ANALİZİ */
   .bosluk-toolbar{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
   .bosluk-filter-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+  .ist-pk{position:relative;display:inline-block;min-width:170px}
+  .ist-pk-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:600;color:#334155;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ist-pk-btn.on,.ist-pk.open .ist-pk-btn{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e}
+  .ist-pk-pop{position:fixed;z-index:100000;background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.22);padding:10px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+  .ist-pk-head{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:#334155}
+  .ist-pk-head button{margin-left:6px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:7px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;color:#334155}
+  .ist-pk-q{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #99d3cd;border-radius:9px;font-size:13px;outline:none}
+  .ist-pk-chips{display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow:auto;padding:2px}
+  .ist-pk-chip{cursor:pointer;background:#f1f5f9;color:#334155;border:1px solid transparent;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:700;user-select:none}
+  .ist-pk-chip.part{border-color:#0f766e;background:#f0fdfa}
+  .ist-pk-chip.full{background:#0f766e;color:#fff}
+  .ist-pk-list{overflow:auto;border-top:1px solid #e2e8f0;padding-top:4px;min-height:80px;flex:1}
+  .ist-pk-row{display:flex;align-items:center;gap:8px;padding:4px 6px;margin:0;min-height:0;line-height:1.25;font-size:13px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:6px;text-transform:none;letter-spacing:0}
+  .ist-pk-row input{margin:0;width:16px;height:16px;flex:none}
+  .ist-pk-row:hover{background:#f1f5f9}
   .bosluk-filter{display:flex;flex-direction:column;gap:5px;min-width:170px}
   .bosluk-filter.wide{min-width:250px;flex:1}
   .bosluk-filter-label{font-size:10px;font-weight:800;letter-spacing:.06em;color:#64748b;text-transform:uppercase}
@@ -670,6 +685,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#1d4ed8;font-weight:700">→</span>Her sayfada üst kısımda pastel renkli istatistik kartları yer alır</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#1d4ed8;font-weight:700">→</span>Filtreli analiz Excel’inde satır, istasyon, eksik/fazla gün-saat, çakışma ve personel özeti bulunur</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#1d4ed8;font-weight:700">→</span>Arama veya filtre uygulanmışsa yalnızca görünen kayıtlar indirilir</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#1d4ed8;font-weight:700">→</span><strong>Çoklu istasyon / ilçe seçici</strong>: Nöbete Uygun Personel, 5+ Gün Boşluk, Sürücü Düzeni, Tüm Personel Düzeni, Çoklu İstasyon, Analiz ve İstasyon Listesindeki “İstasyon” alanından birden fazla istasyon işaretlenebilir; ilçe çipine (örn. Akhisar) tıklamak o ilçenin tüm istasyonlarını seçer/kaldırır. “Tümü/Temizle” ve arama kutusu da vardır</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#047857;font-weight:700">→</span><strong>Sürücü Düzeni</strong> ve <strong>Tüm Personel Düzeni</strong> çıktılarında nöbet bilgisi <strong>TARİH / GÖREV BRANŞI / SAAT</strong> olmak üzere 3 ayrı, satır satır hizalı sütuna bölünür; istasyon(lar) da alt alta yazılır</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#3730a3;font-weight:700">→</span><strong>5+ Gün Boşluk Analizi</strong> ve <strong>Komuta/Başhekimlik</strong> listeleri kendi ekranlarındaki filtreye göre ayrı ayrı Excel’e aktarılabilir</li>
             </ul>
@@ -859,7 +875,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <div id="istasyonPersonelModal" class="istasyon-personel-main-section">
   <div class="istasyon-personel-main-box">
     <div class="istasyon-personel-filters">
-      <label>İstasyon seç<select id="istasyonPersonelStation" onchange="renderIstasyonPersonelList()"><option value="">Tüm istasyonlar</option></select></label>
+      <label>İstasyon seç<select data-ist-picker="1" id="istasyonPersonelStation" onchange="renderIstasyonPersonelList()"><option value="">Tüm istasyonlar</option></select></label>
       <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="text" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
       <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
       <button class="btn-sec" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportIstasyonPersonelExcel()">📥 Excel'e Aktar</button>
@@ -929,7 +945,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="boslukStationFilter">İstasyon</label>
-          <select id="boslukStationFilter"><option value="">Tüm istasyonlar</option></select>
+          <select data-ist-picker="1" id="boslukStationFilter"><option value="">Tüm istasyonlar</option></select>
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="boslukMinDays">Minimum boşluk</label>
@@ -978,7 +994,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="surucuDuzenStationFilter">İstasyon</label>
-          <select id="surucuDuzenStationFilter"><option value="">Tüm istasyonlar</option></select>
+          <select data-ist-picker="1" id="surucuDuzenStationFilter"><option value="">Tüm istasyonlar</option></select>
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="surucuDuzenTypeFilter">Düzen türü</label>
@@ -1002,7 +1018,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="bosluk-toolbar"><div class="bosluk-filter-row">
       <div class="bosluk-filter wide"><label class="bosluk-filter-label" for="tumPersonelDuzenSearch">Kişi veya TCKN</label><input id="tumPersonelDuzenSearch" type="search" placeholder="Ad, soyad veya TCKN ara…"></div>
       <div class="bosluk-filter"><label class="bosluk-filter-label" for="tumPersonelDuzenRoleFilter">Ekip / Branş</label><select id="tumPersonelDuzenRoleFilter"><option value="">Tüm ekipler</option></select></div>
-      <div class="bosluk-filter"><label class="bosluk-filter-label" for="tumPersonelDuzenStationFilter">İstasyon</label><select id="tumPersonelDuzenStationFilter"><option value="">Tüm istasyonlar</option></select></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="tumPersonelDuzenStationFilter">İstasyon</label><select data-ist-picker="1" id="tumPersonelDuzenStationFilter"><option value="">Tüm istasyonlar</option></select></div>
       <div class="bosluk-filter"><label class="bosluk-filter-label" for="tumPersonelDuzenTypeFilter">Düzen türü</label><select id="tumPersonelDuzenTypeFilter"><option value="">Tümü</option><option value="night12">12 saat · 3 gece arka arkaya</option><option value="day24">24 saat · 2 gün arayla</option></select></div>
       <button id="tumPersonelDuzenClearBtn" class="btn-sec bosluk-clear" type="button">Filtreleri temizle</button>
     </div><div id="tumPersonelDuzenFilterSummary" class="bosluk-filter-summary"></div></div>
@@ -1020,7 +1036,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="bosluk-toolbar"><div class="bosluk-filter-row">
       <div class="bosluk-filter wide"><label class="bosluk-filter-label" for="cokluTumPersonelSearch">Kişi veya TCKN</label><input id="cokluTumPersonelSearch" type="search" placeholder="Ad, soyad veya TCKN ara…"></div>
       <div class="bosluk-filter"><label class="bosluk-filter-label" for="cokluTumPersonelBransFilter">Branş (Kadro)</label><select id="cokluTumPersonelBransFilter"><option value="">Tüm branşlar</option></select></div>
-      <div class="bosluk-filter"><label class="bosluk-filter-label" for="cokluTumPersonelStationFilter">Gidilen istasyon</label><select id="cokluTumPersonelStationFilter"><option value="">Tüm istasyonlar</option></select></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="cokluTumPersonelStationFilter">Gidilen istasyon</label><select data-ist-picker="1" id="cokluTumPersonelStationFilter"><option value="">Tüm istasyonlar</option></select></div>
       <button id="cokluTumPersonelClearBtn" class="btn-sec bosluk-clear" type="button">Filtreleri temizle</button>
     </div><div id="cokluTumPersonelFilterSummary" class="bosluk-filter-summary"></div></div>
     <div id="cokluTumPersonelRoleSummary" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 20px;background:#fff;border-bottom:1px solid #f1e4d6"></div>
@@ -1043,7 +1059,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="bosluk-toolbar"><div class="bosluk-filter-row">
       <div class="bosluk-filter wide"><label class="bosluk-filter-label" for="uygunPersonelSearch">Kişi veya TCKN</label><input id="uygunPersonelSearch" type="search" placeholder="Ad, soyad veya TCKN ara…"></div>
       <div class="bosluk-filter"><label class="bosluk-filter-label" for="uygunPersonelBransFilter">Nöbet Branşı</label><select id="uygunPersonelBransFilter"><option value="">Tüm branşlar</option></select></div>
-      <div class="bosluk-filter"><label class="bosluk-filter-label" for="uygunPersonelStationFilter">İstasyon</label><select id="uygunPersonelStationFilter"><option value="">Tüm istasyonlar</option></select></div>
+      <div class="bosluk-filter"><label class="bosluk-filter-label" for="uygunPersonelStationFilter">İstasyon</label><select data-ist-picker="1" id="uygunPersonelStationFilter"><option value="">Tüm istasyonlar</option></select></div>
       <button id="uygunPersonelClearBtn" class="btn-sec bosluk-clear" type="button">Filtreleri temizle</button>
     </div><div id="uygunPersonelFilterSummary" class="bosluk-filter-summary"></div></div>
     <div class="modal-body" id="uygunPersonelModalBody" style="max-height:58vh;overflow-y:auto;padding:0"></div>
@@ -2391,6 +2407,128 @@ const GOREV_MAP = {
   sur: r => /Sürücü/i.test(getGorev(r)),
 };
 
+// ═══════════════════════════════════════════════════════════
+// ÇOKLU İSTASYON SEÇİCİ (ilçe bazlı) — <select data-ist-picker> kutularının yerine geçer.
+// Seçim boşsa "tüm istasyonlar" demektir. ashiIstSecim(id) seçili istasyon adlarını dizi olarak verir.
+// ═══════════════════════════════════════════════════════════
+function ashiIstIlce(name) {
+  const n = String(name || '').trim().replace(/^MAN[İI]SA\s+/i, '');
+  if (/KOMUTA|BA[ŞS]HEK[İI]M|AMBULANS SERV/i.test(n)) return 'Diğer';
+  const w = n.split(/\s+/)[0] || 'Diğer';
+  return w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1).toLocaleLowerCase('tr-TR');
+}
+function ashiIstKisa(name) {
+  return String(name || '').replace(/^MAN[İI]SA\s+/i, '').replace(/AC[İI]L SA[ĞG]LIK H[İI]ZMETLER[İI] [İI]STASYONU/i, 'ASHİ').trim();
+}
+function ashiIstSecim(id) {
+  const sel = typeof id === 'string' ? document.getElementById(id) : id;
+  if (!sel) return [];
+  const st = sel.__istPicker;
+  if (!st) { const v = String(sel.value || '').trim(); return v ? [v] : []; }
+  const all = [...sel.options].map(o => o.value).filter(Boolean);
+  if (!st.set.size || st.set.size >= all.length) return [];
+  return [...st.set];
+}
+// sel: [] (hepsi), dizi (tam ad listesi) ya da küçük harfli metin (eski davranış: içerir)
+function ashiIstUyar(sel, ist) {
+  if (!sel || (Array.isArray(sel) && !sel.length) || sel === '') return true;
+  return Array.isArray(sel) ? sel.includes(ist) : String(ist || '').toLocaleLowerCase('tr-TR').includes(sel);
+}
+function ashiIstSecimLC(id) { return ashiIstSecim(id).map(s => String(s).toLocaleLowerCase('tr-TR')); }
+function ashiIstUyarLC(q, text) {
+  if (!q || !q.length) return true;
+  const t = String(text || '').toLocaleLowerCase('tr-TR');
+  return q.some(x => t === x || t.includes(x));
+}
+(function () {
+  let openPop = null;
+  function closeAll() { if (openPop) { openPop.pop.style.display = 'none'; openPop.wrap.classList.remove('open'); openPop = null; } }
+  document.addEventListener('mousedown', e => { if (openPop && !openPop.wrap.contains(e.target)) closeAll(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+  window.addEventListener('resize', closeAll);
+  document.addEventListener('scroll', e => { if (openPop && !openPop.pop.contains(e.target)) closeAll(); }, true);
+  function init(sel) {
+    if (sel.__istPicker) return;
+    const state = { set: new Set(), q: '' };
+    sel.__istPicker = state;
+    sel.style.display = 'none';
+    const wrap = document.createElement('div'); wrap.className = 'ist-pk';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'ist-pk-btn';
+    const pop = document.createElement('div'); pop.className = 'ist-pk-pop'; pop.style.display = 'none';
+    wrap.appendChild(btn); wrap.appendChild(pop);
+    sel.insertAdjacentElement('afterend', wrap);
+    const names = () => [...sel.options].map(o => o.value).filter(Boolean);
+    const emit = () => sel.dispatchEvent(new Event('change', { bubbles: true }));
+    function label() {
+      const all = names();
+      if (!state.set.size || state.set.size >= all.length) return 'Tüm istasyonlar';
+      if (state.set.size === 1) return ashiIstKisa([...state.set][0]);
+      return state.set.size + ' istasyon seçili';
+    }
+    function renderPop() {
+      const all = names();
+      const groups = {};
+      all.forEach(n => { (groups[ashiIstIlce(n)] = groups[ashiIstIlce(n)] || []).push(n); });
+      const ilceler = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'tr'));
+      const q = state.q.trim().toLocaleLowerCase('tr-TR');
+      const chips = ilceler.map(il => {
+        const g = groups[il], sc = g.filter(n => state.set.has(n)).length;
+        const cls = sc === g.length ? 'full' : (sc ? 'part' : '');
+        return `<span class="ist-pk-chip ${cls}" data-il="${escapeHtml(il)}">${escapeHtml(il)} (${g.length})</span>`;
+      }).join('');
+      const rows = all.filter(n => !q || n.toLocaleLowerCase('tr-TR').includes(q) || ashiIstIlce(n).toLocaleLowerCase('tr-TR').includes(q))
+        .map(n => `<label class="ist-pk-row" title="${escapeHtml(n)}"><input type="checkbox" data-n="${escapeHtml(n)}" ${state.set.has(n) ? 'checked' : ''}><span>${escapeHtml(ashiIstKisa(n))}</span></label>`).join('');
+      pop.innerHTML = `<div class="ist-pk-head"><b>İstasyon (${state.set.size}/${all.length})</b><span><button type="button" data-act="all">Tümü</button><button type="button" data-act="clear">Temizle</button></span></div>
+        <input class="ist-pk-q" type="search" placeholder="İlçe veya istasyon ara…" value="${escapeHtml(state.q)}">
+        <div class="ist-pk-chips">${chips}</div>
+        <div class="ist-pk-list">${rows || '<div style="padding:10px;color:#94a3b8;font-size:12px">Eşleşen istasyon yok</div>'}</div>`;
+      const qi = pop.querySelector('.ist-pk-q');
+      qi.oninput = () => { state.q = qi.value; const pos = qi.selectionStart; renderPop(); const n = pop.querySelector('.ist-pk-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
+      pop.querySelectorAll('.ist-pk-chip').forEach(c => c.onclick = () => {
+        const g = groups[c.dataset.il] || [];
+        if (g.every(n => state.set.has(n))) g.forEach(n => state.set.delete(n)); else g.forEach(n => state.set.add(n));
+        paint(); emit();
+      });
+      pop.querySelectorAll('input[type=checkbox]').forEach(cb => cb.onchange = () => { if (cb.checked) state.set.add(cb.dataset.n); else state.set.delete(cb.dataset.n); paint(); emit(); });
+      pop.querySelector('[data-act=all]').onclick = () => { names().forEach(n => state.set.add(n)); paint(); emit(); };
+      pop.querySelector('[data-act=clear]').onclick = () => { state.set.clear(); paint(); emit(); };
+    }
+    function paint() {
+      btn.textContent = label() + ' ▾';
+      btn.classList.toggle('on', state.set.size > 0 && state.set.size < names().length);
+      if (openPop && openPop.wrap === wrap) { const top = pop.querySelector('.ist-pk-list'); const st = top ? top.scrollTop : 0; renderPop(); const nl = pop.querySelector('.ist-pk-list'); if (nl) nl.scrollTop = st; }
+    }
+    btn.onclick = () => {
+      if (openPop && openPop.wrap === wrap) { closeAll(); return; }
+      closeAll();
+      state.q = '';
+      openPop = { wrap, pop };
+      wrap.classList.add('open');
+      renderPop();
+      const r = btn.getBoundingClientRect();
+      pop.style.display = 'block';
+      const w = Math.min(380, window.innerWidth - 16);
+      pop.style.width = w + 'px';
+      pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+      pop.style.top = (r.bottom + 4) + 'px';
+      pop.style.maxHeight = Math.max(220, window.innerHeight - r.bottom - 16) + 'px';
+    };
+    Object.defineProperty(sel, 'value', {
+      configurable: true,
+      get() { return state.set.size === 1 ? [...state.set][0] : ''; },
+      set(v) { state.set.clear(); if (v) state.set.add(v); paint(); }
+    });
+    new MutationObserver(() => { const all = new Set(names()); [...state.set].forEach(n => { if (!all.has(n)) state.set.delete(n); }); paint(); }).observe(sel, { childList: true });
+    paint();
+  }
+  function scan(root) { (root.querySelectorAll ? root.querySelectorAll('select[data-ist-picker]') : []).forEach(init); }
+  function boot() {
+    scan(document);
+    new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) { if (n.matches && n.matches('select[data-ist-picker]')) init(n); else scan(n); } }))).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
 function sureKategori(saat) {
   // null  → mesai (sayılmaz, toplama eklenmez)
   // 12    → s12
@@ -3340,13 +3478,13 @@ function sortBoslukRows(rows) {
 
 function getBoslukFilteredRows(rows) {
   const search = String(document.getElementById('boslukSearch')?.value || '').trim().toLocaleLowerCase('tr-TR');
-  const station = String(document.getElementById('boslukStationFilter')?.value || '').trim();
+  const station = ashiIstSecim('boslukStationFilter');
   const minInput = Number(document.getElementById('boslukMinDays')?.value);
   const minDays = Number.isFinite(minInput) ? Math.max(BOSLUK_ESIK_GUN, minInput) : BOSLUK_ESIK_GUN;
   const filtered = (rows || []).filter(row => {
     const personText = `${row.ad || ''} ${row.soyad || ''} ${row.tc || ''}`.toLocaleLowerCase('tr-TR');
     const searchOk = !search || personText.includes(search);
-    const stationOk = !station || getBoslukRowStations(row).includes(station);
+    const stationOk = !station.length || getBoslukRowStations(row).some(s => station.includes(s));
     const minOk = Number(row.gapDays) + ANALIZ_EPSILON >= minDays;
     return searchOk && stationOk && minOk;
   });
@@ -3615,9 +3753,9 @@ function buildTumPersonelDuzenData(force=false) {
 function getTumPersonelDuzenFilteredRows(rows){
   const search=String(document.getElementById('tumPersonelDuzenSearch')?.value||'').trim().toLocaleLowerCase('tr-TR');
   const role=String(document.getElementById('tumPersonelDuzenRoleFilter')?.value||'').trim();
-  const station=String(document.getElementById('tumPersonelDuzenStationFilter')?.value||'').trim();
+  const station=ashiIstSecim('tumPersonelDuzenStationFilter');
   const type=String(document.getElementById('tumPersonelDuzenTypeFilter')?.value||'').trim();
-  return (rows||[]).filter(row=>(!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search))&&(!role||row.kadroBrans===role)&&(!station||(row.stations||[]).includes(station))&&(!type||row.type===type));
+  return (rows||[]).filter(row=>(!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search))&&(!role||row.kadroBrans===role)&&(!station.length||(row.stations||[]).some(s=>station.includes(s)))&&(!type||row.type===type));
 }
 function renderTumPersonelDuzenRows(rows){return (rows||[]).map(row=>{
   const dutyLines=(row.dutyLabels||[]).map(day=>day.items.map(item=>
@@ -3750,7 +3888,7 @@ function computeCokluRoleSummary(rows, stationFilter){
   const stats={}; roleOrder.forEach(r=>stats[r]={people:new Set(), nobet:0});
   const totalPeople=new Set(); let totalNobet=0;
   (rows||[]).forEach(row=>{
-    const recs = stationFilter ? row.extraRecords.filter(r=>r.ist===stationFilter) : row.extraRecords;
+    const recs = (stationFilter && stationFilter.length) ? row.extraRecords.filter(r=>ashiIstUyar(stationFilter,r.ist)) : row.extraRecords;
     if(!recs.length) return;
     const personKey=row.tc||row.fullName;
     totalPeople.add(personKey);
@@ -3786,20 +3924,20 @@ function setCokluTumPersonelRoleFilter(role){
 function getCokluTumPersonelFilteredRows(rows, ignoreRoleFilter){
   const search=String(document.getElementById('cokluTumPersonelSearch')?.value||'').trim().toLocaleLowerCase('tr-TR');
   const brans=String(document.getElementById('cokluTumPersonelBransFilter')?.value||'').trim();
-  const station=String(document.getElementById('cokluTumPersonelStationFilter')?.value||'').trim();
+  const station=ashiIstSecim('cokluTumPersonelStationFilter');
   const roleFilter=ignoreRoleFilter?'':cokluTumPersonelRoleFilter;
   return (rows||[]).filter(row=>
     (!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search)) &&
     (!brans||row.kadroBrans===brans) &&
-    (!station||(row.stations||[]).includes(station)) &&
-    (!roleFilter||(row.extraRecords||[]).some(r=>r.role===roleFilter && (!station||r.ist===station)))
+    (!station.length||(row.stations||[]).some(s=>station.includes(s))) &&
+    (!roleFilter||(row.extraRecords||[]).some(r=>r.role===roleFilter && ashiIstUyar(station,r.ist)))
   );
 }
 function renderCokluTumPersonelRows(rows, stationFilter, roleFilter){
   const roleShortMap={'Ekip Şefi':'Ekip Şefi','Yardımcı Sağlık Personeli':'YSP','Sürücü':'Sürücü'};
   return (rows||[]).map(row=>{
     // İstasyon ve/veya görev branşı (özet rozeti) filtresi seçiliyse, satırda sadece o kritere uyan ekstra nöbetler gösterilir
-    const recs=(row.extraRecords||[]).filter(r=>(!stationFilter||r.ist===stationFilter)&&(!roleFilter||r.role===roleFilter));
+    const recs=(row.extraRecords||[]).filter(r=>ashiIstUyar(stationFilter,r.ist)&&(!roleFilter||r.role===roleFilter));
     const grouped={};
     recs.forEach(r=>{ if(!grouped[r.ist]) grouped[r.ist]={count:0, roles:new Set()}; grouped[r.ist].count++; grouped[r.ist].roles.add(r.role); });
     const stationList=Object.keys(grouped).sort((a,b)=>trColl.compare(a,b));
@@ -3833,7 +3971,7 @@ function renderCokluTumPersonelModal(){
   if(stSel && stSel.dataset.filled!=='1'){ stSel.innerHTML='<option value="">Tüm istasyonlar</option>'+stations.map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join(''); stSel.dataset.filled='1'; }
   const visible=getCokluTumPersonelFilteredRows(data.rows);
   const summaryRows=getCokluTumPersonelFilteredRows(data.rows, true);
-  const activeStationFilter=String(document.getElementById('cokluTumPersonelStationFilter')?.value||'').trim();
+  const activeStationFilter=ashiIstSecim('cokluTumPersonelStationFilter');
   renderCokluTumPersonelRoleSummary(summaryRows, activeStationFilter);
   const ozet=document.getElementById('cokluTumPersonelOzet');
   if(ozet) ozet.textContent=`${visible.length} / ${data.rows.length} kişi gösteriliyor · Birden fazla istasyonda nöbet tutan tüm personel`;
@@ -3850,11 +3988,11 @@ function showCokluTumPersonelModal(){
 }
 function exportCokluTumPersonelExcel(){
   const data=buildCokluTumPersonelData(), rows=getCokluTumPersonelFilteredRows(data.rows);
-  const stationFilter=String(document.getElementById('cokluTumPersonelStationFilter')?.value||'').trim();
+  const stationFilter=ashiIstSecim('cokluTumPersonelStationFilter');
   const roleFilter=cokluTumPersonelRoleFilter;
   const aoa=[['PERSONEL','TCKN','BRANŞ (KADRO)','ASIL İSTASYON','EKSTRA GİDİLEN İSTASYONLAR','EKSTRA İSTASYON SAYISI','EKSTRA NÖBET']];
   rows.forEach(r=>{
-    const recs=(r.extraRecords||[]).filter(rec=>(!stationFilter||rec.ist===stationFilter)&&(!roleFilter||rec.role===roleFilter));
+    const recs=(r.extraRecords||[]).filter(rec=>ashiIstUyar(stationFilter,rec.ist)&&(!roleFilter||rec.role===roleFilter));
     const grouped={};
     recs.forEach(rec=>{ grouped[rec.ist]=(grouped[rec.ist]||0)+1; });
     const stationList=Object.keys(grouped).sort((a,b)=>trColl.compare(a,b));
@@ -3971,11 +4109,11 @@ function parseHtmlDateInput(str){
 function getUygunPersonelFilteredRows(rows){
   const search=String(document.getElementById('uygunPersonelSearch')?.value||'').trim().toLocaleLowerCase('tr-TR');
   const brans=String(document.getElementById('uygunPersonelBransFilter')?.value||'').trim();
-  const station=String(document.getElementById('uygunPersonelStationFilter')?.value||'').trim();
+  const station=ashiIstSecim('uygunPersonelStationFilter');
   return (rows||[]).filter(row=>
     (!search||`${row.fullName||''} ${row.tc||''}`.toLocaleLowerCase('tr-TR').includes(search)) &&
     (!brans||(row.roles||[]).includes(brans)) &&
-    (!station||row.asilIst===station)
+    ashiIstUyar(station,row.asilIst)
   );
 }
 function renderUygunPersonelDutyCell(info){
@@ -4073,12 +4211,12 @@ function updateSurucuDuzenButton() {
 
 function getSurucuDuzenFilteredRows(rows) {
   const search = String(document.getElementById('surucuDuzenSearch')?.value || '').trim().toLocaleLowerCase('tr-TR');
-  const station = String(document.getElementById('surucuDuzenStationFilter')?.value || '').trim();
+  const station = ashiIstSecim('surucuDuzenStationFilter');
   const type = String(document.getElementById('surucuDuzenTypeFilter')?.value || '').trim();
   return (rows || []).filter(row => {
     const personText = `${row.fullName || ''} ${row.tc || ''}`.toLocaleLowerCase('tr-TR');
     const searchOk = !search || personText.includes(search);
-    const stationOk = !station || (row.stations || []).includes(station);
+    const stationOk = !station.length || (row.stations || []).some(s => station.includes(s));
     const typeOk = !type || row.type === type;
     return searchOk && stationOk && typeOk;
   });
@@ -4958,7 +5096,7 @@ function ashiOzetGruplari(people, stationQ) {
     });
     if (!multi) { const x = grouped[stationsAll[0]] && grouped[stationsAll[0]][key]; if (x) x.kadro = kadro; return; }
     // çoklu istasyon
-    const matches = !stationQ || String(home).toLocaleLowerCase('tr-TR').includes(stationQ);
+    const matches = ashiIstUyarLC(stationQ, home);
     Object.keys(grouped).forEach(st => { const x = grouped[st][key]; if (x && st !== home) x.misafir = true; });
     if (grouped[home] && grouped[home][key] || matches) {
       const x = mk(home);
@@ -4973,9 +5111,9 @@ function ashiOzetGruplari(people, stationQ) {
   return grouped;
 }
 function getFilteredIstasyonPersonelRows(){
-  const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const stationQ=ashiIstSecimLC('istasyonPersonelStation');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
-  return getIstasyonPersonelRows().map(p=>({...p,allDuties:p.duties,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  return getIstasyonPersonelRows().map(p=>({...p,allDuties:p.duties,duties:p.duties.filter(n=>ashiIstUyarLC(stationQ,n.station))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -5031,7 +5169,7 @@ function dokumNightHours(startMs, endMs) {
 function buildDokumCetveliAoa() {
   const info = reportMonthInfo || getAnalizMonthInfo();
   const year = info.year, month = info.month, days = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  const stationQ = String(document.getElementById('istasyonPersonelStation')?.value || '').trim().toLocaleLowerCase('tr-TR');
+  const stationQ = ashiIstSecimLC('istasyonPersonelStation');
   const personQ = String(document.getElementById('istasyonPersonelPerson')?.value || '').trim().toLocaleLowerCase('tr-TR');
   // Aynı kişiyi (personKey) farklı görev gruplarından birleştir; tüm nöbetleri asıl istasyonunda topla.
   const people = {};
@@ -5088,7 +5226,7 @@ function buildDokumCetveliAoa() {
   const list = Object.values(people).map(x => {
     const asil = x.asilIst || Object.keys(x.istCount).sort((a,b) => x.istCount[b] - x.istCount[a])[0] || '';
     return {...x, asil};
-  }).filter(x => x.asil && (!stationQ || x.asil.toLocaleLowerCase('tr-TR').includes(stationQ)) && (!personQ || `${x.ad} ${x.soyad} ${x.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  }).filter(x => x.asil && ashiIstUyarLC(stationQ, x.asil) && (!personQ || `${x.ad} ${x.soyad} ${x.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
   list.sort((a,b) => trColl.compare(a.asil, b.asil) || trColl.compare(`${a.ad} ${a.soyad}`, `${b.ad} ${b.soyad}`));
   const header = ['Sıra No','TC Kimlik No','Adı Soyadı','İl','Kadrosunun Olduğu Birim','Geçici Görevli Olduğu Birim','Birim Tipi','Kadro Türü','Kadro Unvanı','Branşı'];
   for (let d = 1; d <= days; d++) header.push(`${d} ${DOKUM_AY_ADLARI[month]} ${year} ${DOKUM_GUN_ADLARI[new Date(Date.UTC(year, month - 1, d)).getUTCDay()]}`);
@@ -5157,7 +5295,7 @@ function exportIstasyonPersonelExcel(){
   if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
   const people=getFilteredIstasyonPersonelRows();
   const summaryRows=[], detailRows=[];
-  const stationQx=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const stationQx=ashiIstSecimLC('istasyonPersonelStation');
   people.forEach(p=>p.duties.forEach(n=>{
     const h=Number(n.hours)||0;
     detailRows.push({'İstasyon':n.station,'TCKN':p.tc||'','Personel Adı Soyadı':`${p.ad} ${p.soyad}`.trim(),'Branşı':p.brans||'','Görev':n.role,'Çoklu İstasyon':p.isMulti?'Evet':'Hayır','Nöbet Başlangıcı':n.start||'','Nöbet Bitişi':n.end||'','Süre':n.duration||`${h||0} saat`,'Saat':h});
@@ -5186,7 +5324,7 @@ function setIstasyonPersonelView(view){
 }
 function renderIstasyonPersonelSummaryTable(){
   const wrap=document.getElementById('istasyonPersonelSummaryTable'); if(!wrap)return;
-  const stationQ=String(document.getElementById('istasyonPersonelStation')?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const stationQ=ashiIstSecimLC('istasyonPersonelStation');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
   const people=getFilteredIstasyonPersonelRows();
   const grouped=ashiOzetGruplari(people,stationQ);
@@ -5207,9 +5345,9 @@ function renderIstasyonPersonelList(){
     if(stationSelect.innerHTML!==options) stationSelect.innerHTML=options;
     if(selectedStation!=='現' && stations.includes(selectedStation)) stationSelect.value=selectedStation;
   }
-  const stationQ=String(stationSelect?.value||'').trim().toLocaleLowerCase('tr-TR');
+  const stationQ=ashiIstSecimLC('istasyonPersonelStation');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
-  const people=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>!stationQ||n.station.toLocaleLowerCase('tr-TR').includes(stationQ))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  const people=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>ashiIstUyarLC(stationQ,n.station))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
   const groups={};
   people.forEach(p=>p.duties.forEach(n=>{if(!groups[n.station])groups[n.station]={people:{},duties:0};if(!groups[n.station].people[p.personKey])groups[n.station].people[p.personKey]={...p,duties:[]};groups[n.station].people[p.personKey].duties.push(n);groups[n.station].duties++;}));
   const stations=Object.entries(groups).sort((a,b)=>trColl.compare(a[0],b[0]));
@@ -5490,7 +5628,7 @@ function getAnalizStatusBadge(row) {
 
 function getFilteredAnalizRows() {
   const f = analizUIState.filters || {};
-  const stationQuery = String(f.station || '').trim().toLocaleLowerCase('tr-TR');
+  const stationQuery = Array.isArray(f.station) ? f.station : [];
   const searchQuery = String(f.search || '').trim().toLocaleLowerCase('tr-TR');
   const personelQuery = String(f.personel || '').trim().toLocaleLowerCase('tr-TR');
   const departmentQuery = String(f.department || '').trim().toLocaleLowerCase('tr-TR');
@@ -5502,7 +5640,7 @@ function getFilteredAnalizRows() {
     const searchOk = !searchQuery || searchText.includes(searchQuery);
     const personelOk = !personelQuery || personelText.includes(personelQuery);
     const departmentOk = !departmentQuery || departmentText.split(', ').includes(departmentQuery);
-    const stationOk = !stationQuery || String(row.ist || '').toLocaleLowerCase('tr-TR') === stationQuery;
+    const stationOk = ashiIstUyar(stationQuery, String(row.ist || ''));
     const statusOk = f.status === 'all' || (f.status === 'missing' && row.difference < 0) || (f.status === 'excess' && row.difference > 0);
     const issueOk = f.issue === 'all' || issue === f.issue;
     const overlapOk = !Number(f.minOverlap || 0) || Number(row.overlapHours || 0) >= Number(f.minOverlap);
@@ -5539,7 +5677,7 @@ function applyAnalizFilters() {
     department: department ? department.value : '',
     status: status ? status.value : 'all',
     issue: issue ? issue.value : 'all',
-    station: station ? station.value : '',
+    station: ashiIstSecim('analizFilterStation'),
     minOverlap: minOverlap ? Number(minOverlap.value || 0) : 0,
     sort: document.getElementById('analizSort')?.value === 'asc' ? 'asc' : 'desc'
   };
@@ -5734,7 +5872,7 @@ function showAnalizModal(gKey) {
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="analizFilterStation">İstasyon</label>
-          <select id="analizFilterStation" onchange="applyAnalizFilters()"><option value="">Tüm istasyonlar</option>${stationOptions}</select>
+          <select data-ist-picker="1" id="analizFilterStation" onchange="applyAnalizFilters()"><option value="">Tüm istasyonlar</option>${stationOptions}</select>
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="analizFilterDepartment">Departman / görev</label>
