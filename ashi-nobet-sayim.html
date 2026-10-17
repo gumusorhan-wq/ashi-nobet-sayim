@@ -4441,7 +4441,7 @@ function renderStats(data) {
     { lbl:'ATT (Kadro)',        val: bransMap.att.size,     color:'#1d4ed8', bg:'#dbeafe', click:"showBransPersonelList('att')" },
     { lbl:'AABT (Kadro)',       val: bransMap.aabt.size,    color:'#166534', bg:'#dcfce7', click:"showBransPersonelList('aabt')" },
     { lbl:'Sürücü (Kadro)',     val: bransMap.surucu.size,  color:'#92400e', bg:'#fef3c7', click:"showBransPersonelList('surucu')" },
-    { lbl:'Diğer (Kadro)',      val: bransMap.diger.size,   color:'#6b21a8', bg:'#f3e8ff', click:"showBransPersonelList('diger')" },
+    { lbl:(activeGorev==='ef'?'Doktor (Kadro)':'Diğer (Kadro)'), val: bransMap.diger.size,   color:'#6b21a8', bg:'#f3e8ff', click:"showBransPersonelList('diger')" },
   ];
 
   document.getElementById('statsGrid').innerHTML = stats.map(s =>
@@ -4454,7 +4454,7 @@ function renderStats(data) {
 }
 function closeBransPersonelModal(){const modal=document.getElementById('bransPersonelModal');if(modal)modal.style.display='none';}
 function showBransPersonelList(category){
-  const labels={att:'ATT (Kadro)',aabt:'AABT (Kadro)',surucu:'Sürücü (Kadro)',diger:'Diğer (Kadro)'};
+  const labels={att:'ATT (Kadro)',aabt:'AABT (Kadro)',surucu:'Sürücü (Kadro)',diger:(activeGorev==='ef'?'Doktor (Kadro)':'Diğer (Kadro)')};
   const source=allData[activeGorev]||[]; const people={};
   source.forEach(p=>{const b=String(p.kadro_brans||'').trim();const ok=category==='att'?/^att$/i.test(b):category==='aabt'?/^aabt$/i.test(b):category==='surucu'?/sürücü/i.test(b):!/^att$/i.test(b)&&!/^aabt$/i.test(b)&&!/sürücü/i.test(b);if(!ok)return;const key=String(p.personKey||p.tc||`${p.ad}|${p.soyad}`);if(!people[key])people[key]={tc:p.tc||'',name:`${p.ad||''} ${p.soyad||''}`.trim(),branch:b||'—',stations:new Set(),duties:0};(p.nobetler||[]).forEach(n=>{if(n.ist)people[key].stations.add(n.ist);people[key].duties++;});});
   const rows=Object.values(people).sort((a,b)=>trColl.compare(a.name,b.name));
@@ -6185,7 +6185,7 @@ function buildSheet(rows, baslik, cokluList) {
     {value:brans.att.size, label:'ATT (KADRO)', bg:'DBEAFE', fg:'1D4ED8'},
     {value:brans.aabt.size, label:'AABT (KADRO)', bg:'D1FAE5', fg:'166534'},
     {value:brans.sur.size, label:'SÜRÜCÜ (KADRO)', bg:'FEF3C7', fg:'92400E'},
-    {value:brans.dig.size, label:'DİĞER (KADRO)', bg:'EDE9FE', fg:'6D28D9'}
+    {value:brans.dig.size, label:(activeGorev==='ef'?'DOKTOR (KADRO)':'DİĞER (KADRO)'), bg:'EDE9FE', fg:'6D28D9'}
   ];
   writeExcelStatCards(ws, S, 3, COLS.slice(0,8), statItems);
   for(let i=8;i<11;i++) S(COLS[i]+'3', mkCell('',{bg:PAL.statBg}));
