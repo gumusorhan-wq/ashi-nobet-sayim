@@ -404,7 +404,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   @media(max-width:700px){ .arc-card{margin:10px 10px 0;padding:12px} }
 
   .istasyon-personel-modal-box{width:min(1360px,98vw);max-height:92vh;overflow:auto}
-  .istasyon-personel-filters{display:grid;grid-template-columns:minmax(260px,1.6fr) minmax(180px,1fr) minmax(150px,.7fr) auto;gap:10px;align-items:end;padding:14px 18px;background:#eff6ff;border-bottom:1px solid #bfdbfe}
+  .istasyon-personel-filters{display:grid;grid-template-columns:minmax(260px,1.6fr) minmax(180px,1fr) minmax(110px,.5fr) auto auto;gap:10px;align-items:end;padding:14px 18px;background:#eff6ff;border-bottom:1px solid #bfdbfe}
   .istasyon-personel-filters label{display:flex;flex-direction:column;gap:5px;color:#1e3a5f;font-size:11px;font-weight:800}
   .istasyon-personel-filters input,.istasyon-personel-filters select{height:36px;padding:0 10px;border:1px solid #bfdbfe;border-radius:7px;background:#fff;color:#1e293b;font:inherit;font-size:12px}
   .istasyon-personel-summary{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
@@ -882,6 +882,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <label>İstasyon seç<select data-ist-picker="1" id="istasyonPersonelStation" onchange="renderIstasyonPersonelList()"><option value="">Tüm istasyonlar</option></select></label>
       <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="text" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
       <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
+      <button class="btn-sec" type="button" onclick="showOzelGunModal()" title="İdari tatil, yarım gün gibi özel günleri tanımla; Çalışma Saati otomatik güncellenir">📅 Özel Günler</button>
       <button class="btn-sec" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportIstasyonPersonelExcel()">📥 Excel'e Aktar</button>
     </div>
     <div id="istasyonPersonelSummary" class="istasyon-personel-summary"></div>
@@ -1070,6 +1071,22 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   </div>
 </div>
 <!-- BRANŞ KARTI PERSONEL LİSTESİ MODAL -->
+<div id="ozelGunModal" class="modal-overlay">
+  <div class="modal-box" style="max-width:640px">
+    <div class="modal-head" style="background:#0f4c35"><div><span style="color:#fff;font-weight:700;font-size:15px">📅 Özel Günler</span><div style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px">Bayram, resmî tatil, idari tatil ve yarım gün tanımı · Çalışma Saati (kadro süresi) otomatik güncellenir</div></div><button class="modal-close" onclick="closeOzelGunModal()">✕</button></div>
+    <div style="padding:16px 20px">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#334155">Tarih<input type="date" id="ozelGunTarih" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px"></label>
+        <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#334155">Tür<select id="ozelGunTur" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px"><option value="idari">İdari Tatil</option><option value="yarim">Yarım Gün (5 saat)</option><option value="resmi">Resmî Tatil</option><option value="bayram">Bayram Günü</option></select></label>
+        <button type="button" class="btn-sec" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important;height:36px" onclick="ozelGunEkle()">Günü Ekle</button>
+      </div>
+      <div id="ozelGunOnizleme" style="margin-top:12px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534;font-weight:700"></div>
+      <div id="ozelGunListe" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto"></div>
+      <div style="margin-top:10px;font-size:11px;color:#64748b;line-height:1.5">Hafta sonları zaten sayılmaz. Tatil türleri o günü 0 saat, yarım gün 5 saat sayar. Resmî tatiller ve dini bayramlar hazır tabloda mevcuttur; buraya yalnızca ek günleri (idari tatil gibi) eklemeniz yeterlidir. Tanımlar bu tarayıcıda saklanır.</div>
+    </div>
+  </div>
+</div>
+
 <div id="bransPersonelModal" class="modal-overlay">
   <div class="modal-box" style="max-width:900px">
     <div class="modal-head" style="background:#1e3a5f"><div><span id="bransPersonelModalTitle" style="color:#fff;font-weight:700;font-size:15px">Branş Personel Listesi</span><div id="bransPersonelModalSummary" style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px"></div></div><button class="modal-close" onclick="closeBransPersonelModal()">✕</button></div>
@@ -4909,12 +4926,20 @@ const ASHI_RESMI_TATIL = (() => {
   }));
   return t;
 })();
+// ÖZEL GÜNLER: elle eklenen bayram / resmî tatil / idari tatil / yarım gün. Tarayıcıda saklanır; Kadro süresine otomatik yansır.
+const ASHI_OZEL_GUN_KEY = 'ashiOzelGunler';
+const ASHI_OZEL_GUN_TUR = {bayram:'Bayram Günü', resmi:'Resmî Tatil', idari:'İdari Tatil', yarim:'Yarım Gün (5 saat)'};
+let ashiOzelGunler = (() => { try { const v = JSON.parse(localStorage.getItem(ASHI_OZEL_GUN_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } })();
+function ashiOzelGunKaydet() { try { localStorage.setItem(ASHI_OZEL_GUN_KEY, JSON.stringify(ashiOzelGunler)); } catch (e) {} }
+function ashiOzelGunTam(key) { const o = ashiOzelGunler[key]; return !!o && o.tur !== 'yarim'; }
 function ashiIsIsci(istihdam) { return /[iİıI]ş[cç]i/i.test(String(istihdam || '')); }
 // Resmi tatil tablosu değeri = o günün çalışma çarpanı (0 = tam tatil, 'A' = arife → ASHI_ARIFE_SAAT saat). Tabloda yoksa 1.
 function ashiGunKadroSaat(dayMs, isci) {
   const d = new Date(dayMs), dow = d.getUTCDay();   // 0 pazar … 6 cumartesi
   if (dow === 0) return 0;
   if (dow === 6 && !isci) return 0;
+  const og = ashiOzelGunler[d.toISOString().slice(0, 10)];
+  if (og) return og.tur === 'yarim' ? Math.min(isci ? 7.5 : 8, ASHI_ARIFE_SAAT) : 0;
   const w = ASHI_RESMI_TATIL[d.toISOString().slice(0, 10)];
   if (w === 'A') return ASHI_ARIFE_SAAT;
   const factor = w === undefined ? 1 : w;
@@ -5075,7 +5100,62 @@ function showIstasyonPersonelModal() {
   if(modal) setTimeout(()=>modal.scrollIntoView({behavior:'smooth',block:'start'}),0);
 }
 function closeIstasyonPersonelModal(){ const modal=document.getElementById('istasyonPersonelModal'); if(modal) modal.style.display='none'; }
-function clearIstasyonPersonelFilters(){ ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); renderIstasyonPersonelList(); }
+function ozelGunAyBilgi(){ return reportMonthInfo || (typeof getAnalizMonthInfo === 'function' ? getAnalizMonthInfo() : null); }
+function showOzelGunModal(){
+  const info = ozelGunAyBilgi(), inp = document.getElementById('ozelGunTarih');
+  if (inp) { if (info) { const mm = String(info.month).padStart(2, '0'), last = new Date(Date.UTC(info.year, info.month, 0)).getUTCDate(); inp.min = `${info.year}-${mm}-01`; inp.max = `${info.year}-${mm}-${String(last).padStart(2, '0')}`; if (!inp.value || inp.value < inp.min || inp.value > inp.max) inp.value = inp.min; } }
+  ozelGunRender();
+  const m = document.getElementById('ozelGunModal'); if (m) m.style.display = 'block';
+}
+function closeOzelGunModal(){ const m = document.getElementById('ozelGunModal'); if (m) m.style.display = 'none'; }
+function ozelGunYenile(){ ozelGunRender(); try { if (typeof renderIstasyonPersonelList === 'function') renderIstasyonPersonelList(); } catch (e) { console.warn(e); } }
+function ozelGunEkle(){
+  const d = document.getElementById('ozelGunTarih')?.value, tur = document.getElementById('ozelGunTur')?.value;
+  if (!d) { alert('Lütfen bir tarih seçin.'); return; }
+  if (!ASHI_OZEL_GUN_TUR[tur]) return;
+  ashiOzelGunler[d] = {tur}; ashiOzelGunKaydet(); ozelGunYenile();
+}
+function ozelGunSil(d){ delete ashiOzelGunler[d]; ashiOzelGunKaydet(); ozelGunYenile(); }
+function ozelGunRender(){
+  const list = document.getElementById('ozelGunListe'), onz = document.getElementById('ozelGunOnizleme'); if (!list) return;
+  const items = Object.entries(ashiOzelGunler).sort((a, b) => a[0].localeCompare(b[0]));
+  list.innerHTML = items.length ? items.map(([d, o]) => { const [y, m, g] = d.split('-'); const renk = o.tur === 'yarim' ? '#92400e;background:#fef3c7' : (o.tur === 'idari' ? '#1d4ed8;background:#dbeafe' : '#166534;background:#dcfce7'); return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px"><span><strong>${g}.${m}.${y}</strong> — <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;color:${renk}">${ASHI_OZEL_GUN_TUR[o.tur]}</span></span><button type="button" class="btn-sec" style="padding:3px 10px" onclick="ozelGunSil('${d}')">Sil</button></div>`; }).join('') : '<div style="color:#64748b;font-size:12px;padding:6px">Henüz özel gün eklenmedi.</div>';
+  const info = ozelGunAyBilgi();
+  if (onz) onz.innerHTML = info ? `Bu ay kadro süresi: <strong>Memur ${ashiKadroSaati('', '', info)} saat</strong> · <strong>Sürekli işçi ${ashiKadroSaati('', 'Sürekli İşçi', info)} saat</strong> (izinsiz kişi için)` : 'Kadro süresi önizlemesi için önce nöbet listesi yükleyin.';
+}
+// AKILLI FİLTRELER + DENETİM KARTLARI (İstasyon Listesi › Personel Özeti)
+const ASHI_UYARI_FARK = 72;   // kadro süresinden ±72 saat (3 nöbet) sapma = denetim uyarısı
+let ashiOzetFiltre = {fazla:0, eksik:0, gece:0, coklu:0, uyari:0};
+function ashiOzetFiltreToggle(k){ ashiOzetFiltre[k] = ashiOzetFiltre[k] ? 0 : 1; renderIstasyonPersonelSummaryTable(); }
+function ashiOzetUyar(x){
+  const f = ashiOzetFiltre, fark = x.kadro == null ? null : x.total - x.kadro;
+  if (f.fazla && !(fark != null && fark > 0)) return false;
+  if (f.eksik && !(fark != null && fark < 0)) return false;
+  if (f.gece && !(x.night > 0)) return false;
+  if (f.coklu && !x.isMulti) return false;
+  if (f.uyari && !(fark != null && Math.abs(fark) > ASHI_UYARI_FARK)) return false;
+  return true;
+}
+function ashiOzetPanel(stations){
+  const rows = []; stations.forEach(([, items]) => Object.values(items).forEach(x => { if (!x.misafir) rows.push(x); }));
+  const fmt = v => (Math.round(v * 10) / 10).toLocaleString('tr-TR', {maximumFractionDigits: 1});
+  const farkli = x => x.kadro == null ? null : x.total - x.kadro;
+  const tcSet = new Set(rows.map(x => x.tc || x.name));
+  const top = rows.reduce((b, x) => { const f = farkli(x); return f != null && (!b || f > b.f) ? {f, name: x.name} : b; }, null);
+  const uy = rows.filter(x => { const f = farkli(x); return f != null && Math.abs(f) > ASHI_UYARI_FARK; }).length;
+  const kart = (lbl, val, sub, bg, fg) => `<div style="flex:1 1 150px;background:${bg};border-radius:10px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:${fg};opacity:.85">${lbl}</div><div style="font-size:20px;font-weight:800;color:${fg}">${val}</div><div style="font-size:11px;color:${fg};opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div></div>`;
+  const chip = (k, t, tip) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" title="${tip}" style="padding:5px 11px;border-radius:999px;border:1px solid ${ashiOzetFiltre[k] ? '#0f766e' : '#cbd5e1'};background:${ashiOzetFiltre[k] ? '#0f766e' : '#fff'};color:${ashiOzetFiltre[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
+  return `<div style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">
+    ${kart('PERSONEL', tcSet.size, 'görünen kişi', '#dbeafe', '#1e3a5f')}
+    ${kart('TOPLAM ÇALIŞMA', fmt(rows.reduce((t, x) => t + x.total, 0)) + ' sa', 'nöbet saati', '#dcfce7', '#166534')}
+    ${kart('TOPLAM GECE', fmt(rows.reduce((t, x) => t + (x.night || 0), 0)) + ' sa', '20:00–08:00', '#ede9fe', '#5b21b6')}
+    ${kart('EN YÜKSEK FARK', top ? fmt(top.f) + ' sa' : '—', top ? escapeHtml(top.name) : '—', '#fee2e2', '#991b1b')}
+    ${kart('DENETİM UYARISI', uy, 'kadrodan ±' + ASHI_UYARI_FARK + ' sa sapma', '#fef3c7', '#92400e')}
+  </div><div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-size:12px;font-weight:800;color:#475569">Akıllı filtre:</span>
+    ${chip('fazla', 'Kadro üstü', 'Toplam çalışma > çalışma saati (fark > 0)')}${chip('eksik', 'Kadro altı', 'Toplam çalışma < çalışma saati (fark < 0)')}${chip('gece', 'Gece nöbeti var', '20:00–08:00 arası çalışması olanlar')}${chip('coklu', 'Çoklu istasyon', 'Birden fazla istasyonda nöbet tutanlar')}${chip('uyari', 'Denetim uyarısı', '|fark| > ' + ASHI_UYARI_FARK + ' saat')}
+  </div></div>`;
+}
+function clearIstasyonPersonelFilters(){ ashiOzetFiltre={fazla:0,eksik:0,gece:0,coklu:0,uyari:0}; ['istasyonPersonelStation','istasyonPersonelPerson'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';}); renderIstasyonPersonelList(); }
 // Personel Özeti satırları: kişi başka istasyonda da nöbet tuttuysa
 //  • ASIL istasyonundaki satırda toplam çalışma saatine diğer istasyonlardaki saatleri de eklenir (Kadro/Fark bu satırda hesaplanır),
 //  • diğer (misafir) istasyon satırlarında çalışma saati ve fark "—" gösterilir; o satır yalnızca o istasyondaki nöbeti gösterir.
@@ -5092,11 +5172,11 @@ function ashiOzetGruplari(people, stationQ) {
     const totalAll = all.reduce((t, n) => t + hrs(n), 0);
     const kadro = ashiKadroSaati(p.tc, p.istihdam);
     const key = p.personKey || p.tc || `${p.ad}|${p.soyad}`;
-    const mk = st => (grouped[st] || (grouped[st] = {}))[key] || (grouped[st][key] = {tc:p.tc || '', name:`${p.ad} ${p.soyad}`.trim(), branch:p.brans || '', isMulti:p.isMulti, station:st, s12:0, s24:0, other:0, total:0, days:0, kadro:null, extra:0, misafir:false, sentetik:false});
+    const mk = st => (grouped[st] || (grouped[st] = {}))[key] || (grouped[st][key] = {tc:p.tc || '', name:`${p.ad} ${p.soyad}`.trim(), branch:p.brans || '', isMulti:p.isMulti, station:st, s12:0, s24:0, other:0, total:0, days:0, kadro:null, extra:0, night:0, misafir:false, sentetik:false});
     p.duties.forEach(n => {
       const x = mk(n.station), h = hrs(n);
       if (Math.abs(h - 12) < .01) x.s12++; else if (Math.abs(h - 24) < .01) x.s24++; else if (h > 0) x.other++;
-      if (h > 0) { x.total += h; x.days += h / 24; }
+      if (h > 0) { x.total += h; x.days += h / 24; if (Number.isFinite(n.startMs)) x.night += dokumNightHours(n.startMs, n.startMs + h * EXCEL_HOUR_MS); }
     });
     if (!multi) { const x = grouped[stationsAll[0]] && grouped[stationsAll[0]][key]; if (x) x.kadro = kadro; return; }
     // çoklu istasyon
@@ -5108,6 +5188,7 @@ function ashiOzetGruplari(people, stationQ) {
       if (!grouped[home][key].total && !p.duties.some(n => n.station === home)) x.sentetik = true;
       x.extra = totalAll - own;
       x.total = own + x.extra;
+      x.night = all.reduce((t, n) => t + (Number.isFinite(n.startMs) && hrs(n) > 0 ? dokumNightHours(n.startMs, n.startMs + hrs(n) * EXCEL_HOUR_MS) : 0), 0);
       x.days = x.total / 24;
       x.kadro = kadro; x.misafir = false;
     }
@@ -5142,7 +5223,7 @@ function ashiIzinGunleri(tc, istihdam, info) {
   if (!leaves.length) return {perDay, counts};
   for (let i = 1; i <= days; i++) {
     const ds = Date.UTC(info.year, info.month - 1, i), de = ds + 86400000;
-    if (isci) { const dow = new Date(ds).getUTCDay(), w = ASHI_RESMI_TATIL[new Date(ds).toISOString().slice(0, 10)]; if (dow === 0 || w === 0) continue; }
+    if (isci) { const dow = new Date(ds).getUTCDay(), w = ASHI_RESMI_TATIL[new Date(ds).toISOString().slice(0, 10)]; if (dow === 0 || w === 0 || ashiOzelGunTam(new Date(ds).toISOString().slice(0, 10))) continue; }
     const rec = leaves.filter(r => r.startMs < de && r.endMs > ds).sort((a, b) => a.startMs - b.startMs)[0];
     if (!rec) continue;
     const t = ashiIzinTuru(rec.type);
@@ -5305,7 +5386,7 @@ function exportIstasyonPersonelExcel(){
     detailRows.push({'İstasyon':n.station,'TCKN':p.tc||'','Personel Adı Soyadı':`${p.ad} ${p.soyad}`.trim(),'Branşı':p.brans||'','Görev':n.role,'Çoklu İstasyon':p.isMulti?'Evet':'Hayır','Nöbet Başlangıcı':n.start||'','Nöbet Bitişi':n.end||'','Süre':n.duration||`${h||0} saat`,'Saat':h});
   }));
   const ozet=ashiOzetGruplari(people,stationQx);
-  Object.entries(ozet).sort((a,b)=>trColl.compare(a[0],b[0])).forEach(([st,items])=>Object.values(items).sort((a,b)=>trColl.compare(a.name,b.name)).forEach(x=>summaryRows.push({'İstasyon':st,'TCKN':x.tc,'Personel Adı Soyadı':x.name,'Branşı':x.branch,'Çoklu İstasyon':x.isMulti?'Evet':'Hayır','12 Saat Adedi':x.s12,'24 Saat Adedi':x.s24,'Diğer Süre Adedi':x.other,'Çalışma Saati':x.kadro==null?'-':x.kadro,'Toplam Çalışma Saat':Math.round(x.total*100)/100,'Fark':x.kadro==null?'-':Math.round((x.total-x.kadro)*100)/100,'Toplam Gün':Math.round(x.days*100)/100,'Not':x.misafir?'Misafir (asıl istasyonu başka)':(x.extra>0?`Diğer istasyonlardan +${Math.round(x.extra*100)/100} saat dahil`:'')})));
+  Object.entries(ozet).sort((a,b)=>trColl.compare(a[0],b[0])).forEach(([st,items])=>Object.values(items).filter(ashiOzetUyar).sort((a,b)=>trColl.compare(a.name,b.name)).forEach(x=>summaryRows.push({'İstasyon':st,'TCKN':x.tc,'Personel Adı Soyadı':x.name,'Branşı':x.branch,'Çoklu İstasyon':x.isMulti?'Evet':'Hayır','12 Saat Adedi':x.s12,'24 Saat Adedi':x.s24,'Diğer Süre Adedi':x.other,'Çalışma Saati':x.kadro==null?'-':x.kadro,'Toplam Çalışma Saat':Math.round(x.total*100)/100,'Fark':x.kadro==null?'-':Math.round((x.total-x.kadro)*100)/100,'Toplam Gün':Math.round(x.days*100)/100,'Gece Saati (20-08)':Math.round((x.night||0)*100)/100,'Not':x.misafir?'Misafir (asıl istasyonu başka)':(x.extra>0?`Diğer istasyonlardan +${Math.round(x.extra*100)/100} saat dahil`:'')})));
   const wb=XLSX.utils.book_new();
   const wsSummary=XLSX.utils.json_to_sheet(summaryRows.length?summaryRows:[{'Bilgi':'Filtreye uygun kayıt bulunamadı.'}]);
   const wsDetail=XLSX.utils.json_to_sheet(detailRows.length?detailRows:[{'Bilgi':'Filtreye uygun kayıt bulunamadı.'}]);
@@ -5332,10 +5413,11 @@ function renderIstasyonPersonelSummaryTable(){
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
   const people=getFilteredIstasyonPersonelRows();
   const grouped=ashiOzetGruplari(people,stationQ);
-  const stations=Object.entries(grouped).sort((a,b)=>trColl.compare(a[0],b[0]));
-  if(!stations.length){wrap.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>';return;}
+  const stations=Object.entries(grouped).map(([st,items])=>[st,Object.fromEntries(Object.entries(items).filter(([,x])=>ashiOzetUyar(x)))]).filter(([,items])=>Object.keys(items).length).sort((a,b)=>trColl.compare(a[0],b[0]));
+  const panel=ashiOzetPanel(stations);
+  if(!stations.length){wrap.innerHTML=panel+'<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>';return;}
   const rows=stations.map(([station,items])=>{const values=Object.values(items).sort((a,b)=>trColl.compare(a.name,b.name));const head=`<tr class="station-summary-row"><td colspan="10">🏥 ${escapeHtml(station)} · ${values.length} personel</td></tr>`;const body=values.map(x=>`<tr><td>${escapeHtml(x.tc||'—')}</td><td>${escapeHtml(x.name||'Ad bilgisi yok')} ${x.isMulti?'<span class="badge b-coklu" title="Birden fazla istasyonda nöbet tutuyor">↔ Çoklu</span>':''}</td><td>${escapeHtml(x.branch||'—')}</td><td>${x.s12||'—'}</td><td>${x.s24||'—'}</td><td>${x.other?x.other.toLocaleString('tr-TR',{maximumFractionDigits:2}):'—'}</td><td>${x.kadro==null?'—':x.kadro.toLocaleString('tr-TR',{maximumFractionDigits:2})}</td><td><strong>${x.total.toLocaleString('tr-TR',{maximumFractionDigits:2})}</strong>${x.extra>0?`<div class="ozet-not" title="Başka istasyonlarda tuttuğu nöbetler asıl istasyonundaki toplamına eklenir; istasyon toplamlarını etkilemez">+${x.extra.toLocaleString('tr-TR',{maximumFractionDigits:2})} diğer ist.</div>`:''}${x.misafir?'<div class="ozet-not" title="Bu kişinin asıl istasyonu başkası; bu satırdaki saatler asıl istasyonundaki toplamına eklenir">↗ misafir</div>':''}</td><td class="fark-cell" style="font-weight:700;color:${x.kadro==null?'#64748b':(x.total-x.kadro<0?'#b91c1c':'#047857')}">${x.kadro==null?'—':(Math.round((x.total-x.kadro)*100)/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</td><td>${(Math.round(x.days*100)/100).toLocaleString('tr-TR',{maximumFractionDigits:2})}</td></tr>`).join('');return head+body;}).join('');
-  wrap.innerHTML=`<div class="istasyon-personel-summary-table-wrap"><table class="istasyon-personel-summary-table"><thead><tr><th>TC NO</th><th>PERSONEL ADI SOYADI</th><th>BRANŞI</th><th>12 SAAT</th><th>24 SAAT</th><th>DİĞER SAATLER</th><th title="Aylık kadro süresi: memur hafta içi ×8 sa; işçi hafta içi+cumartesi ×7,5 sa; resmi tatil sayılmaz; izin/rapor günleri düşülür">ÇALIŞMA SAATİ</th><th>TOPLAM ÇALIŞMA SAAT</th><th title="Toplam çalışma saati − çalışma saati (kadro süresi)">FARK</th><th>TOPLAM GÜN</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  wrap.innerHTML=panel+`<div class="istasyon-personel-summary-table-wrap"><table class="istasyon-personel-summary-table"><thead><tr><th>TC NO</th><th>PERSONEL ADI SOYADI</th><th>BRANŞI</th><th>12 SAAT</th><th>24 SAAT</th><th>DİĞER SAATLER</th><th title="Aylık kadro süresi: memur hafta içi ×8 sa; işçi hafta içi+cumartesi ×7,5 sa; resmi tatil sayılmaz; izin/rapor günleri düşülür">ÇALIŞMA SAATİ</th><th>TOPLAM ÇALIŞMA SAAT</th><th title="Toplam çalışma saati − çalışma saati (kadro süresi)">FARK</th><th>TOPLAM GÜN</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function renderIstasyonPersonelList(){
