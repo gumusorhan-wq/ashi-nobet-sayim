@@ -556,6 +556,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <input id="izinRaporFileInput" type="file" accept=".xls,.xlsx" style="display:none" onchange="handleIzinRaporFile(this.files[0])">
           <button class="btn-sec btn-danger" onclick="resetPage()">🔄 Yeni Dosya</button>
         </div>
+        <div class="gorev-shortcut-hint" style="margin:8px 0 0">Sekmeler: <kbd>Alt+1</kbd> Ekip Şefi · <kbd>Alt+2</kbd> YSP · <kbd>Alt+3</kbd> Sürücü</div>
       </div>
     </div>
 
@@ -568,7 +569,6 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <button class="gorev-tab" id="tab-arsiv" onclick="switchGorev('arsiv')" style="border-left:2px solid var(--line)">🗂️ Arşiv</button>
       <button class="gorev-tab" id="tab-kilavuz" onclick="switchGorev('kilavuz')" >📖 Kılavuz</button>
     </div>
-    <div class="gorev-shortcut-hint">Sekmeler: <kbd>Alt+1</kbd> Ekip Şefi · <kbd>Alt+2</kbd> YSP · <kbd>Alt+3</kbd> Sürücü</div>
 
     <!-- Arşiv -->
     <div id="arsivSection" style="display:none"><div id="archiveTabHost"></div></div>
