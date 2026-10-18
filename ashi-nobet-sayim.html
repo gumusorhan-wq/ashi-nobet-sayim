@@ -884,6 +884,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
       <button class="btn-sec" type="button" onclick="showOzelGunModal()" title="İdari tatil, yarım gün gibi özel günleri tanımla; Çalışma Saati otomatik güncellenir">📅 Özel Günler</button>
       <button class="btn-sec" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportIstasyonPersonelExcel()">📥 Excel'e Aktar</button>
+      <button class="btn-sec" type="button" style="background:#a16207!important;color:#fff!important;border-color:#a16207!important" onclick="exportDokumCetveliExcel()">📋 Döküm Cetveli</button>
     </div>
     <div id="istasyonPersonelSummary" class="istasyon-personel-summary"></div>
     <div class="istasyon-personel-view-tabs">
@@ -2865,7 +2866,13 @@ function parseIzinRaporRows(rows) {
     type: izinTipiIndex >= 0 ? izinTipiIndex : indexOf([/IZIN\s*TURU/]),
     start: indexOf([/BASLANGIC\s*TARIHI/, /^BASLANGIC$/]),
     end: indexOf([/BITIS\s*TARIHI/, /^BITIS$/]),
-    days: indexOf([/ALINAN\s*GUN/])
+    days: indexOf([/ALINAN\s*GUN/]),
+    saat: indexOf([/ALINAN\s*SAAT/]),
+    unvan: indexOf([/^UNVAN$/]),
+    brans: indexOf([/^BRANS$/]),
+    istihdam: indexOf([/ISTIHDAM\s*SEKLI/]),
+    birim: indexOf([/AKTIF\s*CALISTIGI\s*BIRIM/]),
+    il: indexOf([/AKTIF\s*CALISTIGI\s*IL/])
   };
   if (ci.tc < 0 || ci.start < 0 || ci.end < 0) throw new Error('İzin/Rapor dosyasında T.C No, başlangıç veya bitiş tarihi kolonu bulunamadı.');
   const records = [];
@@ -2882,7 +2889,13 @@ function parseIzinRaporRows(rows) {
       tc, name, type: type || 'İzin/Rapor',
       startMs: start.getTime(), endMs: end.getTime(),
       start: formatDateTime(start),
-      days: Number.isFinite(daysValue) ? daysValue : roundAnaliz(calculatedDays)
+      days: Number.isFinite(daysValue) ? daysValue : roundAnaliz(calculatedDays),
+      ...(ci.saat >= 0 && parseLeaveNumber(row[ci.saat]) > 0 ? {saat:parseLeaveNumber(row[ci.saat])} : {}),
+      ...(ci.unvan >= 0 ? {unvan:String(row[ci.unvan] || '').trim()} : {}),
+      ...(ci.brans >= 0 ? {brans:String(row[ci.brans] || '').trim()} : {}),
+      ...(ci.istihdam >= 0 ? {istihdam:String(row[ci.istihdam] || '').trim()} : {}),
+      ...(ci.birim >= 0 ? {birim:String(row[ci.birim] || '').trim()} : {}),
+      ...(ci.il >= 0 ? {il:String(row[ci.il] || '').trim()} : {})
     });
   });
   if (!records.length) throw new Error('İzin/Rapor dosyasında geçerli kayıt bulunamadı.');
@@ -5019,7 +5032,8 @@ function ashiBuildDigerList(rows, bransLookup) {
     const k = `${tc || getAd(r) + getSoyad(r)}|${getIstasyon(r)}|${iv.startMs}|${getSure(r)}`;
     if (seen.has(k)) return; seen.add(k);
     const saat = parseSure(getSure(r));
-    out.push({tc, ad:getAd(r), soyad:getSoyad(r), ist:getIstasyon(r), brans:getKadroBrans(r) || (bransLookup && bransLookup[tc]) || '', saat: saat > 0 ? saat : null, sure_raw:String(getSure(r) || ''), startMs:iv.startMs, endMs:iv.endMs});
+    out.push({tc, ad:getAd(r), soyad:getSoyad(r), ist:getIstasyon(r), brans:getKadroBrans(r) || (bransLookup && bransLookup[tc]) || '', saat: saat > 0 ? saat : null, sure_raw:String(getSure(r) || ''), startMs:iv.startMs, endMs:iv.endMs,
+      istihdam:getRowExtra(r,'istihdam'), unvan:getRowExtra(r,'unvan'), il:getRowExtra(r,'il'), ofBrans:getRowExtra(r,'ofBrans')});
   });
   return out;
 }
@@ -5207,173 +5221,237 @@ function getFilteredIstasyonPersonelRows(){
 // ═══════════════════════════════════════════════════════════
 // İzin/rapor günlerini gün gün çıkarır (Döküm Cetveli için). Memur: takvim günü olarak (hafta sonu dahil);
 // İşçi: pazar ve resmi tatil günleri sayılmaz. Hücre kodu "1 <kod>": Yİ yıllık, HeR rapor, Eİ evlilik, Çİ çalışma izni, Sİ diğer sosyal izin.
+function ashiIzinMuafiyetMi(type) { return /muafiyet|s[üu]t\s*izn/.test(String(type || '').toLocaleLowerCase('tr-TR')); }
+// İzin türü → Döküm Cetveli kodu ve gün sayacı (resmî döküm cetveliyle birebir)
 function ashiIzinTuru(type) {
   const t = String(type || '').toLocaleLowerCase('tr-TR');
+  const R = 'Raporlu Gun Sayisi', S = 'Sosyal Izinli Gun Sayisi';
   if (/y[ıi]ll[ıi]k/.test(t)) return {kod:'Yİ', alan:'Yıllık İzin Gün Sayısı'};
-  if (/rapor|hastal|istirahat|ana?l[ıi]k|do[ğg]um/.test(t)) return {kod:'HeR', alan:'Raporlu Gun Sayisi'};
+  if (/heyet/.test(t)) return {kod:'HyR', alan:R};
+  if (/i[şs]\s*kazas/.test(t)) return {kod:'İR', alan:R};
+  if (/hekim\s*rapor|rapor|hastal|istirahat/.test(t)) return {kod:'HeR', alan:R};
+  if (/do[ğg]um\s*sonras|do[ğg]um|ana?l[ıi]k/.test(t) && !/[öo]ncesi/.test(t)) return {kod:'DSİ', alan:S};
+  if (/do[ğg]um\s*[öo]ncesi/.test(t)) return {kod:'DÖİ', alan:S};
+  if (/babal[ıi]k/.test(t)) return {kod:'Bİ', alan:S};
+  if (/evlilik/.test(t)) return {kod:'Eİ', alan:S};
+  if (/[öo]l[üu]m/.test(t)) return {kod:'Öİa', alan:S};
+  if (/refakat/.test(t)) return {kod:'Rİ', alan:S};
+  if (/idari/.test(t)) return {kod:'İİ', alan:S};
+  if (/sendikal/.test(t)) return {kod:'Sİ', alan:''};
   if (/çal[ıi][şs]ma\s*izn|calisma\s*izn/.test(t)) return {kod:'Çİ', alan:'Çalışma İzinli Gün Sayısı'};
-  if (/evlilik/.test(t)) return {kod:'Eİ', alan:'Sosyal Izinli Gun Sayisi'};
-  return {kod:'Sİ', alan:'Sosyal Izinli Gun Sayisi'};
+  return {kod:'Sİ', alan:''};
 }
+// Günlük izin bilgisi: tam gün izinler ("1 Yİ") ve saatlik izinler ("3 İİ"; mesaiyi bölerek "M" üretir). Muafiyet kayıtları döküme yazılmaz.
 function ashiIzinGunleri(tc, istihdam, info) {
   const days = new Date(Date.UTC(info.year, info.month, 0)).getUTCDate();
   const isci = ashiIsIsci(istihdam), tcN = normalizeTcValue(tc);
-  const leaves = tcN ? (izinRaporRecords || []).filter(r => r.tc === tcN) : [];
-  const perDay = Array.from({length:days}, () => ''), counts = {};
+  const leaves = tcN ? (izinRaporRecords || []).filter(r => r.tc === tcN && !ashiIzinMuafiyetMi(r.type)) : [];
+  const perDay = Array.from({length:days}, () => ({full:null, part:[]})), counts = {};
   if (!leaves.length) return {perDay, counts};
   for (let i = 1; i <= days; i++) {
     const ds = Date.UTC(info.year, info.month - 1, i), de = ds + 86400000;
     if (isci) { const dow = new Date(ds).getUTCDay(), w = ASHI_RESMI_TATIL[new Date(ds).toISOString().slice(0, 10)]; if (dow === 0 || w === 0 || ashiOzelGunTam(new Date(ds).toISOString().slice(0, 10))) continue; }
-    const rec = leaves.filter(r => r.startMs < de && r.endMs > ds).sort((a, b) => a.startMs - b.startMs)[0];
-    if (!rec) continue;
-    const t = ashiIzinTuru(rec.type);
-    perDay[i - 1] = '1 ' + t.kod;
-    counts[t.alan] = (counts[t.alan] || 0) + 1;
+    const recs = leaves.filter(r => r.startMs < de && r.endMs > ds).sort((a, b) => a.startMs - b.startMs);
+    recs.forEach(rec => {
+      const t = ashiIzinTuru(rec.type), saat = Number(rec.saat);
+      const hourly = Number.isFinite(saat) && saat > 0 && saat < 24;
+      if (hourly) { perDay[i - 1].part.push({kod:t.kod, saat, s:Math.max(rec.startMs, ds), e:Math.min(rec.endMs, de)}); if (t.alan) counts[t.alan] = (counts[t.alan] || 0) + 1; }
+      else if (!perDay[i - 1].full) { perDay[i - 1].full = {kod:t.kod}; if (t.alan) counts[t.alan] = (counts[t.alan] || 0) + 1; }
+    });
   }
   return {perDay, counts};
 }
-const DOKUM_TAIL_HEADERS = ["Kadro Süresi (*)", "Çalışma Süresi (*)", "Fark (*)", "Nöbet Çalışma Süresi", "Nöbet Dışı Toplam Mesai Süresi", "20.00 ile 08.00 Saatleri Arası Çalışma Süresi", "Aylık Kadro Süresini Tamamladıktan Sonraki Nöbetlerinin 20.00 ile 08.00 Saatleri Arası Çalışma Saati", "Aylık Kadro Süresini Tamamladıktan Sonraki Milli ve Dini Bayram Nöbetlerinin (Arife Dahil) 20.00 ile 08.00 Saatleri Arası Çalışma Saati", "Yıllık İzin Gün Sayısı", "Raporlu Gun Sayisi", "Sosyal Izinli Gun Sayisi", "Çalışma İzinli Gün Sayısı", "Dini Bayram", "Milli Bayram", "Resmi Tatil", "Hafta İçi Eğitim  Mesaisi Toplamı", "Hafta Sonu Eğitim Mesaisi Toplamı", "Önceki Ay Fark", "Yıllık Toplam Fark"];
+const DOKUM_TAIL_HEADERS = ["Kadro S\u00fcresi (*)", "\u00c7al\u0131\u015fma S\u00fcresi (*)", "Fark (*)", "N\u00f6bet \u00c7al\u0131\u015fma S\u00fcresi", "N\u00f6bet D\u0131\u015f\u0131 Toplam Mesai S\u00fcresi", "20.00 ile 08.00 Saatleri Aras\u0131 \u00c7al\u0131\u015fma S\u00fcresi", "Ayl\u0131k Kadro\u00a0S\u00fcresini Tamamlad\u0131ktan Sonraki N\u00f6betlerinin 20.00 ile 08.00 Saatleri Aras\u0131 \u00c7al\u0131\u015fma Saati", "Ayl\u0131k Kadro\u00a0S\u00fcresini Tamamlad\u0131ktan Sonraki Milli ve Dini Bayram N\u00f6betlerinin (Arife Dahil) 20.00 ile 08.00 Saatleri Aras\u0131 \u00c7al\u0131\u015fma Saati", "Y\u0131ll\u0131k \u0130zin G\u00fcn Say\u0131s\u0131", "Raporlu Gun Sayisi", "Sosyal Izinli Gun Sayisi", "\u00c7al\u0131\u015fma \u0130zinli G\u00fcn Say\u0131s\u0131", "Dini Bayram", "Milli Bayram", "Resmi Tatil", "Hafta \u0130\u00e7i E\u011fitim  Mesaisi Toplam\u0131", "Hafta Sonu E\u011fitim Mesaisi Toplam\u0131", "\u00d6nceki Ay Fark", "Y\u0131ll\u0131k Toplam Fark"];
 const DOKUM_AY_ADLARI = ['','Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 const DOKUM_GUN_ADLARI = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+const ASHI_BIRIM_KOD = {"AFYONKARAH\u0130SAR MERKEZ 6 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "357824", "BURSA \u0130L AMBULANS SERV\u0130S\u0130 BA\u015eHEK\u0130ML\u0130\u011e\u0130": "284620", "D\u0130YARBAKIR KOMUTA KONTROL MERKEZ\u0130": "10493", "MAN\u0130SA AHMETL\u0130 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10921", "MAN\u0130SA AKH\u0130SAR 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10922", "MAN\u0130SA AKH\u0130SAR 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "128369", "MAN\u0130SA AKH\u0130SAR 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "183150", "MAN\u0130SA AKH\u0130SAR 4 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726979", "MAN\u0130SA AKH\u0130SAR 5 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726980", "MAN\u0130SA AKH\u0130SAR 6 NOLU ORGAN\u0130ZE SANAY\u0130 B\u00d6LGES\u0130 AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "652426", "MAN\u0130SA AKH\u0130SAR 7 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "53555", "MAN\u0130SA ALA\u015eEH\u0130R 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10923", "MAN\u0130SA ALA\u015eEH\u0130R 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "422001", "MAN\u0130SA ALA\u015eEH\u0130R 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726981", "MAN\u0130SA ALA\u015eEH\u0130R 4 NOLU (ULUDERBENT) AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "45271", "MAN\u0130SA DEM\u0130RC\u0130 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10924", "MAN\u0130SA DEM\u0130RC\u0130 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726982", "MAN\u0130SA DEM\u0130RC\u0130 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "223608", "MAN\u0130SA G\u00d6LMARMARA 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10925", "MAN\u0130SA G\u00d6LMARMARA 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726985", "MAN\u0130SA G\u00d6RDES 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "128370", "MAN\u0130SA G\u00d6RDES 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726984", "MAN\u0130SA KIRKA\u011eA\u00c7 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10926", "MAN\u0130SA KIRKA\u011eA\u00c7 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10927", "MAN\u0130SA KOMUTA KONTROL MERKEZ\u0130": "10916", "MAN\u0130SA KULA 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10929", "MAN\u0130SA KULA 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726987", "MAN\u0130SA K\u00d6PR\u00dcBA\u015eI 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10928", "MAN\u0130SA K\u00d6PR\u00dcBA\u015eI 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726986", "MAN\u0130SA SAL\u0130HL\u0130 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10930", "MAN\u0130SA SAL\u0130HL\u0130 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10931", "MAN\u0130SA SAL\u0130HL\u0130 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "422002", "MAN\u0130SA SAL\u0130HL\u0130 4 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726988", "MAN\u0130SA SAL\u0130HL\u0130 5 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726989", "MAN\u0130SA SAL\u0130HL\u0130 6 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "652406", "MAN\u0130SA SARIG\u00d6L 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "128371", "MAN\u0130SA SARIG\u00d6L 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726990", "MAN\u0130SA SARUHANLI 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "128372", "MAN\u0130SA SARUHANLI 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726991", "MAN\u0130SA SELEND\u0130 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "128373", "MAN\u0130SA SELEND\u0130 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726992", "MAN\u0130SA SOMA 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10932", "MAN\u0130SA SOMA 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "422003", "MAN\u0130SA SOMA 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726993", "MAN\u0130SA SOMA 4 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "652424", "MAN\u0130SA TURGUTLU 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10933", "MAN\u0130SA TURGUTLU 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "128374", "MAN\u0130SA TURGUTLU 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "426521", "MAN\u0130SA TURGUTLU 4 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726994", "MAN\u0130SA TURGUTLU 5 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "652405", "MAN\u0130SA TURGUTLU 6 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "53557", "MAN\u0130SA YUNUSEMRE 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10917", "MAN\u0130SA YUNUSEMRE 10 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "223607", "MAN\u0130SA YUNUSEMRE 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10918", "MAN\u0130SA YUNUSEMRE 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10920", "MAN\u0130SA YUNUSEMRE 4 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "421903", "MAN\u0130SA YUNUSEMRE 5 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726972", "MAN\u0130SA YUNUSEMRE 6 NOLU (MURAD\u0130YE) AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726975", "MAN\u0130SA YUNUSEMRE 8 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "652402", "MAN\u0130SA YUNUSEMRE 9 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "94314", "MAN\u0130SA \u0130L AMBULANS SERV\u0130S\u0130 BA\u015eHEK\u0130ML\u0130\u011e\u0130": "284634", "MAN\u0130SA \u015eEHZADELER 1 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "10919", "MAN\u0130SA \u015eEHZADELER 2 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "421901", "MAN\u0130SA \u015eEHZADELER 3 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "421902", "MAN\u0130SA \u015eEHZADELER 4 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726971", "MAN\u0130SA \u015eEHZADELER 5 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "726973", "MAN\u0130SA \u015eEHZADELER 6 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "854845", "MAN\u0130SA \u015eEHZADELER 7 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "652403", "MAN\u0130SA \u015eEHZADELER 8 NOLU AC\u0130L SA\u011eLIK H\u0130ZMETLER\u0130 \u0130STASYONU": "20044"};
+const ASHI_KOMUTA_BIRIM = 'MANİSA KOMUTA KONTROL MERKEZİ', ASHI_BASHEK_BIRIM = 'MANİSA İL AMBULANS SERVİSİ BAŞHEKİMLİĞİ';
+function ashiBirimKodlu(name) { const n = String(name || '').replace(/\s+\d{4,7}$/, '').trim(); if (!n) return ''; const k = ASHI_BIRIM_KOD[n]; return k ? `${n} ${k}` : n; }
+function dokumFmt(h) { const r = Math.round(h * 100) / 100; return String(r); }
 function dokumCellCode(hours, startMs) {
-  const h = Math.round(hours * 100) / 100;
-  const txt = Number.isInteger(h) ? String(h) : String(h).replace(',', '.');
-  if (Math.abs(h - 12) < 0.01) { const sh = new Date(startMs).getUTCHours(); return `${txt} ${sh >= 6 && sh < 15 ? 'S' : 'A'}`; }
+  const txt = dokumFmt(hours);
+  if (Math.abs(hours - 12) < 0.01) { const sh = new Date(startMs).getUTCHours(); return `${txt} ${sh >= 6 && sh < 15 ? 'S' : 'A'}`; }
   return `${txt} N`;
 }
+// 20:00–08:00 aralığıyla kesişen süre (saat). Her gece penceresi [gün 20:00, ertesi gün 08:00] yalnızca bir kez sayılır.
 function dokumNightHours(startMs, endMs) {
-  // 20:00–08:00 aralığıyla kesişen süre (saat)
-  let total = 0;
-  const d0 = new Date(startMs); d0.setUTCHours(0,0,0,0);
-  for (let day = d0.getTime() - 24*EXCEL_HOUR_MS; day <= endMs; day += 24*EXCEL_HOUR_MS) {
-    const wins = [[day, day + 8*EXCEL_HOUR_MS], [day + 20*EXCEL_HOUR_MS, day + 32*EXCEL_HOUR_MS]];
-    wins.forEach(([a, b]) => { const o = Math.min(b, endMs) - Math.max(a, startMs); if (o > 0) total += o; });
+  if (!(endMs > startMs)) return 0;
+  const DAY = 24 * EXCEL_HOUR_MS; let total = 0;
+  for (let day = Math.floor(startMs / DAY) * DAY - DAY; day <= endMs; day += DAY) {
+    const o = Math.min(day + 32 * EXCEL_HOUR_MS, endMs) - Math.max(day + 20 * EXCEL_HOUR_MS, startMs);
+    if (o > 0) total += o;
   }
   return total / EXCEL_HOUR_MS;
+}
+function dokumTatilGunu(ms) { const k = new Date(ms).toISOString().slice(0, 10); if (ASHI_RESMI_TATIL[k] !== undefined) return true; const o = ashiOzelGunler[k]; return !!o && (o.tur === 'bayram' || o.tur === 'resmi'); }
+// Bayram / milli tatil günlerine (arife dahil) düşen gece süresi
+function dokumNightHolidayHours(startMs, endMs) {
+  if (!(endMs > startMs)) return 0;
+  const DAY = 24 * EXCEL_HOUR_MS; let total = 0;
+  for (let day = Math.floor(startMs / DAY) * DAY - DAY; day <= endMs; day += DAY) {
+    const x = Math.max(day + 20 * EXCEL_HOUR_MS, startMs), y = Math.min(day + 32 * EXCEL_HOUR_MS, endMs);
+    if (!(y > x)) continue;
+    const m = day + DAY;
+    if (x < m && dokumTatilGunu(day)) total += Math.min(y, m) - x;
+    if (y > m && dokumTatilGunu(m)) total += y - Math.max(x, m);
+  }
+  return total / EXCEL_HOUR_MS;
+}
+// Tüm kaynaklardan (istasyon nöbetleri, Komuta/Başhekimlik, Diğer görev, Mesai, Eğitim, Koordinasyon, izin) kişi bazında olay toplar.
+function ashiDokumTopla(info) {
+  const H = EXCEL_HOUR_MS, people = new Map();
+  const keyOf = o => { const t = String(o.tc || '').trim(); return t ? 't:' + t : 'n:' + `${o.ad || ''}|${o.soyad || ''}`.trim().toLocaleUpperCase('tr-TR'); };
+  const get = o => {
+    const k = keyOf(o); let x = people.get(k);
+    if (!x) { x = {tc:String(o.tc || '').trim(), ad:'', soyad:'', il:'', unvan:'', ofBrans:'', istihdam:'', brans:'', asilIst:'', istCount:{}, komuta:false, bashek:false, events:new Map(), izinBirim:''}; people.set(k, x); }
+    ['ad','soyad','il','unvan','ofBrans','istihdam','brans'].forEach(f => { if (!x[f] && o[f]) x[f] = o[f]; });
+    if (!x.asilIst && o.asilIst) x.asilIst = o.asilIst;
+    return x;
+  };
+  const add = (x, ev) => {
+    if (!Number.isFinite(ev.startMs)) return;
+    const dt = new Date(ev.startMs); if (dt.getUTCFullYear() !== info.year || dt.getUTCMonth() + 1 !== info.month) return;
+    const endMs = Number.isFinite(ev.endMs) && ev.endMs > ev.startMs ? ev.endMs : ev.startMs + (ev.hours || 0) * H;
+    let hours = Number(ev.hours); if (!(hours > 0)) hours = (endMs - ev.startMs) / H;
+    if (!(hours > 0)) return;
+    const k = `${ev.startMs}|${endMs}`; if (x.events.has(k)) return;
+    x.events.set(k, {startMs:ev.startMs, endMs, hours, kind:ev.kind || 'N', mesai:!!ev.mesai});
+    if (ev.ist && ev.kind !== 'EGM') x.istCount[ev.ist] = (x.istCount[ev.ist] || 0) + 1;
+  };
+  ['ef','ysp','sur'].forEach(g => (allData[g] || []).forEach(p => {
+    const x = get({tc:p.tc, ad:p.ad, soyad:p.soyad, il:p.il, unvan:p.unvan, ofBrans:p.ofBrans, istihdam:p.istihdam, brans:p.kadro_brans, asilIst:p.asilIst});
+    (p.nobetler || []).forEach(n => add(x, {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) > 0 ? Number(n.saat) : 0, mesai:!(Number(n.saat) > 0), ist:n.ist}));
+  }));
+  ashiRefakatExtra().forEach(n => { if (n.ist) add(get(n), {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) || n.hours, ist:n.ist}); });
+  [['komuta', 'komuta'], ['bashekimlik', 'bashek']].forEach(([list, flag]) => ((specialDutyLists || {})[list] || []).forEach(p => (p.records || []).forEach(n => {
+    if (/refakat|koordinasyon|e[ğg]itim/i.test(String(n.gorev || '')) || !n.ist) return;
+    const x = get({tc:n.tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans || p.kadro_brans});
+    x[flag] = true;
+    add(x, {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) > 0 ? Number(n.saat) : 0, mesai:!(Number(n.saat) > 0), ist:n.ist});
+  })));
+  ((specialDutyLists || {}).diger || []).forEach(n => {
+    if (!n.ist) return;
+    add(get({tc:n.tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans}), {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) > 0 ? Number(n.saat) : 0, mesai:!(Number(n.saat) > 0), ist:n.ist});
+  });
+  ((specialDutyLists || {}).mesai || []).forEach(n => {
+    const x = get({tc:n.tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans});
+    if (n.ist && !Object.keys(x.istCount).length) x.istCount[n.ist] = 1;
+    add(x, {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat), kind:n.tur === 'koord' ? 'N' : 'EGM', ist:n.ist});
+  });
+  // İzin/Rapor kaydı olup nöbeti olmayan personel de cetvelde yer alır (muafiyet kayıtları hariç)
+  const ms0 = Date.UTC(info.year, info.month - 1, 1), ms1 = Date.UTC(info.year, info.month, 1), byTc = new Map();
+  (izinRaporRecords || []).forEach(r => { if (ashiIzinMuafiyetMi(r.type) || !(r.startMs < ms1 && r.endMs > ms0)) return; if (!byTc.has(r.tc)) byTc.set(r.tc, r); });
+  byTc.forEach((r, tc) => {
+    const parts = String(r.name || '').trim().split(/\s+/), soyad = parts.length > 1 ? parts.pop() : '';
+    const x = get({tc, ad:parts.join(' '), soyad, il:r.il || '', unvan:r.unvan || '', ofBrans:r.brans || '', istihdam:r.istihdam || '', brans:r.brans || ''});
+    if (!x.izinBirim && r.birim) x.izinBirim = String(r.birim).replace(/\s+\d{4,7}$/, '').trim();
+  });
+  return people;
+}
+function ashiDokumSatirHesapla(x, info) {
+  const H = EXCEL_HOUR_MS, days = new Date(Date.UTC(info.year, info.month, 0)).getUTCDate();
+  const izg = ashiIzinGunleri(x.tc, x.istihdam, info);
+  const cells = Array.from({length:days}, () => []), izinCells = Array.from({length:days}, () => []);
+  const dayOf = ms => new Date(ms).getUTCDate() - 1;
+  let evs = [...x.events.values()].sort((a, b) => a.startMs - b.startMs), out = [];
+  // Mesai kayıtları: tam gün izin varsa yazılmaz; saatlik izin varsa izin dışında kalan süre "M" olur
+  evs.forEach(ev => {
+    if (!ev.mesai) { out.push(ev); return; }
+    const di = dayOf(ev.startMs), pd = izg.perDay[di];
+    if (pd && pd.full) return;
+    const ov = pd ? pd.part.filter(p => p.s < ev.endMs && p.e > ev.startMs).sort((a, b) => a.s - b.s) : [];
+    if (!ov.length) { out.push(ev); return; }
+    let cur = ev.startMs;
+    ov.forEach(p => { if (p.s > cur) out.push({...ev, startMs:cur, endMs:p.s, hours:(p.s - cur) / H, kind:'M'}); cur = Math.max(cur, p.e); });
+    if (ev.endMs > cur) out.push({...ev, startMs:cur, endMs:ev.endMs, hours:(ev.endMs - cur) / H, kind:'M'});
+  });
+  // Resmî cetvelde 6 saat ve altındaki kayıtlar nöbet değil "M" (nöbet dışı mesai) olarak yazılır
+  out = out.map(ev => ev.kind === 'N' && ev.hours <= 6 + 1e-9 ? {...ev, kind:'M'} : ev);
+  evs = out.sort((a, b) => a.startMs - b.startMs);
+  let nobet = 0, dis = 0, night = 0, egHi = 0, egHs = 0;
+  evs.forEach(ev => {
+    const txt = ev.kind === 'N' ? dokumCellCode(ev.hours, ev.startMs) : `${dokumFmt(ev.hours)} ${ev.kind}`;
+    cells[dayOf(ev.startMs)].push(txt);
+    if (ev.kind === 'N') { nobet += ev.hours; night += dokumNightHours(ev.startMs, ev.endMs); }
+    else { dis += ev.hours; if (ev.kind === 'EGM') { const wd = new Date(ev.startMs).getUTCDay(); if (wd === 0 || wd === 6) egHs += ev.hours; else egHi += ev.hours; } }
+  });
+  izg.perDay.forEach((pd, i) => {
+    if (pd.full) izinCells[i].push(`1 ${pd.full.kod}`);
+    pd.part.forEach(p => izinCells[i].push(`${dokumFmt(p.saat)} ${p.kod}`));
+  });
+  const kadro = ashiKadroSaati(x.tc, x.istihdam, info);
+  // Kadro süresi dolduktan sonraki nöbetlerin 20:00–08:00 süresi (kadro süresini aşan kısım tam saate indirilir)
+  let cum = 0, post = 0, postBayram = 0;
+  evs.forEach(ev => {
+    const before = cum; cum += ev.hours;
+    if (ev.kind === 'N' && cum > kadro + 1e-9) {
+      const p = Math.floor(cum - Math.max(kadro, before) + 1e-9);
+      if (p > 0) { post += dokumNightHours(ev.endMs - p * H, ev.endMs); postBayram += dokumNightHolidayHours(ev.endMs - p * H, ev.endMs); }
+    }
+  });
+  const rows = cells.map((c, i) => c.concat(izinCells[i]).join('\n'));
+  return {rows, kadro, nobet, dis, night, egHi, egHs, post, postBayram, counts:izg.counts, calis:nobet + dis};
 }
 function buildDokumCetveliAoa() {
   const info = reportMonthInfo || getAnalizMonthInfo();
   const year = info.year, month = info.month, days = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const stationQ = ashiIstSecimLC('istasyonPersonelStation');
   const personQ = String(document.getElementById('istasyonPersonelPerson')?.value || '').trim().toLocaleLowerCase('tr-TR');
-  // Aynı kişiyi (personKey) farklı görev gruplarından birleştir; tüm nöbetleri asıl istasyonunda topla.
-  const people = {};
-  ['ef','ysp','sur'].forEach(g => (allData[g] || []).forEach(p => {
-    const key = String(p.personKey || p.tc || `${p.ad}|${p.soyad}`);
-    if (!people[key]) people[key] = {tc:p.tc || '', ad:p.ad || '', soyad:p.soyad || '', il:p.il || '', unvan:p.unvan || '', ofBrans:p.ofBrans || '', istihdam:p.istihdam || '', brans:p.kadro_brans || '', istCount:{}, duties:new Map()};
-    const x = people[key];
-    if (!x.unvan && p.unvan) x.unvan = p.unvan;
-    if (!x.ofBrans && p.ofBrans) x.ofBrans = p.ofBrans;
-    if (!x.istihdam && p.istihdam) x.istihdam = p.istihdam;
-    if (!x.il && p.il) x.il = p.il;
-    if (p.asilIst) x.asilIst = x.asilIst || p.asilIst;
-    (p.nobetler || []).forEach(n => {
-      if (!Number.isFinite(n.startMs) || !(Number(n.saat) > 0)) return;
-      const endMs = Number.isFinite(n.endMs) ? n.endMs : n.startMs + n.saat * EXCEL_HOUR_MS;
-      const dk = `${n.startMs}|${endMs}`;
-      if (!x.duties.has(dk)) x.duties.set(dk, {startMs:n.startMs, endMs, hours:Number(n.saat), ist:n.ist});
-      if (n.ist) x.istCount[n.ist] = (x.istCount[n.ist] || 0) + 1;
-    });
-  }));
-  ashiRefakatExtra().forEach(n => {
-    if (!n.ist) return;
-    if (!people[n.personKey]) people[n.personKey] = {tc:n.tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans, istCount:{}, duties:new Map()};
-    const x = people[n.personKey];
-    if (!x.istihdam && n.istihdam) x.istihdam = n.istihdam;
-    const dk = `${n.startMs}|${n.endMs}`;
-    if (!x.duties.has(dk)) { x.duties.set(dk, {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) || n.hours, ist:n.ist}); x.istCount[n.ist] = (x.istCount[n.ist] || 0) + 1; }
-  });
-  // Komuta Kontrol Merkezi ve Başhekimlik personeli: nöbetleri döküme işlenir (eğitim/koordinasyon ayrıca mesai listesinden gelir).
-  ['komuta', 'bashekimlik'].forEach(k => ((specialDutyLists || {})[k] || []).forEach(p => (p.records || []).forEach(n => {
-    if (/refakat|koordinasyon|e[ğg]itim/i.test(String(n.gorev || ''))) return;
-    if (!(Number(n.saat) > 0) || !Number.isFinite(n.startMs) || !n.ist) return;
-    const tc = String(n.tc || '').trim();
-    const personKey = tc ? 'tc:' + tc : 'name:' + `${n.ad || ''}|${n.soyad || ''}`.trim().toLocaleUpperCase('tr-TR');
-    let x = people[personKey] || (tc && Object.values(people).find(q => q.tc === tc));
-    if (!x) x = people[personKey] = {tc, ad:n.ad || '', soyad:n.soyad || '', il:n.il || '', unvan:n.unvan || '', ofBrans:n.ofBrans || '', istihdam:n.istihdam || '', brans:n.brans || p.kadro_brans || '', istCount:{}, duties:new Map()};
-    if (!x.istihdam && n.istihdam) x.istihdam = n.istihdam;
-    if (!x.unvan && n.unvan) x.unvan = n.unvan;
-    const endMs = Number.isFinite(n.endMs) ? n.endMs : n.startMs + n.saat * EXCEL_HOUR_MS;
-    const dk = `${n.startMs}|${endMs}`;
-    if (!x.duties.has(dk)) { x.duties.set(dk, {startMs:n.startMs, endMs, hours:Number(n.saat), ist:n.ist}); x.istCount[n.ist] = (x.istCount[n.ist] || 0) + 1; }
-  })));
-  ((specialDutyLists || {}).mesai || []).forEach(n => {
-    const tc = String(n.tc || '').trim();
-    const personKey = tc ? 'tc:' + tc : 'name:' + `${n.ad || ''}|${n.soyad || ''}`.trim().toLocaleUpperCase('tr-TR');
-    let x = people[personKey] || (tc && people[tc]) || Object.values(people).find(q => tc && q.tc === tc);
-    if (!x) {
-      x = people[personKey] = {tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans, istCount:{}, duties:new Map()};
-      if (n.ist) x.istCount[n.ist] = 1;
-    }
-    if (!x.istihdam && n.istihdam) x.istihdam = n.istihdam;
-    (x.mesai = x.mesai || []).push(n);
-  });
-  const list = Object.values(people).map(x => {
-    const asil = x.asilIst || Object.keys(x.istCount).sort((a,b) => x.istCount[b] - x.istCount[a])[0] || '';
-    return {...x, asil};
+  const r2 = v => Math.round(v * 100) / 100;
+  const list = [...ashiDokumTopla(info).values()].map(x => {
+    const own = x.asilIst || Object.keys(x.istCount).sort((a, b) => x.istCount[b] - x.istCount[a])[0] || x.izinBirim || '';
+    const kadroBirim = own || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
+    return {...x, asil:kadroBirim};
   }).filter(x => x.asil && ashiIstUyarLC(stationQ, x.asil) && (!personQ || `${x.ad} ${x.soyad} ${x.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
-  list.sort((a,b) => trColl.compare(a.asil, b.asil) || trColl.compare(`${a.ad} ${a.soyad}`, `${b.ad} ${b.soyad}`));
+  list.sort((a, b) => trColl.compare(a.asil, b.asil) || trColl.compare(`${a.ad} ${a.soyad}`.trim(), `${b.ad} ${b.soyad}`.trim()) || trColl.compare(a.tc, b.tc));
   const header = ['Sıra No','TC Kimlik No','Adı Soyadı','İl','Kadrosunun Olduğu Birim','Geçici Görevli Olduğu Birim','Birim Tipi','Kadro Türü','Kadro Unvanı','Branşı'];
   for (let d = 1; d <= days; d++) header.push(`${d} ${DOKUM_AY_ADLARI[month]} ${year} ${DOKUM_GUN_ADLARI[new Date(Date.UTC(year, month - 1, d)).getUTCDay()]}`);
   DOKUM_TAIL_HEADERS.forEach(h => header.push(h));
-  const rows = [header];
+  const rows = [header], T = n => DOKUM_TAIL_HEADERS.findIndex(h => h.replace(/\s+/g, ' ') === n.replace(/\s+/g, ' '));
+  const ti = {kadro:0, calis:1, fark:2, nobet:3, dis:4, gece:5, post:6, postBayram:7, egHi:15, egHs:16};
   list.forEach((x, i) => {
-    const cells = Array.from({length:days}, () => []);
-    const izg = ashiIzinGunleri(x.tc, x.istihdam, info);
-    izg.perDay.forEach((c, di) => { if (c) cells[di].push(c); });
-    let total = 0, night = 0;
-    [...x.duties.values()].sort((a,b) => a.startMs - b.startMs).forEach(d => {
-      const dt = new Date(d.startMs);
-      if (dt.getUTCFullYear() !== year || dt.getUTCMonth() + 1 !== month) return;
-      cells[dt.getUTCDate() - 1].push(dokumCellCode(d.hours, d.startMs));
-      total += d.hours; night += dokumNightHours(d.startMs, d.endMs);
-    });
-    let egHi = 0, egHs = 0;
-    (x.mesai || []).slice().sort((a,b) => a.startMs - b.startMs).forEach(m => {
-      const dt = new Date(m.startMs);
-      if (dt.getUTCFullYear() !== year || dt.getUTCMonth() + 1 !== month) return;
-      const h = Math.round(m.saat * 100) / 100, txt = Number.isInteger(h) ? String(h) : String(h).replace(',', '.');
-      if (m.tur === 'koord') { cells[dt.getUTCDate() - 1].push(`${txt} K`); total += h; night += dokumNightHours(m.startMs, m.endMs); }
-      else { cells[dt.getUTCDate() - 1].push(`${txt} E`); const wd = dt.getUTCDay(); if (wd === 0 || wd === 6) egHs += h; else egHi += h; }
-    });
-    const row = [i + 1, x.tc, `${x.ad} ${x.soyad}`.trim(), x.il || 'MANİSA', x.asil, ' ', 'İASB İstasyon', x.istihdam, x.unvan, x.ofBrans || x.brans];
-    cells.forEach(c => row.push(c.join('\n')));
-    const r2 = v => Math.round(v * 100) / 100;
-    const tailVals = DOKUM_TAIL_HEADERS.map(() => '');
-    const kadro = ashiKadroSaati(x.tc, x.istihdam, info);
-    tailVals[0] = kadro;       // Kadro Süresi (*)
-    const egT = egHi + egHs;   // Eğitim mesaisi: nöbet dışı; koordinasyon nöbet süresine dahil
-    tailVals[1] = r2(total);   // Çalışma Süresi (*) — eğitim etkilemez
-    tailVals[2] = r2(total - kadro);   // Fark (*)
-    tailVals[3] = r2(total);   // Nöbet Çalışma Süresi (koordinasyon dahil)
-    tailVals[4] = r2(egT);     // Nöbet Dışı Toplam Mesai Süresi (eğitim)
-    tailVals[DOKUM_TAIL_HEADERS.indexOf('Hafta İçi Eğitim  Mesaisi Toplamı')] = r2(egHi);
-    tailVals[DOKUM_TAIL_HEADERS.indexOf('Hafta Sonu Eğitim Mesaisi Toplamı')] = r2(egHs);
-    tailVals[5] = r2(night);   // 20.00 ile 08.00 arası çalışma süresi
-    Object.entries(izg.counts).forEach(([alan, n]) => { const ti = DOKUM_TAIL_HEADERS.indexOf(alan); if (ti >= 0) tailVals[ti] = n; });
-    tailVals.forEach(v => row.push(v));
+    const s = ashiDokumSatirHesapla(x, info);
+    const gecici = x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : '');
+    const tip = x.komuta ? 'İASB Komuta Birimi' : (x.bashek ? 'İASB Başhekimlik' : 'İASB İstasyon');
+    const row = [i + 1, x.tc, `${x.ad} ${x.soyad}`.trim(), x.il || 'MANİSA', ashiBirimKodlu(x.asil), gecici && gecici !== x.asil ? ashiBirimKodlu(gecici) : '', tip, x.istihdam, x.unvan, x.ofBrans || x.brans];
+    s.rows.forEach(c => row.push(c));
+    const tail = DOKUM_TAIL_HEADERS.map(() => 0);
+    tail[ti.kadro] = r2(s.kadro); tail[ti.calis] = r2(s.calis); tail[ti.fark] = r2(s.calis - s.kadro);
+    tail[ti.nobet] = r2(s.nobet); tail[ti.dis] = r2(s.dis); tail[ti.gece] = r2(s.night);
+    tail[ti.post] = r2(s.post); tail[ti.postBayram] = r2(s.postBayram);
+    tail[ti.egHi] = r2(s.egHi); tail[ti.egHs] = r2(s.egHs);
+    Object.entries(s.counts).forEach(([alan, n]) => { const k = T(alan); if (k >= 0) tail[k] = n; });
+    tail[17] = ''; tail[18] = '';   // Önceki Ay Fark / Yıllık Toplam Fark: önceki aylar bu dosyada yok
+    tail.forEach(v => row.push(v));
     rows.push(row);
   });
-  return {rows, days, count:list.length};
+  return {rows, days, count:list.length, year, month};
 }
 function buildDokumCetveliSheet() {
-  const {rows, days, count} = buildDokumCetveliAoa();
+  const {rows, days, count, year, month} = buildDokumCetveliAoa();
   const ws = XLSX.utils.aoa_to_sheet(rows);
   const nCols = rows[0].length;
-  const widths = [{wch:7},{wch:14},{wch:28},{wch:9},{wch:62},{wch:20},{wch:16},{wch:34},{wch:22},{wch:26}];
-  for (let d = 0; d < days; d++) widths.push({wch:9});
-  while (widths.length < nCols) widths.push({wch:18});
+  const widths = [{wch:5.1},{wch:9.6},{wch:11.6},{wch:13.4},{wch:10.7},{wch:10.7},{wch:13.4},{wch:8},{wch:8},{wch:8}];
+  for (let d = 0; d < days; d++) widths.push({wch:5.3});
+  while (widths.length < nCols) widths.push({wch:5.3});
+  widths[10 + days + 6] = {wch:7.9}; widths[10 + days + 7] = {wch:9};
   ws['!cols'] = widths;
-  ws['!rows'] = [{hpt:78}];
+  ws['!rows'] = [{hpt:141.75}];
+  ws['!autofilter'] = {ref: XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:count, c:nCols - 1}})};
+  const brd = {top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'}};
+  const font = {name:'Arial', sz:7};
   for (let c = 0; c < nCols; c++) {
     const ref = XLSX.utils.encode_cell({r:0, c});
-    if (ws[ref]) ws[ref].s = {font:{bold:true, sz:10}, alignment:{wrapText:true, vertical:'center', horizontal:'center'}, fill:{patternType:'solid', fgColor:{rgb:'D9E1F2'}}, border:{top:{style:'thin'},bottom:{style:'thin'},left:{style:'thin'},right:{style:'thin'}}};
+    if (ws[ref]) ws[ref].s = {font, alignment:{wrapText:true, vertical:'center', horizontal:c < 10 ? 'left' : 'center', textRotation:c >= 10 ? 90 : 0}, border:brd};
   }
-  for (let r = 1; r <= count; r++) for (let c = 10; c < 10 + days; c++) {
+  for (let r = 1; r <= count; r++) for (let c = 0; c < nCols; c++) {
     const ref = XLSX.utils.encode_cell({r, c});
-    if (ws[ref]) ws[ref].s = {alignment:{wrapText:true, vertical:'center', horizontal:'center'}};
+    if (!ws[ref]) ws[ref] = {t:'s', v:''};
+    const dayCol = c >= 10 && c < 10 + days;
+    let fill;
+    if (dayCol) { const dow = new Date(Date.UTC(year, month - 1, c - 9)).getUTCDay(); fill = {patternType:'solid', fgColor:{rgb:(dow === 0 || dow === 6) ? '87CEFA' : 'FFFFFF'}}; }
+    ws[ref].s = {font, alignment:{wrapText:true, vertical:'center', horizontal:c < 10 ? 'left' : 'center'}, border:brd, ...(fill ? {fill} : {})};
   }
-  ws['!autofilter'] = {ref:XLSX.utils.encode_range({s:{r:0,c:0}, e:{r:count,c:nCols - 1}})};
   return ws;
 }
 function exportIstasyonPersonelExcel(){
@@ -5397,6 +5475,15 @@ function exportIstasyonPersonelExcel(){
   try { XLSX.utils.book_append_sheet(wb,buildDokumCetveliSheet(),'Nöbet Döküm Cetveli'); } catch(err) { console.warn('Nöbet Döküm Cetveli sayfası oluşturulamadı:', err); }
   const station=document.getElementById('istasyonPersonelStation')?.value||'tum_istasyonlar';
   XLSX.writeFile(wb,`ashi_istasyon_personel_${station.replace(/[^a-z0-9çğıöşüÇĞİÖŞÜ]+/gi,'_').slice(0,50)}.xlsx`);
+}
+function exportDokumCetveliExcel(){
+  if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
+  try {
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,buildDokumCetveliSheet(),'Nöbet Listesi Döküm Cetveli');
+    const {year,month}=buildDokumCetveliAoa();
+    XLSX.writeFile(wb,`Nöbet Listesi Döküm Cetveli_${year}_${String(month).padStart(2,'0')}.xlsx`);
+  } catch(err) { alert('Döküm Cetveli oluşturulamadı: '+(err&&err.message||err)); }
 }
 function setIstasyonPersonelView(view){
   const detail=view!=='summary';
