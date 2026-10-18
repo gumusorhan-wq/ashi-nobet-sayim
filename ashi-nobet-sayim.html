@@ -155,6 +155,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .ist-pk-row{display:flex;align-items:center;gap:6px;padding:1px 6px;margin:0;min-height:0;line-height:1.15;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:6px;text-transform:none;letter-spacing:0}
   .ist-pk-row input{margin:0;width:14px;height:14px;flex:none}
   .ist-pk-row:hover{background:#f1f5f9}
+  .ist-pk-pop .ist-pk-row{display:flex!important;flex-direction:row!important;align-items:center!important;gap:6px!important;padding:1px 6px!important;margin:0!important;min-height:0!important;height:auto!important;line-height:1.15!important;font-size:12.5px!important;font-weight:600!important;text-transform:none!important;letter-spacing:0!important}
+  .ist-pk-pop .ist-pk-row input{margin:0!important;width:14px!important;height:14px!important;min-height:0!important;padding:0!important;flex:none!important}
+  .ist-pk-pop .ist-pk-row span{line-height:1.15!important;margin:0!important;padding:0!important}
+  .ist-pk-pop .ist-pk-list{display:block!important}
   .istasyon-personel-filters .ist-pk-row{flex-direction:row;display:flex;align-items:center;gap:6px;padding:1px 6px;line-height:1.15;font-size:12.5px;font-weight:600;color:#1e293b}
   .istasyon-personel-filters .ist-pk-row input{height:14px;width:14px;padding:0;border:0;background:none;flex:none}
   .istasyon-personel-filters .ist-pk-q{height:34px;padding:0 10px;font-size:13px;font-weight:600;border:1px solid #bfdbfe}
@@ -404,7 +408,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   @media(max-width:700px){ .arc-card{margin:10px 10px 0;padding:12px} }
 
   .istasyon-personel-modal-box{width:min(1360px,98vw);max-height:92vh;overflow:auto}
-  .istasyon-personel-filters{display:grid;grid-template-columns:minmax(260px,1.6fr) minmax(180px,1fr) minmax(110px,.5fr) auto auto;gap:10px;align-items:end;padding:14px 18px;background:#eff6ff;border-bottom:1px solid #bfdbfe}
+  .istasyon-personel-filters{display:grid;grid-template-columns:minmax(260px,1.6fr) minmax(180px,1fr) minmax(110px,.5fr) auto auto auto;gap:10px;align-items:end;padding:14px 18px;background:#eff6ff;border-bottom:1px solid #bfdbfe}
   .istasyon-personel-filters label{display:flex;flex-direction:column;gap:5px;color:#1e3a5f;font-size:11px;font-weight:800}
   .istasyon-personel-filters input,.istasyon-personel-filters select{height:36px;padding:0 10px;border:1px solid #bfdbfe;border-radius:7px;background:#fff;color:#1e293b;font:inherit;font-size:12px}
   .istasyon-personel-summary{display:flex;gap:8px;flex-wrap:wrap;padding:12px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
