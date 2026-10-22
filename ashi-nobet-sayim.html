@@ -175,6 +175,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .gorev-tabs,body.ui-side .gorev-shortcut-hint,body.ui-side .topbar{display:none!important}
     body.ui-side .report-header .header-actions{display:none!important}
     body.ui-side{padding-top:64px}
+    body.ui-side .table-wrap{overflow:clip}
+    body.ui-side::before{content:'';position:fixed;top:0;left:var(--an-w);right:0;height:62px;background:var(--gray);z-index:840;pointer-events:none}
+    body.ui-side #raporContent .search-row,body.ui-side #raporContent .lf-bar{position:sticky;top:62px;z-index:30;background:var(--gray);margin:0;padding:6px 0;min-height:52px;box-sizing:border-box}
+    body.ui-side #raporContent .tbl thead th{position:sticky;top:114px;z-index:20}
     body.ui-side .report-header{position:fixed;top:8px;left:calc(var(--an-w) + 18px);right:18px;width:auto;z-index:850;margin:0}
     body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{top:62px}
     body.ui-side .an-dl{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex:none;border:0;border-radius:9px;background:#0f4c35;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:8px 16px;cursor:pointer;white-space:nowrap}
@@ -190,8 +194,55 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .istasyon-personel-main-section,body.ui-side .istasyon-personel-main-box,body.ui-side #istasyonPersonelKontrol,body.ui-side #raporContent{min-width:0;max-width:100%;box-sizing:border-box}
     body.ui-side #krTablo{max-width:100%;overflow-x:auto}
     /* analizler: açılır pencere yerine ana ekranda sayfa olarak */
-    body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{left:var(--an-w);z-index:800;background:#f3f6f4;padding:14px 18px}
+    body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{left:var(--an-w);z-index:800;background:#f3f6f4;padding:0 18px 14px;top:62px;bottom:0;overflow:hidden}
     body.ui-side #nobelAnaliziModal>.modal-box,body.ui-side #cokluModal>.modal-box,body.ui-side #boslukModal>.modal-box,body.ui-side #surucuDuzenModal>.modal-box,body.ui-side #tumPersonelDuzenModal>.modal-box,body.ui-side #cokluTumPersonelModal>.modal-box,body.ui-side #uygunPersonelModal>.modal-box{width:100%!important;max-width:none!important;margin:0}
+    body.ui-side #nobelAnaliziModal>.modal-box,body.ui-side #cokluModal>.modal-box,body.ui-side #boslukModal>.modal-box,body.ui-side #surucuDuzenModal>.modal-box,body.ui-side #tumPersonelDuzenModal>.modal-box,body.ui-side #cokluTumPersonelModal>.modal-box,body.ui-side #uygunPersonelModal>.modal-box{height:100%;max-height:none;display:flex;flex-direction:column;box-sizing:border-box}
+    body.ui-side .modal-overlay>.modal-box>*{flex:0 0 auto}
+    body.ui-side .modal-overlay>.modal-box>.modal-body{flex:1 1 auto;min-height:0;max-height:none!important;overflow:auto!important}
+    body.ui-side #nobelAnaliziBody{display:flex;flex-direction:column;overflow:hidden!important}
+    body.ui-side #analizToolbar{flex:0 0 auto}
+    body.ui-side #analizTableWrap{flex:1 1 auto;min-height:0;overflow:auto!important}
+    body.ui-side .modal-overlay .modal-body div[style*="overflow:auto"],body.ui-side .modal-overlay .modal-body div[style*="overflow-x:auto"]{overflow:visible!important}
+    body.ui-side #analizTableWrap{overflow:auto!important}
+    body.ui-side .modal-overlay .modal-body thead th{position:sticky;top:0;z-index:6}
+    body.ui-side .modal-overlay .bosluk-toolbar{padding:8px 14px}
+    body.ui-side .modal-overlay .bosluk-filter-row{gap:8px}
+    body.ui-side .modal-overlay .bosluk-filter{min-width:0;flex:1 1 150px}
+    body.ui-side .modal-overlay .bosluk-filter.wide{flex:2 1 200px}
+    body.ui-side .modal-overlay .bosluk-filter-label{display:none}
+    body.ui-side .modal-overlay .bosluk-filter .bosluk-view-switch{height:36px}
+    body.ui-side .modal-overlay .bosluk-filter-summary{padding:6px 0 0;min-height:0}
+    body.ui-side #analizToolbar .bosluk-filter-summary>span:not(:last-child){display:none}
+    body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter{flex:1 1 140px}
+    body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter.wide{flex:2 1 190px}
+    body.ui-side .modal-overlay .modal-head{padding:10px 16px}
+    body.ui-side .an-statbar{padding:8px 16px!important;gap:12px!important}
+    body.ui-side .istasyon-personel-main-section{overflow:visible}
+    body.ui-side .istasyon-personel-main-box>.istasyon-personel-filters{position:sticky;top:62px;z-index:35}
+    body.ui-side .istasyon-personel-main-box>.istasyon-personel-view-tabs,body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{position:sticky;top:calc(62px + var(--ip-f,66px));z-index:34;background:var(--gray)}
+    body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{background:#fff}
+    body.ui-side .istasyon-personel-summary-table-wrap,body.ui-side #krTablo{overflow:visible!important}
+    body.ui-side .istasyon-personel-summary-table th{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px));z-index:20}
+    body.ui-side .istasyon-personel-station-head{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px));z-index:15}
+    body.ui-side #istasyonPersonelKontrol>div:first-child{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px));z-index:30;background:var(--gray)}
+    body.ui-side .kr-table th{top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) + var(--ip-k,56px))}
+    body.ui-side #specialListToolbar{position:sticky;top:62px;z-index:30}
+    body.ui-side #raporContent #tblSpecialList.tbl thead th{position:sticky;top:calc(62px + var(--sp-h,90px));z-index:20}
+    body.ui-side .an-statbar{flex-wrap:nowrap!important}
+    body.ui-side .an-statbar>div:last-child{white-space:nowrap;flex-wrap:nowrap!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div{white-space:nowrap}
+    body.ui-side .an-statbar .btn-sec{padding:6px 10px;font-size:12px}
+    body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter:has(.bosluk-view-switch){flex:0 0 150px}
+    body.ui-side .an-statbar #analizOzetKart{flex-wrap:nowrap!important}
+    body.ui-side .modal-overlay .bosluk-filter .ist-pk{min-width:0;width:100%;display:block}
+    body.ui-side .modal-overlay .bosluk-filter .ist-pk-btn{height:36px;padding:0 10px}
+    body.ui-side .modal-overlay .bosluk-filter-summary .btn-sec{padding:4px 10px;font-size:12px}
+    body.ui-side .analiz-table{overflow:visible!important}
+    body.ui-side .analiz-table thead th{background:#1e3a5f;color:#fff}
+    body.ui-side .an-statbar #analizOzetKart{gap:8px!important}
+    body.ui-side .an-statbar #analizOzetKart>div{padding:5px 14px!important;display:flex;align-items:baseline;gap:8px;text-align:left!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div:first-child{font-size:17px!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div:last-child{font-size:10px!important}
     body.ui-side.an-min #asideNav .an-tx,body.ui-side.an-min #asideNav .an-sec,body.ui-side.an-min #asideNav .an-sub,body.ui-side.an-min #asideNav .an-bt,body.ui-side.an-min #asideNav .an-foot,body.ui-side.an-min #asideNav details>summary::after{display:none}
     body.ui-side.an-min #asideNav .an-it{justify-content:center;padding:10px 0}
     body.ui-side.an-min #asideNav .an-brand{justify-content:center;padding:2px 0 10px}
@@ -221,6 +272,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   #asideNav .an-foot .update-btn{font-size:11px;padding:5px 8px;border-radius:7px}
   #asideNav .an-back{margin-top:8px;width:100%;border:1px solid #3d7a63;background:transparent;color:#e8f5ee;border-radius:9px;padding:8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
   #asideNav .an-back:hover{background:#17503d}
+  #anTip{display:none;position:fixed;z-index:100001;background:#0f172a;color:#fff;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:7px;box-shadow:0 6px 18px rgba(15,23,42,.3);pointer-events:none;white-space:nowrap}
   .lf-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
   .lf-bar .search-input{flex:1 1 240px;min-width:200px}
   .search-row{flex-wrap:wrap}
@@ -1073,7 +1125,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       </div>
       <button class="modal-close" onclick="document.getElementById('nobelAnaliziModal').style.display='none'">✕</button>
     </div>
-    <div style="padding:16px 20px;background:#fef2f2;border-bottom:1px solid #fecaca;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+    <div class="an-statbar" style="padding:16px 20px;background:#fef2f2;border-bottom:1px solid #fecaca;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
       <div id="analizOzetKart" style="display:flex;gap:16px;flex-wrap:wrap"></div>
       <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
         <button id="exportAnalizFilteredBtn" class="btn-sec" style="background:#fff;color:#991b1b;border-color:#fca5a5">📥 Filtreli Excel</button>
@@ -6495,19 +6547,19 @@ function showAnalizModal(gKey) {
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="analizFilterDepartment">Departman / görev</label>
-          <select id="analizFilterDepartment" onchange="applyAnalizFilters()"><option value="">Tümü</option>${departmentOptions}</select>
+          <select id="analizFilterDepartment" onchange="applyAnalizFilters()"><option value="">Departman: Tümü</option>${departmentOptions}</select>
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="analizFilterStatus">Durum</label>
-          <select id="analizFilterStatus" onchange="applyAnalizFilters()"><option value="all">Tümü</option><option value="missing">Eksik</option><option value="excess">Fazla</option></select>
+          <select id="analizFilterStatus" onchange="applyAnalizFilters()"><option value="all">Durum: Tümü</option><option value="missing">Eksik</option><option value="excess">Fazla</option></select>
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="analizFilterIssue">Sorun tipi</label>
-          <select id="analizFilterIssue" onchange="applyAnalizFilters()"><option value="all">Tümü</option><option value="missingStation">Eksik istasyon / kayıt yok</option><option value="overlap">Çakışan saat</option><option value="missingHour">Eksik saat</option><option value="excessHour">Fazla saat</option></select>
+          <select id="analizFilterIssue" onchange="applyAnalizFilters()"><option value="all">Sorun tipi: Tümü</option><option value="missingStation">Eksik istasyon / kayıt yok</option><option value="overlap">Çakışan saat</option><option value="missingHour">Eksik saat</option><option value="excessHour">Fazla saat</option></select>
         </div>
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="analizFilterMinOverlap">Min. çakışma</label>
-          <input id="analizFilterMinOverlap" type="number" min="0" step="0.25" oninput="applyAnalizFilters()" placeholder="0">
+          <input id="analizFilterMinOverlap" type="number" min="0" step="0.25" oninput="applyAnalizFilters()" placeholder="Min. çakışma (sa)" title="Minimum çakışma (saat)">
         </div>
         <div class="bosluk-filter">
           <span class="bosluk-filter-label">Görünüm</span>
@@ -6519,8 +6571,8 @@ function showAnalizModal(gKey) {
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="analizSort">Sıralama</label>
           <select id="analizSort" onchange="applyAnalizFilters()">
-            <option value="desc">Sorun büyüklüğü: büyükten küçüğe</option>
-            <option value="asc">Sorun büyüklüğü: küçükten büyüğe</option>
+            <option value="desc">Sırala: büyükten küçüğe</option>
+            <option value="asc">Sırala: küçükten büyüğe</option>
           </select>
         </div>
         <button id="analizClearBtn" class="btn-sec bosluk-clear" type="button" onclick="clearAnalizFilters()">Filtreleri temizle</button>
@@ -7429,6 +7481,44 @@ function ashiUiAyarla(mod) {
   if (!yan) AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) o.style.removeProperty('left'); });
   ashiNavSenk();
 }
+(function anTipKur(){
+  let tip=null;
+  const gizle=()=>{ if(tip) tip.style.display='none'; };
+  document.addEventListener('mouseover',e=>{
+    const t=e.target.closest&&e.target.closest('#asideNav .an-it');
+    if(!t||!document.body.classList.contains('an-min')||!document.body.classList.contains('ui-side')){ gizle(); return; }
+    const x=t.querySelector('.an-tx'); const txt=((x?x.textContent:t.textContent)||'').trim(); if(!txt){ gizle(); return; }
+    if(!tip){ tip=document.createElement('div'); tip.id='anTip'; document.body.appendChild(tip); }
+    tip.textContent=txt; tip.style.display='block';
+    const r=t.getBoundingClientRect();
+    tip.style.left=(r.right+8)+'px'; tip.style.top=(r.top+r.height/2-tip.offsetHeight/2)+'px';
+  });
+  document.addEventListener('mouseout',e=>{ if(e.target.closest&&e.target.closest('#asideNav .an-it')) gizle(); });
+  document.addEventListener('click',gizle,true);
+})();
+(function anTekAnaliz(){
+  const ids=AN_OVERLAYS;
+  const mo=new MutationObserver(ms=>{
+    if(!document.body.classList.contains('ui-side')) return;
+    ms.forEach(m=>{ const o=m.target; if(o.style.display!=='none'&&o.style.display!==''){ ids.forEach(id=>{ if(id!==o.id){ const x=document.getElementById(id); if(x&&x.style.display!=='none'&&x.style.display!=='') x.style.display='none'; } }); setTimeout(()=>{ try{ ashiNavSenk(); }catch(e){} },30); } });
+  });
+  ids.forEach(id=>{ const o=document.getElementById(id); if(o) mo.observe(o,{attributes:true,attributeFilter:['style']}); });
+})();
+(function anStickyOlc(){
+  const set=(n,el,extra)=>{ if(el&&el.offsetHeight) document.documentElement.style.setProperty(n,(el.offsetHeight+(extra||0))+'px'); };
+  const olc=()=>{
+    const q=s=>document.querySelector(s);
+    set('--ip-f',q('.istasyon-personel-main-box>.istasyon-personel-filters'));
+    const t=q('.istasyon-personel-main-box>.istasyon-personel-view-tabs'), m=q('.istasyon-personel-main-box>.istasyon-personel-summary');
+    const h=Math.max(t&&t.offsetHeight||0,m&&m.offsetHeight||0); if(h) document.documentElement.style.setProperty('--ip-t',h+'px');
+    set('--ip-k',q('#istasyonPersonelKontrol>div:first-child'));
+    set('--sp-h',q('#specialListToolbar'));
+  };
+  const ro=typeof ResizeObserver==='function'?new ResizeObserver(olc):null;
+  const kur=()=>{ ['.istasyon-personel-main-box>.istasyon-personel-filters','.istasyon-personel-main-box>.istasyon-personel-view-tabs','.istasyon-personel-main-box>.istasyon-personel-summary','#istasyonPersonelKontrol>div:first-child','#specialListToolbar'].forEach(sel=>{const e=document.querySelector(sel); if(e&&ro) ro.observe(e);}); olc(); };
+  window.addEventListener('resize',olc);
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',kur); else kur();
+})();
 function anMinToggle(force) {
   const min = typeof force === 'boolean' ? force : !document.body.classList.contains('an-min');
   document.body.classList.toggle('an-min', min);
