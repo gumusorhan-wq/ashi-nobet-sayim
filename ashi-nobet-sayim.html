@@ -194,6 +194,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .istasyon-personel-main-section,body.ui-side .istasyon-personel-main-box,body.ui-side #istasyonPersonelKontrol,body.ui-side #raporContent{min-width:0;max-width:100%;box-sizing:border-box}
     body.ui-side #krTablo{max-width:100%;overflow-x:auto}
     /* analizler: açılır pencere yerine ana ekranda sayfa olarak */
+    body.ui-side.an-ov{overflow:hidden!important}
+    body.ui-side.an-ov #raporContent,body.ui-side.an-ov #uploadSection{display:none!important}
     body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{left:var(--an-w);z-index:800;background:#f3f6f4;padding:0 18px 14px;top:62px;bottom:0;overflow:hidden}
     body.ui-side #nobelAnaliziModal>.modal-box,body.ui-side #cokluModal>.modal-box,body.ui-side #boslukModal>.modal-box,body.ui-side #surucuDuzenModal>.modal-box,body.ui-side #tumPersonelDuzenModal>.modal-box,body.ui-side #cokluTumPersonelModal>.modal-box,body.ui-side #uygunPersonelModal>.modal-box{width:100%!important;max-width:none!important;margin:0}
     body.ui-side #nobelAnaliziModal>.modal-box,body.ui-side #cokluModal>.modal-box,body.ui-side #boslukModal>.modal-box,body.ui-side #surucuDuzenModal>.modal-box,body.ui-side #tumPersonelDuzenModal>.modal-box,body.ui-side #cokluTumPersonelModal>.modal-box,body.ui-side #uygunPersonelModal>.modal-box{height:100%;max-height:none;display:flex;flex-direction:column;box-sizing:border-box}
@@ -1303,8 +1305,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
         <div class="bosluk-filter">
           <label class="bosluk-filter-label" for="boslukSort">Sıralama</label>
           <select id="boslukSort" onchange="applyBoslukSort()">
-            <option value="desc">Boşluk: büyükten küçüğe</option>
             <option value="asc">Boşluk: küçükten büyüğe</option>
+            <option value="desc">Boşluk: büyükten küçüğe</option>
           </select>
         </div>
         <button id="boslukClearBtn" class="btn-sec bosluk-clear" type="button">Filtreleri temizle</button>
@@ -1458,7 +1460,7 @@ let currentPage  = 1;
 let reportMonthInfo = null;
 let currentSourceFileName = '';
 let boslukDataCache = null;
-let boslukUIState = {view:'personel',sort:'desc'};
+let boslukUIState = {view:'personel',sort:'asc'};
 let surucuDuzenDataCache = null;
 let tumPersonelDuzenDataCache = null;
 const BOSLUK_ESIK_GUN = 5;
@@ -3965,9 +3967,9 @@ function bindBoslukControls(data) {
     if (station) station.value = '';
     if (minDays) minDays.value = BOSLUK_ESIK_GUN;
     const sort = document.getElementById('boslukSort');
-    if (sort) sort.value = 'desc';
+    if (sort) sort.value = 'asc';
     boslukUIState.view='personel';
-    boslukUIState.sort='desc';
+    boslukUIState.sort='asc';
     renderBoslukModal();
   };
   if (personBtn) personBtn.classList.toggle('active', boslukUIState.view === 'personel');
@@ -7401,7 +7403,7 @@ function resetPage() {
   document.getElementById('statsGrid').innerHTML='';
   _analizCache = null;
   boslukDataCache = null;
-  boslukUIState = {view:'personel',sort:'desc'};
+  boslukUIState = {view:'personel',sort:'asc'};
   surucuDuzenDataCache = null;
   reportMonthInfo = null;
   currentSourceFileName = '';
@@ -7688,6 +7690,12 @@ function ashiUiAyarla(mod) {
     ms.forEach(m=>{ const o=m.target; if(o.style.display!=='none'&&o.style.display!==''){ ids.forEach(id=>{ if(id!==o.id){ const x=document.getElementById(id); if(x&&x.style.display!=='none'&&x.style.display!=='') x.style.display='none'; } }); setTimeout(()=>{ try{ ashiNavSenk(); }catch(e){} },30); } });
   });
   ids.forEach(id=>{ const o=document.getElementById(id); if(o) mo.observe(o,{attributes:true,attributeFilter:['style']}); });
+})();
+(function anOvKilit(){
+  const upd=()=>{ const ac=AN_OVERLAYS.some(id=>{ const x=document.getElementById(id); return x&&x.style.display!=='none'&&x.style.display!==''&&getComputedStyle(x).display!=='none'; }); document.body.classList.toggle('an-ov',ac); };
+  const mo=new MutationObserver(upd);
+  const kur=()=>{ AN_OVERLAYS.forEach(id=>{ const o=document.getElementById(id); if(o) mo.observe(o,{attributes:true,attributeFilter:['style','class']}); }); upd(); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',kur); else kur();
 })();
 (function anStickyOlc(){
   const set=(n,el,extra)=>{ if(el&&el.offsetHeight) document.documentElement.style.setProperty(n,(el.offsetHeight+(extra||0))+'px'); };
