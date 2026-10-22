@@ -151,7 +151,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .kr-table td.kpos{color:#047857;font-weight:700}.kr-table td.kneg{color:#b91c1c;font-weight:700}.kr-table td.kred{background:#ffedd5;font-weight:700;color:#9a3412}
   .kr-table tbody tr:hover{background:#fffbeb}
   .kr-warn{margin-top:6px;padding:6px 10px;border-radius:8px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e;font-size:12px}
-  #krPop{display:none;position:absolute;left:0;top:44px;z-index:50;width:330px;max-height:420px;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:14px;box-shadow:0 14px 36px rgba(15,23,42,.25);padding:12px}
+  #krPop{display:none;position:absolute;left:0;top:44px;z-index:50;width:330px;max-height:min(420px,calc(100vh - 150px));overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:14px;box-shadow:0 14px 36px rgba(15,23,42,.25);padding:12px}
   .kr-pop-head{display:flex;justify-content:space-between;font-size:12px;color:#0f766e;margin-bottom:8px}.kr-pop-head span{color:#334155;font-weight:700}
   .kr-yil{border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;padding:8px;margin-bottom:8px}
   .kr-yil-head{display:flex;align-items:center;justify-content:space-between}.kr-yil-t{cursor:pointer;font-size:14px}.kr-yil-t small{color:#64748b;margin-left:4px}
@@ -409,7 +409,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .ist-pk-chip{cursor:pointer;background:#f1f5f9;color:#334155;border:1px solid transparent;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;user-select:none}
   .ist-pk-chip.part{border-color:#0f766e;background:#f0fdfa}
   .ist-pk-chip.full{background:#0f766e;color:#fff}
-  .ist-pk-list{overflow:auto;border-top:1px solid #e2e8f0;padding-top:2px;min-height:80px;flex:1}
+  .ist-pk-list{overflow:auto;border-top:1px solid #e2e8f0;padding-top:2px;min-height:80px;flex:1 1 auto}
+  .ist-pk-pop>*{flex-shrink:0}.ist-pk-pop>.ist-pk-list{flex-shrink:1;min-height:0}
   .ist-pk-row{display:flex;align-items:center;gap:6px;padding:1px 6px;margin:0;min-height:0;line-height:1.15;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:6px;text-transform:none;letter-spacing:0}
   .ist-pk-row input{margin:0;width:14px;height:14px;flex:none}
   .ist-pk-row:hover{background:#f1f5f9}
@@ -609,7 +610,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .arc-empty,.arc-empty-row{padding:22px 10px;text-align:center;color:#64748b;font-size:12px}
   .arc-note{margin-top:12px;padding:9px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;color:#78350f;font-size:11px;line-height:1.5}
   .arc-modal{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:10000;display:none;align-items:center;justify-content:center;padding:16px}
-  .arc-modal-box{background:#fff;border-radius:14px;max-width:460px;width:100%;padding:20px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  .arc-modal-box{background:#fff;border-radius:14px;max-width:460px;width:100%;max-height:calc(100vh - 32px);overflow:auto;padding:20px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
   .arc-modal-title{font-weight:900;color:#1e3a5f;font-size:16px}
   .arc-modal-sub{margin-top:4px;color:#64748b;font-size:12px;line-height:1.45}
   .arc-slot-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
@@ -2878,12 +2879,13 @@ function ashiIstUyarLC(q, text) {
       wrap.classList.add('open');
       renderPop();
       const r = btn.getBoundingClientRect();
-      pop.style.display = 'block';
+      pop.style.display = 'flex';
       const w = Math.min(380, window.innerWidth - 16);
       pop.style.width = w + 'px';
       pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
-      pop.style.top = (r.bottom + 4) + 'px';
-      pop.style.maxHeight = Math.max(220, window.innerHeight - r.bottom - 16) + 'px';
+      const alt = window.innerHeight - r.bottom - 16, ust = r.top - 16;
+      if (alt < 260 && ust > alt) { pop.style.top = 'auto'; pop.style.bottom = (window.innerHeight - r.top + 4) + 'px'; pop.style.maxHeight = Math.max(160, ust) + 'px'; }
+      else { pop.style.bottom = 'auto'; pop.style.top = (r.bottom + 4) + 'px'; pop.style.maxHeight = Math.max(160, alt) + 'px'; }
     };
     Object.defineProperty(sel, 'value', {
       configurable: true,
