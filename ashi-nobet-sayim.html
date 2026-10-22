@@ -176,6 +176,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .report-header .header-actions{display:none!important}
     body.ui-side{padding-top:64px}
     body.ui-side .table-wrap{overflow:clip}
+    body.ui-side .tbl{min-width:0}
+    body.ui-side .tbl th{white-space:normal}
     body.ui-side::before{content:'';position:fixed;top:0;left:var(--an-w);right:0;height:62px;background:var(--gray);z-index:840;pointer-events:none}
     body.ui-side #raporContent .search-row,body.ui-side #raporContent .lf-bar{position:sticky;top:62px;z-index:30;background:var(--gray);margin:0;padding:6px 0;min-height:52px;box-sizing:border-box}
     body.ui-side #raporContent .tbl thead th{position:sticky;top:114px;z-index:20}
@@ -716,6 +718,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-summary-table tr.station-summary-row td{background:#eff6ff;color:#1e3a5f;font-weight:900;text-align:left;border-top:2px solid #bfdbfe}
 
     .ashi-fb-btn{display:none}
+  @media screen and (min-width:641px) and (max-width:1100px){body.ui-side #raporContent .tbl td,body.ui-side #raporContent .tbl th{padding:5px 4px!important;font-size:11px!important}}
   @media screen and (max-width:1279px){
     body.ui-side #kilavuzSection{max-width:100%;overflow-x:hidden}
     body.ui-side #kilavuzSection *{max-width:100%;box-sizing:border-box;overflow-wrap:break-word}
@@ -760,7 +763,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .ashi-fb-hide.ashi-fb-ac{position:static!important;margin-top:0}
   }
   /* ===== Kompakt tablo (yalnız tablet/telefon; bilgisayarda değişiklik yok) ===== */
-  @media screen and (max-width:1279px){
+  @media screen and (max-width:1439px){
     body.ui-side .tbl td,body.ui-side .tbl th,body.ui-side .istasyon-personel-summary-table td,body.ui-side .istasyon-personel-summary-table th{padding:6px 8px!important;font-size:12px!important}
     body.ui-side td.ashi-ist{min-width:0;font-size:11.5px!important;line-height:1.25!important;white-space:normal}
   }
@@ -7916,7 +7919,7 @@ function ashiNavSenk() {
   function isle(t){
     const th=[...t.querySelectorAll('thead tr:last-child th')].map(x=>x.textContent.trim());
     t.classList.add('ashi-kart');
-    const dar=window.innerWidth<1280;
+    const dar=window.innerWidth<1440;
     t.querySelectorAll('tbody tr').forEach(tr=>{
       [...tr.children].forEach((td,i)=>{
         if(td.tagName!=='TD') return;
