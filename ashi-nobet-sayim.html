@@ -165,6 +165,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 
   /* ===== Yeni görünüm (sol menü) — isteğe bağlı; klasik görünüm bozulmaz ===== */
   #asideNav{display:none}
+  .an-dl{display:none}
   .ui-toggle-top{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
   .ui-toggle-top:hover{background:rgba(255,255,255,.22)}
   @media(min-width:1000px){
@@ -173,6 +174,11 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side #asideNav{display:flex;position:fixed;left:0;top:0;bottom:0;width:var(--an-w);z-index:900;background:#0f3d2e;color:#d1e7dd;flex-direction:column;padding:14px 10px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;font-family:'IBM Plex Sans',sans-serif}
     body.ui-side .gorev-tabs,body.ui-side .gorev-shortcut-hint,body.ui-side .topbar{display:none!important}
     body.ui-side .report-header .header-actions{display:none!important}
+    body.ui-side{padding-top:64px}
+    body.ui-side .report-header{position:fixed;top:8px;left:calc(var(--an-w) + 18px);right:18px;width:auto;z-index:850;margin:0}
+    body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{top:62px}
+    body.ui-side .an-dl{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex:none;border:0;border-radius:9px;background:#0f4c35;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:8px 16px;cursor:pointer;white-space:nowrap}
+    body.ui-side .an-dl:hover{background:#166534}
     body.ui-side .upload-section{margin-top:24px}
     /* üst beyaz başlık: tek satır */
     body.ui-side .report-header{display:flex;align-items:center;gap:14px;padding:9px 18px;min-height:0}
@@ -215,6 +221,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   #asideNav .an-foot .update-btn{font-size:11px;padding:5px 8px;border-radius:7px}
   #asideNav .an-back{margin-top:8px;width:100%;border:1px solid #3d7a63;background:transparent;color:#e8f5ee;border-radius:9px;padding:8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
   #asideNav .an-back:hover{background:#17503d}
+  .lf-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+  .lf-bar .search-input{flex:1 1 240px;min-width:200px}
+  .search-row{flex-wrap:wrap}
+  .lf-sel{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:#fff;color:#334155;max-width:230px}
+  .lf-sel.on{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e;font-weight:600}
+  .lf-clr{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;font:inherit;font-size:12.5px;font-weight:700;color:#334155;cursor:pointer}
+  .lf-cnt{font-size:12px;color:var(--muted)}
   .ist-pk-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:600;color:#334155;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ist-pk-btn.on,.ist-pk.open .ist-pk-btn{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e}
   .ist-pk-pop{position:fixed;z-index:100000;background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.22);padding:10px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
@@ -640,6 +653,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
         <div style="font-weight:700;font-size:16px" id="reportTitle">Rapor</div>
         <div class="report-subtitle" id="reportSubtitle"></div>
       </div>
+      <button type="button" class="an-dl" id="anDl" onclick="anIndir()" title="Bulunduğunuz sayfayı Excel olarak indir">⬇ Excel indir</button>
       <div class="header-actions">
         <div class="control-group">
           <div class="control-group-title">Analiz ve kontroller</div>
@@ -895,6 +909,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <!-- Search -->
     <div class="search-row">
       <input class="search-input" id="searchInput" type="text" placeholder="İstasyon, ad, soyad, TC, branş ile ara..." oninput="filterTable()">
+      <select class="lf-sel" id="lfListeIst" onchange="filterTable()"><option value="">Tüm istasyonlar</option></select>
+      <select class="lf-sel" id="lfListeBrans" onchange="filterTable()"><option value="">Tüm branşlar</option></select>
+      <select class="lf-sel" id="lfListeDurum" onchange="filterTable()"><option value="">Tüm kayıtlar</option><option value="coklu">Farklı istasyonda nöbet tutan</option><option value="muaf">Muafiyetli</option><option value="nd">Mesai / diğer kaydı olan</option><option value="sifir">Nöbeti olmayan (0 gün)</option></select>
+      <button type="button" class="lf-clr" onclick="lfTemizle('liste')">Temizle</button>
       <span style="font-size:12px;color:var(--muted)" id="searchCount"></span>
     </div>
 
@@ -925,6 +943,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 
     <!-- PERSONEL DETAY VIEW (istasyon gruplu) -->
     <div id="viewPersonelDetay" style="display:none">
+      <div class="lf-bar">
+        <input class="search-input" id="lfPerQ" type="search" placeholder="Personel veya istasyon ara…" oninput="lfGec('personel')">
+        <select class="lf-sel" id="lfPerIst" onchange="renderPersonelDetay()"><option value="">Tüm istasyonlar</option></select>
+        <select class="lf-sel" id="lfPerBrans" onchange="renderPersonelDetay()"><option value="">Tüm branşlar</option></select>
+        <button type="button" class="lf-clr" onclick="lfTemizle('personel')">Temizle</button>
+        <span class="lf-cnt" id="lfPerCnt"></span>
+      </div>
       <div class="table-wrap">
         <table class="tbl" id="tblPersonelDetay">
           <thead><tr>
@@ -943,6 +968,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 
     <!-- İSTASYON ÖZET VIEW -->
     <div id="viewIstasyonOzet" style="display:none">
+      <div class="lf-bar">
+        <input class="search-input" id="lfOzQ" type="search" placeholder="İstasyon ara…" oninput="lfGec('ozet')">
+        <select class="lf-sel" id="lfOzBrans" onchange="renderIstasyonOzet()"><option value="">Tüm branşlar</option></select>
+        <select class="lf-sel" id="lfOzKap" onchange="renderIstasyonOzet()"><option value="">Tüm istasyonlar</option><option value="tam">Ay tam kapsanan</option><option value="eksik">Ay tam kapsanmayan</option></select>
+        <button type="button" class="lf-clr" onclick="lfTemizle('ozet')">Temizle</button>
+        <span class="lf-cnt" id="lfOzCnt"></span>
+      </div>
       <div class="table-wrap">
         <table class="tbl tbl-ist" id="tblIstasyonOzet">
           <thead><tr>
@@ -4859,7 +4891,21 @@ function buildIstasyonData(gorev) {
 // Resim 1: İstasyon gruplu personel detay listesi
 function renderPersonelDetay() {
   const ayGun = getAyGunSayisi();
-  const istGroups = buildIstasyonData(activeGorev);
+  lfSecenek('personel');
+  const fq = lfNorm(lfEl('lfPerQ').value).trim(), fi = lfEl('lfPerIst').value, fb = lfEl('lfPerBrans').value;
+  const tumGrup = buildIstasyonData(activeGorev);
+  let toplamP = 0, gorunenP = 0;
+  tumGrup.forEach(i => toplamP += i.personeller.length);
+  const istGroups = tumGrup.filter(i => !fi || i.ist === fi).map(i => {
+    const istEsles = fq && lfNorm(i.ist).includes(fq);
+    const pl = i.personeller.filter(p =>
+      (!fb || (p.kadro_brans||'').trim() === fb) &&
+      (!fq || istEsles || lfNorm(`${p.ad||''} ${p.soyad||''}`).includes(fq) || String(p.tc||'').includes(fq)));
+    return Object.assign({}, i, { personeller: pl });
+  }).filter(i => i.personeller.length);
+  istGroups.forEach(i => gorunenP += i.personeller.length);
+  lfEl('lfPerCnt').textContent = (fq||fi||fb) ? `${gorunenP} / ${toplamP} personel · ${istGroups.length} istasyon` : `${toplamP} personel`;
+  lfIsaret();
   const tbody = document.getElementById('tbodyPersonelDetay');
   let html = '';
   istGroups.forEach(ist => {
@@ -4898,7 +4944,15 @@ function renderPersonelDetay() {
 // Resim 2: İstasyon özet tablosu
 function renderIstasyonOzet() {
   const ayGun = getAyGunSayisi();
-  const istGroups = buildIstasyonData(activeGorev);
+  lfSecenek('ozet');
+  const oq = lfNorm(lfEl('lfOzQ').value).trim(), ob = lfEl('lfOzBrans').value, ok = lfEl('lfOzKap').value;
+  const tumOzet = buildIstasyonData(activeGorev);
+  const istGroups = tumOzet.filter(i =>
+    (!oq || lfNorm(i.ist).includes(oq)) &&
+    (!ob || i.personeller.some(p => (p.kadro_brans||'').trim() === ob)) &&
+    (!ok || (ok === 'tam' ? i.gercekGun >= ayGun : i.gercekGun < ayGun)));
+  lfEl('lfOzCnt').textContent = (oq||ob||ok) ? `${istGroups.length} / ${tumOzet.length} istasyon` : `${tumOzet.length} istasyon`;
+  lfIsaret();
   const tbody = document.getElementById('tbodyIstasyonOzet');
   let html = '';
   if (!istGroups.length) {
@@ -4952,18 +5006,55 @@ function renderIstasyonOzet() {
 
 }
 
+function lfEl(id){return document.getElementById(id);}
+function lfOpts(id, vals, all){
+  const e=lfEl(id); if(!e) return; const cur=e.value;
+  e.innerHTML='<option value="">'+all+'</option>'+vals.map(v=>'<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>').join('');
+  e.value=vals.includes(cur)?cur:'';
+}
+const lfSort=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,'tr'));
+let _lfSig={};
+function lfSecenek(v){
+  const d=allData[activeGorev]||[];
+  const sig=activeGorev+'|'+d.length+'|'+(d[0]&&d[0].tc||'');
+  if(_lfSig[v]===sig) return; _lfSig[v]=sig;
+  if(v==='liste'){
+    lfOpts('lfListeIst',lfSort(d.map(r=>r.asilIst)),'Tüm istasyonlar');
+    lfOpts('lfListeBrans',lfSort(d.map(r=>(r.kadro_brans||'').trim())),'Tüm branşlar');
+  } else {
+    const g=buildIstasyonData(activeGorev);
+    const br=lfSort(g.flatMap(i=>i.personeller.map(p=>(p.kadro_brans||'').trim())));
+    if(v==='personel'){ lfOpts('lfPerIst',lfSort(g.map(i=>i.ist)),'Tüm istasyonlar'); lfOpts('lfPerBrans',br,'Tüm branşlar'); }
+    else lfOpts('lfOzBrans',br,'Tüm branşlar');
+  }
+}
+function lfIsaret(){ document.querySelectorAll('.lf-sel').forEach(e=>e.classList.toggle('on',!!e.value)); }
+let _lfT=null;
+function lfGec(v){ clearTimeout(_lfT); _lfT=setTimeout(()=>{ if(v==='personel') renderPersonelDetay(); else renderIstasyonOzet(); },150); }
+function lfTemizle(v){
+  const ids={liste:['searchInput','lfListeIst','lfListeBrans','lfListeDurum'],personel:['lfPerQ','lfPerIst','lfPerBrans'],ozet:['lfOzQ','lfOzBrans','lfOzKap']}[v];
+  ids.forEach(i=>{const e=lfEl(i); if(e) e.value='';});
+  if(v==='liste') filterTable(); else if(v==='personel') renderPersonelDetay(); else renderIstasyonOzet();
+}
+const lfNorm=t=>String(t||'').toLocaleLowerCase('tr');
 function filterTable() {
-  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  lfSecenek('liste');
+  const q = lfNorm(lfEl('searchInput').value).trim();
+  const ist = lfEl('lfListeIst').value, br = lfEl('lfListeBrans').value, du = lfEl('lfListeDurum').value;
   const data = allData[activeGorev];
-  filteredRows = q ? data.filter(r =>
-    r.asilIst.toLowerCase().includes(q) ||
-    r.ad.toLowerCase().includes(q) ||
-    r.soyad.toLowerCase().includes(q) ||
-    r.tc.includes(q) ||
-    (r.kadro_brans||'').toLowerCase().includes(q)
-  ) : [...data];
-  document.getElementById('searchCount').textContent =
-    q ? `${filteredRows.length} / ${data.length} sonuç` : `${data.length} kayıt`;
+  const nd = du==='muaf'||du==='nd' ? ashiNobetDisiOzet() : null;
+  filteredRows = data.filter(r => {
+    if (ist && r.asilIst !== ist) return false;
+    if (br && (r.kadro_brans||'').trim() !== br) return false;
+    if (du==='coklu' && !r.coklu) return false;
+    if (du==='sifir' && r.toplamSaat>0) return false;
+    if (nd) { const x = nd[String(r.tc || `${r.ad}|${r.soyad}`).trim()] || {}; if (du==='muaf' && !x.muaf) return false; if (du==='nd' && !(x.mesai||x.diger)) return false; }
+    if (!q) return true;
+    return lfNorm(r.asilIst).includes(q) || lfNorm(r.ad).includes(q) || lfNorm(r.soyad).includes(q) || String(r.tc).includes(q) || lfNorm(r.kadro_brans).includes(q);
+  });
+  const aktif = q||ist||br||du;
+  lfEl('searchCount').textContent = aktif ? `${filteredRows.length} / ${data.length} sonuç` : `${data.length} kayıt`;
+  lfIsaret();
   currentPage = 1;
   renderTable();
 }
@@ -7343,6 +7434,21 @@ function anMinToggle(force) {
   document.body.classList.toggle('an-min', min);
   try { localStorage.setItem('ashi_ui_min', min ? '1' : '0'); } catch (e) {}
   const b = document.getElementById('anMinBtn'); if (b) b.textContent = min ? '»' : '«';
+}
+function anIndir() {
+  const ov = AN_OVERLAYS.map(id => document.getElementById(id)).find(o => o && o.style.display !== 'none' && o.style.display !== '');
+  if (ov) {
+    const b = [...ov.querySelectorAll('button')].find(x => /excel/i.test(x.textContent) && !x.disabled);
+    if (b) { b.click(); return; }
+    alert('Bu analiz sayfasında Excel çıktısı bulunmuyor.'); return;
+  }
+  if (typeof XLSX === 'undefined') { alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
+  try {
+    if (activeGorev === 'istasyon') {
+      if (document.getElementById('istasyonPersonelKontrol')?.style.display === 'block') exportKontrolRaporuExcel(); else exportIstasyonPersonelExcel();
+    } else if (['ef', 'ysp', 'sur'].includes(activeGorev)) exportExcelSingle();
+    else alert('Bu sayfa için Excel çıktısı yok. Arşiv için "Yedek Al (JSON)" kullanılabilir.');
+  } catch (e) { console.warn(e); alert('Excel indirilemedi: ' + e.message); }
 }
 function ashiNavRaporVar() { const r = document.getElementById('reportSection'); return !!r && r.style.display !== 'none'; }
 function anKapatAnaliz() { AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o && o.style.display !== 'none') o.style.display = 'none'; }); }
