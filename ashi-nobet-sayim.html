@@ -217,6 +217,18 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter.wide{flex:2 1 190px}
     body.ui-side .modal-overlay .modal-head{padding:10px 16px}
     body.ui-side .an-statbar{padding:8px 16px!important;gap:12px!important}
+    .an-more-btn{display:none}
+    body.ui-side .an-more-btn{display:inline-flex;align-items:center}
+    body.ui-side #analizToolbar:not(.an-more) .bosluk-filter:has(#analizFilterDepartment),body.ui-side #analizToolbar:not(.an-more) .bosluk-filter:has(#analizFilterMinOverlap),body.ui-side #analizToolbar:not(.an-more) .bosluk-filter:has(#analizSort),body.ui-side #analizToolbar:not(.an-more) .bosluk-filter-summary .btn-sec,body.ui-side #analizToolbar:not(.an-more) #analizColorSettings{display:none}
+    body.ui-side #analizToolbar .bosluk-filter-summary{flex:0 0 auto;order:20;font-size:12px;padding:0 2px;white-space:nowrap}
+    body.ui-side #analizToolbar.an-more .bosluk-filter-summary{flex:1 1 auto}
+    body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter{flex:1 1 130px}
+    body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter.wide{flex:1.4 1 170px}
+    body.ui-side .an-statbar{background:#fff!important;border-bottom:1px solid #e5e7eb!important}
+    body.ui-side .an-statbar #analizOzetKart{gap:18px!important;align-items:center}
+    body.ui-side .an-statbar #analizOzetKart>div{border:0!important;background:none!important;padding:0!important}
+    body.ui-side .an-statbar #analizOzetKart>div:first-child{border:2px solid #c4b5fd!important;border-radius:999px!important;padding:3px 14px!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div:first-child{font-size:16px!important}
     body.ui-side .an-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
     body.ui-side .an-bar>*{order:1;margin:0}
     body.ui-side .an-bar .bosluk-filter{flex:1 1 110px;min-width:0}
@@ -255,7 +267,6 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{background:#fff}
     body.ui-side .istasyon-personel-summary-table-wrap,body.ui-side #krTablo{overflow:visible!important}
     body.ui-side .istasyon-personel-summary-table th{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) - 6px);z-index:20}
-    body.ui-side .istasyon-personel-station-head{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) - 6px);z-index:15}
     body.ui-side .kr-table th{top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) - 6px)}
     body.ui-side #specialListToolbar{position:sticky;top:62px;z-index:30}
     body.ui-side #raporContent #tblSpecialList.tbl thead th{position:sticky;top:calc(62px + var(--sp-h,90px));z-index:20}
@@ -6611,7 +6622,8 @@ function showAnalizModal(gKey) {
             <option value="asc">Sırala: küçükten büyüğe</option>
           </select>
         </div>
-        <button id="analizClearBtn" class="btn-sec bosluk-clear" type="button" onclick="clearAnalizFilters()">Filtreleri temizle</button>
+        <button id="analizClearBtn" class="btn-sec bosluk-clear" type="button" onclick="clearAnalizFilters()" title="Filtreleri temizle">Temizle</button>
+        <button id="analizMoreBtn" class="btn-sec bosluk-clear an-more-btn" type="button" onclick="this.closest('#analizToolbar').classList.toggle('an-more')" title="Departman, min. çakışma, sıralama ve badge renkleri">Daha fazla ▾</button>
       </div>
       <div class="bosluk-filter-summary"><strong id="analizFilterCount"></strong><span>Eksik, fazla ve çakışan durumlar renkli etiketlerle ayrılır.</span><button type="button" class="btn-sec bosluk-clear" style="margin-left:auto" onclick="toggleAnalizColorSettings()">🎨 Badge renklerini ayarla</button></div>
       <div id="analizColorSettings" class="analiz-color-settings">
