@@ -141,6 +141,26 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .bosluk-toolbar{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
   .bosluk-filter-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
   .ist-pk{position:relative;display:inline-block;min-width:170px}
+
+  .kr-table{border-collapse:collapse;font-size:12px;width:max-content;min-width:100%}
+  .kr-table th{position:sticky;top:0;z-index:2;background:#f1f5f9;border:1px solid #94a3b8;padding:6px 6px;font-size:11px;line-height:1.2;text-align:center;color:#0f172a}
+  .kr-table th.ky{background:#ffff00}.kr-table th.kr{background:#ff6600;color:#fff}
+  .kr-table td{border:1px solid #e2e8f0;padding:4px 6px;white-space:nowrap}
+  .kr-table td.kn{text-align:right;font-variant-numeric:tabular-nums}
+  .kr-table td.kpos{color:#047857;font-weight:700}.kr-table td.kneg{color:#b91c1c;font-weight:700}.kr-table td.kred{background:#ffedd5;font-weight:700;color:#9a3412}
+  .kr-table tbody tr:hover{background:#fffbeb}
+  .kr-warn{margin-top:6px;padding:6px 10px;border-radius:8px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e;font-size:12px}
+  #krPop{display:none;position:absolute;left:0;top:44px;z-index:50;width:330px;max-height:420px;overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:14px;box-shadow:0 14px 36px rgba(15,23,42,.25);padding:12px}
+  .kr-pop-head{display:flex;justify-content:space-between;font-size:12px;color:#0f766e;margin-bottom:8px}.kr-pop-head span{color:#334155;font-weight:700}
+  .kr-yil{border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;padding:8px;margin-bottom:8px}
+  .kr-yil-head{display:flex;align-items:center;justify-content:space-between}.kr-yil-t{cursor:pointer;font-size:14px}.kr-yil-t small{color:#64748b;margin-left:4px}
+  .kr-yil-head button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;font:inherit;font-size:12px;font-weight:700;padding:3px 9px;cursor:pointer}
+  .kr-aylar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+  .kr-ay{border:1px solid #cbd5e1;border-radius:9px;background:#fff;font:inherit;font-size:13px;font-weight:700;padding:8px 0;cursor:pointer;color:#0f172a}
+  .kr-ay.off{opacity:.35;text-align:center;cursor:default}.kr-ay.cur{border-color:#0f766e;color:#0f766e}.kr-ay.sel{background:#0f766e;border-color:#0f766e;color:#fff}
+  .kr-legend{font-size:11.5px;color:#475569;margin:6px 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.kr-lg{display:inline-block;width:10px;height:10px;border-radius:3px;border:1px solid #0f766e}.kr-lg.sel{background:#0f766e}
+  .kr-tab{border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:5px 14px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;color:#334155}.kr-tab.on{background:#b45309;border-color:#b45309;color:#fff}
+  .kr-kapat{border:0;background:none;font:inherit;font-weight:700;color:#334155;cursor:pointer}
   .ist-pk-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:600;color:#334155;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ist-pk-btn.on,.ist-pk.open .ist-pk-btn{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e}
   .ist-pk-pop{position:fixed;z-index:100000;background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.22);padding:10px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
@@ -889,6 +909,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <button class="btn-sec" type="button" onclick="showOzelGunModal()" title="İdari tatil, yarım gün gibi özel günleri tanımla; Çalışma Saati otomatik güncellenir">📅 Özel Günler</button>
       <button class="btn-sec" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportIstasyonPersonelExcel()">📥 Excel'e Aktar</button>
       <button class="btn-sec" type="button" style="background:#a16207!important;color:#fff!important;border-color:#a16207!important" onclick="exportDokumCetveliExcel()">📋 Döküm Cetveli</button>
+      <button class="btn-sec" type="button" style="background:#b45309!important;color:#fff!important;border-color:#b45309!important" onclick="showKontrolRaporuModal()">📊 Kontrol Raporu</button>
     </div>
     <div id="istasyonPersonelSummary" class="istasyon-personel-summary"></div>
     <div class="istasyon-personel-view-tabs">
@@ -1076,6 +1097,22 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   </div>
 </div>
 <!-- BRANŞ KARTI PERSONEL LİSTESİ MODAL -->
+<div id="krModal" class="modal-overlay">
+  <div class="modal-box" style="max-width:1320px;width:97vw;display:flex;flex-direction:column;max-height:94vh">
+    <div class="modal-head" style="background:#b45309"><div><span style="color:#fff;font-weight:700;font-size:15px">📊 Kontrol Raporu</span><div style="color:rgba(255,255,255,.85);font-size:11px;margin-top:3px">Resmî Döküm Cetveli’nin sarı ve kırmızı sütunları · bir veya birden çok ay seçilebilir (toplam + aylık sayfalar)</div></div><button class="modal-close" onclick="closeKontrolRaporuModal()">✕</button></div>
+    <div style="padding:12px 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;position:relative;border-bottom:1px solid #e2e8f0">
+      <div style="position:relative">
+        <button type="button" id="krPickBtn" class="btn-sec" style="height:36px;min-width:170px;text-align:left" onclick="krPopAc()">📅 Ay seç…</button>
+        <div id="krPop"></div>
+      </div>
+      <input id="krAra" type="search" placeholder="Ad, TCKN veya birim ara…" oninput="krCiz()" style="height:36px;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;min-width:240px;flex:1;max-width:380px">
+      <button type="button" class="btn-sec" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important;height:36px" onclick="exportKontrolRaporuExcel()">📥 Excel’e Aktar</button>
+    </div>
+    <div style="padding:8px 16px 0;display:flex;gap:6px"><button type="button" class="kr-tab on" data-t="ozet" onclick="krSekmeSec('ozet')">Kişi bazlı kontrol</button><button type="button" class="kr-tab" data-t="ayici" onclick="krSekmeSec('ayici')">Ay içinde alınan izin/rapor</button></div>
+    <div id="krOzet" style="padding:8px 16px;font-size:12.5px;color:#334155"></div>
+    <div id="krTablo" style="overflow:auto;flex:1;min-height:200px;padding:0 16px 16px"></div>
+  </div>
+</div>
 <div id="ozelGunModal" class="modal-overlay">
   <div class="modal-box" style="max-width:640px">
     <div class="modal-head" style="background:#0f4c35"><div><span style="color:#fff;font-weight:700;font-size:15px">📅 Özel Günler</span><div style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px">Bayram, resmî tatil, idari tatil ve yarım gün tanımı · Çalışma Saati (kadro süresi) otomatik güncellenir</div></div><button class="modal-close" onclick="closeOzelGunModal()">✕</button></div>
@@ -1299,7 +1336,7 @@ let archiveIzinTarget = null;
 // Eski (tek kayıtlı) arşiv kayıtlarını yeni yapıya çevirir: {key, reportMonthInfo, savedAt, slots:{basi,sonu}, izin}
 function archiveUpgrade(rec) {
   if (!rec) return rec;
-  if (rec.slots) { if (rec.izin === undefined) rec.izin = null; return rec; }
+  if (rec.slots) { if (rec.izin === undefined) rec.izin = null; if (rec.izinBasi === undefined) rec.izinBasi = null; return rec; }
   const slots = {};
   if (rec.allData) {
     slots.sonu = {
@@ -1308,7 +1345,7 @@ function archiveUpgrade(rec) {
       globalTcIstCount: rec.globalTcIstCount, migrated: true
     };
   }
-  return {key: rec.key, reportMonthInfo: rec.reportMonthInfo, savedAt: rec.savedAt, slots, izin: null};
+  return {key: rec.key, reportMonthInfo: rec.reportMonthInfo, savedAt: rec.savedAt, slots, izin: null, izinBasi: null};
 }
 function archiveRecordPeople(rec) {
   return Math.max(0, ...['basi','sonu'].map(s => rec?.slots?.[s] ? archivePeopleCount(rec.slots[s]) : 0));
@@ -1437,8 +1474,9 @@ async function loadArchivedMonth(key, slot) {
     // Eski sürümlerde kaydedilmiş arşivlerde de saat/gün toplamları ay sınırına göre yeniden hesaplanır.
     try { recalculatePersonTotalsForReportMonth(); } catch (err) { console.warn('Toplamlar yeniden hesaplanamadı:', err); }
     currentSourceFileName = String(snapshot.sourceFileName || '');
-    izinRaporRecords = rec.izin?.records ? await ashiAlignIzin(archiveClone(rec.izin.records)) : [];
-    izinRaporFileName = rec.izin?.fileName || '';
+    const izK = useSlot === 'basi' ? (rec.izinBasi || rec.izin) : (rec.izin || rec.izinBasi);
+    izinRaporRecords = izK?.records ? await ashiAlignIzin(archiveClone(izK.records)) : [];
+    izinRaporFileName = izK?.fileName || '';
     updateIzinRaporButton();
     archiveActiveKey = rec.key; archiveActiveSlot = useSlot;
     archiveResetViewFilters();
@@ -1458,15 +1496,16 @@ async function deleteArchivedMonth(key, part) {
     const rec = await archiveGet(key);
     if (!rec) { renderArchivePanel(); return; }
     const label = archiveMonthLabel(rec.reportMonthInfo);
-    const what = part === 'izin' ? 'izin/muafiyet dosyasını' : (part ? `${ASHI_SLOT_LABELS[part]} Excel kaydını` : 'tüm arşiv kaydını (Ay Başı, Ay Sonu ve izin dosyası)');
+    const what = part === 'izin' ? 'Ay Sonu izin/muafiyet dosyasını' : part === 'izinBasi' ? 'Ay Başı izin/muafiyet dosyasını' : (part ? `${ASHI_SLOT_LABELS[part]} Excel kaydını` : 'tüm arşiv kaydını (Ay Başı, Ay Sonu ve izin dosyası)');
     if (!window.confirm(`${label} için ${what} silmek istediğinizden emin misiniz?\n\nBu işlem yalnızca yerel arşiv kaydını kaldırır ve geri alınamaz.`)) return;
     if (part === 'izin') rec.izin = null;
+    else if (part === 'izinBasi') rec.izinBasi = null;
     else if (part) delete rec.slots[part];
-    else { rec.slots = {}; rec.izin = null; }
-    if (!rec.slots.basi && !rec.slots.sonu && !rec.izin) await archiveDelete(key);
+    else { rec.slots = {}; rec.izin = null; rec.izinBasi = null; }
+    if (!rec.slots.basi && !rec.slots.sonu && !rec.izin && !rec.izinBasi) await archiveDelete(key);
     else await archivePut(rec);
     if (archiveActiveKey === key && (!part || part === archiveActiveSlot)) { archiveActiveKey = null; archiveActiveSlot = null; }
-    if (part === 'izin' && archiveKeyFromInfo(reportMonthInfo) === key) { izinRaporRecords = []; izinRaporFileName = ''; updateIzinRaporButton(); invalidateBoundaryDependentCaches(); }
+    if ((part === 'izin' || part === 'izinBasi') && archiveKeyFromInfo(reportMonthInfo) === key) { izinRaporRecords = []; izinRaporFileName = ''; updateIzinRaporButton(); invalidateBoundaryDependentCaches(); }
     renderArchivePanel();
     if (archiveKeyFromInfo(reportMonthInfo)) autoFillBoundaryFromArchive();
   } catch (err) {
@@ -1474,15 +1513,15 @@ async function deleteArchivedMonth(key, part) {
   }
 }
 function archiveSetYear(y) { archiveYearFilter = y; renderArchivePanel(); }
-function archivePickIzin(key) {
-  archiveIzinTarget = key;
+function archivePickIzin(key, slot) {
+  archiveIzinTarget = {key, slot};
   const input = document.getElementById('archiveIzinFileInput');
   if (input) input.click();
 }
 function archiveIzinInputChanged(input) {
   const file = input.files && input.files[0];
   const target = archiveIzinTarget; archiveIzinTarget = null;
-  if (file) handleIzinRaporFile(file, target).finally(() => { input.value = ''; });
+  if (file) handleIzinRaporFile(file, target && target.key, target && target.slot).finally(() => { input.value = ''; });
 }
 async function archiveExportBackup() {
   try {
@@ -1511,6 +1550,7 @@ function archiveImportBackup(file) {
         if (cur) {
           cur.slots = {...cur.slots, ...(r.slots || {})};
           if (r.izin) cur.izin = r.izin;
+          if (r.izinBasi) cur.izinBasi = r.izinBasi;
           cur.savedAt = r.savedAt || cur.savedAt;
           await archivePut(cur);
         } else await archivePut(r);
@@ -1539,8 +1579,10 @@ function archiveViewHtml(records) {
       const on = rec.key === archiveActiveKey && slot === archiveActiveSlot ? ' on' : '';
       return `<span class="arc-slot${on}"><button type="button" class="arc-slot-open" title="${escapeHtml(s.sourceFileName || 'Excel raporu')} · ${escapeHtml(archiveDateLabel(s.savedAt))}${s.anon ? ' · Drive\'dan (TC/ad yıldızlı)' : ''}" onclick="event.stopPropagation();loadArchivedMonth('${k}','${slot}')">${s.anon ? '🔒' : '✓'} ${escapeHtml(archiveShortDate(s.savedAt))}<small>· ${archivePeopleCount(s).toLocaleString('tr-TR')} kişi · ${archiveSlotTotals(s).saat.toLocaleString('tr-TR')} sa · ${Math.round(archiveSlotTotals(s).gun).toLocaleString('tr-TR')} gün</small></button><button type="button" class="arc-x" title="${ASHI_SLOT_LABELS[slot]} kaydını sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}','${slot}')">✕</button></span>`;
     };
-    const izin = rec.izin;
-    const izinCell = `${izin ? `<span class="arc-slot"><span class="arc-izin" title="${escapeHtml(izin.fileName || '')}">📄 ${(izin.records || []).length.toLocaleString('tr-TR')} kayıt</span><button type="button" class="arc-x" title="İzin dosyasını sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}','izin')">✕</button></span>` : '<span class="arc-miss">—</span>'}<button type="button" class="arc-mini" title="${izin ? 'İzin dosyasını değiştir' : 'İzin dosyası yükle'}" onclick="event.stopPropagation();archivePickIzin('${k}')">${izin ? '↻' : '＋ Yükle'}</button>`;
+    const izinHucre = (izin, part) => `${izin ? `<span class="arc-slot"><span class="arc-izin" title="${escapeHtml(izin.fileName || '')} · ${escapeHtml(archiveDateLabel(izin.savedAt))}${izin.anon ? ' · Drive\'dan (TC/ad yıldızlı)' : ''}">${izin.anon ? '🔒' : '📄'} ${(izin.records || []).length.toLocaleString('tr-TR')} kayıt</span><button type="button" class="arc-x" title="İzin dosyasını sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}','${part}')">✕</button></span>` : '<span class="arc-miss">—</span>'}<button type="button" class="arc-mini" title="${izin ? 'İzin dosyasını değiştir' : 'İzin dosyası yükle'}" onclick="event.stopPropagation();archivePickIzin('${k}','${part === 'izinBasi' ? 'basi' : 'sonu'}')">${izin ? '↻' : '＋ Yükle'}</button>`;
+    const yeniIzin = ashiAyIciIzin(rec);
+    const izinBasiCell = izinHucre(rec.izinBasi, 'izinBasi');
+    const izinSonuCell = izinHucre(rec.izin, 'izin') + (yeniIzin.var && yeniIzin.liste.length ? `<span class="arc-badge warn" style="margin-left:4px" title="Ay başı izin dosyasında olmayıp ay sonunda görülen ${yeniIzin.liste.length} kayıt (ay içinde alınan izin/rapor)">+${yeniIzin.liste.length} ay içi</span>` : '');
     let badge;
     if (hasB && hasS) badge = '<span class="arc-badge ok">Tam</span>';
     else if (hasS) badge = '<span class="arc-badge warn">Ay Başı yok</span>';
@@ -1550,7 +1592,7 @@ function archiveViewHtml(records) {
     return `<tr class="${act}" onclick="loadArchivedMonth('${k}')">
       <td class="arc-month">${escapeHtml(archiveMonthLabel(rec.reportMonthInfo))}</td>
       <td>${slotCell('basi')}</td><td>${slotCell('sonu')}</td>
-      <td>${izinCell}</td>
+      <td>${izinBasiCell}</td><td>${izinSonuCell}</td>
       <td class="arc-date">${escapeHtml(archiveDateLabel(rec.savedAt))}</td>
       <td>${badge}</td>
       ${ashiDrive.sahip() ? `<td>${ashiDrive.pubMap()[rec.key] === ashiDrive.imza(rec) ? '<span class="arc-badge ok" title="Drive ile aynı">☁ Güncel</span>' : '<span class="arc-badge warn" title="Drive\'a yayınlanmadı / değişti">⬆ Bekliyor</span>'}</td>` : ''}
@@ -1564,7 +1606,7 @@ function archiveViewHtml(records) {
     </div>
     ${driveHtml(records)}
     ${records.length ? `<div class="arc-years">${chip('all','Tümü')}${years.map(y => chip(y, y)).join('')}</div>
-    <div class="arc-wrap"><table class="arc-table"><thead><tr><th>Ay</th><th>Ay Başı</th><th>Ay Sonu</th><th>İzin / Muafiyet</th><th>Son Kayıt</th><th>Durum</th>${ashiDrive.sahip() ? '<th>Drive</th>' : ''}<th></th></tr></thead><tbody>${rows || '<tr><td colspan="${ashiDrive.sahip() ? 8 : 7}" class="arc-empty-row">Bu yılda kayıt yok.</td></tr>'}</tbody></table></div>`
+    <div class="arc-wrap"><table class="arc-table"><thead><tr><th>Ay</th><th>Ay Başı</th><th>Ay Sonu</th><th>İzin Ay Başı</th><th>İzin Ay Sonu</th><th>Son Kayıt</th><th>Durum</th>${ashiDrive.sahip() ? '<th>Drive</th>' : ''}<th></th></tr></thead><tbody>${rows || '<tr><td colspan="${ashiDrive.sahip() ? 9 : 8}" class="arc-empty-row">Bu yılda kayıt yok.</td></tr>'}</tbody></table></div>`
     : '<div class="arc-empty">Henüz kayıtlı rapor ayı yok. Bir nöbet Excel\'i yüklediğinizde Ay Başı veya Ay Sonu olarak buraya kaydedilir.</div>'}
     <div class="arc-note">⚠️ Kayıtlar yalnızca bu tarayıcıda tutulur; tarayıcı site verileri temizlenirse silinir. Düzenli olarak <strong>Yedek Al</strong> yapın. Her ay için bir <strong>Ay Başı</strong> ve bir <strong>Ay Sonu</strong> Excel'i ile bir izin/muafiyet dosyası saklanır; bir satıra tıklayınca Ay Sonu (yoksa Ay Başı) açılır. Önceki/sonraki ay sınır verisi buradan otomatik alınır.</div>
   </div>`;
@@ -1650,7 +1692,9 @@ const ashiDrive = (() => {
     for (const sl of ['basi','sonu']) if (p.slots?.[sl]) { const g = geriAc(p.slots[sl], id); delete g.anon; slots[sl] = g; }
     let izin = null;
     if (p.izin) { izin = {...p.izin, records:geriAc(p.izin.records || [], id)}; delete izin.anon; }
-    const out = {...p, slots, izin}; delete out.kimlik;
+    let izinBasi = null;
+    if (p.izinBasi) { izinBasi = {...p.izinBasi, records:geriAc(p.izinBasi.records || [], id)}; delete izinBasi.anon; }
+    const out = {...p, slots, izin, izinBasi}; delete out.kimlik;
     return {p:out, acildi:true, var:true};
   }
   const oto = () => LS.get('ashi_drive_oto') === '1';
@@ -1659,8 +1703,8 @@ const ashiDrive = (() => {
   const jget = (k, d) => { try { return JSON.parse(LS.get(k) || '') || d; } catch { return d; } };
   const syncMap = () => jget('ashi_drive_sync', {});
   const pubMap = () => jget('ashi_drive_pub', {});
-  const imza = rec => rec ? [rec.slots?.basi?.savedAt || '', rec.slots?.sonu?.savedAt || '', rec.izin?.savedAt || ''].join('|') : '';
-  const bekleyenler = records => (records || []).filter(r => r && (r.slots?.basi || r.slots?.sonu || r.izin) && pubMap()[r.key] !== imza(r)).map(r => r.key).sort();
+  const imza = rec => rec ? [rec.slots?.basi?.savedAt || '', rec.slots?.sonu?.savedAt || '', rec.izin?.savedAt || '', rec.izinBasi?.savedAt || ''].join('|') : '';
+  const bekleyenler = records => (records || []).filter(r => r && (r.slots?.basi || r.slots?.sonu || r.izin || r.izinBasi) && pubMap()[r.key] !== imza(r)).map(r => r.key).sort();
 
   async function anahtar(pw, salt) {
     const b = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
@@ -1844,12 +1888,13 @@ const ashiDrive = (() => {
   }
 
   function birlestir(local, remote, zorla) {
-    const out = local ? {...local, slots:{...(local.slots || {})}} : {key:remote.key, reportMonthInfo:remote.reportMonthInfo, savedAt:remote.savedAt, slots:{}, izin:null};
+    const out = local ? {...local, slots:{...(local.slots || {})}} : {key:remote.key, reportMonthInfo:remote.reportMonthInfo, savedAt:remote.savedAt, slots:{}, izin:null, izinBasi:null};
     ['basi','sonu'].forEach(sl => {
       const r = remote.slots?.[sl], l = out.slots[sl];
       if (r && (!l || String(r.savedAt || '') > String(l.savedAt || '') || (l.anon && !r.anon && String(r.savedAt || '') >= String(l.savedAt || '')) || (zorla && String(r.savedAt || '') >= String(l.savedAt || '') && !(r.anon && !l.anon)) || (ashiSlotEski(l) && !ashiSlotEski(r) && String(r.savedAt || '') >= String(l.savedAt || '') && !(r.anon && !l.anon)))) out.slots[sl] = r;
     });
     if (remote.izin && (!out.izin || String(remote.izin.savedAt || '') > String(out.izin.savedAt || '') || (out.izin.anon && !remote.izin.anon && String(remote.izin.savedAt || '') >= String(out.izin.savedAt || '')) || (zorla && String(remote.izin.savedAt || '') >= String(out.izin.savedAt || '') && !(remote.izin.anon && !out.izin.anon)))) out.izin = remote.izin;
+    if (remote.izinBasi && (!out.izinBasi || String(remote.izinBasi.savedAt || '') > String(out.izinBasi.savedAt || '') || (out.izinBasi.anon && !remote.izinBasi.anon && String(remote.izinBasi.savedAt || '') >= String(out.izinBasi.savedAt || '')) || (zorla && String(remote.izinBasi.savedAt || '') >= String(out.izinBasi.savedAt || '') && !(remote.izinBasi.anon && !out.izinBasi.anon)))) out.izinBasi = remote.izinBasi;
     if (!out.reportMonthInfo) out.reportMonthInfo = remote.reportMonthInfo;
     out.savedAt = [out.savedAt, remote.savedAt].filter(Boolean).sort().pop() || null;
     return out;
@@ -1866,7 +1911,7 @@ const ashiDrive = (() => {
       for (const f of L) {
         const yerel = await archiveGet(f.ym);
         const degisti = !sync[f.ym] || sync[f.ym].mod !== f.modifiedTime;
-        const yildizli = !!kp && !!yerel && (Object.values(yerel.slots || {}).some(sl => sl && sl.anon) || !!yerel.izin?.anon);
+        const yildizli = !!kp && !!yerel && (Object.values(yerel.slots || {}).some(sl => sl && sl.anon) || !!yerel.izin?.anon || !!yerel.izinBasi?.anon);
         if (Array.isArray(keys)) { if (keys.includes(f.ym)) is.push(f); }
         else if (f.ym === enGuncel && (!yerel || degisti || yildizli)) is.push(f);   // otomatik: en güncel ay
         else if (yerel && degisti) is.push(f);   // daha önce seçilip indirilmiş aylar Drive'da değişirse girişte otomatik güncellenir (seçilmemiş aylar gelmez)
@@ -1900,7 +1945,7 @@ const ashiDrive = (() => {
   async function yayinla(rec, pw, mevcut) {
     const slots = {}, id = {t:{}, n:{}};
     for (const sl of ['basi','sonu']) if (rec.slots?.[sl]) slots[sl] = await anonSlot(rec.slots[sl], pw, id);
-    const paket = {v:2, key:rec.key, reportMonthInfo:rec.reportMonthInfo, savedAt:rec.savedAt, slots, izin:rec.izin ? await anonIzin(rec.izin, pw, id) : null, yayin:new Date().toISOString()};
+    const paket = {v:2, key:rec.key, reportMonthInfo:rec.reportMonthInfo, savedAt:rec.savedAt, slots, izin:rec.izin ? await anonIzin(rec.izin, pw, id) : null, izinBasi:rec.izinBasi ? await anonIzin(rec.izinBasi, pw, id) : null, yayin:new Date().toISOString()};
     // Kimlik tablosu (gerçek TC/ad/soyad) YALNIZCA ayrı "kimlik parolası" ile şifrelenir; ekip parolası bunu açmaz.
     const kp = kimlikParola();
     if (kp && kp !== pw && (Object.keys(id.t).length || Object.keys(id.n).length)) paket.kimlik = b64(await sifrele(id, kp));
@@ -2004,7 +2049,7 @@ function driveSavePw() {
   driveSync(true);   // parola girilince en güncel ay kendiliğinden iner
 }
 function drivePublishAll() {
-  archiveGetAll().then(all => drivePublish(all.filter(r => r.slots?.basi || r.slots?.sonu || r.izin).map(r => r.key))).catch(err => driveSetMsg('Arşiv okunamadı: ' + err.message, 'err'));
+  archiveGetAll().then(all => drivePublish(all.filter(r => r.slots?.basi || r.slots?.sonu || r.izin || r.izinBasi).map(r => r.key))).catch(err => driveSetMsg('Arşiv okunamadı: ' + err.message, 'err'));
 }
 async function driveAdminLogin() {
   if (driveBusy) return;
@@ -2044,7 +2089,7 @@ async function driveChangePw() {
       const r = await ashiDrive.parolaDegistir({eski, yeni, kimEski, kimYeni}, m => driveSetMsg('🔑 ' + m, ''));
       driveSetMsg(`Parola değiştirildi: ${r.n} ay yeniden şifrelendi${r.atlanan ? `, ${r.atlanan} paket açılamadığı için atlandı` : ''}${r.kimSilinen ? `, ${r.kimSilinen} pakette eski kimlik parolası bilinmediği için kimlik tablosu silindi (↻ Hepsini yeniden yayınla ile eklenir)` : ''}. Diğer cihazlar yeni parolayı girmeli.`, 'ok');
     } else {
-      const all = (await archiveGetAll()).filter(x => (x.slots?.basi && !x.slots.basi.anon) || (x.slots?.sonu && !x.slots.sonu.anon) || (x.izin && !x.izin.anon));
+      const all = (await archiveGetAll()).filter(x => (x.slots?.basi && !x.slots.basi.anon) || (x.slots?.sonu && !x.slots.sonu.anon) || (x.izin && !x.izin.anon) || (x.izinBasi && !x.izinBasi.anon));
       if (!all.length) { driveSetMsg('Eski parola bilinmiyorsa bu cihazda ham verisi olan (kendi yüklediğiniz) ay bulunmalı; hiçbiri yok. Eski parolayı girin veya önce ayları bu cihaza yükleyin.', 'err'); return; }
       if (!window.confirm(`Eski parola kullanılmadan sıfırlanacak. Bu cihazdaki ${all.length} ay yeni parolayla Drive’a yeniden yayınlanacak; bu cihazda ham verisi olmayan aylar eski parolayla kalıp okunamayacak. Devam edilsin mi?`)) return;
       const r = await ashiDrive.parolaSifirla({yeni, kimYeni}, all, m => driveSetMsg('🔑 ' + m, ''));
@@ -2212,7 +2257,7 @@ function driveHtml(records) {
       <button type="button" onclick="driveSavePw()">Parolayı Kaydet</button>
     </div>`;
   const kpw = ashiDrive.kimlikParola();
-  const anonAylar = (records || []).filter(x => Object.values(x.slots || {}).some(sl => sl && sl.anon) || x.izin?.anon).map(x => x.key).sort();
+  const anonAylar = (records || []).filter(x => Object.values(x.slots || {}).some(sl => sl && sl.anon) || x.izin?.anon || x.izinBasi?.anon).map(x => x.key).sort();
   const kimYok = anonAylar.filter(k => (ashiDrive.syncMap()[k] || {}).kim === false), kimVarAmaKapali = anonAylar.filter(k => (ashiDrive.syncMap()[k] || {}).kim);
   const kimlikDurum = anonAylar.length ? `<div class="arc-drive-msg err" style="display:block">${kimYok.length ? `⚠ ${kimYok.join(', ')}: Drive’daki pakette gerçek kimlik tablosu yok, bu yüzden yıldızlı. Yönetici cihazında kimlik parolasını kaydedip <b>↻ Hepsini yeniden yayınla</b>’ya basmalı.` : ''}${kimVarAmaKapali.length ? ` ${kimVarAmaKapali.join(', ')}: pakette kimlik tablosu var ama ${kpw ? 'girdiğiniz kimlik parolası uymuyor (yöneticiden doğrusunu alın)' : 'kimlik parolası girilmedi'}.` : ''}${!kimYok.length && !kimVarAmaKapali.length ? `Yıldızlı aylar: ${anonAylar.join(', ')} — “⟳ Yenile”ye basın.` : ''}</div>` : '';
   const kimlikBox = kimlikDurum + (kpw ? `<div class="arc-drive-row"><span class="arc-drive-note" style="margin:0">🔓 Kimlik parolası kayıtlı: eşitlenen aylarda TC ve ad/soyad açık görünür.</span><button type="button" class="arc-drive-link" onclick="driveForgetApw()">Kimlik parolasını unut</button></div>`
@@ -2759,7 +2804,7 @@ function processFile(file) {
       if (archiveResult.error) console.warn('Rapor yüklendi ancak yerel arşive kaydedilemedi.', archiveResult.error);
       // Bu aya daha önce arşivlenmiş izin/muafiyet dosyası varsa otomatik geri yükle.
       {
-        const savedIzin = (archiveResult.record || archiveConflict.existing || {}).izin;
+        const savedIzin = (archiveResult.record || archiveConflict.existing || {}).izin || (archiveResult.record || archiveConflict.existing || {}).izinBasi;
         if (savedIzin && savedIzin.records && savedIzin.records.length) {
           izinRaporRecords = await ashiAlignIzin(archiveClone(savedIzin.records));
           izinRaporFileName = savedIzin.fileName || '';
@@ -2919,13 +2964,43 @@ function readIzinRaporFile(file) {
     reader.readAsArrayBuffer(file);
   });
 }
-async function archiveSaveIzin(key, data) {
+// İzin dosyası Ay Başı / Ay Sonu karşılaştırması: Ay Sonu'nda olup Ay Başı'nda olmayan kayıtlar = ay içinde alınan izin/rapor.
+function ashiIzinAnahtar(r) { return `${r.tc}|${r.startMs}|${r.endMs}|${String(r.type || '').toLocaleLowerCase('tr-TR')}`; }
+function ashiAyIciIzin(rec) {
+  const b = rec?.izinBasi?.records, e = rec?.izin?.records;
+  if (!Array.isArray(b) || !Array.isArray(e)) return {var:false, liste:[]};
+  const eski = new Set(b.map(ashiIzinAnahtar));
+  return {var:true, liste:e.filter(r => !eski.has(ashiIzinAnahtar(r)))};
+}
+// İzin dosyası yüklenirken Ay Başı / Ay Sonu seçtirir.
+function izinSlotSor(key) {
+  return new Promise(async resolve => {
+    let rec = null; try { rec = await archiveWithTimeout(archiveGet(key), 3000, null); } catch (e) {}
+    const old = document.getElementById('izinSlotModal'); if (old) old.remove();
+    const d = document.createElement('div'); d.id = 'izinSlotModal';
+    d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100001;display:flex;align-items:center;justify-content:center;padding:16px';
+    const ay = archiveMonthLabel(rec?.reportMonthInfo || {year:Number(key.slice(0, 4)), month:Number(key.slice(5, 7))});
+    const not = o => o ? `Kayıtlı (${archiveShortDate(o.savedAt)}) · seçerseniz GÜNCELLENİR` : 'Boş · yeni kayıt oluşturulur';
+    d.innerHTML = `<div style="background:#fff;border-radius:14px;max-width:420px;width:100%;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="font-weight:800;font-size:15px;margin-bottom:4px">📄 İzin/Rapor dosyası — ${escapeHtml(ay)}</div>
+      <div style="font-size:12.5px;color:#64748b;margin-bottom:14px">Bu izin dosyası hangi zamanın raporu? Ay Başı ve Ay Sonu karşılaştırılarak ay içinde alınan izin/raporlar görülür.</div>
+      <div style="display:grid;gap:10px">
+        <button type="button" data-s="basi" style="text-align:left;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;cursor:pointer;font:inherit"><b>🌅 Ay Başı</b><div style="font-size:11.5px;color:#64748b">${escapeHtml(not(rec?.izinBasi))}</div></button>
+        <button type="button" data-s="sonu" style="text-align:left;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;cursor:pointer;font:inherit"><b>🌇 Ay Sonu</b><div style="font-size:11.5px;color:#64748b">${escapeHtml(not(rec?.izin))}</div></button>
+        <button type="button" data-s="" style="padding:8px;border:0;background:none;color:#64748b;cursor:pointer;font:inherit">Vazgeç</button>
+      </div></div>`;
+    d.querySelectorAll('button').forEach(b => b.onclick = () => { d.remove(); resolve(b.dataset.s || null); });
+    document.body.appendChild(d);
+  });
+}
+async function archiveSaveIzin(key, data, slot) {
   let rec = await archiveGet(key);
   if (!rec) {
     const info = {year:Number(key.slice(0,4)), month:Number(key.slice(5,7))};
-    rec = {key, reportMonthInfo:info, savedAt:null, slots:{}, izin:null};
+    rec = {key, reportMonthInfo:info, savedAt:null, slots:{}, izin:null, izinBasi:null};
   }
-  rec.izin = {records:data.records, fileName:data.fileName, savedAt:new Date().toISOString()};
+  const izinNesne = {records:data.records, fileName:data.fileName, savedAt:new Date().toISOString()};
+  if (slot === 'basi') rec.izinBasi = izinNesne; else rec.izin = izinNesne;
   rec.savedAt = new Date().toISOString();
   await archivePut(rec);
   await pruneArchive();
@@ -2934,7 +3009,7 @@ async function archiveSaveIzin(key, data) {
   return rec;
 }
 // targetKey verilmezse (rapor ekranındaki buton) açık olan ayın arşiv kaydına işlenir.
-async function handleIzinRaporFile(file, targetKey) {
+async function handleIzinRaporFile(file, targetKey, targetSlot) {
   if (!file) return;
   try {
     const records = await readIzinRaporFile(file);
@@ -2947,10 +3022,13 @@ async function handleIzinRaporFile(file, targetKey) {
       key = Object.keys(cnt).sort((a, b) => cnt[b] - cnt[a])[0];
       if (!key) throw new Error('İzin/Rapor dosyasında ay belirlenemedi.');
     }
+    const izSlot = targetSlot || await izinSlotSor(key);
+    if (!izSlot) return;
     let archived = true;
-    try { await archiveSaveIzin(key, {records, fileName:file.name}); }
+    try { await archiveSaveIzin(key, {records, fileName:file.name}, izSlot); }
     catch (err) { archived = false; console.warn('İzin/Rapor arşive kaydedilemedi:', err); }
-    if (key === curKey) {
+    let sonuVar = false; try { sonuVar = !!(await archiveGet(key))?.izin; } catch (e) {}
+    if (key === curKey && (izSlot === 'sonu' || !sonuVar)) {
       izinRaporRecords = await ashiAlignIzin(records);
       izinRaporFileName = file.name;
       updateIzinRaporButton();
@@ -2958,7 +3036,7 @@ async function handleIzinRaporFile(file, targetKey) {
       try { renderTable(); } catch (e) {}
     }
     const [y, m] = [Number(key.slice(0,4)), Number(key.slice(5,7))];
-    alert(`${records.length} izin/rapor kaydı yüklendi (${archiveMonthLabel({year:y, month:m})}).` + (archived ? '\nArşive kaydedildi; bu ay açıldığında otomatik yüklenir.' : '\nUyarı: arşive kaydedilemedi, yalnızca bu oturumda geçerli.'));
+    alert(`${records.length} izin/rapor kaydı yüklendi (${archiveMonthLabel({year:y, month:m})} · ${izSlot === 'basi' ? 'Ay Başı' : 'Ay Sonu'}).` + (archived ? '\nArşive kaydedildi; bu ay açıldığında otomatik yüklenir.' : '\nUyarı: arşive kaydedilemedi, yalnızca bu oturumda geçerli.'));
   } catch (error) {
     alert('İzin/Rapor dosyası yüklenemedi: ' + error.message);
     console.error(error);
@@ -5479,6 +5557,187 @@ function exportIstasyonPersonelExcel(){
   try { XLSX.utils.book_append_sheet(wb,buildDokumCetveliSheet(),'Nöbet Döküm Cetveli'); } catch(err) { console.warn('Nöbet Döküm Cetveli sayfası oluşturulamadı:', err); }
   const station=document.getElementById('istasyonPersonelStation')?.value||'tum_istasyonlar';
   XLSX.writeFile(wb,`ashi_istasyon_personel_${station.replace(/[^a-z0-9çğıöşüÇĞİÖŞÜ]+/gi,'_').slice(0,50)}.xlsx`);
+}
+// ===== Kontrol Raporu (resmî döküm cetvelinin sarı/kırmızı sütunları; çoklu ay) =====
+const KR_AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
+const KR_KOLON = [
+  {k:'tc', t:'TC Kimlik No', c:'y'}, {k:'ad', t:'Adı Soyadı', c:'y'}, {k:'birim', t:'Kadrosunun Olduğu Birim', c:''},
+  {k:'istihdam', t:'Kadro Türü', c:'y'}, {k:'unvan', t:'Kadro Unvanı', c:'y'},
+  {k:'kadro', t:'Kadro Süresi (*)', c:'y', n:1}, {k:'calis', t:'Çalışma Süresi (*)', c:'y', n:1}, {k:'fark', t:'Fark (*)', c:'y', n:1},
+  {k:'yi', t:'Yıllık İzin Gün Sayısı', c:'y', n:1}, {k:'rapor', t:'Raporlu Gün Sayısı', c:'r', n:1}, {k:'sosyal', t:'Sosyal İzinli Gün Sayısı', c:'r', n:1},
+  {k:'egHi', t:'Hafta İçi Eğitim Mesaisi Toplamı', c:'y', n:1}, {k:'egHs', t:'Hafta Sonu Eğitim Mesaisi Toplamı', c:'y', n:1},
+  {k:'ayIci', t:'Ay İçi Yeni İzin/Rapor (adet)', c:'', n:1}
+];
+let krSekme = 'ozet', krSecili = new Set(), krAylar = [], krSonuc = null, krCache = new Map(), krYilAcik = {}, krBusy = false, krSeq = 0;
+async function krAyListesi() {
+  let recs = []; try { recs = await archiveGetAll(); } catch (e) { console.warn(e); }
+  const list = [];
+  recs.forEach(rec => {
+    const slot = rec.slots?.sonu ? 'sonu' : (rec.slots?.basi ? 'basi' : null);
+    if (slot && rec.reportMonthInfo) list.push({key:rec.key, info:rec.reportMonthInfo, slot, savedAt:rec.savedAt || '', izin:!!((rec.izin || rec.izinBasi)?.records?.length), izinBasi:!!rec.izinBasi?.records?.length, izinSonu:!!rec.izin?.records?.length});
+  });
+  if (reportMonthInfo) {
+    const k = archiveKeyFromInfo(reportMonthInfo), e = list.find(x => x.key === k);
+    if (e) { e.cur = true; e.izin = (izinRaporRecords || []).length > 0; }
+    else list.push({key:k, info:{...reportMonthInfo}, slot:null, savedAt:'', izin:(izinRaporRecords || []).length > 0, cur:true});
+  }
+  return list.sort((a, b) => a.key.localeCompare(b.key));
+}
+// Tek ayın kişi bazlı değerlerini hesaplar (geçerli ay: ekrandaki veri, diğerleri: arşiv)
+async function krAyHesapla(m) {
+  const ck = m.cur ? '' : `${m.key}|${m.slot}|${m.savedAt}`;
+  if (ck && krCache.has(ck)) return krCache.get(ck);
+  const sv = {allData, specialDutyLists, izinRaporRecords, reportMonthInfo};
+  let nAll, nSpec, nIzin, info;
+  if (m.cur) { info = {...reportMonthInfo}; }
+  else {
+    const rec = await archiveGet(m.key), sn = rec?.slots?.[m.slot];
+    if (!sn) return [];
+    nAll = archiveClone(sn.allData || {ef:[], ysp:[], sur:[]}); nSpec = archiveClone(sn.specialDutyLists || {komuta:[], bashekimlik:[]});
+    const izK = rec.izin || rec.izinBasi;
+    nIzin = izK?.records ? await ashiAlignIzin(archiveClone(izK.records)) : [];
+    info = archiveClone(rec.reportMonthInfo);
+  }
+  const r2 = v => Math.round(v * 100) / 100, out = [];
+  try {
+    if (!m.cur) { allData = nAll; specialDutyLists = nSpec; izinRaporRecords = nIzin; reportMonthInfo = info; }
+    ashiDokumTopla(info).forEach(x => {
+      const own = x.asilIst || Object.keys(x.istCount).sort((a, b) => x.istCount[b] - x.istCount[a])[0] || x.izinBirim || '';
+      const birim = own || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
+      if (!birim) return;
+      const s = ashiDokumSatirHesapla(x, info), c = s.counts || {};
+      out.push({tc:x.tc, ad:`${x.ad} ${x.soyad}`.trim(), birim, istihdam:x.istihdam || '', unvan:x.unvan || '',
+        kadro:r2(s.kadro), calis:r2(s.calis), fark:r2(s.calis - s.kadro),
+        yi:c['Yıllık İzin Gün Sayısı'] || 0, rapor:c['Raporlu Gun Sayisi'] || 0, sosyal:c['Sosyal Izinli Gun Sayisi'] || 0,
+        egHi:r2(s.egHi), egHs:r2(s.egHs)});
+    });
+  } finally { allData = sv.allData; specialDutyLists = sv.specialDutyLists; izinRaporRecords = sv.izinRaporRecords; reportMonthInfo = sv.reportMonthInfo; }
+  if (ck) krCache.set(ck, out);
+  return out;
+}
+async function krHesapla() {
+  const seq = ++krSeq, host = document.getElementById('krTablo'); if (!host) return;
+  const secili = krAylar.filter(m => krSecili.has(m.key));
+  if (!secili.length) { krSonuc = null; krCiz(); return; }
+  host.innerHTML = '<div style="padding:24px;color:#64748b;font-size:13px">Hesaplanıyor…</div>';
+  const aylar = [], toplam = new Map();
+  for (const m of secili) {
+    let rows = [], ayIci = {var:false, liste:[]};
+    try { rows = await krAyHesapla(m); } catch (e) { console.warn('Kontrol raporu ay hesabı', m.key, e); }
+    try { ayIci = ashiAyIciIzin(await archiveGet(m.key)); } catch (e) {}
+    if (seq !== krSeq) return;
+    const sayac = {}; ayIci.liste.forEach(r => { sayac[r.tc] = (sayac[r.tc] || 0) + 1; });
+    rows.forEach(r => { r.ayIci = sayac[r.tc] || 0; });
+    aylar.push({key:m.key, label:archiveMonthLabel(m.info), rows, izin:m.izin, izinBasi:m.izinBasi, izinSonu:m.izinSonu, ayIci});
+    rows.forEach(r => {
+      const k = r.tc || r.ad; let t = toplam.get(k);
+      if (!t) { t = {...r, ayAdet:0, kadro:0, calis:0, fark:0, yi:0, rapor:0, sosyal:0, egHi:0, egHs:0, ayIci:0}; toplam.set(k, t); }
+      t.ayAdet++; ['kadro','calis','fark','yi','rapor','sosyal','egHi','egHs','ayIci'].forEach(f => { t[f] += r[f]; });
+      t.birim = r.birim; if (r.istihdam) t.istihdam = r.istihdam; if (r.unvan) t.unvan = r.unvan;
+    });
+  }
+  const rows = [...toplam.values()].map(t => { ['kadro','calis','fark','yi','rapor','sosyal','egHi','egHs'].forEach(f => { t[f] = Math.round(t[f] * 100) / 100; }); return t; });
+  rows.sort((a, b) => trColl.compare(a.birim, b.birim) || trColl.compare(a.ad, b.ad) || trColl.compare(a.tc, b.tc));
+  krSonuc = {aylar, rows};
+  krCiz();
+}
+function krFmt(v) { return (Math.round(v * 10) / 10).toLocaleString('tr-TR', {maximumFractionDigits:1}); }
+function krFiltreli() {
+  if (!krSonuc) return [];
+  const q = String(document.getElementById('krAra')?.value || '').trim().toLocaleLowerCase('tr-TR');
+  return q ? krSonuc.rows.filter(r => `${r.ad} ${r.tc} ${r.birim}`.toLocaleLowerCase('tr-TR').includes(q)) : krSonuc.rows;
+}
+function krAyIciListe() {
+  if (!krSonuc) return [];
+  const q = String(document.getElementById('krAra')?.value || '').trim().toLocaleLowerCase('tr-TR'), out = [];
+  krSonuc.aylar.forEach(a => (a.ayIci.liste || []).forEach(r => {
+    const t = ashiIzinTuru(r.type), muaf = ashiIzinMuafiyetMi(r.type);
+    const o = {ay:a.label, tc:r.tc, ad:r.name || '', tur:r.type || '', kod:muaf ? 'Muafiyet' : t.kod, rapor:!muaf && /Raporlu/.test(t.alan || ''), bas:r.start || '', bitis:r.endMs ? formatDateTime(new Date(r.endMs)) : '', gun:Number(r.days) || 0, ms:r.startMs};
+    if (!q || `${o.ad} ${o.tc} ${o.tur}`.toLocaleLowerCase('tr-TR').includes(q)) out.push(o);
+  }));
+  return out.sort((x, y) => (y.rapor - x.rapor) || trColl.compare(x.ad, y.ad) || x.ms - y.ms);
+}
+function krSekmeSec(t) { krSekme = t; document.querySelectorAll('.kr-tab').forEach(b => b.classList.toggle('on', b.dataset.t === t)); krCiz(); }
+function krAyIciCiz(host, ozet) {
+  const liste = krAyIciListe(), yok = krSonuc.aylar.filter(a => !a.ayIci.var).map(a => a.label);
+  const kisi = new Set(liste.map(r => r.tc)).size, rapor = liste.filter(r => r.rapor);
+  if (ozet) ozet.innerHTML = `<b>${liste.length}</b> yeni kayıt · <b>${kisi}</b> kişi · Rapor alan: <b>${new Set(rapor.map(r => r.tc)).size}</b> kişi (${rapor.length} kayıt)`
+    + (yok.length ? `<div class="kr-warn">⚠ ${escapeHtml(yok.join(', '))}: Ay Başı ve Ay Sonu izin dosyalarının ikisi de arşivde olmadığı için karşılaştırma yapılamıyor. Arşiv ekranından eksik olanı yükleyin.</div>` : '');
+  const th = ['Ay','TC Kimlik No','Adı Soyadı','İzin Türü','Kod','Başlangıç','Bitiş','Gün'].map((t, i) => `<th class="${i === 3 || i === 4 ? 'kr' : ''}">${t}</th>`).join('');
+  const body = liste.slice(0, 2000).map((r, i) => `<tr${r.rapor ? ' style="background:#fff1f2"' : ''}><td>${i + 1}</td><td>${escapeHtml(r.ay)}</td><td>${escapeHtml(r.tc)}</td><td>${escapeHtml(r.ad)}</td><td>${escapeHtml(r.tur)}</td><td>${escapeHtml(r.kod)}</td><td>${escapeHtml(r.bas)}</td><td>${escapeHtml(r.bitis)}</td><td class="kn">${krFmt(r.gun)}</td></tr>`).join('');
+  host.innerHTML = `<table class="kr-table"><thead><tr><th>Sıra</th>${th}</tr></thead><tbody>${body || '<tr><td colspan="9" style="padding:18px;color:#64748b">Ay içinde alınmış yeni izin/rapor kaydı yok.</td></tr>'}</tbody></table>`;
+}
+function krCiz() {
+  const host = document.getElementById('krTablo'), ozet = document.getElementById('krOzet'); if (!host) return;
+  if (!krSonuc) { host.innerHTML = '<div style="padding:24px;color:#64748b;font-size:13px">Yukarıdan en az bir ay seçin.</div>'; if (ozet) ozet.innerHTML = ''; return; }
+  if (krSekme === 'ayici') { krAyIciCiz(host, ozet); return; }
+  const rows = krFiltreli(), eksikIzin = krSonuc.aylar.filter(a => !a.izin).map(a => a.label);
+  const top = f => rows.reduce((t, r) => t + (r[f] || 0), 0);
+  if (ozet) ozet.innerHTML = `<b>${krSonuc.aylar.length}</b> ay · <b>${rows.length}</b> kişi · Kadro <b>${krFmt(top('kadro'))}</b> · Çalışma <b>${krFmt(top('calis'))}</b> · Fark <b>${krFmt(top('fark'))}</b> · Yıllık izin <b>${krFmt(top('yi'))}</b> gün · Rapor <b>${krFmt(top('rapor'))}</b> gün · Sosyal izin <b>${krFmt(top('sosyal'))}</b> gün`
+    + (eksikIzin.length ? `<div class="kr-warn">⚠ ${escapeHtml(eksikIzin.join(', '))}: izin/rapor dosyası yok; bu aylarda izin günleri 0 görünür ve kadro süresi izin düşülmeden hesaplanır.</div>` : '');
+  const th = KR_KOLON.map(c => `<th class="${c.c === 'y' ? 'ky' : (c.c === 'r' ? 'kr' : '')}">${escapeHtml(c.t)}</th>`).join('');
+  const body = rows.slice(0, 1500).map((r, i) => `<tr><td>${i + 1}</td>${KR_KOLON.map(c => { const v = r[c.k]; if (!c.n) return c.k === 'birim' ? `<td title="${escapeHtml(String(v))}">${escapeHtml(ashiIstKisa(String(v)))}</td>` : `<td>${escapeHtml(String(v ?? ''))}</td>`; const cls = c.k === 'fark' ? (v > 0 ? ' kpos' : (v < 0 ? ' kneg' : '')) : ((c.k === 'rapor' || c.k === 'sosyal' || c.k === 'ayIci') && v > 0 ? ' kred' : ''); return `<td class="kn${cls}">${krFmt(v)}</td>`; }).join('')}</tr>`).join('');
+  host.innerHTML = `<table class="kr-table"><thead><tr><th>Sıra</th>${th}</tr></thead><tbody>${body || '<tr><td colspan="14" style="padding:18px;color:#64748b">Kayıt bulunamadı.</td></tr>'}</tbody></table>`;
+}
+function krPickHtml() {
+  const years = [...new Set(krAylar.map(m => m.key.slice(0, 4)))].sort().reverse();
+  const pop = document.getElementById('krPop'); if (!pop) return;
+  pop.innerHTML = `<div class="kr-pop-head"><b>AYLARI SEÇ</b><span>${krSecili.size} ay seçili</span></div>` + (years.length ? years.map(y => {
+    const yms = krAylar.filter(m => m.key.startsWith(y)), acik = krYilAcik[y] !== false;
+    return `<div class="kr-yil"><div class="kr-yil-head"><span class="kr-yil-t" onclick="krYilToggle('${y}')">${acik ? '▾' : '▸'} <b>${y}</b> <small>${yms.length} ay</small></span><button type="button" onclick="krYilSec('${y}')">Tüm yıl</button></div>
+      ${acik ? `<div class="kr-aylar">${KR_AYK.map((n, i) => { const k = `${y}-${String(i + 1).padStart(2, '0')}`, m = krAylar.find(x => x.key === k); if (!m) return `<span class="kr-ay off">${n}</span>`; return `<button type="button" class="kr-ay${krSecili.has(k) ? ' sel' : ''}${m.cur ? ' cur' : ''}" onclick="krAyToggle('${k}')" title="${m.cur ? 'Ekrandaki ay' : 'Arşiv'}${m.izin ? '' : ' · izin dosyası yok'}">${n}${m.izin ? '' : '*'}</button>`; }).join('')}</div>` : ''}</div>`;
+  }).join('') : '<div style="padding:12px;color:#64748b;font-size:12.5px">Arşivde ay yok. Önce bir nöbet Excel’i yükleyin.</div>')
+    + `<div class="kr-legend"><span class="kr-lg sel"></span> seçili <span class="kr-lg cur"></span> ekrandaki ay · * izin dosyası yok</div><div style="text-align:right"><button type="button" class="kr-kapat" onclick="krPopKapat()">Kapat ✕</button></div>`;
+  const btn = document.getElementById('krPickBtn'); if (btn) btn.textContent = krSecili.size ? `📅 ${krSecili.size} ay seçili` : '📅 Ay seç…';
+}
+function krPopAc() { const p = document.getElementById('krPop'); if (!p) return; if (p.style.display === 'block') { krPopKapat(); return; } krPickHtml(); p.style.display = 'block'; }
+function krPopKapat() { const p = document.getElementById('krPop'); if (p) p.style.display = 'none'; krHesapla(); }
+function krYilToggle(y) { krYilAcik[y] = krYilAcik[y] === false; krPickHtml(); }
+function krAyToggle(k) { if (krSecili.has(k)) krSecili.delete(k); else krSecili.add(k); krPickHtml(); }
+function krYilSec(y) { const ks = krAylar.filter(m => m.key.startsWith(y)).map(m => m.key); const hepsi = ks.every(k => krSecili.has(k)); ks.forEach(k => hepsi ? krSecili.delete(k) : krSecili.add(k)); krPickHtml(); }
+async function showKontrolRaporuModal() {
+  const m = document.getElementById('krModal'); if (!m) return;
+  m.style.display = 'block';
+  krAylar = await krAyListesi();
+  const gecerli = new Set(krAylar.map(x => x.key));
+  krSecili = new Set([...krSecili].filter(k => gecerli.has(k)));
+  if (!krSecili.size && reportMonthInfo) krSecili.add(archiveKeyFromInfo(reportMonthInfo));
+  krPickHtml(); krHesapla();
+}
+function closeKontrolRaporuModal() { const m = document.getElementById('krModal'); if (m) m.style.display = 'none'; }
+function exportKontrolRaporuExcel() {
+  if (typeof XLSX === 'undefined') { alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
+  if (!krSonuc || !krSonuc.rows.length) { alert('Önce en az bir ay seçin.'); return; }
+  const wb = XLSX.utils.book_new(), brd = {top:{style:'thin'}, bottom:{style:'thin'}, left:{style:'thin'}, right:{style:'thin'}}, font = {name:'Arial', sz:9};
+  const fillOf = c => c === 'y' ? {patternType:'solid', fgColor:{rgb:'FFFF00'}} : (c === 'r' ? {patternType:'solid', fgColor:{rgb:'FF6600'}} : {patternType:'solid', fgColor:{rgb:'FFFFFF'}});
+  const yap = (rows, ad) => {
+    const aoa = [['Sıra No', ...KR_KOLON.map(c => c.t)]];
+    rows.forEach((r, i) => aoa.push([i + 1, ...KR_KOLON.map(c => c.n ? (Number(r[c.k]) || 0) : (r[c.k] ?? ''))]));
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{wch:6}, {wch:13}, {wch:26}, {wch:44}, {wch:30}, {wch:26}, {wch:11}, {wch:11}, {wch:9}, {wch:11}, {wch:11}, {wch:11}, {wch:12}, {wch:12}, {wch:14}];
+    ws['!rows'] = [{hpt:48}];
+    ws['!autofilter'] = {ref:XLSX.utils.encode_range({s:{r:0, c:0}, e:{r:rows.length, c:KR_KOLON.length}})};
+    ws['!freeze'] = {xSplit:3, ySplit:1};
+    for (let c = 0; c <= KR_KOLON.length; c++) {
+      const ref = XLSX.utils.encode_cell({r:0, c}); if (ws[ref]) ws[ref].s = {font:{...font, bold:true}, fill:fillOf(c ? KR_KOLON[c - 1].c : ''), alignment:{wrapText:true, vertical:'center', horizontal:'center'}, border:brd};
+      for (let r = 1; r <= rows.length; r++) { const rf = XLSX.utils.encode_cell({r, c}); if (ws[rf]) ws[rf].s = {font, border:brd, alignment:{vertical:'center', horizontal:c && KR_KOLON[c - 1].n ? 'right' : 'left'}}; }
+    }
+    XLSX.utils.book_append_sheet(wb, ws, ad.slice(0, 31));
+  };
+  const q = String(document.getElementById('krAra')?.value || '').trim().toLocaleLowerCase('tr-TR');
+  const sup = list => q ? list.filter(r => `${r.ad} ${r.tc} ${r.birim}`.toLocaleLowerCase('tr-TR').includes(q)) : list;
+  const coklu = krSonuc.aylar.length > 1;
+  yap(sup(krSonuc.rows), coklu ? 'Toplam (' + krSonuc.aylar.length + ' ay)' : 'Kontrol Raporu');
+  if (coklu) krSonuc.aylar.forEach(a => yap(sup(a.rows.slice().sort((x, y) => trColl.compare(x.birim, y.birim) || trColl.compare(x.ad, y.ad))), a.key));
+  const ayIci = krAyIciListe();
+  if (ayIci.length) {
+    const aoa = [['Ay','TC Kimlik No','Adı Soyadı','İzin Türü','Kod','Başlangıç','Bitiş','Gün'], ...ayIci.map(r => [r.ay, r.tc, r.ad, r.tur, r.kod, r.bas, r.bitis, r.gun])];
+    const ws = XLSX.utils.aoa_to_sheet(aoa); ws['!cols'] = [{wch:14},{wch:13},{wch:28},{wch:34},{wch:9},{wch:18},{wch:18},{wch:7}]; ws['!autofilter'] = {ref:XLSX.utils.encode_range({s:{r:0, c:0}, e:{r:ayIci.length, c:7}})};
+    for (let c = 0; c < 8; c++) { const ref = XLSX.utils.encode_cell({r:0, c}); ws[ref].s = {font:{...font, bold:true}, fill:fillOf(c === 3 || c === 4 ? 'r' : 'y'), alignment:{horizontal:'center', vertical:'center', wrapText:true}, border:brd}; }
+    XLSX.utils.book_append_sheet(wb, ws, 'Ay İçi İzin-Rapor');
+  }
+  const adlar = krSonuc.aylar.map(a => a.key);
+  XLSX.writeFile(wb, `Kontrol Raporu_${adlar.length > 1 ? adlar[0] + '_' + adlar[adlar.length - 1] : adlar[0]}.xlsx`);
 }
 function exportDokumCetveliExcel(){
   if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
