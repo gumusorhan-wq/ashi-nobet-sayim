@@ -168,30 +168,51 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .ui-toggle-top{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
   .ui-toggle-top:hover{background:rgba(255,255,255,.22)}
   @media(min-width:1000px){
-    body.ui-side{padding-left:244px}
-    body.ui-side #asideNav{display:flex;position:fixed;left:0;top:0;bottom:0;width:244px;z-index:900;background:#0f3d2e;color:#d1e7dd;flex-direction:column;padding:16px 10px;box-sizing:border-box;overflow-y:auto;font-family:'IBM Plex Sans',sans-serif}
-    body.ui-side .gorev-tabs,body.ui-side .gorev-shortcut-hint{display:none!important}
+    body.ui-side{--an-w:244px;padding-left:var(--an-w)}
+    body.ui-side.an-min{--an-w:68px}
+    body.ui-side #asideNav{display:flex;position:fixed;left:0;top:0;bottom:0;width:var(--an-w);z-index:900;background:#0f3d2e;color:#d1e7dd;flex-direction:column;padding:14px 10px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;font-family:'IBM Plex Sans',sans-serif}
+    body.ui-side .gorev-tabs,body.ui-side .gorev-shortcut-hint,body.ui-side .topbar{display:none!important}
     body.ui-side .report-header .header-actions{display:none!important}
-    body.ui-side .topbar{padding-left:24px;padding-right:24px}
+    body.ui-side .upload-section{margin-top:24px}
+    /* üst beyaz başlık: tek satır */
+    body.ui-side .report-header{display:flex;align-items:center;gap:14px;padding:9px 18px;min-height:0}
+    body.ui-side .report-header>div:first-child{display:flex;flex-direction:row;align-items:baseline;gap:12px;flex:1 1 auto;width:auto;min-width:0;max-width:none;border:0;padding:0 4px;flex-wrap:nowrap;justify-content:flex-start;text-align:left}
+    body.ui-side .report-header #reportTitle{font-size:15px!important;white-space:nowrap}
+    body.ui-side .report-header .report-subtitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:12.5px;margin:0}
     body.ui-side .istasyon-personel-filters button[onclick^="exportDokumCetveliExcel"],body.ui-side .istasyon-personel-filters button[onclick^="showKontrolRaporuModal"]{display:none}
     body.ui-side .istasyon-personel-filters{grid-template-columns:minmax(160px,1.3fr) minmax(140px,1fr) auto auto auto}
-    body.ui-side .report-header{padding-top:10px;padding-bottom:10px}
     body.ui-side .istasyon-personel-main-section,body.ui-side .istasyon-personel-main-box,body.ui-side #istasyonPersonelKontrol,body.ui-side #raporContent{min-width:0;max-width:100%;box-sizing:border-box}
     body.ui-side #krTablo{max-width:100%;overflow-x:auto}
+    /* analizler: açılır pencere yerine ana ekranda sayfa olarak */
+    body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{left:var(--an-w);z-index:800;background:#f3f6f4;padding:14px 18px}
+    body.ui-side #nobelAnaliziModal>.modal-box,body.ui-side #cokluModal>.modal-box,body.ui-side #boslukModal>.modal-box,body.ui-side #surucuDuzenModal>.modal-box,body.ui-side #tumPersonelDuzenModal>.modal-box,body.ui-side #cokluTumPersonelModal>.modal-box,body.ui-side #uygunPersonelModal>.modal-box{width:100%!important;max-width:none!important;margin:0}
+    body.ui-side.an-min #asideNav .an-tx,body.ui-side.an-min #asideNav .an-sec,body.ui-side.an-min #asideNav .an-sub,body.ui-side.an-min #asideNav .an-bt,body.ui-side.an-min #asideNav .an-foot,body.ui-side.an-min #asideNav details>summary::after{display:none}
+    body.ui-side.an-min #asideNav .an-it{justify-content:center;padding:10px 0}
+    body.ui-side.an-min #asideNav .an-brand{justify-content:center;padding:2px 0 10px}
   }
-  #asideNav .an-brand{display:flex;align-items:center;gap:10px;padding:2px 8px 14px;color:#fff}
-  #asideNav .an-brand b{font-size:14px;display:block;line-height:1.1}#asideNav .an-brand small{font-size:11px;color:#8fbfa8}
-  #asideNav .an-logo{width:34px;height:34px;border-radius:9px;background:#e8f5ee;color:#0f3d2e;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex:none}
+  #asideNav .an-brand{display:flex;align-items:center;gap:10px;padding:2px 8px 10px;color:#fff}
+  #asideNav .an-bt b{font-size:14px;display:block;line-height:1.1}#asideNav .an-bt small{font-size:11px;color:#8fbfa8}
+  #asideNav .an-logo{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden}
+  #asideNav .an-logo img{width:100%;height:100%;object-fit:cover}
+  #asideNav .an-min-btn{align-self:flex-end;width:26px;height:26px;margin:0 2px 6px;border:1px solid #3d7a63;background:transparent;color:#cfe8dc;border-radius:7px;cursor:pointer;font-size:13px;line-height:1;padding:0}
+  #asideNav .an-min-btn:hover{background:#17503d}
+  body.an-min #asideNav .an-min-btn{align-self:center}
   #asideNav .an-sec{font-size:10.5px;letter-spacing:.09em;color:#7fae98;padding:12px 10px 4px;font-weight:700}
-  #asideNav .an-it{display:flex;align-items:center;gap:9px;width:100%;box-sizing:border-box;padding:8px 10px;border:0;border-radius:9px;background:none;color:inherit;font:inherit;font-size:13px;font-weight:500;cursor:pointer;text-align:left}
+  #asideNav .an-it{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;padding:8px 10px;border:0;border-radius:9px;background:none;color:inherit;font:inherit;font-size:13px;font-weight:500;cursor:pointer;text-align:left}
   #asideNav .an-it:hover{background:#17503d}
   #asideNav .an-it.on{background:#e8f5ee;color:#0f3d2e;font-weight:700}
+  #asideNav summary.an-it.has-on{background:#17503d;color:#fff;font-weight:700}
   #asideNav .an-it[disabled]{opacity:.4;cursor:not-allowed}
-  #asideNav .an-sub{padding-left:26px}
+  #asideNav .an-ic{width:16px;height:16px;flex:none;display:inline-flex}
+  #asideNav .an-ic svg{width:16px;height:16px}
+  #asideNav .an-sub{padding-left:22px}
   #asideNav .an-sub .an-it{font-size:12.5px;padding:6px 10px}
   #asideNav details>summary{list-style:none;cursor:pointer}#asideNav details>summary::-webkit-details-marker{display:none}
   #asideNav details>summary::after{content:'▸';margin-left:auto;font-size:10px;opacity:.7}#asideNav details[open]>summary::after{content:'▾'}
-  #asideNav .an-foot{margin-top:auto;border-top:1px solid #1c5a45;padding:10px 8px 0;font-size:11.5px;color:#8fbfa8;line-height:1.5}
+  #asideNav .an-foot{margin-top:auto;border-top:1px solid #1c5a45;padding:10px 4px 0;font-size:11.5px;color:#8fbfa8;line-height:1.5}
+  #asideNav .an-foot .update-widget{display:flex;flex-direction:column;gap:6px;background:none;border:0;padding:0;margin:0;color:#8fbfa8;font-size:11px;box-shadow:none}
+  #asideNav .an-foot .update-actions{display:flex;gap:6px;flex-wrap:wrap}
+  #asideNav .an-foot .update-btn{font-size:11px;padding:5px 8px;border-radius:7px}
   #asideNav .an-back{margin-top:8px;width:100%;border:1px solid #3d7a63;background:transparent;color:#e8f5ee;border-radius:9px;padding:8px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
   #asideNav .an-back:hover{background:#17503d}
   .ist-pk-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:600;color:#334155;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -492,6 +513,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-view-tabs{display:flex;gap:6px;padding:10px 18px 0;background:#fff;border-bottom:1px solid #e2e8f0}
   .istasyon-personel-view-tabs button{border:1px solid #cbd5e1;border-bottom:0;border-radius:7px 7px 0 0;background:#f8fafc;color:#475569;font:inherit;font-size:11px;font-weight:800;padding:8px 12px;cursor:pointer}
   .istasyon-personel-view-tabs button.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+  /* sekmeler solda, özet bilgiler sağda, tek satır */
+  .istasyon-personel-main-box{display:flex;flex-wrap:wrap;align-items:flex-end}
+  .istasyon-personel-main-box>.istasyon-personel-filters{flex:0 0 100%}
+  .istasyon-personel-main-box>.istasyon-personel-view-tabs{order:1;flex:1 1 auto;min-width:0}
+  .istasyon-personel-main-box>.istasyon-personel-summary{order:2;flex:0 1 auto;max-width:100%;flex-wrap:nowrap;justify-content:flex-end;background:#fff;padding:10px 18px 8px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
+  .istasyon-personel-main-box>#istasyonPersonelList,.istasyon-personel-main-box>#istasyonPersonelSummaryTable,.istasyon-personel-main-box>#istasyonPersonelKontrol{order:3;flex:0 0 100%;min-width:0}
+  @media(max-width:1250px){.istasyon-personel-main-box>.istasyon-personel-summary{flex-wrap:wrap;white-space:normal}}
   .ozet-not{font-size:9.5px;font-weight:600;color:#64748b;line-height:1.2;margin-top:2px}
   .istasyon-personel-summary-table-wrap{overflow:auto;border:1px solid #dbe4ee;border-radius:8px;background:#fff}
   .istasyon-personel-summary-table{width:100%;min-width:900px;border-collapse:collapse;font-size:11px}
@@ -519,41 +547,37 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 
 
 <nav id="asideNav" aria-label="Ana menü">
-  <div class="an-brand"><div class="an-logo">112</div><div><b>ASHİ Nöbet Sayım</b><small id="anPeriod">Rapor yüklenmedi</small></div></div>
-  <div class="an-sec">ÇALIŞMA ALANI</div>
-  <details open><summary class="an-it" data-need="rep">Nöbet listeleri</summary>
-    <div class="an-sub"><button type="button" class="an-it" data-g="ef" data-need="rep">Ekip Şefi</button><button type="button" class="an-it" data-g="ysp" data-need="rep">Yardımcı Sağlık Personeli</button><button type="button" class="an-it" data-g="sur" data-need="rep">Sürücü</button></div></details>
-  <button type="button" class="an-it" data-g="istasyon" data-need="rep">İstasyon listesi</button>
-  <div class="an-sec">RAPORLAR</div>
-  <button type="button" class="an-it" id="anKontrol" data-need="rep" onclick="anKontrolAc()">Kontrol raporu</button>
-  <button type="button" class="an-it" data-need="rep" onclick="anGorevIstasyon();exportDokumCetveliExcel()">Döküm cetveli (Excel)</button>
-  <details><summary class="an-it" data-need="rep">Analizler</summary>
-    <div class="an-sub">
-      <button type="button" class="an-it" data-need="rep" onclick="showCokluModal()">Farklı istasyon nöbetleri</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showBoslukModal()">5+ gün boşluk</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showSurucuDuzenModal()">Sürücü nöbet analizi</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showTumPersonelDuzenModal()">Tüm personel analizi</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showCokluTumPersonelModal()">Çoklu istasyon</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showUygunPersonelModal()">Nöbete uygun personel</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showAnalizModal('ef')">Ekip Şefi analizi</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showAnalizModal('ysp')">YSP analizi</button>
-      <button type="button" class="an-it" data-need="rep" onclick="showAnalizModal('sur')">Sürücü analizi</button>
-    </div></details>
-  <details><summary class="an-it" data-need="rep">Listeler</summary>
-    <div class="an-sub">
-      <button type="button" class="an-it" data-need="rep" onclick="anGorevListe();switchView('personel')">Personel listesi</button>
-      <button type="button" class="an-it" data-need="rep" onclick="anGorevListe();switchView('istasyon')">İstasyon özeti</button>
-      <button type="button" class="an-it" data-need="rep" onclick="anGorevListe();switchView('special-komuta')">Komuta Kontrol</button>
-      <button type="button" class="an-it" data-need="rep" onclick="anGorevListe();switchView('special-bashekimlik')">Başhekimlik</button>
-    </div></details>
+  <div class="an-brand"><div class="an-logo"><img id="anLogo" alt="Logo"></div><div class="an-bt"><b>ASHİ Nöbet Sayım</b><small id="anPeriod">Rapor yüklenmedi</small></div></div>
+  <button type="button" class="an-min-btn" id="anMinBtn" onclick="anMinToggle()" title="Menüyü daralt / genişlet" aria-label="Menüyü daralt / genişlet"></button>
+  <button type="button" class="an-it" data-ic="home" data-g="istasyon" data-need="rep"><span class="an-ic"></span><span class="an-tx">İstasyon listesi</span></button>
+  <button type="button" class="an-it" data-ic="doc" id="anKontrol" data-need="rep" onclick="anKontrolAc()"><span class="an-ic"></span><span class="an-tx">Kontrol raporu</span></button>
+  <button type="button" class="an-it" data-ic="grid" data-need="rep" onclick="anNav(function(){anGorevIstasyon();exportDokumCetveliExcel()})"><span class="an-ic"></span><span class="an-tx">Döküm cetveli (Excel)</span></button>
+  <div class="an-sec">LİSTELER</div>
+  <details><summary class="an-it" data-ic="user" data-need="rep"><span class="an-ic"></span><span class="an-tx">Personel listesi</span></summary>
+    <div class="an-sub"><button type="button" class="an-it" data-g="ef" data-v="personel" data-need="rep"><span class="an-tx">Ekip Şefi</span></button><button type="button" class="an-it" data-g="ysp" data-v="personel" data-need="rep"><span class="an-tx">Yardımcı Sağlık Personeli</span></button><button type="button" class="an-it" data-g="sur" data-v="personel" data-need="rep"><span class="an-tx">Sürücü</span></button></div></details>
+  <details><summary class="an-it" data-ic="build" data-need="rep"><span class="an-ic"></span><span class="an-tx">İstasyon özeti</span></summary>
+    <div class="an-sub"><button type="button" class="an-it" data-g="ef" data-v="istasyon" data-need="rep"><span class="an-tx">Ekip Şefi</span></button><button type="button" class="an-it" data-g="ysp" data-v="istasyon" data-need="rep"><span class="an-tx">Yardımcı Sağlık Personeli</span></button><button type="button" class="an-it" data-g="sur" data-v="istasyon" data-need="rep"><span class="an-tx">Sürücü</span></button></div></details>
+  <details><summary class="an-it" data-ic="list" data-need="rep"><span class="an-ic"></span><span class="an-tx">Nöbet tablosu</span></summary>
+    <div class="an-sub"><button type="button" class="an-it" data-g="ef" data-v="liste" data-need="rep"><span class="an-tx">Ekip Şefi</span></button><button type="button" class="an-it" data-g="ysp" data-v="liste" data-need="rep"><span class="an-tx">Yardımcı Sağlık Personeli</span></button><button type="button" class="an-it" data-g="sur" data-v="liste" data-need="rep"><span class="an-tx">Sürücü</span></button></div></details>
+  <button type="button" class="an-it" data-ic="radio" data-v="special-komuta" data-need="rep"><span class="an-ic"></span><span class="an-tx">Komuta Kontrol</span></button>
+  <button type="button" class="an-it" data-ic="cross" data-v="special-bashekimlik" data-need="rep"><span class="an-ic"></span><span class="an-tx">Başhekimlik</span></button>
+  <div class="an-sec">ANALİZLER</div>
+  <button type="button" class="an-it" data-ic="chart" data-ov="boslukModal" data-need="rep" onclick="anNav(showBoslukModal)"><span class="an-ic"></span><span class="an-tx">5+ gün boşluk</span></button>
+  <button type="button" class="an-it" data-ic="chart" data-ov="surucuDuzenModal" data-need="rep" onclick="anNav(showSurucuDuzenModal)"><span class="an-ic"></span><span class="an-tx">Sürücü nöbet analizi</span></button>
+  <button type="button" class="an-it" data-ic="chart" data-ov="tumPersonelDuzenModal" data-need="rep" onclick="anNav(showTumPersonelDuzenModal)"><span class="an-ic"></span><span class="an-tx">Tüm personel analizi</span></button>
+  <button type="button" class="an-it" data-ic="chart" data-ov="cokluTumPersonelModal" data-need="rep" onclick="anNav(showCokluTumPersonelModal)"><span class="an-ic"></span><span class="an-tx">Çoklu istasyon</span></button>
+  <button type="button" class="an-it" data-ic="chart" data-ov="uygunPersonelModal" data-need="rep" onclick="anNav(showUygunPersonelModal)"><span class="an-ic"></span><span class="an-tx">Nöbete uygun personel</span></button>
+  <button type="button" class="an-it" data-ic="chart" data-ov="nobelAnaliziModal" data-ag="ef" data-need="rep" onclick="anNav(function(){window.__anG='ef';showAnalizModal('ef')})"><span class="an-ic"></span><span class="an-tx">Ekip Şefi analizi</span></button>
+  <button type="button" class="an-it" data-ic="chart" data-ov="nobelAnaliziModal" data-ag="ysp" data-need="rep" onclick="anNav(function(){window.__anG='ysp';showAnalizModal('ysp')})"><span class="an-ic"></span><span class="an-tx">YSP analizi</span></button>
+  <button type="button" class="an-it" data-ic="chart" data-ov="nobelAnaliziModal" data-ag="sur" data-need="rep" onclick="anNav(function(){window.__anG='sur';showAnalizModal('sur')})"><span class="an-ic"></span><span class="an-tx">Sürücü analizi</span></button>
   <div class="an-sec">VERİ</div>
-  <button type="button" class="an-it" data-g="arsiv" id="anArsiv">Arşiv</button>
-  <button type="button" class="an-it" data-need="rep" onclick="openIzinRaporPicker()">İzin / Rapor dosyası</button>
-  <button type="button" class="an-it" data-need="rep" onclick="showOzelGunModal()">Özel günler</button>
-  <button type="button" class="an-it" data-need="rep" onclick="exportExcelAll()">Excel (tümü)</button>
-  <button type="button" class="an-it" data-need="rep" onclick="resetPage()">Yeni dosya yükle</button>
-  <button type="button" class="an-it" data-g="kilavuz" data-need="rep">Kılavuz</button>
-  <div class="an-foot"><div>Sürüm 02.07 · Yeni görünüm (deneme)</div><button type="button" class="an-back" onclick="ashiUiAyarla('classic')">↩ Klasik görünüme dön</button></div>
+  <button type="button" class="an-it" data-ic="box" data-g="arsiv" id="anArsiv"><span class="an-ic"></span><span class="an-tx">Arşiv</span></button>
+  <button type="button" class="an-it" data-ic="down" data-need="rep" onclick="anNav(openIzinRaporPicker)"><span class="an-ic"></span><span class="an-tx">İzin / Rapor dosyası</span></button>
+  <button type="button" class="an-it" data-ic="cal" data-need="rep" onclick="showOzelGunModal()"><span class="an-ic"></span><span class="an-tx">Özel günler</span></button>
+  <button type="button" class="an-it" data-ic="grid" data-need="rep" onclick="anNav(exportExcelAll)"><span class="an-ic"></span><span class="an-tx">Excel (tümü)</span></button>
+  <button type="button" class="an-it" data-ic="refresh" data-need="rep" onclick="anNav(resetPage)"><span class="an-ic"></span><span class="an-tx">Yeni dosya yükle</span></button>
+  <button type="button" class="an-it" data-ic="book" data-g="kilavuz" data-need="rep"><span class="an-ic"></span><span class="an-tx">Kılavuz</span></button>
+  <div class="an-foot"><div id="anUpd"></div><button type="button" class="an-back" onclick="ashiUiAyarla('classic')">↩ Klasik görünüme dön</button></div>
 </nav>
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:16px">
@@ -7295,41 +7319,87 @@ function initUpdateControls(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initUpdateControls); else initUpdateControls();
 
 // ===== Yeni görünüm (sol menü) aç/kapat — tercih bu tarayıcıda saklanır; klasik görünüm varsayılan =====
+const AN_OVERLAYS = ['nobelAnaliziModal','cokluModal','boslukModal','surucuDuzenModal','tumPersonelDuzenModal','cokluTumPersonelModal','uygunPersonelModal'];
+const AN_ICONS = {
+  home:'<path d="M2 14V6l6-4 6 4v8z"/><path d="M6.5 14v-4h3v4"/>', doc:'<path d="M3 2h7l3 3v9H3z"/><path d="M5.5 8h5M5.5 11h5"/>', grid:'<rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 7h12M6 3v10"/>',
+  user:'<circle cx="8" cy="5.5" r="2.5"/><path d="M3 14c.5-3 2.5-4 5-4s4.5 1 5 4"/>', build:'<rect x="3" y="2" width="10" height="12" rx="1"/><path d="M6 5h1M9 5h1M6 8h1M9 8h1M7 14v-3h2v3"/>', list:'<path d="M5 4h9M5 8h9M5 12h9M2 4h1M2 8h1M2 12h1"/>',
+  radio:'<circle cx="8" cy="8" r="1.5"/><path d="M4.5 4.5a5 5 0 000 7M11.5 4.5a5 5 0 010 7"/>', cross:'<path d="M6 2h4v4h4v4h-4v4H6v-4H2V6h4z"/>', chart:'<path d="M2 13V9M6 13V4M10 13V7M14 13V2"/>',
+  box:'<path d="M2 5h12v8H2zM2 5l1.5-3h9L14 5"/><path d="M6 8h4"/>', down:'<path d="M8 2v8M5 7l3 3 3-3M3 13h10"/>', cal:'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 7h12M5 1.5v3M11 1.5v3"/>',
+  refresh:'<path d="M13 8a5 5 0 10-1.5 3.5M13 3v3h-3"/>', book:'<path d="M3 2h8a2 2 0 012 2v10H5a2 2 0 01-2-2z"/><path d="M5 14V4"/>'
+};
 function ashiUiAyarla(mod) {
   const yan = mod === 'side';
   document.body.classList.toggle('ui-side', yan);
   try { localStorage.setItem('ashi_ui', yan ? 'side' : 'classic'); } catch (e) {}
   const b = document.getElementById('uiToggleTop'); if (b) b.textContent = yan ? 'Klasik görünüme dön' : 'Yeni görünümü dene';
+  // Güncelleme widget'ı: yeni görünümde menünün altına, klasikte yeşil üst çubuğa
+  const w = document.getElementById('updateWidget'), hedef = yan ? document.getElementById('anUpd') : document.querySelector('.topbar');
+  if (w && hedef && w.parentNode !== hedef) hedef.appendChild(w);
+  if (!yan) AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) o.style.removeProperty('left'); });
   ashiNavSenk();
 }
+function anMinToggle(force) {
+  const min = typeof force === 'boolean' ? force : !document.body.classList.contains('an-min');
+  document.body.classList.toggle('an-min', min);
+  try { localStorage.setItem('ashi_ui_min', min ? '1' : '0'); } catch (e) {}
+  const b = document.getElementById('anMinBtn'); if (b) b.textContent = min ? '»' : '«';
+}
 function ashiNavRaporVar() { const r = document.getElementById('reportSection'); return !!r && r.style.display !== 'none'; }
-function anGorevIstasyon() { if (typeof activeGorev !== 'undefined' && activeGorev !== 'istasyon') switchGorev('istasyon'); }
-function anGorevListe() { const g = (typeof lastValidGorev !== 'undefined' && lastValidGorev) || 'sur'; if (activeGorev === 'istasyon' || activeGorev === 'arsiv' || activeGorev === 'kilavuz') switchGorev(g); }
-function anKontrolAc() { anGorevIstasyon(); showKontrolRaporuModal(); }
+function anKapatAnaliz() { AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o && o.style.display !== 'none') o.style.display = 'none'; }); }
+function anNav(fn) { try { fn(); } catch (e) { console.warn(e); } setTimeout(ashiNavSenk, 50); }
+function anGorevIstasyon() { anKapatAnaliz(); if (activeGorev !== 'istasyon') switchGorev('istasyon'); }
+function anGorevListe() { const g = (typeof lastValidGorev !== 'undefined' && lastValidGorev) || 'sur'; if (['istasyon', 'arsiv', 'kilavuz'].includes(activeGorev)) switchGorev(g); }
+function anKontrolAc() { anKapatAnaliz(); anGorevIstasyon(); showKontrolRaporuModal(); }
 function ashiNavSenk() {
   const nav = document.getElementById('asideNav'); if (!nav) return;
-  const var_ = ashiNavRaporVar();
+  const var_ = ashiNavRaporVar(), liste = ['ef', 'ysp', 'sur'].includes(activeGorev);
   nav.querySelectorAll('[data-need="rep"]').forEach(el => { if (el.tagName === 'BUTTON') el.disabled = !var_; });
   const kontrolAcik = var_ && activeGorev === 'istasyon' && document.getElementById('istasyonPersonelKontrol')?.style.display === 'block';
-  nav.querySelectorAll('[data-g]').forEach(el => el.classList.toggle('on', var_ ? (el.dataset.g === activeGorev && !(el.dataset.g === 'istasyon' && kontrolAcik)) : (el.dataset.g === 'arsiv' && false)));
-  document.getElementById('anKontrol')?.classList.toggle('on', !!kontrolAcik);
+  const acikOv = AN_OVERLAYS.filter(id => { const o = document.getElementById(id); return o && o.style.display !== 'none' && o.style.display !== ''; });
+  nav.querySelectorAll('button.an-it').forEach(el => {
+    let on = false;
+    if (el.dataset.ov) on = acikOv.includes(el.dataset.ov) && (!el.dataset.ag || el.dataset.ag === window.__anG);
+    else if (!acikOv.length && var_) {
+      const g = el.dataset.g, v = el.dataset.v;
+      if (g && v) on = g === activeGorev && v === activeView;
+      else if (g === 'istasyon') on = activeGorev === 'istasyon' && !kontrolAcik;
+      else if (g) on = g === activeGorev;
+      else if (v) on = liste && v === activeView;
+    }
+    el.classList.toggle('on', on);
+  });
+  document.getElementById('anKontrol')?.classList.toggle('on', !!kontrolAcik && !acikOv.length);
+  nav.querySelectorAll('details').forEach(d => { const k = !!d.querySelector('.an-sub .on'); d.querySelector('summary')?.classList.toggle('has-on', k); if (k) d.open = true; });
   const p = document.getElementById('anPeriod'); if (p) p.textContent = (typeof reportMonthInfo !== 'undefined' && reportMonthInfo) ? archiveMonthLabel(reportMonthInfo) : 'Rapor yüklenmedi';
 }
 (function ashiNavKur() {
   const nav = document.getElementById('asideNav'); if (!nav) return;
-  nav.querySelectorAll('button[data-g]').forEach(b => b.addEventListener('click', () => {
-    const g = b.dataset.g;
+  const topLogo = document.querySelector('.topbar img'), anLogo = document.getElementById('anLogo');
+  if (topLogo && anLogo) anLogo.src = topLogo.src;
+  nav.querySelectorAll('.an-it[data-ic]').forEach(b => { const ic = b.querySelector('.an-ic'); if (ic) ic.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${AN_ICONS[b.dataset.ic] || ''}</svg>`; });
+  nav.querySelectorAll('summary').forEach(sm => sm.addEventListener('click', () => { if (document.body.classList.contains('an-min')) anMinToggle(false); }));
+  nav.querySelectorAll('button[data-g], button[data-v]').forEach(b => b.addEventListener('click', () => {
+    const g = b.dataset.g, v = b.dataset.v;
+    anKapatAnaliz();
     if (g === 'arsiv' && !ashiNavRaporVar()) { document.getElementById('archiveHost')?.scrollIntoView({behavior:'smooth'}); return; }
-    switchGorev(g);
+    if (g === 'istasyon') { switchGorev('istasyon'); return; }
+    if (g && v) { switchGorev(g); switchView(v); return; }
+    if (g) { switchGorev(g); return; }
+    if (v) { anGorevListe(); switchView(v); }
   }));
+  nav.addEventListener('click', e => { if (!e.target.closest('button.an-it')) return; setTimeout(() => nav.querySelectorAll('details').forEach(d => { if (!d.querySelector('.an-sub .on')) d.open = false; }), 80); });
   // Mevcut gezinme işlevlerine kanca: menüdeki seçili öğe her zaman güncel kalır
   ['switchGorev', 'switchView', 'setIstasyonPersonelView'].forEach(ad => {
     const eski = window[ad]; if (typeof eski !== 'function') return;
     window[ad] = function () { const r = eski.apply(this, arguments); try { ashiNavSenk(); } catch (e) {} return r; };
   });
-  const rs = document.getElementById('reportSection');
-  if (rs && window.MutationObserver) new MutationObserver(ashiNavSenk).observe(rs, {attributes:true, attributeFilter:['style']});
-  let tercih = 'classic'; try { tercih = localStorage.getItem('ashi_ui') || 'classic'; } catch (e) {}
+  if (window.MutationObserver) {
+    const mo = new MutationObserver(ashiNavSenk);
+    const rs = document.getElementById('reportSection'); if (rs) mo.observe(rs, {attributes:true, attributeFilter:['style']});
+    AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) mo.observe(o, {attributes:true, attributeFilter:['style']}); });
+  }
+  let tercih = 'classic', min = '0'; try { tercih = localStorage.getItem('ashi_ui') || 'classic'; min = localStorage.getItem('ashi_ui_min') || '0'; } catch (e) {}
+  anMinToggle(min === '1');
   ashiUiAyarla(tercih);
 })();
 </script>
