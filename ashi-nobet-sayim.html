@@ -187,6 +187,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     /* üst beyaz başlık: tek satır */
     body.ui-side .report-header{display:flex;align-items:center;gap:14px;padding:9px 18px;min-height:0}
     body.ui-side .report-header>div:first-child{display:flex;flex-direction:row;align-items:baseline;gap:12px;flex:1 1 auto;width:auto;min-width:0;max-width:none;border:0;padding:0 4px;flex-wrap:nowrap;justify-content:flex-start;text-align:left}
+    body.ui-side .report-header{flex-direction:row!important;flex-wrap:nowrap!important}
+    body.ui-side .report-header>div:first-child{border-bottom:0!important;padding:0 4px!important;flex-direction:row!important;width:auto!important}
     body.ui-side .report-header #reportTitle{font-size:15px!important;white-space:nowrap}
     body.ui-side .report-header .report-subtitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:12.5px;margin:0}
     body.ui-side .istasyon-personel-filters button[onclick^="exportDokumCetveliExcel"],body.ui-side .istasyon-personel-filters button[onclick^="showKontrolRaporuModal"]{display:none}
@@ -712,6 +714,32 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-summary-table th:first-child,.istasyon-personel-summary-table th:nth-child(2),.istasyon-personel-summary-table th:nth-child(3),.istasyon-personel-summary-table td:first-child,.istasyon-personel-summary-table td:nth-child(2),.istasyon-personel-summary-table td:nth-child(3){text-align:left}
   .istasyon-personel-summary-table td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:center;white-space:nowrap;color:#334155}
   .istasyon-personel-summary-table tr.station-summary-row td{background:#eff6ff;color:#1e3a5f;font-weight:900;text-align:left;border-top:2px solid #bfdbfe}
+
+  /* ===== Kompakt tablo (yalnız tablet/telefon; bilgisayarda değişiklik yok) ===== */
+  @media screen and (max-width:1279px){
+    body.ui-side .tbl td,body.ui-side .tbl th,body.ui-side .istasyon-personel-summary-table td,body.ui-side .istasyon-personel-summary-table th{padding:6px 8px!important;font-size:12px!important}
+    body.ui-side td.ashi-ist{min-width:0;font-size:11.5px!important;line-height:1.25!important;white-space:normal}
+  }
+  @media screen and (max-width:640px){
+    body.ui-side table.ashi-kart{display:block;width:100%;min-width:0!important;border:0!important;background:transparent!important}
+    body.ui-side table.ashi-kart thead{display:none!important}
+    body.ui-side table.ashi-kart tbody{display:block}
+    body.ui-side table.ashi-kart tr{display:block;margin:8px 0;padding:6px 12px;border:1px solid #dbe3ea;border-radius:12px;background:#fff!important;box-shadow:0 1px 4px rgba(15,23,42,.06)}
+    body.ui-side table.ashi-kart td{display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:auto!important;max-width:none!important;border:0!important;padding:4px 0!important;text-align:right!important;background:transparent!important;font-size:12.5px!important}
+    body.ui-side table.ashi-kart td::before{content:attr(data-l);flex:0 0 36%;max-width:36%;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.2px;color:#64748b;text-transform:uppercase}
+    body.ui-side table.ashi-kart td:empty,body.ui-side table.ashi-kart td[data-l=""]::before{display:none}
+    body.ui-side table.ashi-kart td:empty{display:none}
+    body.ui-side table.ashi-kart td[colspan]{display:block;text-align:left!important;font-weight:800}
+    body.ui-side table.ashi-kart td[colspan]::before{display:none}
+    body.ui-side table.ashi-kart td.ashi-ist{font-weight:700;text-align:right!important}
+    body.ui-side table.ashi-kart td.ashi-bos,body.ui-side table.ashi-kart td.ashi-no{display:none!important}
+    body.ui-side table.ashi-kart tr{overflow:hidden}
+    body.ui-side table.ashi-kart td.ashi-blok div,body.ui-side table.ashi-kart td.ashi-blok span{display:inline!important;min-width:0}
+    body.ui-side table.ashi-kart td.ashi-blok div{display:block!important}
+    body.ui-side table.ashi-kart td.ashi-blok{display:block;text-align:left!important;padding:5px 0!important;overflow-wrap:anywhere}
+    body.ui-side table.ashi-kart td.ashi-blok *{white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;max-width:100%}
+    body.ui-side table.ashi-kart td.ashi-blok::before{display:block;flex:none;max-width:none;margin-bottom:2px}
+  }
 </style>
 </head>
 <body>
@@ -7827,10 +7855,45 @@ function ashiNavSenk() {
     AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) mo.observe(o, {attributes:true, attributeFilter:['style']}); });
   }
   // v03.01: sol menülü görünüm artık tek görünüm (eski tercih ne olursa olsun)
-  let min = '0'; try { min = localStorage.getItem('ashi_ui_min') || '0'; } catch (e) {}
-  anMinToggle(min === '1');
+  let min = null; try { min = localStorage.getItem('ashi_ui_min'); } catch (e) {}
+  if (min === null) { // tercih yoksa tablet genişliğinde menü daralı açılır (tabloya daha çok yer); kaydedilmez
+    const dar = window.innerWidth < 1280;
+    document.body.classList.toggle('an-min', dar);
+    const mb = document.getElementById('anMinBtn'); if (mb) mb.textContent = dar ? '»' : '«';
+  } else anMinToggle(min === '1');
   ashiUiAyarla('side');
   window.addEventListener('resize', () => { try { anBarlar(window.matchMedia('(min-width:1000px)').matches); } catch (e) {} });
+})();
+
+(function ashiKompakt(){
+  const SEL='.tbl, .bosluk-table, .surucu-duzen-table, .istasyon-personel-summary-table';
+  let bekle=null;
+  function isle(t){
+    const th=[...t.querySelectorAll('thead tr:last-child th')].map(x=>x.textContent.trim());
+    t.classList.add('ashi-kart');
+    const dar=window.innerWidth<1280;
+    t.querySelectorAll('tbody tr').forEach(tr=>{
+      [...tr.children].forEach((td,i)=>{
+        if(td.tagName!=='TD') return;
+        if(!td.hasAttribute('colspan')&&td.getAttribute('data-l')===null) td.setAttribute('data-l',th[i]||'');
+        const sade=td.childElementCount===0&&td.firstChild&&td.firstChild.nodeType===3;
+        const t0=td.textContent.trim();
+        td.classList.toggle('ashi-bos',!td.hasAttribute('colspan')&&(t0===''||t0==='—'||t0==='-'));
+        td.classList.toggle('ashi-no',(th[i]||'')==='#');
+        td.classList.toggle('ashi-blok',!sade&&td.childElementCount>0&&td.textContent.length>40);
+        const tx=sade?td.textContent:'';
+        if(dar&&sade&&/İSTASYONU\s*$/.test(td.dataset.full||tx)){
+          if(!td.dataset.full){ td.dataset.full=tx; td.title=tx; td.classList.add('ashi-ist'); }
+          try{ const k=ashiIstKisa(td.dataset.full); if(td.textContent!==k) td.textContent=k; }catch(e){}
+        } else if(!dar&&td.dataset.full){ td.textContent=td.dataset.full; td.classList.remove('ashi-ist'); delete td.dataset.full; td.removeAttribute('title'); }
+      });
+    });
+  }
+  let mo=null;
+  function tara(){ bekle=null; if(mo) mo.disconnect(); try{ document.querySelectorAll(SEL).forEach(isle); }catch(e){ console.warn(e); } if(mo) mo.observe(document.body,{childList:true,subtree:true}); }
+  function planla(){ if(bekle) return; bekle=setTimeout(tara,250); }
+  const kur=()=>{ mo=new MutationObserver(planla); mo.observe(document.body,{childList:true,subtree:true}); window.addEventListener('resize',planla); planla(); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',kur); else kur();
 })();
 </script>
 </body>
