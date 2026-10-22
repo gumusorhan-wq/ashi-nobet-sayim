@@ -313,16 +313,11 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   
   }
   @media(min-width:1000px){
-    body.ui-side.an-min{--an-w:76px}
+    body.ui-side.an-min{--an-w:68px}
     body.ui-side.an-min #asideNav .an-tx,body.ui-side.an-min #asideNav .an-sec,body.ui-side.an-min #asideNav .an-sub,body.ui-side.an-min #asideNav .an-bt,body.ui-side.an-min #asideNav .an-foot,body.ui-side.an-min #asideNav details>summary::after{display:none}
     body.ui-side.an-min #asideNav .an-it{justify-content:center;padding:10px 0}
-    body.ui-side.an-min #asideNav .an-ic{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);align-items:center;justify-content:center}
-    body.ui-side.an-min #asideNav .an-ic svg{width:22px;height:22px;stroke-width:1.9}
-    body.ui-side.an-min #asideNav .an-it:hover .an-ic{background:rgba(255,255,255,.26)}
-    body.ui-side.an-min #asideNav .an-it.active .an-ic,body.ui-side.an-min #asideNav .an-it.on .an-ic{background:#fff;color:#14513c}
-    body.ui-side.an-min{--an-w:76px}
     body.ui-side.an-min #asideNav .an-brand{justify-content:center;padding:2px 0 10px}
-    body.ui-side.an-min{--an-w:76px}
+    body.ui-side.an-min{--an-w:68px}
     #anBurger{display:none}
   }
   #anBurger{display:none}
@@ -1229,7 +1224,6 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <button type="button" id="krPickBtn" class="btn-sec" style="height:36px;min-width:170px;text-align:left" onclick="krPopAc()">📅 Ay seç…</button>
           <div id="krPop"></div>
         </div>
-        <input id="krAra" type="search" placeholder="Ad, TCKN veya birim ara…" oninput="krCiz()" style="height:36px;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;min-width:240px;flex:1;max-width:380px">
         <button type="button" class="kr-tab on" data-t="ozet" onclick="krSekmeSec('ozet')">Kişi bazlı kontrol</button><button type="button" class="kr-tab" data-t="ayici" onclick="krSekmeSec('ayici')">Ay içinde alınan izin/rapor</button>
         <button type="button" class="btn-sec" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important;height:36px;margin-left:auto" onclick="exportKontrolRaporuExcel()">📥 Excel’e Aktar</button>
       </div>
@@ -6014,15 +6008,26 @@ async function krHesapla() {
   krSonuc = {aylar, rows};
   krCiz();
 }
+(function krUstFiltre(){
+  const asil = window.renderIstasyonPersonelList || renderIstasyonPersonelList;
+  window.renderIstasyonPersonelList = renderIstasyonPersonelList = function () {
+    const sonuc = asil.apply(this, arguments);
+    try { if (document.getElementById('istasyonPersonelKontrol')?.style.display === 'block' && typeof krCiz === 'function' && krSonuc) krCiz(); } catch (e) {}
+    return sonuc;
+  };
+})();
 function krFmt(v) { return (Math.round(v * 10) / 10).toLocaleString('tr-TR', {maximumFractionDigits:1}); }
+// Kontrol raporu, üstteki ortak filtreleri (İstasyon seç / Personel adı ile ara) kullanır
+function krAraQ() { return String(document.getElementById('istasyonPersonelPerson')?.value || '').trim().toLocaleLowerCase('tr-TR'); }
+function krIstUyar(birim) { try { return ashiIstUyarLC(ashiIstSecimLC('istasyonPersonelStation'), birim); } catch (e) { return true; } }
+function krSatirUyar(r) { const q = krAraQ(); return (!q || `${r.ad} ${r.tc}`.toLocaleLowerCase('tr-TR').includes(q)) && krIstUyar(r.birim); }
 function krFiltreli() {
   if (!krSonuc) return [];
-  const q = String(document.getElementById('krAra')?.value || '').trim().toLocaleLowerCase('tr-TR');
-  return q ? krSonuc.rows.filter(r => `${r.ad} ${r.tc} ${r.birim}`.toLocaleLowerCase('tr-TR').includes(q)) : krSonuc.rows;
+  return krSonuc.rows.filter(krSatirUyar);
 }
 function krAyIciListe() {
   if (!krSonuc) return [];
-  const q = String(document.getElementById('krAra')?.value || '').trim().toLocaleLowerCase('tr-TR'), out = [];
+  const q = krAraQ(), out = [];
   krSonuc.aylar.forEach(a => (a.ayIci.liste || []).forEach(r => {
     const t = ashiIzinTuru(r.type), muaf = ashiIzinMuafiyetMi(r.type);
     const o = {ay:a.label, tc:r.tc, ad:r.name || '', tur:r.type || '', kod:muaf ? 'Muafiyet' : t.kod, rapor:!muaf && /Raporlu/.test(t.alan || ''), bas:r.start || '', bitis:r.endMs ? formatDateTime(new Date(r.endMs)) : '', gun:Number(r.days) || 0, ms:r.startMs};
@@ -6095,8 +6100,7 @@ function exportKontrolRaporuExcel() {
     }
     XLSX.utils.book_append_sheet(wb, ws, ad.slice(0, 31));
   };
-  const q = String(document.getElementById('krAra')?.value || '').trim().toLocaleLowerCase('tr-TR');
-  const sup = list => q ? list.filter(r => `${r.ad} ${r.tc} ${r.birim}`.toLocaleLowerCase('tr-TR').includes(q)) : list;
+  const sup = list => list.filter(krSatirUyar);
   const coklu = krSonuc.aylar.length > 1;
   yap(sup(krSonuc.rows), coklu ? 'Toplam (' + krSonuc.aylar.length + ' ay)' : 'Kontrol Raporu');
   if (coklu) krSonuc.aylar.forEach(a => yap(sup(a.rows.slice().sort((x, y) => trColl.compare(x.birim, y.birim) || trColl.compare(x.ad, y.ad))), a.key));
