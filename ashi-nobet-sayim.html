@@ -166,6 +166,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   /* ===== Yeni görünüm (sol menü) — isteğe bağlı; klasik görünüm bozulmaz ===== */
   #asideNav{display:none}
   .an-dl{display:none}
+  #uiToggleTop,#asideNav .an-back{display:none!important}
   .ui-toggle-top{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
   .ui-toggle-top:hover{background:rgba(255,255,255,.22)}
   @media(min-width:1000px){
@@ -218,6 +219,24 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .modal-overlay .modal-head{padding:10px 16px}
     body.ui-side .an-statbar{padding:8px 16px!important;gap:12px!important}
     .an-more-btn{display:none}
+    body.ui-side .an-statbar #analizOzetKart{gap:6px!important;flex:1 1 auto;min-width:0;overflow:hidden}
+    body.ui-side .an-statbar #analizOzetKart>div:first-child{padding:2px 8px!important}
+    body.ui-side .an-statbar #analizOzetKart>div{gap:3px!important}
+    body.ui-side .an-statbar .btn-sec{padding:5px 6px!important}
+    body.ui-side .an-statbar{padding:8px 10px!important;gap:6px!important}
+    body.ui-side .an-statbar .btn-sec{font-size:11.5px!important}
+    body.ui-side .an-statbar #analizOzetKart>div{gap:5px!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div:first-child{font-size:15px!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div:last-child{font-size:9px!important;letter-spacing:0!important}
+    body.ui-side .an-statbar{gap:8px!important;padding:8px 12px!important}
+    body.ui-side .an-statbar .btn-sec{padding:5px 8px!important}
+    body.ui-side .an-cnt{font-size:11.5px!important;margin-right:4px!important}
+    body.ui-side .an-statbar #analizOzetKart>div:first-child>div:last-child{display:none}
+    body.ui-side .an-statbar #analizOzetKart>div>div:last-child{font-size:9.5px!important}
+    body.ui-side .an-statbar>div:last-child{flex:0 0 auto;margin-left:0!important}
+    body.ui-side .an-cnt{align-self:center;margin-right:8px;font-size:12px;white-space:nowrap}
+    body.ui-side .an-statbar>div:last-child{align-items:center}
+    body.ui-side #analizToolbar:not(.an-more) .bosluk-filter-summary{display:none}
     body.ui-side .an-more-btn{display:inline-flex;align-items:center}
     body.ui-side #analizToolbar:not(.an-more) .bosluk-filter:has(#analizFilterDepartment),body.ui-side #analizToolbar:not(.an-more) .bosluk-filter:has(#analizFilterMinOverlap),body.ui-side #analizToolbar:not(.an-more) .bosluk-filter:has(#analizSort),body.ui-side #analizToolbar:not(.an-more) .bosluk-filter-summary .btn-sec,body.ui-side #analizToolbar:not(.an-more) #analizColorSettings{display:none}
     body.ui-side #analizToolbar .bosluk-filter-summary{flex:0 0 auto;order:20;font-size:12px;padding:0 2px;white-space:nowrap}
@@ -261,6 +280,11 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side #istasyonPersonelKontrol>div:first-child .kr-tab,body.ui-side #istasyonPersonelKontrol>div:first-child .btn-sec{white-space:nowrap;font-size:12px;padding-left:10px;padding-right:10px}
     body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelKontrol:not([style*="none"]))>.istasyon-personel-view-tabs{align-self:center}
     body.ui-side #istasyonPersonelKontrol>#krOzet,body.ui-side #istasyonPersonelKontrol>#krTablo{order:3;flex:0 0 100%;min-width:0}
+    body.ui-side .an-statbar #analizOzetKart>div:first-child{padding:2px 8px!important;border-width:1.5px!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div:last-child{font-size:8.5px!important}
+    body.ui-side .an-statbar #analizOzetKart>div>div:first-child{font-size:14px!important}
+    body.ui-side .an-statbar #analizOzetKart>div{gap:3px!important}
+    body.ui-side .an-statbar #analizOzetKart{gap:8px!important}
     body.ui-side .istasyon-personel-main-section{overflow:visible}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-filters{position:sticky;top:62px;z-index:35}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-view-tabs,body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{position:sticky;top:calc(62px + var(--ip-f,66px));z-index:34;background:var(--gray)}
@@ -6554,6 +6578,12 @@ function renderAnalizDetailLists() {
   if (overlapSummary) overlapSummary.textContent = `${groupByStation(overlapRows).length} istasyon · ${overlapRows.length} gün`;
 }
 
+function anSayacTasi() {
+  if (!document.body.classList.contains('ui-side')) return;
+  const c = document.getElementById('analizFilterCount'), host = document.querySelector('#nobelAnaliziModal .an-statbar>div:last-child');
+  if (!c || !host) return;
+  c.classList.add('an-cnt'); host.insertBefore(c, host.firstChild);
+}
 function showAnalizModal(gKey) {
   const paket = buildAnalizData(true);
   const data = paket.branches[gKey];
@@ -6636,6 +6666,7 @@ function showAnalizModal(gKey) {
     </div>
     <div id="analizTableWrap" style="padding:0 20px 18px;overflow:auto"></div>`;
   renderFilteredAnalizTable();
+  anSayacTasi();
   const filteredBtn = document.getElementById('exportAnalizFilteredBtn');
   const allBtn = document.getElementById('exportAnalizAllBtn');
   if (filteredBtn) filteredBtn.onclick = () => exportAnalizExcelV2(gKey, data.label, data, true);
@@ -7340,8 +7371,8 @@ function resetPage() {
 // ═══════════════════════════════════════════════════════════
 // UZAK SÜRÜM KONTROLÜ VE YENİ SÜRÜM İNDİRME
 // ═══════════════════════════════════════════════════════════
-const ASHI_APP_VERSION = '02.07';
-const ASHI_APP_BUILD = '20261014.1';   // aynı sürüm numarasında hangi yapının açık olduğunu görmek için
+const ASHI_APP_VERSION = '03.01';
+const ASHI_APP_BUILD = '20261022.1';   // aynı sürüm numarasında hangi yapının açık olduğunu görmek için
 const ASHI_DEFAULT_UPDATE_MANIFEST_URL = 'https://raw.githubusercontent.com/gumusorhan-wq/ashi-nobet-sayim/main/ashi-update.json';
 const ASHI_UPDATE_CONFIG_KEY = 'ashiNobetUpdateConfigV1';
 // Gömülü kullanım: bu adreslerde uygulama canlı sürümü otomatik yükleyiciyle çalışır; güncelleme kontrolü/indirme gösterilmez ve yapılmaz.
@@ -7580,7 +7611,7 @@ function ashiUiAyarla(mod) {
   const w = document.getElementById('updateWidget'), hedef = yan ? document.getElementById('anUpd') : document.querySelector('.topbar');
   if (w && hedef && w.parentNode !== hedef) hedef.appendChild(w);
   if (!yan) AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) o.style.removeProperty('left'); });
-  try { anBarlar(yan); } catch (e) { console.warn(e); }
+  try { anBarlar(yan && window.matchMedia('(min-width:1000px)').matches); } catch (e) { console.warn(e); }
   ashiNavSenk();
 }
 (function anTipKur(){
@@ -7696,9 +7727,11 @@ function ashiNavSenk() {
     const rs = document.getElementById('reportSection'); if (rs) mo.observe(rs, {attributes:true, attributeFilter:['style']});
     AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) mo.observe(o, {attributes:true, attributeFilter:['style']}); });
   }
-  let tercih = 'classic', min = '0'; try { tercih = localStorage.getItem('ashi_ui') || 'classic'; min = localStorage.getItem('ashi_ui_min') || '0'; } catch (e) {}
+  // v03.01: sol menülü görünüm artık tek görünüm (eski tercih ne olursa olsun)
+  let min = '0'; try { min = localStorage.getItem('ashi_ui_min') || '0'; } catch (e) {}
   anMinToggle(min === '1');
-  ashiUiAyarla(tercih);
+  ashiUiAyarla('side');
+  window.addEventListener('resize', () => { try { anBarlar(window.matchMedia('(min-width:1000px)').matches); } catch (e) {} });
 })();
 </script>
 </body>
