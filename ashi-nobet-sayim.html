@@ -169,9 +169,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   #uiToggleTop,#asideNav .an-back{display:none!important}
   .ui-toggle-top{border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
   .ui-toggle-top:hover{background:rgba(255,255,255,.22)}
-  @media(min-width:1000px){
+  @media screen{
     body.ui-side{--an-w:244px;padding-left:var(--an-w)}
-    body.ui-side.an-min{--an-w:68px}
     body.ui-side #asideNav{display:flex;position:fixed;left:0;top:0;bottom:0;width:var(--an-w);z-index:900;background:#0f3d2e;color:#d1e7dd;flex-direction:column;padding:14px 10px;box-sizing:border-box;overflow-y:auto;overflow-x:hidden;font-family:'IBM Plex Sans',sans-serif}
     body.ui-side .gorev-tabs,body.ui-side .gorev-shortcut-hint,body.ui-side .topbar{display:none!important}
     body.ui-side .report-header .header-actions{display:none!important}
@@ -309,10 +308,62 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .an-statbar #analizOzetKart>div{padding:5px 14px!important;display:flex;align-items:baseline;gap:8px;text-align:left!important}
     body.ui-side .an-statbar #analizOzetKart>div>div:first-child{font-size:17px!important}
     body.ui-side .an-statbar #analizOzetKart>div>div:last-child{font-size:10px!important}
+  
+  }
+  @media(min-width:1000px){
+    body.ui-side.an-min{--an-w:68px}
     body.ui-side.an-min #asideNav .an-tx,body.ui-side.an-min #asideNav .an-sec,body.ui-side.an-min #asideNav .an-sub,body.ui-side.an-min #asideNav .an-bt,body.ui-side.an-min #asideNav .an-foot,body.ui-side.an-min #asideNav details>summary::after{display:none}
     body.ui-side.an-min #asideNav .an-it{justify-content:center;padding:10px 0}
     body.ui-side.an-min #asideNav .an-brand{justify-content:center;padding:2px 0 10px}
+    body.ui-side.an-min{--an-w:68px}
+    #anBurger{display:none}
   }
+  #anBurger{display:none}
+  @media(max-width:999px){
+    body.ui-side{--an-w:0px;padding-left:0;padding-top:60px}
+    body.ui-side #asideNav{width:276px;max-width:86vw;transform:translateX(-105%);transition:transform .22s ease;z-index:1200}
+    body.ui-side.an-open #asideNav{transform:none;box-shadow:0 0 40px rgba(0,0,0,.45)}
+    body.ui-side.an-open::after{content:'';position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:1150}
+    body.ui-side .an-min-btn,body.ui-side #anMinBtn{display:none}
+    #anBurger{display:inline-flex;position:fixed;top:8px;left:8px;width:44px;height:44px;align-items:center;justify-content:center;border:0;border-radius:10px;background:#0f3d2e;color:#fff;font-size:22px;line-height:1;cursor:pointer;z-index:860;box-shadow:0 1px 6px rgba(0,0,0,.2)}
+    body.ui-side::before{left:0;height:58px}
+    body.ui-side .report-header{left:60px;right:8px;top:8px;padding:6px 10px;gap:8px}
+    body.ui-side .report-header{flex-wrap:nowrap!important;flex-direction:row!important;min-height:44px;align-items:center}
+    body.ui-side .report-header #reportTitle{font-size:13.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+    body.ui-side .report-header>div:first-child{gap:8px;flex-wrap:nowrap;overflow:hidden;min-width:0;text-align:left}
+    body.ui-side .stats-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    body.ui-side .search-row .ist-pk,body.ui-side .lf-bar .ist-pk{min-width:0;width:100%}
+    body.ui-side .an-dl{padding:8px 11px;font-size:12px}
+    body.ui-side #raporContent .search-row,body.ui-side #raporContent .lf-bar{position:static;min-height:0;padding:4px 0}
+    body.ui-side #raporContent .search-row>*,body.ui-side #raporContent .lf-bar>*{flex:1 1 140px;max-width:100%;min-width:0;box-sizing:border-box}
+    body.ui-side .table-wrap{overflow-x:auto}
+    body.ui-side #raporContent .tbl thead th,body.ui-side #tblSpecialList thead th,body.ui-side .istasyon-personel-summary-table th,body.ui-side .kr-table th{position:static}
+    body.ui-side #raporContent #tblSpecialList.tbl thead th{position:static}
+    body.ui-side #specialListToolbar{position:static}
+    body.ui-side .istasyon-personel-main-box>.istasyon-personel-filters,body.ui-side .istasyon-personel-main-box>.istasyon-personel-view-tabs,body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary,body.ui-side #istasyonPersonelKontrol>div:first-child{position:static}
+    body.ui-side .istasyon-personel-filters{grid-template-columns:1fr 1fr}
+    body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelKontrol:not([style*="none"]))>.istasyon-personel-summary{display:flex}
+    body.ui-side #istasyonPersonelKontrol:not([style*="none"]){display:block!important}
+    body.ui-side #istasyonPersonelKontrol>div:first-child{flex-wrap:wrap!important}
+    body.ui-side .istasyon-personel-summary-table-wrap,body.ui-side #krTablo{overflow-x:auto!important}
+    body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{flex-wrap:wrap;max-width:100%}
+    body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{left:0;top:60px;padding:0 6px 6px}
+    body.ui-side .modal-overlay .modal-head{padding:8px 12px}
+    body.ui-side .an-statbar{flex-wrap:wrap!important}
+    body.ui-side .an-statbar #analizOzetKart{flex-wrap:wrap!important;overflow:visible!important}
+    body.ui-side .an-bar>[id$="Ozet"]{white-space:normal;min-width:0;flex:1 1 100%!important}
+    body.ui-side .modal-overlay .bosluk-filter,body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter{flex:1 1 140px}
+    body.ui-side .modal-overlay .bosluk-filter.wide,body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter.wide{flex:1 1 100%}
+    body.ui-side .modal-overlay .bosluk-filter:has(.bosluk-view-switch),body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter:has(.bosluk-view-switch){flex:0 0 auto}
+  }
+  @media(max-width:640px){
+    body.ui-side .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    body.ui-side .report-header .report-subtitle{display:none}
+    body.ui-side .an-dl .an-dl-t{display:none}
+    body.ui-side .istasyon-personel-filters{grid-template-columns:1fr}
+    body.ui-side .modal-overlay .bosluk-filter,body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter{flex:1 1 100%}
+  }
+
   #asideNav .an-brand{display:flex;align-items:center;gap:10px;padding:2px 8px 10px;color:#fff}
   #asideNav .an-bt b{font-size:14px;display:block;line-height:1.1}#asideNav .an-bt small{font-size:11px;color:#8fbfa8}
   #asideNav .an-logo{width:40px;height:40px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden}
@@ -677,6 +728,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 </div>
 
 
+<button type="button" id="anBurger" onclick="anMenuAc()" aria-label="Menüyü aç" title="Menü">☰</button>
 <nav id="asideNav" aria-label="Ana menü">
   <div class="an-brand"><div class="an-logo"><img id="anLogo" alt="Logo"></div><div class="an-bt"><b>ASHİ Nöbet Sayım</b><small id="anPeriod">Rapor yüklenmedi</small></div></div>
   <button type="button" class="an-min-btn" id="anMinBtn" onclick="anMinToggle()" title="Menüyü daralt / genişlet" aria-label="Menüyü daralt / genişlet"></button>
@@ -771,7 +823,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
         <div style="font-weight:700;font-size:16px" id="reportTitle">Rapor</div>
         <div class="report-subtitle" id="reportSubtitle"></div>
       </div>
-      <button type="button" class="an-dl" id="anDl" onclick="anIndir()" title="Bulunduğunuz sayfayı Excel olarak indir">⬇ Excel indir</button>
+      <button type="button" class="an-dl" id="anDl" onclick="anIndir()" title="Bulunduğunuz sayfayı Excel olarak indir" aria-label="Excel indir"><span class="an-dl-i">⬇</span><span class="an-dl-t">&nbsp;Excel indir</span></button>
       <div class="header-actions">
         <div class="control-group">
           <div class="control-group-title">Analiz ve kontroller</div>
@@ -7652,6 +7704,17 @@ function ashiUiAyarla(mod) {
   window.addEventListener('resize',olc);
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',kur); else kur();
 })();
+function anMenuAc(ac) {
+  const b = document.body, yeni = typeof ac === 'boolean' ? ac : !b.classList.contains('an-open');
+  b.classList.toggle('an-open', yeni);
+}
+document.addEventListener('click', e => {
+  const b = document.body; if (!b.classList.contains('an-open')) return;
+  if (e.target === b || (!e.target.closest('#asideNav') && !e.target.closest('#anBurger'))) anMenuAc(false);
+  else if (e.target.closest('#asideNav button.an-it')) setTimeout(() => anMenuAc(false), 120);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') anMenuAc(false); });
+window.addEventListener('resize', () => { if (window.innerWidth >= 1000) anMenuAc(false); });
 function anMinToggle(force) {
   const min = typeof force === 'boolean' ? force : !document.body.classList.contains('an-min');
   document.body.classList.toggle('an-min', min);
