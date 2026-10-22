@@ -715,6 +715,18 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-summary-table td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:center;white-space:nowrap;color:#334155}
   .istasyon-personel-summary-table tr.station-summary-row td{background:#eff6ff;color:#1e3a5f;font-weight:900;text-align:left;border-top:2px solid #bfdbfe}
 
+    .ashi-fb-btn{display:none}
+  @media screen and (max-width:1279px){
+    body.ui-side table.bosluk-table{table-layout:fixed;width:100%!important;min-width:0!important}
+    body.ui-side table.bosluk-table th:nth-child(1){width:15%}body.ui-side table.bosluk-table th:nth-child(2),body.ui-side table.bosluk-table th:nth-child(4){width:29%}body.ui-side table.bosluk-table th:nth-child(3){width:15%}body.ui-side table.bosluk-table th:nth-child(5){width:12%}
+    body.ui-side table.bosluk-table td{overflow-wrap:anywhere;word-break:break-word}
+    body.ui-side table.bosluk-table td *{white-space:normal!important;overflow-wrap:anywhere;font-size:11px}
+  }
+  @media screen and (max-width:640px){
+    body.ui-side .ashi-fb-btn{display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;margin:6px 0;padding:9px 14px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#0f3d2e;font:inherit;font-size:13px;font-weight:800;cursor:pointer;position:sticky;top:62px;z-index:40}
+    body.ui-side .ashi-fb-hide:not(.ashi-fb-ac){display:none!important}
+    body.ui-side .ashi-fb-hide.ashi-fb-ac{position:static!important;margin-top:0}
+  }
   /* ===== Kompakt tablo (yalnız tablet/telefon; bilgisayarda değişiklik yok) ===== */
   @media screen and (max-width:1279px){
     body.ui-side .tbl td,body.ui-side .tbl th,body.ui-side .istasyon-personel-summary-table td,body.ui-side .istasyon-personel-summary-table th{padding:6px 8px!important;font-size:12px!important}
@@ -7889,8 +7901,17 @@ function ashiNavSenk() {
       });
     });
   }
+
+  function filtre(){
+    document.querySelectorAll('.search-row, .lf-bar, .bosluk-toolbar, .istasyon-personel-filters').forEach(b=>{
+      if(b.dataset.fb) return; b.dataset.fb='1'; b.classList.add('ashi-fb-hide');
+      const d=document.createElement('button'); d.type='button'; d.className='ashi-fb-btn'; d.innerHTML='<span>🔎 Filtreler</span><span>▾</span>';
+      d.onclick=()=>{ const ac=b.classList.toggle('ashi-fb-ac'); d.lastChild.textContent=ac?'▴':'▾'; };
+      b.parentNode.insertBefore(d,b);
+    });
+  }
   let mo=null;
-  function tara(){ bekle=null; if(mo) mo.disconnect(); try{ document.querySelectorAll(SEL).forEach(isle); }catch(e){ console.warn(e); } if(mo) mo.observe(document.body,{childList:true,subtree:true}); }
+  function tara(){ bekle=null; if(mo) mo.disconnect(); try{ document.querySelectorAll(SEL).forEach(isle); filtre(); }catch(e){ console.warn(e); } if(mo) mo.observe(document.body,{childList:true,subtree:true}); }
   function planla(){ if(bekle) return; bekle=setTimeout(tara,250); }
   const kur=()=>{ mo=new MutationObserver(planla); mo.observe(document.body,{childList:true,subtree:true}); window.addEventListener('resize',planla); planla(); };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',kur); else kur();
