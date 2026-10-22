@@ -313,11 +313,16 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   
   }
   @media(min-width:1000px){
-    body.ui-side.an-min{--an-w:68px}
+    body.ui-side.an-min{--an-w:76px}
     body.ui-side.an-min #asideNav .an-tx,body.ui-side.an-min #asideNav .an-sec,body.ui-side.an-min #asideNav .an-sub,body.ui-side.an-min #asideNav .an-bt,body.ui-side.an-min #asideNav .an-foot,body.ui-side.an-min #asideNav details>summary::after{display:none}
     body.ui-side.an-min #asideNav .an-it{justify-content:center;padding:10px 0}
+    body.ui-side.an-min #asideNav .an-ic{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.12);align-items:center;justify-content:center}
+    body.ui-side.an-min #asideNav .an-ic svg{width:22px;height:22px;stroke-width:1.9}
+    body.ui-side.an-min #asideNav .an-it:hover .an-ic{background:rgba(255,255,255,.26)}
+    body.ui-side.an-min #asideNav .an-it.active .an-ic,body.ui-side.an-min #asideNav .an-it.on .an-ic{background:#fff;color:#14513c}
+    body.ui-side.an-min{--an-w:76px}
     body.ui-side.an-min #asideNav .an-brand{justify-content:center;padding:2px 0 10px}
-    body.ui-side.an-min{--an-w:68px}
+    body.ui-side.an-min{--an-w:76px}
     #anBurger{display:none}
   }
   #anBurger{display:none}
@@ -747,19 +752,19 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   <button type="button" class="an-it" data-ic="radio" data-v="special-komuta" data-need="rep"><span class="an-ic"></span><span class="an-tx">Komuta Kontrol</span></button>
   <button type="button" class="an-it" data-ic="cross" data-v="special-bashekimlik" data-need="rep"><span class="an-ic"></span><span class="an-tx">Başhekimlik</span></button>
   <div class="an-sec">ANALİZLER</div>
-  <button type="button" class="an-it" data-ic="chart" data-ov="boslukModal" data-need="rep" onclick="anNav(showBoslukModal)"><span class="an-ic"></span><span class="an-tx">5+ gün boşluk</span></button>
-  <button type="button" class="an-it" data-ic="chart" data-ov="surucuDuzenModal" data-need="rep" onclick="anNav(showSurucuDuzenModal)"><span class="an-ic"></span><span class="an-tx">Sürücü nöbet analizi</span></button>
-  <button type="button" class="an-it" data-ic="chart" data-ov="tumPersonelDuzenModal" data-need="rep" onclick="anNav(showTumPersonelDuzenModal)"><span class="an-ic"></span><span class="an-tx">Tüm personel analizi</span></button>
-  <button type="button" class="an-it" data-ic="chart" data-ov="cokluTumPersonelModal" data-need="rep" onclick="anNav(showCokluTumPersonelModal)"><span class="an-ic"></span><span class="an-tx">Çoklu istasyon</span></button>
-  <button type="button" class="an-it" data-ic="chart" data-ov="uygunPersonelModal" data-need="rep" onclick="anNav(showUygunPersonelModal)"><span class="an-ic"></span><span class="an-tx">Nöbete uygun personel</span></button>
-  <button type="button" class="an-it" data-ic="chart" data-ov="nobelAnaliziModal" data-ag="ef" data-need="rep" onclick="anNav(function(){window.__anG='ef';showAnalizModal('ef')})"><span class="an-ic"></span><span class="an-tx">Ekip Şefi analizi</span></button>
-  <button type="button" class="an-it" data-ic="chart" data-ov="nobelAnaliziModal" data-ag="ysp" data-need="rep" onclick="anNav(function(){window.__anG='ysp';showAnalizModal('ysp')})"><span class="an-ic"></span><span class="an-tx">YSP analizi</span></button>
-  <button type="button" class="an-it" data-ic="chart" data-ov="nobelAnaliziModal" data-ag="sur" data-need="rep" onclick="anNav(function(){window.__anG='sur';showAnalizModal('sur')})"><span class="an-ic"></span><span class="an-tx">Sürücü analizi</span></button>
+  <button type="button" class="an-it" data-ic="gap" data-ov="boslukModal" data-need="rep" onclick="anNav(showBoslukModal)"><span class="an-ic"></span><span class="an-tx">5+ gün boşluk</span></button>
+  <button type="button" class="an-it" data-ic="car" data-ov="surucuDuzenModal" data-need="rep" onclick="anNav(showSurucuDuzenModal)"><span class="an-ic"></span><span class="an-tx">Sürücü nöbet analizi</span></button>
+  <button type="button" class="an-it" data-ic="users" data-ov="tumPersonelDuzenModal" data-need="rep" onclick="anNav(showTumPersonelDuzenModal)"><span class="an-ic"></span><span class="an-tx">Tüm personel analizi</span></button>
+  <button type="button" class="an-it" data-ic="swap" data-ov="cokluTumPersonelModal" data-need="rep" onclick="anNav(showCokluTumPersonelModal)"><span class="an-ic"></span><span class="an-tx">Çoklu istasyon</span></button>
+  <button type="button" class="an-it" data-ic="ucheck" data-ov="uygunPersonelModal" data-need="rep" onclick="anNav(showUygunPersonelModal)"><span class="an-ic"></span><span class="an-tx">Nöbete uygun personel</span></button>
+  <button type="button" class="an-it" data-ic="shield" data-ov="nobelAnaliziModal" data-ag="ef" data-need="rep" onclick="anNav(function(){window.__anG='ef';showAnalizModal('ef')})"><span class="an-ic"></span><span class="an-tx">Ekip Şefi analizi</span></button>
+  <button type="button" class="an-it" data-ic="heart" data-ov="nobelAnaliziModal" data-ag="ysp" data-need="rep" onclick="anNav(function(){window.__anG='ysp';showAnalizModal('ysp')})"><span class="an-ic"></span><span class="an-tx">YSP analizi</span></button>
+  <button type="button" class="an-it" data-ic="wheel" data-ov="nobelAnaliziModal" data-ag="sur" data-need="rep" onclick="anNav(function(){window.__anG='sur';showAnalizModal('sur')})"><span class="an-ic"></span><span class="an-tx">Sürücü analizi</span></button>
   <div class="an-sec">VERİ</div>
   <button type="button" class="an-it" data-ic="box" data-g="arsiv" id="anArsiv"><span class="an-ic"></span><span class="an-tx">Arşiv</span></button>
   <button type="button" class="an-it" data-ic="down" data-need="rep" onclick="anNav(openIzinRaporPicker)"><span class="an-ic"></span><span class="an-tx">İzin / Rapor dosyası</span></button>
   <button type="button" class="an-it" data-ic="cal" data-need="rep" onclick="showOzelGunModal()"><span class="an-ic"></span><span class="an-tx">Özel günler</span></button>
-  <button type="button" class="an-it" data-ic="grid" data-need="rep" onclick="anNav(exportExcelAll)"><span class="an-ic"></span><span class="an-tx">Excel (tümü)</span></button>
+  <button type="button" class="an-it" data-ic="xls" data-need="rep" onclick="anNav(exportExcelAll)"><span class="an-ic"></span><span class="an-tx">Excel (tümü)</span></button>
   <button type="button" class="an-it" data-ic="refresh" data-need="rep" onclick="anNav(resetPage)"><span class="an-ic"></span><span class="an-tx">Yeni dosya yükle</span></button>
   <button type="button" class="an-it" data-ic="book" data-g="kilavuz" data-need="rep"><span class="an-ic"></span><span class="an-tx">Kılavuz</span></button>
   <div class="an-foot"><div id="anUpd"></div><button type="button" class="an-back" onclick="ashiUiAyarla('classic')">↩ Klasik görünüme dön</button></div>
@@ -5897,7 +5902,7 @@ function buildDokumCetveliSheet() {
   }
   return ws;
 }
-function exportIstasyonPersonelExcel(){
+function exportIstasyonPersonelExcel(sayfa){
   if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
   const people=getFilteredIstasyonPersonelRows();
   const summaryRows=[], detailRows=[];
@@ -5913,11 +5918,18 @@ function exportIstasyonPersonelExcel(){
   const wsDetail=XLSX.utils.json_to_sheet(detailRows.length?detailRows:[{'Bilgi':'Filtreye uygun kayıt bulunamadı.'}]);
   wsSummary['!cols']=[{wch:38},{wch:16},{wch:28},{wch:24},{wch:16},{wch:14},{wch:14},{wch:16},{wch:14},{wch:22},{wch:12},{wch:14},{wch:34}];
   wsDetail['!cols']=[{wch:38},{wch:16},{wch:28},{wch:24},{wch:22},{wch:16},{wch:22},{wch:22},{wch:18},{wch:10}];
-  XLSX.utils.book_append_sheet(wb,wsSummary,'Personel Özeti');
-  XLSX.utils.book_append_sheet(wb,wsDetail,'Nöbet Detayları');
-  try { XLSX.utils.book_append_sheet(wb,buildDokumCetveliSheet(),'Nöbet Döküm Cetveli'); } catch(err) { console.warn('Nöbet Döküm Cetveli sayfası oluşturulamadı:', err); }
+  // sayfa: yalnız açık sekmeyi (Nöbet Detayları / Personel Özeti) indir; verilmezse tüm sayfalar
+  const detayAcik=!!document.getElementById('istasyonPersonelDetailTab')?.classList.contains('active');
+  if(sayfa==='sayfa'){
+    if(detayAcik) XLSX.utils.book_append_sheet(wb,wsDetail,'Nöbet Detayları'); else XLSX.utils.book_append_sheet(wb,wsSummary,'Personel Özeti');
+  } else {
+    XLSX.utils.book_append_sheet(wb,wsSummary,'Personel Özeti');
+    XLSX.utils.book_append_sheet(wb,wsDetail,'Nöbet Detayları');
+    try { XLSX.utils.book_append_sheet(wb,buildDokumCetveliSheet(),'Nöbet Döküm Cetveli'); } catch(err) { console.warn('Nöbet Döküm Cetveli sayfası oluşturulamadı:', err); }
+  }
   const station=document.getElementById('istasyonPersonelStation')?.value||'tum_istasyonlar';
-  XLSX.writeFile(wb,`ashi_istasyon_personel_${station.replace(/[^a-z0-9çğıöşüÇĞİÖŞÜ]+/gi,'_').slice(0,50)}.xlsx`);
+  const ek=sayfa==='sayfa'?(detayAcik?'_detay':'_ozet'):'';
+  XLSX.writeFile(wb,`ashi_istasyon_personel${ek}_${station.replace(/[^a-z0-9çğıöşüÇĞİÖŞÜ]+/gi,'_').slice(0,50)}.xlsx`);
 }
 // ===== Kontrol Raporu (resmî döküm cetvelinin sarı/kırmızı sütunları; çoklu ay) =====
 const KR_AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
@@ -7250,7 +7262,7 @@ function exportExcelAll() {
   XLSX.writeFile(wb, 'ashi_nobet_sayim_tumu.xlsx');
 }
 
-function exportExcelSingle() {
+function exportExcelSingle(sayfa) {
   // Başhekimlik / Komuta Kontrol sekimlerindeyken bu görünümdeki (filtrelenmiş) listeyi aktar
   if (activeView === 'special-komuta' || activeView === 'special-bashekimlik') {
     const kind = activeView === 'special-komuta' ? 'komuta' : 'bashekimlik';
@@ -7264,6 +7276,15 @@ function exportExcelSingle() {
   const gorev = ['ef','ysp','sur'].includes(activeGorev) ? activeGorev : (lastValidGorev || 'sur');
   const wb = XLSX.utils.book_new();
   const labels = { ef:'Ekip Şefi', ysp:'Yardımcı Sağlık Personeli', sur:'Sürücü' };
+  // sayfa: yalnız açık görünümü (Nöbet tablosu / Personel listesi / İstasyon özeti) indir
+  if (sayfa === 'sayfa') {
+    let ek = '';
+    if (activeView === 'personel') { XLSX.utils.book_append_sheet(wb, buildPersonelDetaySheet(gorev), 'Personel Detay'); ek = '_personel'; }
+    else if (activeView === 'istasyon') { XLSX.utils.book_append_sheet(wb, buildIstasyonOzetSheet(gorev), 'İstasyon Özet'); ek = '_istasyon'; }
+    else XLSX.utils.book_append_sheet(wb, buildSheet(allData[gorev], labels[gorev], allCoklu[gorev]), labels[gorev]);
+    XLSX.writeFile(wb, `ashi_nobet_${gorev}${ek}.xlsx`);
+    return;
+  }
   const ws = buildSheet(allData[gorev], labels[gorev], allCoklu[gorev]);
   XLSX.utils.book_append_sheet(wb, ws, labels[gorev]);
   // Personel Detay
@@ -7633,6 +7654,7 @@ const AN_ICONS = {
   user:'<circle cx="8" cy="5.5" r="2.5"/><path d="M3 14c.5-3 2.5-4 5-4s4.5 1 5 4"/>', build:'<rect x="3" y="2" width="10" height="12" rx="1"/><path d="M6 5h1M9 5h1M6 8h1M9 8h1M7 14v-3h2v3"/>', list:'<path d="M5 4h9M5 8h9M5 12h9M2 4h1M2 8h1M2 12h1"/>',
   radio:'<circle cx="8" cy="8" r="1.5"/><path d="M4.5 4.5a5 5 0 000 7M11.5 4.5a5 5 0 010 7"/>', cross:'<path d="M6 2h4v4h4v4h-4v4H6v-4H2V6h4z"/>', chart:'<path d="M2 13V9M6 13V4M10 13V7M14 13V2"/>',
   box:'<path d="M2 5h12v8H2zM2 5l1.5-3h9L14 5"/><path d="M6 8h4"/>', down:'<path d="M8 2v8M5 7l3 3 3-3M3 13h10"/>', cal:'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 7h12M5 1.5v3M11 1.5v3"/>',
+  gap:'<path d="M4 2h8M4 14h8M5 2c0 4 3 4 3 6s-3 2-3 6M11 2c0 4-3 4-3 6s3 2 3 6"/>', car:'<path d="M2.5 10.5V8l1.5-3h8l1.5 3v2.5z"/><path d="M2.5 8h11"/><circle cx="5" cy="12" r="1.3"/><circle cx="11" cy="12" r="1.3"/>', users:'<circle cx="6" cy="5.5" r="2.2"/><path d="M1.8 13c.4-2.6 2-3.6 4.2-3.6s3.8 1 4.2 3.6"/><circle cx="11.5" cy="6" r="1.7"/><path d="M11.5 9.6c1.8 0 2.8 1 3 3"/>', swap:'<path d="M2 5h10M9 2l3 3-3 3M14 11H4M7 8l-3 3 3 3"/>', ucheck:'<circle cx="7" cy="5.5" r="2.5"/><path d="M2 14c.5-3 2.3-4 5-4 1 0 1.8.2 2.5.6M10 11.5l1.8 1.8L15 10"/>', shield:'<path d="M8 1.5l5 2v4c0 3-2.2 5.5-5 7-2.8-1.5-5-4-5-7v-4z"/><path d="M8 5v5M5.5 7.5h5"/>', heart:'<path d="M8 13.5S2 10 2 5.8A3 3 0 018 4.5a3 3 0 016 1.300C14 10 8 13.500 8 13.500z"/>', wheel:'<circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="1.5"/><path d="M2.2 7.5h4.3M9.5 7.5h4.3M8 9.5V14"/>', xls:'<rect x="2.500" y="2" width="11" height="12" rx="1.500"/><path d="M5.500 5.500l5 5M10.500 5.500l-5 5"/>',
   refresh:'<path d="M13 8a5 5 0 10-1.5 3.5M13 3v3h-3"/>', book:'<path d="M3 2h8a2 2 0 012 2v10H5a2 2 0 01-2-2z"/><path d="M5 14V4"/>'
 };
 const AN_BAR_IDS = ['boslukModal', 'surucuDuzenModal', 'tumPersonelDuzenModal', 'cokluTumPersonelModal', 'uygunPersonelModal'];
@@ -7739,8 +7761,8 @@ function anIndir() {
   if (typeof XLSX === 'undefined') { alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
   try {
     if (activeGorev === 'istasyon') {
-      if (document.getElementById('istasyonPersonelKontrol')?.style.display === 'block') exportKontrolRaporuExcel(); else exportIstasyonPersonelExcel();
-    } else if (['ef', 'ysp', 'sur'].includes(activeGorev)) exportExcelSingle();
+      if (document.getElementById('istasyonPersonelKontrol')?.style.display === 'block') exportKontrolRaporuExcel(); else exportIstasyonPersonelExcel('sayfa');
+    } else if (['ef', 'ysp', 'sur'].includes(activeGorev)) exportExcelSingle('sayfa');
     else alert('Bu sayfa için Excel çıktısı yok. Arşiv için "Yedek Al (JSON)" kullanılabilir.');
   } catch (e) { console.warn(e); alert('Excel indirilemedi: ' + e.message); }
 }
