@@ -217,15 +217,46 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter.wide{flex:2 1 190px}
     body.ui-side .modal-overlay .modal-head{padding:10px 16px}
     body.ui-side .an-statbar{padding:8px 16px!important;gap:12px!important}
+    body.ui-side .an-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:8px 14px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
+    body.ui-side .an-bar>*{order:1;margin:0}
+    body.ui-side .an-bar .bosluk-filter{flex:1 1 110px;min-width:0}
+    body.ui-side .an-bar .bosluk-filter.wide{flex:1.5 1 160px}
+    body.ui-side .an-bar>#uygunPersonelSearchBtn,body.ui-side .an-bar>.bosluk-filter:has(#uygunPersonelDate){order:0;flex:0 0 auto}
+    body.ui-side .an-bar>.bosluk-filter:has(#uygunPersonelDate) .bosluk-filter-label{display:block}
+    body.ui-side .an-bar>.bosluk-clear{order:2;flex:0 0 auto}
+    body.ui-side .an-bar>[id$="Ozet"]{order:5;font-size:12px!important;flex:4 1 0%!important;min-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    body.ui-side .an-bar>.bosluk-filter-summary{order:6;padding:0;flex:0 0 auto;white-space:nowrap}
+    body.ui-side .an-bar>[id$="RoleSummary"]{order:7;display:flex;flex-wrap:wrap;gap:6px;padding:0!important;background:none!important;border:0!important;flex:0 1 auto}
+    body.ui-side .an-bar>.btn-sec[id^="export"]{order:9;margin-left:auto;flex:0 0 auto}
+    body.ui-side .an-bar>.bosluk-filter:has(.bosluk-view-switch){flex:0 0 auto}
+    body.ui-side .an-bar>.bosluk-filter:has(.bosluk-view-switch) .bosluk-view-btn{white-space:nowrap}
+    body.ui-side #istasyonPersonelKontrol>div:first-child .btn-sec[onclick*="exportKontrolRaporuExcel"]{display:none}
+    body.ui-side .an-bar~.an-emp{display:none!important}
+    body.ui-side #analizToolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    body.ui-side #analizToolbar .analiz-filter-row{display:contents}
+    body.ui-side #analizToolbar .bosluk-filter:has(#analizSort){flex:0 0 220px}
+    body.ui-side #analizToolbar .bosluk-clear:not(.keep){flex:0 0 auto}
+    body.ui-side #analizToolbar .bosluk-filter-summary{flex:1 1 280px;margin:0;padding:0;min-height:0}
+    body.ui-side #analizToolbar .bosluk-filter-summary .btn-sec{margin-left:auto}
+    body.ui-side #analizToolbar .analiz-color-settings{flex:0 0 100%}
+    body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelKontrol:not([style*="none"]))>.istasyon-personel-summary{display:none}
+    body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelKontrol:not([style*="none"]))>.istasyon-personel-view-tabs{flex:0 0 auto}
+    body.ui-side #istasyonPersonelKontrol:not([style*="none"]){display:contents!important}
+    body.ui-side #istasyonPersonelKontrol>div:first-child{order:2;flex:1 1 0;min-width:0;align-self:stretch;padding:6px 4px!important;position:sticky;top:calc(62px + var(--ip-f,66px));z-index:34;background:var(--gray)}
+    body.ui-side #istasyonPersonelKontrol>div:first-child{flex-wrap:nowrap!important;gap:8px!important;align-items:center}
+    body.ui-side #istasyonPersonelKontrol>div:first-child #krPickBtn{min-width:120px!important;padding:0 10px;white-space:nowrap}
+    body.ui-side #istasyonPersonelKontrol>div:first-child #krAra{min-width:100px!important;max-width:none!important;flex:1 1 100px}
+    body.ui-side #istasyonPersonelKontrol>div:first-child .kr-tab,body.ui-side #istasyonPersonelKontrol>div:first-child .btn-sec{white-space:nowrap;font-size:12px;padding-left:10px;padding-right:10px}
+    body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelKontrol:not([style*="none"]))>.istasyon-personel-view-tabs{align-self:center}
+    body.ui-side #istasyonPersonelKontrol>#krOzet,body.ui-side #istasyonPersonelKontrol>#krTablo{order:3;flex:0 0 100%;min-width:0}
     body.ui-side .istasyon-personel-main-section{overflow:visible}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-filters{position:sticky;top:62px;z-index:35}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-view-tabs,body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{position:sticky;top:calc(62px + var(--ip-f,66px));z-index:34;background:var(--gray)}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{background:#fff}
     body.ui-side .istasyon-personel-summary-table-wrap,body.ui-side #krTablo{overflow:visible!important}
-    body.ui-side .istasyon-personel-summary-table th{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px));z-index:20}
-    body.ui-side .istasyon-personel-station-head{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px));z-index:15}
-    body.ui-side #istasyonPersonelKontrol>div:first-child{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px));z-index:30;background:var(--gray)}
-    body.ui-side .kr-table th{top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) + var(--ip-k,56px))}
+    body.ui-side .istasyon-personel-summary-table th{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) - 6px);z-index:20}
+    body.ui-side .istasyon-personel-station-head{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) - 6px);z-index:15}
+    body.ui-side .kr-table th{top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) - 6px)}
     body.ui-side #specialListToolbar{position:sticky;top:62px;z-index:30}
     body.ui-side #raporContent #tblSpecialList.tbl thead th{position:sticky;top:calc(62px + var(--sp-h,90px));z-index:20}
     body.ui-side .an-statbar{flex-wrap:nowrap!important}
@@ -1159,7 +1190,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     </div>
     <div style="padding:14px 20px;background:#eef2ff;border-bottom:1px solid #c7d2fe;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div id="boslukOzet" style="font-size:13px;color:#312e81;font-weight:800"></div>
-      <button id="exportBoslukExcelBtn" class="btn-sec" style="margin-left:auto;background:#fff;color:#3730a3;border-color:#a5b4fc">📥 Görünen Boşlukları Excel’e Aktar</button>
+      <button id="exportBoslukExcelBtn" class="btn-sec" title="Görünen boşlukları Excel’e aktar" style="margin-left:auto;background:#fff;color:#3730a3;border-color:#a5b4fc">📥 Excel’e Aktar</button>
     </div>
     <div id="boslukToolbar" class="bosluk-toolbar">
       <div class="bosluk-filter-row">
@@ -2335,6 +2366,11 @@ async function driveSync(silent, keys) {
     // Açık olan arşiv ayı güncellendiyse (ör. kimlikler açıldıysa) ekrandaki rapor yeniden yüklenir.
     if (archiveActiveKey && r.alinan.includes(archiveActiveKey)) await loadArchivedMonth(archiveActiveKey, archiveActiveSlot);
     else if (r.alinan.length && archiveKeyFromInfo(reportMonthInfo)) autoFillBoundaryFromArchive();
+    // Açılışta otomatik açılan ay hâlâ ekrandaysa ve Drive'dan daha yeni bir ay geldiyse ona geçilir.
+    if (r.alinan.length && ashiOtoKey && archiveActiveKey === ashiOtoKey) {
+      const yeni = await ashiEnSonAyAnahtar();
+      if (yeni && yeni !== archiveActiveKey) { await loadArchivedMonth(yeni); if (archiveActiveKey === yeni) ashiOtoKey = yeni; }
+    }
   } catch (err) {
     console.warn('[ortak arşiv]', err);
     if (err && err.parola) ashiDrive.parolaAyarla(null, false);
@@ -7461,6 +7497,38 @@ function initUpdateControls(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initUpdateControls); else initUpdateControls();
 
+// ===== Açılışta son ayı arşivden otomatik aç + Drive'ı arka planda güncel tut =====
+let ashiOtoKey = null;
+async function ashiEnSonAyAnahtar() {
+  const liste = await archiveGetAll();
+  const ad = liste.filter(r => r && r.reportMonthInfo && r.slots && (r.slots.sonu || r.slots.basi)).map(r => String(r.key)).sort();
+  return ad.length ? ad[ad.length - 1] : null;
+}
+async function ashiSonAyiAc() {
+  try {
+    if (!archiveSupported()) return;
+    const raporVar = document.getElementById('reportSection')?.style.display === 'block';
+    if (raporVar || archiveActiveKey) return;
+    const key = await ashiEnSonAyAnahtar(); if (!key) return;
+    await loadArchivedMonth(key);
+    if (archiveActiveKey !== key) return;
+    ashiOtoKey = key;
+    if (document.body.classList.contains('ui-side') && typeof switchGorev === 'function') { try { switchGorev('istasyon'); } catch (e) {} }
+    if (typeof ashiNavSenk === 'function') ashiNavSenk();
+  } catch (e) { console.warn('[otomatik açılış]', e); }
+}
+(function ashiOtoAcilis() {
+  const basla = () => {
+    setTimeout(ashiSonAyiAc, 900);
+    // Ortak arşiv (Drive) açık kaldığı sürece 10 dakikada bir sessizce yeniden kontrol edilir.
+    setInterval(() => {
+      if (document.visibilityState !== 'visible' || typeof driveBusy === 'undefined' || driveBusy) return;
+      if (ashiDrive.parolaGuclu(ashiDrive.parola()) && ashiDrive.klasor()) driveSync(true);
+    }, 600000);
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', basla); else basla();
+})();
+
 // ===== Yeni görünüm (sol menü) aç/kapat — tercih bu tarayıcıda saklanır; klasik görünüm varsayılan =====
 const AN_OVERLAYS = ['nobelAnaliziModal','cokluModal','boslukModal','surucuDuzenModal','tumPersonelDuzenModal','cokluTumPersonelModal','uygunPersonelModal'];
 const AN_ICONS = {
@@ -7470,6 +7538,27 @@ const AN_ICONS = {
   box:'<path d="M2 5h12v8H2zM2 5l1.5-3h9L14 5"/><path d="M6 8h4"/>', down:'<path d="M8 2v8M5 7l3 3 3-3M3 13h10"/>', cal:'<rect x="2" y="3" width="12" height="11" rx="1.5"/><path d="M2 7h12M5 1.5v3M11 1.5v3"/>',
   refresh:'<path d="M13 8a5 5 0 10-1.5 3.5M13 3v3h-3"/>', book:'<path d="M3 2h8a2 2 0 012 2v10H5a2 2 0 01-2-2z"/><path d="M5 14V4"/>'
 };
+const AN_BAR_IDS = ['boslukModal', 'surucuDuzenModal', 'tumPersonelDuzenModal', 'cokluTumPersonelModal', 'uygunPersonelModal'];
+function anBarlar(ac) {
+  AN_BAR_IDS.forEach(id => {
+    const box = document.querySelector('#' + id + '>.modal-box'); if (!box) return;
+    let bar = box.querySelector(':scope>.an-bar');
+    if (ac && !bar) {
+      const kids = [...box.children], sum = kids[1], tb = box.querySelector(':scope>.bosluk-toolbar');
+      if (!sum || !tb) return;
+      const chips = box.querySelector(':scope>[id$="RoleSummary"]');
+      const row = tb.querySelector('.bosluk-filter-row'), fs = tb.querySelector('.bosluk-filter-summary');
+      bar = document.createElement('div'); bar.className = 'an-bar'; bar._m = [];
+      const mv = el => { if (!el) return; bar._m.push({ el, parent: el.parentNode, next: el.nextSibling }); bar.appendChild(el); };
+      [...sum.children].forEach(mv); [...row.children].forEach(mv); mv(fs); mv(chips);
+      box.insertBefore(bar, sum);
+      sum.classList.add('an-emp'); tb.classList.add('an-emp');
+    } else if (!ac && bar) {
+      bar._m.reverse().forEach(m => m.parent.insertBefore(m.el, m.next));
+      bar.remove(); box.querySelectorAll(':scope>.an-emp').forEach(e => e.classList.remove('an-emp'));
+    }
+  });
+}
 function ashiUiAyarla(mod) {
   const yan = mod === 'side';
   document.body.classList.toggle('ui-side', yan);
@@ -7479,6 +7568,7 @@ function ashiUiAyarla(mod) {
   const w = document.getElementById('updateWidget'), hedef = yan ? document.getElementById('anUpd') : document.querySelector('.topbar');
   if (w && hedef && w.parentNode !== hedef) hedef.appendChild(w);
   if (!yan) AN_OVERLAYS.forEach(id => { const o = document.getElementById(id); if (o) o.style.removeProperty('left'); });
+  try { anBarlar(yan); } catch (e) { console.warn(e); }
   ashiNavSenk();
 }
 (function anTipKur(){
@@ -7510,7 +7600,7 @@ function ashiUiAyarla(mod) {
     const q=s=>document.querySelector(s);
     set('--ip-f',q('.istasyon-personel-main-box>.istasyon-personel-filters'));
     const t=q('.istasyon-personel-main-box>.istasyon-personel-view-tabs'), m=q('.istasyon-personel-main-box>.istasyon-personel-summary');
-    const h=Math.max(t&&t.offsetHeight||0,m&&m.offsetHeight||0); if(h) document.documentElement.style.setProperty('--ip-t',h+'px');
+    const kb=q('#istasyonPersonelKontrol>div:first-child'); const h=Math.max(t&&t.offsetHeight||0,m&&m.offsetHeight||0,(kb&&kb.offsetHeight)||0); if(h) document.documentElement.style.setProperty('--ip-t',h+'px');
     set('--ip-k',q('#istasyonPersonelKontrol>div:first-child'));
     set('--sp-h',q('#specialListToolbar'));
   };
