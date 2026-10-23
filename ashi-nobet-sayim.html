@@ -5551,7 +5551,10 @@ function ashiKadroSaati(tc, istihdam, info) {
   const isci = ashiIsIsci(istihdam);
   const days = new Date(Date.UTC(info.year, info.month, 0)).getUTCDate();
   const tcN = normalizeTcValue(tc);
-  const leaves = tcN ? (izinRaporRecords || []).filter(r => r.tc === tcN) : [];
+  const allL = tcN ? (izinRaporRecords || []).filter(r => r.tc === tcN) : [];
+  // Nöbet muafiyeti çalışma saatini düşürmez; süt izni günlük mesaiden (8 / işçi 7,5 saat) 1,5 veya 3 saat düşer.
+  const leaves = allL.filter(r => !ashiIzinMuafiyetMi(r.type));
+  const sutL = allL.filter(r => /s[üu]t\s*izn/.test(String(r.type || '').toLocaleLowerCase('tr-TR'))).map(r => ({...r, sutH: parseFloat((String(r.type).match(/(\d+(?:[.,]\d+)?)\s*saat/i) || [])[1]?.replace(',', '.')) || 0}));
   let total = 0;
   for (let i = 1; i <= days; i++) {
     const dayStart = Date.UTC(info.year, info.month - 1, i), dayEnd = dayStart + 86400000;
@@ -5563,7 +5566,10 @@ function ashiKadroSaati(tc, istihdam, info) {
     segs.forEach(([a, b]) => { if (curS === null) { curS = a; curE = b; } else if (a <= curE) curE = Math.max(curE, b); else { covered += curE - curS; curS = a; curE = b; } });
     if (curS !== null) covered += curE - curS;
     const coveredH = covered / 3600000;
-    total += coveredH >= 23.9 ? 0 : Math.max(0, hrs - coveredH);
+    let kalan = coveredH >= 23.9 ? 0 : Math.max(0, hrs - coveredH);
+    const sutH = sutL.reduce((m, r) => r.startMs < dayEnd && r.endMs > dayStart ? Math.max(m, r.sutH) : m, 0);
+    if (sutH && kalan) kalan = Math.max(0, kalan - sutH);
+    total += kalan;
   }
   return Math.round(total * 100) / 100;
 }
@@ -5727,7 +5733,7 @@ function ozelGunRender(){
 // AKILLI FİLTRELER + DENETİM KARTLARI (İstasyon Listesi › Personel Özeti)
 const ASHI_UYARI_FARK = 72;   // kadro süresinden ±72 saat (3 nöbet) sapma = denetim uyarısı
 let ashiOzetFiltre = {fazla:0, eksik:0, gece:0, coklu:0, uyari:0};
-function ashiOzetFiltreToggle(k){ ashiOzetFiltre[k] = ashiOzetFiltre[k] ? 0 : 1; renderIstasyonPersonelSummaryTable(); }
+function ashiOzetFiltreToggle(k){ const acik = ashiOzetFiltre[k]; Object.keys(ashiOzetFiltre).forEach(x => ashiOzetFiltre[x] = 0); ashiOzetFiltre[k] = acik ? 0 : 1; renderIstasyonPersonelSummaryTable(); }
 function ashiOzetUyar(x){
   const f = ashiOzetFiltre, fark = x.kadro == null ? null : x.total - x.kadro;
   if (f.fazla && !(fark != null && fark > 0)) return false;
@@ -5816,7 +5822,7 @@ function ashiIzinTuru(type) {
   if (/y[ıi]ll[ıi]k/.test(t)) return {kod:'Yİ', alan:'Yıllık İzin Gün Sayısı'};
   if (/heyet/.test(t)) return {kod:'HyR', alan:R};
   if (/i[şs]\s*kazas/.test(t)) return {kod:'İR', alan:R};
-  if (/hekim\s*rapor|rapor|hastal|istirahat/.test(t)) return {kod:'HeR', alan:R};
+  if (/hekim\s*rapor|rapor|hastal|hastane|istirahat/.test(t)) return {kod:'HeR', alan:R};
   if (/do[ğg]um\s*sonras|do[ğg]um|ana?l[ıi]k/.test(t) && !/[öo]ncesi/.test(t)) return {kod:'DSİ', alan:S};
   if (/do[ğg]um\s*[öo]ncesi/.test(t)) return {kod:'DÖİ', alan:S};
   if (/babal[ıi]k/.test(t)) return {kod:'Bİ', alan:S};
@@ -5824,9 +5830,9 @@ function ashiIzinTuru(type) {
   if (/[öo]l[üu]m/.test(t)) return {kod:'Öİa', alan:S};
   if (/refakat/.test(t)) return {kod:'Rİ', alan:S};
   if (/idari/.test(t)) return {kod:'İİ', alan:S};
-  if (/sendikal/.test(t)) return {kod:'Sİ', alan:''};
+  if (/sendikal/.test(t)) return {kod:'Sİ', alan:S};
   if (/çal[ıi][şs]ma\s*izn|calisma\s*izn/.test(t)) return {kod:'Çİ', alan:'Çalışma İzinli Gün Sayısı'};
-  return {kod:'Sİ', alan:''};
+  return {kod:'Sİ', alan:S};   // mazeret vb. diğer sosyal izinler
 }
 // Günlük izin bilgisi: tam gün izinler ("1 Yİ") ve saatlik izinler ("3 İİ"; mesaiyi bölerek "M" üretir). Muafiyet kayıtları döküme yazılmaz.
 function ashiIzinGunleri(tc, istihdam, info) {
