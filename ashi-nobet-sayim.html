@@ -3042,6 +3042,19 @@ function openGuide() {
   switchGorev('kilavuz');
 }
 
+function ashiIstasyonTuret(ad, il) {
+  const t = String(ad || '').replace(/\s+/g, ' ').trim();
+  if (!t) return '';
+  const OZEL = {
+    'ALAŞEHİR 4 (ULUDERBENT) NOLU ASHİ': 'ALAŞEHİR 4 NOLU (ULUDERBENT)',
+    'YUNUSEMRE 6 NOLU ASHİ': 'YUNUSEMRE 6 NOLU (MURADİYE)'
+  };
+  const m = t.match(/^(.*)\sASH[İI]$/i);
+  if (!m) return t;
+  const govde = OZEL[t] || m[1];
+  const ilAd = String(il || '').replace(/\s+/g, ' ').trim() || 'MANİSA';
+  return `${ilAd} ${govde} ACİL SAĞLIK HİZMETLERİ İSTASYONU`;
+}
 function processFile(file) {
   if (!file) return;
   const ext = file.name.split('.').pop().toLowerCase();
@@ -3068,9 +3081,21 @@ function processFile(file) {
 
       // Başlık satırından kolon indekslerini bul
       const hdr = rows[0].map(h => String(h||'').trim()); const normalizeReportHeader = value => String(value || '').toLocaleUpperCase('tr-TR').normalize('NFD').split('').filter(ch => { const code = ch.charCodeAt(0); return code < 0x300 || code > 0x36f; }).join('').replace(/[ÇĞİÖŞÜ]/g, ch => ({Ç:'C', Ğ:'G', İ:'I', Ö:'O', Ş:'S', Ü:'U'}[ch] || ch)); const hdrNorm = hdr.map(normalizeReportHeader); const stationInfoIndex = hdrNorm.findIndex(h => /EKIBIN\s+ISTASYON\s+BILGISI/.test(h)); const ci = { tckn: hdr.findIndex(h => /TCKN|TC Kimlik/i.test(h)), ad: hdr.findIndex(h => /^Ad$/i.test(h)), soyad: hdr.findIndex(h => /soyad/i.test(h)), tur: hdr.findIndex(h => /Ekip T[üu]r[üu]/i.test(h)), tip: hdr.findIndex(h => /Ekip Tipi/i.test(h)), ist: stationInfoIndex, gorev: hdr.findIndex(h => /N[öo]bet G[öo]revi/i.test(h)), sure: hdr.findIndex(h => /N[öo]bet S[üu]resi/i.test(h)), bas: hdr.findIndex(h => /Ba[sş]lang[iı][cç]/i.test(h)), bitis: hdr.findIndex(h => /Bit[iı][şs] tarihi|Bit[iı][şs]/i.test(h)), bran: (() => { const n=hdr.findIndex(h=>/N[öo]bet Listesi Bran/i.test(h)); return n>=0?n:hdr.findIndex(h=>/^Bran[sş]/i.test(h)); })(), kadroBran: (() => { const n=hdr.findIndex(h=>/Kadro\s*Bran/i.test(h)); if(n>=0) return n; const n2=hdr.findIndex(h=>/N[öo]bet Listesi Bran/i.test(h)); if(n2>=0) return n2; return hdr.findIndex(h=>/^Bran[sş]/i.test(h)); })(), il: hdr.findIndex(h => /^[İIi]l$/.test(h)), unvan: hdr.findIndex(h => /^Unvan$/i.test(h)), ofBrans: hdr.findIndex(h => /^Bran[sş]$/i.test(h)), istihdam: hdr.findIndex(h => /[İIi]stihdam/i.test(h)), }; const requiredHeaderKeys = ['tckn','ad','soyad','tur','tip','ist','gorev','sure','bas'];
+      // Yeni rapor sürümünde "Ekibin İstasyon Bilgisi" sütunu yoksa istasyon adı "Ekip Adı"ndan türetilir
+      // (ör. "AHMETLİ 1 NOLU ASHİ" → "MANİSA AHMETLİ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU"); arşivdeki eski aylarla aynı ad kalır.
+      if (ci.ist < 0) {
+        const eadIdx = hdr.findIndex(h => /^Ekip Ad[ıi]$/i.test(h));
+        if (eadIdx >= 0) {
+          const yeniIdx = rows[0].length;
+          rows[0][yeniIdx] = 'Ekibin İstasyon Bilgisi';
+          for (let ri = 1; ri < rows.length; ri++) rows[ri][yeniIdx] = ashiIstasyonTuret(rows[ri][eadIdx], ci.il >= 0 ? rows[ri][ci.il] : '');
+          ci.ist = yeniIdx;
+        }
+      }
       const missingHeaderKeys = requiredHeaderKeys.filter(key => ci[key] < 0);
       if (missingHeaderKeys.length) {
-        throw new Error('Bu dosya desteklenen Nöbet İçi Hareket Raporu veya Nöbet Listesi Raporu formatında değil. Gerekli kolonlar bulunamadı; farklı raporlar kabul edilmez.');
+        const ETK = {tckn:'TCKN', ad:'Ad', soyad:'Soyad', tur:'Ekip Türü', tip:'Ekip Tipi', ist:'Ekibin İstasyon Bilgisi / Ekip Adı', gorev:'Nöbet Görevi', sure:'Nöbet Süresi', bas:'Başlangıç Tarihi'};
+        throw new Error('Bu dosya desteklenen Nöbet İçi Hareket Raporu veya Nöbet Listesi Raporu formatında değil. Eksik kolon: ' + missingHeaderKeys.map(k => ETK[k] || k).join(', ') + '. Farklı raporlar kabul edilmez.');
       }
       // Opsiyonel kolonlar için Nöbet İçi Hareket Raporu varsayılan indeksleri
       if (ci.bran<0)  ci.bran=7;  if (ci.bitis<0) ci.bitis=ci.bas+1;
@@ -3218,7 +3243,8 @@ function processFile(file) {
       switchGorev(activeGorev);
 
     } catch(err) {
-      showError('Hata: ' + err.message + (err.stack ? '\n' + err.stack.split('\n').slice(0,3).join('\n') : ''));
+      console.error(err);
+      showError('Hata: ' + err.message);
       console.error(err);
     }
     showLoading(false);
