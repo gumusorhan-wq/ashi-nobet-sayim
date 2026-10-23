@@ -1591,7 +1591,7 @@ function normalizeStationName(value) {
 }
 function isASHI(row) {
   const station = normalizeStationName(getIstasyon(row));
-  return station.includes('ACIL SAGLIK HIZMETLERI') || /\bASHI\b/.test(station);
+  return station.includes('ACIL SAGLIK HIZMETLERI') || /\bASHI\b/.test(station) || /ACIL VAKA EKIB|GOREVLENDIRME EKIP/.test(station);
 }
 function isAmbulans(row)  { const c=window.__ci; return /Acil Yardım Ambulans|Özel Donanımlı Ambulans/i.test(String(row[c?c.tip:12]||'')); }
 function isIstasyon(row)  { const c=window.__ci; return /İstasyon/i.test(String(row[c?c.tur:11]||'')); }
@@ -1780,6 +1780,8 @@ async function archiveSaveCurrentReportInner(fileName, options={}) {
   const key = archiveKeyFromInfo(info);
   const slot = options.slot || 'sonu';
   if (!key || !info) return {saved:false, reason:'missing-month'};
+  // Arşiv yalnızca Manisa'ya ait; başka il dosyası Manisa'nın o ayki kaydının üzerine yazılmasın
+  if (window.__ashiIl && !/^MAN[İI]SA$/i.test(window.__ashiIl)) return {saved:false, reason:'other-province'};
   try {
     const rec = (await archiveGet(key)) || {key, reportMonthInfo: info, savedAt: null, slots: {}, izin: null};
     rec.reportMonthInfo = info;
@@ -2860,14 +2862,47 @@ const GOREV_MAP = {
 // ÇOKLU İSTASYON SEÇİCİ (ilçe bazlı) — <select data-ist-picker> kutularının yerine geçer.
 // Seçim boşsa "tüm istasyonlar" demektir. ashiIstSecim(id) seçili istasyon adlarını dizi olarak verir.
 // ═══════════════════════════════════════════════════════════
+// Türkiye il → ilçe listesi (81 il, 973 ilçe). İstasyon adındaki ilçeyi bulup ilçeye göre gruplamak için kullanılır.
+const ASHI_IL_ILCE = {"ADANA":["ALADAĞ","CEYHAN","ÇUKUROVA","FEKE","İMAMOĞLU","KARAİSALI","KARATAŞ","KOZAN","POZANTI","SAİMBEYLİ","SARIÇAM","SEYHAN","TUFANBEYLİ","YUMURTALIK","YÜREĞİR"],"ADIYAMAN":["MERKEZ","BESNİ","ÇELİKHAN","GERGER","GÖLBAŞI","KAHTA","SAMSAT","SİNCİK","TUT"],"AFYONKARAHİSAR":["MERKEZ","BAŞMAKÇI","BAYAT","BOLVADİN","ÇAY","ÇOBANLAR","DAZKIRI","DİNAR","EMİRDAĞ","EVCİLER","HOCALAR","İHSANİYE","İSCEHİSAR","KIZILÖREN","SANDIKLI","SİNANPAŞA","SULTANDAĞI","ŞUHUT"],"AĞRI":["MERKEZ","DİYADİN","DOĞUBAYAZIT","ELEŞKİRT","HAMUR","PATNOS","TAŞLIÇAY","TUTAK"],"AMASYA":["MERKEZ","GÖYNÜCEK","GÜMÜŞHACIKÖY","HAMAMÖZÜ","MERZİFON","SULUOVA","TAŞOVA"],"ANKARA":["AKYURT","ALTINDAĞ","AYAŞ","BALA","BEYPAZARI","ÇAMLIDERE","ÇANKAYA","ÇUBUK","ELMADAĞ","ETİMESGUT","EVREN","GÖLBAŞI","GÜDÜL","HAYMANA","KAHRAMANKAZAN","KALECİK","KEÇİÖREN","KIZILCAHAMAM","MAMAK","NALLIHAN","POLATLI","PURSAKLAR","SİNCAN","ŞEREFLİKOÇHİSAR","YENİMAHALLE"],"ANTALYA":["AKSEKİ","AKSU","ALANYA","DEMRE","DÖŞEMEALTI","ELMALI","FİNİKE","GAZİPAŞA","GÜNDOĞMUŞ","İBRADI","KAŞ","KEMER","KEPEZ","KONYAALTI","KORKUTELİ","KUMLUCA","MANAVGAT","MURATPAŞA","SERİK"],"ARTVİN":["MERKEZ","ARDANUÇ","ARHAVİ","BORÇKA","HOPA","KEMALPAŞA","MURGUL","ŞAVŞAT","YUSUFELİ"],"AYDIN":["BOZDOĞAN","BUHARKENT","ÇİNE","DİDİM","EFELER","GERMENCİK","İNCİRLİOVA","KARACASU","KARPUZLU","KOÇARLI","KÖŞK","KUŞADASI","KUYUCAK","NAZİLLİ","SÖKE","SULTANHİSAR","YENİPAZAR"],"BALIKESİR":["ALTIEYLÜL","AYVALIK","BALYA","BANDIRMA","BİGADİÇ","BURHANİYE","DURSUNBEY","EDREMİT","ERDEK","GÖMEÇ","GÖNEN","HAVRAN","İVRİNDİ","KARESİ","KEPSUT","MANYAS","MARMARA","SAVAŞTEPE","SINDIRGI","SUSURLUK"],"BİLECİK":["MERKEZ","BOZÜYÜK","GÖLPAZARI","İNHİSAR","OSMANELİ","PAZARYERİ","SÖĞÜT","YENİPAZAR"],"BİNGÖL":["MERKEZ","ADAKLI","GENÇ","KARLIOVA","KİĞI","SOLHAN","YAYLADERE","YEDİSU"],"BİTLİS":["MERKEZ","ADİLCEVAZ","AHLAT","GÜROYMAK","HİZAN","MUTKİ","TATVAN"],"BOLU":["MERKEZ","DÖRTDİVAN","GEREDE","GÖYNÜK","KIBRISCIK","MENGEN","MUDURNU","SEBEN","YENİÇAĞA"],"BURDUR":["MERKEZ","AĞLASUN","ALTINYAYLA","BUCAK","ÇAVDIR","ÇELTİKÇİ","GÖLHİSAR","KARAMANLI","KEMER","TEFENNİ","YEŞİLOVA"],"BURSA":["BÜYÜKORHAN","GEMLİK","GÜRSU","HARMANCIK","İNEGÖL","İZNİK","KARACABEY","KELES","KESTEL","MUDANYA","MUSTAFAKEMALPAŞA","NİLÜFER","ORHANELİ","ORHANGAZİ","OSMANGAZİ","YENİŞEHİR","YILDIRIM"],"ÇANAKKALE":["MERKEZ","AYVACIK","BAYRAMİÇ","BİGA","BOZCAADA","ÇAN","ECEABAT","EZİNE","GELİBOLU","GÖKÇEADA","LAPSEKİ","YENİCE"],"ÇANKIRI":["MERKEZ","ATKARACALAR","BAYRAMÖREN","ÇERKEŞ","ELDİVAN","ILGAZ","KIZILIRMAK","KORGUN","KURŞUNLU","ORTA","ŞABANÖZÜ","YAPRAKLI"],"ÇORUM":["MERKEZ","ALACA","BAYAT","BOĞAZKALE","DODURGA","İSKİLİP","KARGI","LAÇİN","MECİTÖZÜ","OĞUZLAR","ORTAKÖY","OSMANCIK","SUNGURLU","UĞURLUDAĞ"],"DENİZLİ":["ACIPAYAM","BABADAĞ","BAKLAN","BEKİLLİ","BEYAĞAÇ","BOZKURT","BULDAN","ÇAL","ÇAMELİ","ÇARDAK","ÇİVRİL","GÜNEY","HONAZ","KALE","MERKEZEFENDİ","PAMUKKALE","SARAYKÖY","SERİNHİSAR","TAVAS"],"DİYARBAKIR":["BAĞLAR","BİSMİL","ÇERMİK","ÇINAR","ÇÜNGÜŞ","DİCLE","EĞİL","ERGANİ","HANİ","HAZRO","KAYAPINAR","KOCAKÖY","KULP","LİCE","SİLVAN","SUR","YENİŞEHİR"],"EDİRNE":["MERKEZ","ENEZ","HAVSA","İPSALA","KEŞAN","LALAPAŞA","MERİÇ","SÜLOĞLU","UZUNKÖPRÜ"],"ELAZIĞ":["MERKEZ","AĞIN","ALACAKAYA","ARICAK","BASKİL","KARAKOÇAN","KEBAN","KOVANCILAR","MADEN","PALU","SİVRİCE"],"ERZİNCAN":["MERKEZ","ÇAYIRLI","İLİÇ","KEMAH","KEMALİYE","OTLUKBELİ","REFAHİYE","TERCAN","ÜZÜMLÜ"],"ERZURUM":["AŞKALE","AZİZİYE","ÇAT","HINIS","HORASAN","İSPİR","KARAÇOBAN","KARAYAZI","KÖPRÜKÖY","NARMAN","OLTU","OLUR","PALANDÖKEN","PASİNLER","PAZARYOLU","ŞENKAYA","TEKMAN","TORTUM","UZUNDERE","YAKUTİYE"],"ESKİŞEHİR":["ALPU","BEYLİKOVA","ÇİFTELER","GÜNYÜZÜ","HAN","İNÖNÜ","MAHMUDİYE","MİHALGAZİ","MİHALIÇÇIK","ODUNPAZARI","SARICAKAYA","SEYİTGAZİ","SİVRİHİSAR","TEPEBAŞI"],"GAZİANTEP":["ARABAN","İSLAHİYE","KARKAMIŞ","NİZİP","NURDAĞI","OĞUZELİ","ŞAHİNBEY","ŞEHİTKAMİL","YAVUZELİ"],"GİRESUN":["MERKEZ","ALUCRA","BULANCAK","ÇAMOLUK","ÇANAKÇI","DERELİ","DOĞANKENT","ESPİYE","EYNESİL","GÖRELE","GÜCE","KEŞAP","PİRAZİZ","ŞEBİNKARAHİSAR","TİREBOLU","YAĞLIDERE"],"GÜMÜŞHANE":["MERKEZ","KELKİT","KÖSE","KÜRTÜN","ŞİRAN","TORUL"],"HAKKARİ":["MERKEZ","ÇUKURCA","DERECİK","ŞEMDİNLİ","YÜKSEKOVA"],"HATAY":["ALTINÖZÜ","ANTAKYA","ARSUZ","BELEN","DEFNE","DÖRTYOL","ERZİN","HASSA","İSKENDERUN","KIRIKHAN","KUMLU","PAYAS","REYHANLI","SAMANDAĞ","YAYLADAĞI"],"ISPARTA":["MERKEZ","AKSU","ATABEY","EĞİRDİR","GELENDOST","GÖNEN","KEÇİBORLU","SENİRKENT","SÜTÇÜLER","ŞARKİKARAAĞAÇ","ULUBORLU","YALVAÇ","YENİŞARBADEMLİ"],"MERSİN":["AKDENİZ","ANAMUR","AYDINCIK","BOZYAZI","ÇAMLIYAYLA","ERDEMLİ","GÜLNAR","MEZİTLİ","MUT","SİLİFKE","TARSUS","TOROSLAR","YENİŞEHİR"],"İSTANBUL":["ADALAR","ARNAVUTKÖY","ATAŞEHİR","AVCILAR","BAĞCILAR","BAHÇELİEVLER","BAKIRKÖY","BAŞAKŞEHİR","BAYRAMPAŞA","BEŞİKTAŞ","BEYKOZ","BEYLİKDÜZÜ","BEYOĞLU","BÜYÜKÇEKMECE","ÇATALCA","ÇEKMEKÖY","ESENLER","ESENYURT","EYÜPSULTAN","FATİH","GAZİOSMANPAŞA","GÜNGÖREN","KADIKÖY","KAĞITHANE","KARTAL","KÜÇÜKÇEKMECE","MALTEPE","PENDİK","SANCAKTEPE","SARIYER","SİLİVRİ","SULTANBEYLİ","SULTANGAZİ","ŞİLE","ŞİŞLİ","TUZLA","ÜMRANİYE","ÜSKÜDAR","ZEYTİNBURNU"],"İZMİR":["ALİAĞA","BALÇOVA","BAYINDIR","BAYRAKLI","BERGAMA","BEYDAĞ","BORNOVA","BUCA","ÇEŞME","ÇİĞLİ","DİKİLİ","FOÇA","GAZİEMİR","GÜZELBAHÇE","KARABAĞLAR","KARABURUN","KARŞIYAKA","KEMALPAŞA","KINIK","KİRAZ","KONAK","MENDERES","MENEMEN","NARLIDERE","ÖDEMİŞ","SEFERİHİSAR","SELÇUK","TİRE","TORBALI","URLA"],"KARS":["MERKEZ","AKYAKA","ARPAÇAY","DİGOR","KAĞIZMAN","SARIKAMIŞ","SELİM","SUSUZ"],"KASTAMONU":["MERKEZ","ABANA","AĞLI","ARAÇ","AZDAVAY","BOZKURT","CİDE","ÇATALZEYTİN","DADAY","DEVREKANİ","DOĞANYURT","HANÖNÜ","İHSANGAZİ","İNEBOLU","KÜRE","PINARBAŞI","SEYDİLER","ŞENPAZAR","TAŞKÖPRÜ","TOSYA"],"KAYSERİ":["AKKIŞLA","BÜNYAN","DEVELİ","FELAHİYE","HACILAR","İNCESU","KOCASİNAN","MELİKGAZİ","ÖZVATAN","PINARBAŞI","SARIOĞLAN","SARIZ","TALAS","TOMARZA","YAHYALI","YEŞİLHİSAR"],"KIRKLARELİ":["MERKEZ","BABAESKİ","DEMİRKÖY","KOFÇAZ","LÜLEBURGAZ","PEHLİVANKÖY","PINARHİSAR","VİZE"],"KIRŞEHİR":["MERKEZ","AKÇAKENT","AKPINAR","BOZTEPE","ÇİÇEKDAĞI","KAMAN","MUCUR"],"KOCAELİ":["BAŞİSKELE","ÇAYIROVA","DARICA","DERİNCE","DİLOVASI","GEBZE","GÖLCÜK","İZMİT","KANDIRA","KARAMÜRSEL","KARTEPE","KÖRFEZ"],"KONYA":["AHIRLI","AKÖREN","AKŞEHİR","ALTINEKİN","BEYŞEHİR","BOZKIR","CİHANBEYLİ","ÇELTİK","ÇUMRA","DERBENT","DEREBUCAK","DOĞANHİSAR","EMİRGAZİ","EREĞLİ","GÜNEYSINIR","HADİM","HALKAPINAR","HÜYÜK","ILGIN","KADINHANI","KARAPINAR","KARATAY","KULU","MERAM","SARAYÖNÜ","SELÇUKLU","SEYDİŞEHİR","TAŞKENT","TUZLUKÇU","YALIHÜYÜK","YUNAK"],"KÜTAHYA":["MERKEZ","ALTINTAŞ","ASLANAPA","ÇAVDARHİSAR","DOMANİÇ","DUMLUPINAR","EMET","GEDİZ","HİSARCIK","PAZARLAR","SİMAV","ŞAPHANE","TAVŞANLI"],"MALATYA":["AKÇADAĞ","ARAPGİR","ARGUVAN","BATTALGAZİ","DARENDE","DOĞANŞEHİR","DOĞANYOL","HEKİMHAN","KALE","KULUNCAK","PÜTÜRGE","YAZIHAN","YEŞİLYURT"],"MANİSA":["AHMETLİ","AKHİSAR","ALAŞEHİR","DEMİRCİ","GÖLMARMARA","GÖRDES","KIRKAĞAÇ","KÖPRÜBAŞI","KULA","SALİHLİ","SARIGÖL","SARUHANLI","SELENDİ","SOMA","ŞEHZADELER","TURGUTLU","YUNUSEMRE"],"KAHRAMANMARAŞ":["AFŞİN","ANDIRIN","ÇAĞLAYANCERİT","DULKADİROĞLU","EKİNÖZÜ","ELBİSTAN","GÖKSUN","NURHAK","ONİKİŞUBAT","PAZARCIK","TÜRKOĞLU"],"MARDİN":["ARTUKLU","DARGEÇİT","DERİK","KIZILTEPE","MAZIDAĞI","MİDYAT","NUSAYBİN","ÖMERLİ","SAVUR","YEŞİLLİ"],"MUĞLA":["BODRUM","DALAMAN","DATÇA","FETHİYE","KAVAKLIDERE","KÖYCEĞİZ","MARMARİS","MENTEŞE","MİLAS","ORTACA","SEYDİKEMER","ULA","YATAĞAN"],"MUŞ":["MERKEZ","BULANIK","HASKÖY","KORKUT","MALAZGİRT","VARTO"],"NEVŞEHİR":["MERKEZ","ACIGÖL","AVANOS","DERİNKUYU","GÜLŞEHİR","HACIBEKTAŞ","KOZAKLI","ÜRGÜP"],"NİĞDE":["MERKEZ","ALTUNHİSAR","BOR","ÇAMARDI","ÇİFTLİK","ULUKIŞLA"],"ORDU":["AKKUŞ","ALTINORDU","AYBASTI","ÇAMAŞ","ÇATALPINAR","ÇAYBAŞI","FATSA","GÖLKÖY","GÜLYALI","GÜRGENTEPE","İKİZCE","KABADÜZ","KABATAŞ","KORGAN","KUMRU","MESUDİYE","PERŞEMBE","ULUBEY","ÜNYE"],"RİZE":["MERKEZ","ARDEŞEN","ÇAMLIHEMŞİN","ÇAYELİ","DEREPAZARI","FINDIKLI","GÜNEYSU","HEMŞİN","İKİZDERE","İYİDERE","KALKANDERE","PAZAR"],"SAKARYA":["ADAPAZARI","AKYAZI","ARİFİYE","ERENLER","FERİZLİ","GEYVE","HENDEK","KARAPÜRÇEK","KARASU","KAYNARCA","KOCAALİ","PAMUKOVA","SAPANCA","SERDİVAN","SÖĞÜTLÜ","TARAKLI"],"SAMSUN":["ALAÇAM","ASARCIK","ATAKUM","AYVACIK","BAFRA","CANİK","ÇARŞAMBA","HAVZA","İLKADIM","KAVAK","LADİK","19 MAYIS","SALIPAZARI","TEKKEKÖY","TERME","VEZİRKÖPRÜ","YAKAKENT"],"SİİRT":["MERKEZ","BAYKAN","ERUH","KURTALAN","PERVARİ","ŞİRVAN","TİLLO"],"SİNOP":["MERKEZ","AYANCIK","BOYABAT","DİKMEN","DURAĞAN","ERFELEK","GERZE","SARAYDÜZÜ","TÜRKELİ"],"SİVAS":["MERKEZ","AKINCILAR","ALTINYAYLA","DİVRİĞİ","DOĞANŞAR","GEMEREK","GÖLOVA","GÜRÜN","HAFİK","İMRANLI","KANGAL","KOYULHİSAR","SUŞEHRİ","ŞARKIŞLA","ULAŞ","YILDIZELİ","ZARA"],"TEKİRDAĞ":["ÇERKEZKÖY","ÇORLU","ERGENE","HAYRABOLU","KAPAKLI","MALKARA","MARMARAEREĞLİSİ","MURATLI","SARAY","SÜLEYMANPAŞA","ŞARKÖY"],"TOKAT":["MERKEZ","ALMUS","ARTOVA","BAŞÇİFTLİK","ERBAA","NİKSAR","PAZAR","REŞADİYE","SULUSARAY","TURHAL","YEŞİLYURT","ZİLE"],"TRABZON":["AKÇAABAT","ARAKLI","ARSİN","BEŞİKDÜZÜ","ÇARŞIBAŞI","ÇAYKARA","DERNEKPAZARI","DÜZKÖY","HAYRAT","KÖPRÜBAŞI","MAÇKA","OF","ORTAHİSAR","SÜRMENE","ŞALPAZARI","TONYA","VAKFIKEBİR","YOMRA"],"TUNCELİ":["MERKEZ","ÇEMİŞGEZEK","HOZAT","MAZGİRT","NAZIMİYE","OVACIK","PERTEK","PÜLÜMÜR"],"ŞANLIURFA":["AKÇAKALE","BİRECİK","BOZOVA","CEYLANPINAR","EYYÜBİYE","HALFETİ","HALİLİYE","HARRAN","HİLVAN","KARAKÖPRÜ","SİVEREK","SURUÇ","VİRANŞEHİR"],"UŞAK":["MERKEZ","BANAZ","EŞME","KARAHALLI","SİVASLI","ULUBEY"],"VAN":["BAHÇESARAY","BAŞKALE","ÇALDIRAN","ÇATAK","EDREMİT","ERCİŞ","GEVAŞ","GÜRPINAR","İPEKYOLU","MURADİYE","ÖZALP","SARAY","TUŞBA"],"YOZGAT":["MERKEZ","AKDAĞMADENİ","AYDINCIK","BOĞAZLIYAN","ÇANDIR","ÇAYIRALAN","ÇEKEREK","KADIŞEHRİ","SARAYKENT","SARIKAYA","SORGUN","ŞEFAATLİ","YENİFAKILI","YERKÖY"],"ZONGULDAK":["MERKEZ","ALAPLI","ÇAYCUMA","DEVREK","EREĞLİ","GÖKÇEBEY","KİLİMLİ","KOZLU"],"AKSARAY":["MERKEZ","AĞAÇÖREN","ESKİL","GÜLAĞAÇ","GÜZELYURT","ORTAKÖY","SARIYAHŞİ","SULTANHANI"],"BAYBURT":["MERKEZ","AYDINTEPE","DEMİRÖZÜ"],"KARAMAN":["MERKEZ","AYRANCI","BAŞYAYLA","ERMENEK","KAZIMKARABEKİR","SARIVELİLER"],"KIRIKKALE":["MERKEZ","BAHŞILI","BALIŞEYH","ÇELEBİ","DELİCE","KARAKEÇİLİ","KESKİN","SULAKYURT","YAHŞİHAN"],"BATMAN":["MERKEZ","BEŞİRİ","GERCÜŞ","HASANKEYF","KOZLUK","SASON"],"ŞIRNAK":["MERKEZ","BEYTÜŞŞEBAP","CİZRE","GÜÇLÜKONAK","İDİL","SİLOPİ","ULUDERE"],"BARTIN":["MERKEZ","AMASRA","KURUCAŞİLE","ULUS"],"ARDAHAN":["MERKEZ","ÇILDIR","DAMAL","GÖLE","HANAK","POSOF"],"IĞDIR":["MERKEZ","ARALIK","KARAKOYUNLU","TUZLUCA"],"YALOVA":["MERKEZ","ALTINOVA","ARMUTLU","ÇINARCIK","ÇİFTLİKKÖY","TERMAL"],"KARABÜK":["MERKEZ","EFLANİ","ESKİPAZAR","OVACIK","SAFRANBOLU","YENİCE"],"KİLİS":["MERKEZ","ELBEYLİ","MUSABEYLİ","POLATELİ"],"OSMANİYE":["MERKEZ","BAHÇE","DÜZİÇİ","HASANBEYLİ","KADİRLİ","SUMBAS","TOPRAKKALE"],"DÜZCE":["MERKEZ","AKÇAKOCA","CUMAYERİ","ÇİLİMLİ","GÖLYAKA","GÜMÜŞOVA","KAYNAŞLI","YIĞILCA"]};
+let __ashiIlIlceN = null;
+function ashiIlIlceHazir() {
+  if (__ashiIlIlceN) return __ashiIlIlceN;
+  __ashiIlIlceN = Object.keys(ASHI_IL_ILCE).map(il => ({
+    il, n: normalizeStationName(il),
+    ilceler: ASHI_IL_ILCE[il].map(x => ({ad: x, n: normalizeStationName(x)})).sort((a, b) => b.n.length - a.n.length)
+  })).sort((a, b) => b.n.length - a.n.length);
+  return __ashiIlIlceN;
+}
+// İstasyon adından {il, kalan} çıkarır: ad bir il adıyla başlıyorsa o il, değilse yüklenen dosyanın ili (yoksa Manisa)
+function ashiIstAyir(name) {
+  const t = String(name || '').replace(/\s+/g, ' ').trim();
+  const tn = normalizeStationName(t);
+  for (const x of ashiIlIlceHazir()) {
+    if (tn === x.n || tn.startsWith(x.n + ' ')) return {il: x.il, kalan: t.slice(x.n.length).trim(), ilVar: true};
+  }
+  const dosyaIl = normalizeStationName(window.__ashiIl || '');
+  const x = ashiIlIlceHazir().find(y => y.n === dosyaIl) || ashiIlIlceHazir().find(y => y.n === 'MANISA');
+  return {il: x.il, kalan: t, ilVar: false};
+}
 function ashiIstIlce(name) {
-  const n = String(name || '').trim().replace(/^MAN[İI]SA\s+/i, '');
+  const a = ashiIstAyir(name);
+  const n = a.kalan;
   if (/KOMUTA|BA[ŞS]HEK[İI]M|AMBULANS SERV/i.test(n)) return 'Diğer';
+  const x = ashiIlIlceHazir().find(y => y.il === a.il);
+  const nn = normalizeStationName(n);
+  const baslik = w => w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1).toLocaleLowerCase('tr-TR');
+  if (x) {
+    for (const d of x.ilceler) { if (nn === d.n || nn.startsWith(d.n + ' ')) return baslik(d.ad); }
+    for (const d of x.ilceler) { if (d.n.length > 3 && new RegExp('(^| )' + d.n + '( |$)').test(nn)) return baslik(d.ad); }
+  }
+  if (/GOREVLENDIRME/.test(nn)) return 'Diğer';
   const w = n.split(/\s+/)[0] || 'Diğer';
-  return w.charAt(0).toLocaleUpperCase('tr-TR') + w.slice(1).toLocaleLowerCase('tr-TR');
+  return baslik(w);
 }
 function ashiIstKisa(name) {
-  return String(name || '').replace(/^MAN[İI]SA\s+/i, '').replace(/AC[İI]L SA[ĞG]LIK H[İI]ZMETLER[İI] [İI]STASYONU/i, 'ASHİ').trim();
+  const a = ashiIstAyir(name);
+  return (a.ilVar ? a.kalan : String(name || '').trim())
+    .replace(/AC[İI]L SA[ĞG]LIK H[İI]ZMETLER[İI] [İI]STASYONU/i, 'ASHİ').replace(/\s+AC[İI]L VAKA EK[İI]B[İI]/i, '').trim();
 }
 function ashiIstSecim(id) {
   const sel = typeof id === 'string' ? document.getElementById(id) : id;
@@ -3042,15 +3077,18 @@ function openGuide() {
   switchGorev('kilavuz');
 }
 
-function ashiIstasyonTuret(ad, il) {
+const ASHI_IST_KOD = {"4450":"MANİSA AHMETLİ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4130":"MANİSA AKHİSAR 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4140":"MANİSA AKHİSAR 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4150":"MANİSA AKHİSAR 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4180":"MANİSA AKHİSAR 4 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4160":"MANİSA AKHİSAR 5 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4170":"MANİSA AKHİSAR 6 NOLU ORGANİZE SANAYİ BÖLGESİ ACİL SAĞLIK HİZMETLERİ İSTASYONU","4190":"MANİSA AKHİSAR 7 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4520":"MANİSA ALAŞEHİR 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4530":"MANİSA ALAŞEHİR 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4510":"MANİSA ALAŞEHİR 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4570":"MANİSA ALAŞEHİR 4 NOLU (ULUDERBENT) ACİL SAĞLIK HİZMETLERİ İSTASYONU","4350":"MANİSA DEMİRCİ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4360":"MANİSA DEMİRCİ 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4340":"MANİSA DEMİRCİ 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4380":"MANİSA GÖLMARMARA 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4370":"MANİSA GÖLMARMARA 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4270":"MANİSA GÖRDES 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4280":"MANİSA GÖRDES 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4250":"MANİSA KIRKAĞAÇ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4240":"MANİSA KIRKAĞAÇ 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4260":"MANİSA KÖPRÜBAŞI 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4290":"MANİSA KÖPRÜBAŞI 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4540":"MANİSA KULA 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4550":"MANİSA KULA 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4470":"MANİSA SALİHLİ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4480":"MANİSA SALİHLİ 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4490":"MANİSA SALİHLİ 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4590":"MANİSA SALİHLİ 4 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4120":"MANİSA SALİHLİ 5 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4460":"MANİSA SALİHLİ 6 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4720":"MANİSA SARIGÖL 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4710":"MANİSA SARIGÖL 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4110":"MANİSA SARUHANLI 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4310":"MANİSA SARUHANLI 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4730":"MANİSA SELENDİ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4740":"MANİSA SELENDİ 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4210":"MANİSA SOMA 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4220":"MANİSA SOMA 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4230":"MANİSA SOMA 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4200":"MANİSA SOMA 4 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4050":"MANİSA ŞEHZADELER 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4060":"MANİSA ŞEHZADELER 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4330":"MANİSA ŞEHZADELER 4 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","9050":"MANİSA ŞEHZADELER 5 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4080":"MANİSA ŞEHZADELER 6 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4100":"MANİSA ŞEHZADELER 7 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4500":"MANİSA ŞEHZADELER 8 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4410":"MANİSA TURGUTLU 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4420":"MANİSA TURGUTLU 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4430":"MANİSA TURGUTLU 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4400":"MANİSA TURGUTLU 4 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4440":"MANİSA TURGUTLU 5 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4390":"MANİSA TURGUTLU 6 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4010":"MANİSA YUNUSEMRE 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4610":"MANİSA YUNUSEMRE 10 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4020":"MANİSA YUNUSEMRE 2 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4040":"MANİSA YUNUSEMRE 3 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4070":"MANİSA YUNUSEMRE 4 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4320":"MANİSA YUNUSEMRE 5 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4090":"MANİSA YUNUSEMRE 6 NOLU (MURADİYE) ACİL SAĞLIK HİZMETLERİ İSTASYONU","4000":"MANİSA YUNUSEMRE 8 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU","4600":"MANİSA YUNUSEMRE 9 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU"};
+function ashiIstasyonTuret(ad, il, kod) {
   const t = String(ad || '').replace(/\s+/g, ' ').trim();
   if (!t) return '';
+  const kk = String(kod == null ? '' : kod).trim().replace(/\.0+$/, '');
+  if (kk && ASHI_IST_KOD[kk] && /\sASH[İI]$/i.test(t)) return ASHI_IST_KOD[kk]; // Ekip Kodu sabit kimliktir: arşivdeki eski adla birebir eşleşir
   const OZEL = {
     'ALAŞEHİR 4 (ULUDERBENT) NOLU ASHİ': 'ALAŞEHİR 4 NOLU (ULUDERBENT)',
     'YUNUSEMRE 6 NOLU ASHİ': 'YUNUSEMRE 6 NOLU (MURADİYE)'
   };
   const m = t.match(/^(.*)\sASH[İI]$/i);
-  if (!m) return t;
+  if (!m) { const ilx = String(il || '').replace(/\s+/g, ' ').trim(); return ilx && !t.toLocaleUpperCase('tr-TR').startsWith(ilx.toLocaleUpperCase('tr-TR') + ' ') ? `${ilx} ${t}` : t; }
   const govde = OZEL[t] || m[1];
   const ilAd = String(il || '').replace(/\s+/g, ' ').trim() || 'MANİSA';
   return `${ilAd} ${govde} ACİL SAĞLIK HİZMETLERİ İSTASYONU`;
@@ -3088,10 +3126,12 @@ function processFile(file) {
         if (eadIdx >= 0) {
           const yeniIdx = rows[0].length;
           rows[0][yeniIdx] = 'Ekibin İstasyon Bilgisi';
-          for (let ri = 1; ri < rows.length; ri++) rows[ri][yeniIdx] = ashiIstasyonTuret(rows[ri][eadIdx], ci.il >= 0 ? rows[ri][ci.il] : '');
+          const ekIdx = hdr.findIndex(h => /^Ekip Kodu$/i.test(h));
+          for (let ri = 1; ri < rows.length; ri++) rows[ri][yeniIdx] = ashiIstasyonTuret(rows[ri][eadIdx], ci.il >= 0 ? rows[ri][ci.il] : '', ekIdx >= 0 ? rows[ri][ekIdx] : '');
           ci.ist = yeniIdx;
         }
       }
+      window.__ashiIl = ci.il >= 0 && rows[1] ? String(rows[1][ci.il] || '').replace(/\s+/g, ' ').trim() : '';
       const missingHeaderKeys = requiredHeaderKeys.filter(key => ci[key] < 0);
       if (missingHeaderKeys.length) {
         const ETK = {tckn:'TCKN', ad:'Ad', soyad:'Soyad', tur:'Ekip Türü', tip:'Ekip Tipi', ist:'Ekibin İstasyon Bilgisi / Ekip Adı', gorev:'Nöbet Görevi', sure:'Nöbet Süresi', bas:'Başlangıç Tarihi'};
@@ -3399,6 +3439,7 @@ function izinSlotSor(key) {
   });
 }
 async function archiveSaveIzin(key, data, slot) {
+  if (window.__ashiIl && !/^MAN[İI]SA$/i.test(window.__ashiIl)) return null; // başka il: Manisa arşivine yazma
   let rec = await archiveGet(key);
   if (!rec) {
     const info = {year:Number(key.slice(0,4)), month:Number(key.slice(5,7))};
@@ -7956,7 +7997,7 @@ function ashiNavSenk() {
         td.classList.toggle('ashi-no',(th[i]||'')==='#');
         td.classList.toggle('ashi-blok',!sade&&td.childElementCount>0&&td.textContent.length>40);
         const tx=sade?td.textContent:'';
-        if(dar&&sade&&/İSTASYONU\s*$/.test(td.dataset.full||tx)){
+        if(dar&&sade&&/(İSTASYONU|EKİBİ|EKİBİ\s*\(ENTEGRE\))\s*$/.test(td.dataset.full||tx)){
           if(!td.dataset.full){ td.dataset.full=tx; td.title=tx; td.classList.add('ashi-ist'); }
           try{ const k=ashiIstKisa(td.dataset.full); if(td.textContent!==k) td.textContent=k; }catch(e){}
         } else if(!dar&&td.dataset.full){ td.textContent=td.dataset.full; td.classList.remove('ashi-ist'); delete td.dataset.full; td.removeAttribute('title'); }
