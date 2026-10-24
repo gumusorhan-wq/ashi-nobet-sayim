@@ -1985,7 +1985,7 @@ function archiveViewHtml(records) {
   return `<div class="arc-card">
     <div class="arc-head">
       <div><div class="arc-title">🗂️ Arşiv</div><div class="arc-sub">Tarayıcıda yerel kayıt · ${records.length} ay saklı</div></div>
-      <div class="arc-tools"><button type="button" onclick="archiveExportBackup()">⬇ Yedek Al (JSON)</button><button type="button" onclick="document.getElementById('archiveBackupInput').click()">⬆ Yedeği Yükle</button></div>
+      <div class="arc-tools"><button type="button" onclick="ashiAsosAc()" title="ASOS'taki hazır Nöbet İçi Hareket ve İzin-Muafiyet raporlarını al">🔗 ASOS'tan al</button><button type="button" onclick="archiveExportBackup()">⬇ Yedek Al (JSON)</button><button type="button" onclick="document.getElementById('archiveBackupInput').click()">⬆ Yedeği Yükle</button></div>
     </div>
     ${driveHtml(records)}
     ${records.length ? `<div class="arc-years">${chip('all','Tümü')}${years.map(y => chip(y, y)).join('')}</div>
@@ -5835,6 +5835,71 @@ function getFilteredIstasyonPersonelRows(){
   const stationQ=ashiIstSecimLC('istasyonPersonelStation');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
   return getIstasyonPersonelRows().map(p=>({...p,allDuties:p.duties,duties:p.duties.filter(n=>ashiIstUyarLC(stationQ,n.station))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+}
+
+// ═══════════════════════════════════════════════════════════
+// ASOS'TAN AL: ASOS "Rapor Görüntüleme Ekranı"ndaki hazır Nöbet İçi Hareket ve Personel İzin-Muafiyet raporlarını
+// kullanıcının kendi oturumuyla indirip bu sayfaya aktarır. Şifre/oturum bu sayfaya hiç gelmez; yer imi (bookmarklet) ASOS sayfasında çalışır.
+// ═══════════════════════════════════════════════════════════
+const ASHI_ASOS_URL = 'https://asos.saglik.gov.tr/Report/RequestedReports';
+let ashiAsosPencere = null, ashiAsosItemler = [], ashiAsosDbg = [];
+function ashiAsosYerImi() {
+  const kod = "(async()=>{try{const O='" + location.origin + "';if(!window.opener){prompt('Önce ASHİ sayfasındaki ASOS’tan al düğmesiyle bu sayfayı açın.','');return}"
+    + "const defs=[['hareket',/N[öo]bet\\s*[İIi]çi\\s*Hareket/i],['izin',/[İIi]zin.?Muafiyet/i]];const rows=[...document.querySelectorAll('tr')];const items=[],dbg=[],tr=[];"
+    + "for(const [k,re] of defs){const r=rows.find(x=>re.test(x.textContent)&&x.querySelector('a,button'));if(!r){dbg.push(k+': satır yok');continue}"
+    + "const cells=[...r.children].map(c=>c.textContent.trim().replace(/\\s+/g,' '));const el=[...r.querySelectorAll('a,button')].find(e=>/[İIi]ndir/i.test(e.textContent));"
+    + "const href=el&&(el.href||el.dataset.href||el.dataset.url);if(!href||/^javascript/i.test(href)){dbg.push(k+': indir bağlantısı yok: '+(el?el.outerHTML.slice(0,400):'eleman yok'));continue}"
+    + "const res=await fetch(href,{credentials:'include'});if(!res.ok){dbg.push(k+': HTTP '+res.status);continue}"
+    + "if(/html/i.test(res.headers.get('content-type')||'')){dbg.push(k+': dosya yerine sayfa döndü');continue}"
+    + "const buf=await res.arrayBuffer();const cd=res.headers.get('content-disposition')||'';const m=/filename\\*?=(?:UTF-8'')?\"?([^\";]+)/i.exec(cd);"
+    + "let name='';try{name=m?decodeURIComponent(m[1]):''}catch(e){}items.push({k,cells,name,buf});tr.push(buf)}"
+    + "window.opener.postMessage({t:'ashi-asos',items,dbg},O,tr);if(dbg.length)prompt('Bazı raporlar alınamadı. Bu metni kopyalayıp gönderin:',dbg.join(' | '));else alert('Raporlar ASHİ sayfasına gönderildi.')"
+    + "}catch(e){prompt('Hata: kopyalayıp gönderin',String(e))}})()";
+  return kod;
+}
+function ashiAsosAc() {
+  let m = document.getElementById('ashiAsosModal');
+  if (!m) { m = document.createElement('div'); m.id = 'ashiAsosModal'; m.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;padding:14px'; document.body.appendChild(m); }
+  m.style.display = 'flex';
+  ashiAsosCiz();
+}
+function ashiAsosKapat() { const m = document.getElementById('ashiAsosModal'); if (m) m.style.display = 'none'; }
+function ashiAsosCiz() {
+  const m = document.getElementById('ashiAsosModal'); if (!m) return;
+  const kod = ashiAsosYerImi(), href = 'javascript:' + encodeURIComponent(kod);
+  const liste = ashiAsosItemler.length ? ashiAsosItemler.map((it, i) => `<div style="border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;margin-top:8px;background:#f8fafc">
+      <div style="font-weight:800;color:#0f172a">${it.k === 'hareket' ? '📅 Nöbet İçi Hareket Raporu' : '📄 Personel İzin-Muafiyet Raporu'} <span style="font-weight:600;color:#64748b;font-size:12px">· ${escapeHtml(it.name || 'dosya adı yok')} · ${Math.round(it.buf.byteLength / 1024)} KB</span></div>
+      <div style="font-size:12px;color:#475569;margin:4px 0 8px">${escapeHtml((it.cells || []).filter(Boolean).join(' · '))}</div>
+      <button type="button" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="ashiAsosYukle(${i})">${it.k === 'hareket' ? 'Nöbet listesini arşive yükle' : 'İzin/muafiyet dosyasını arşive yükle'}</button>
+      ${it.k === 'izin' ? '<span style="font-size:11px;color:#64748b;margin-left:8px">Önce nöbet listesini yükleyin (ay belli olsun).</span>' : ''}</div>`).join('') : '';
+  const dbg = ashiAsosDbg.length ? `<div style="margin-top:10px;padding:8px 10px;border-radius:8px;background:#fef3c7;color:#92400e;font-size:12px"><b>Alınamayanlar:</b><br>${ashiAsosDbg.map(escapeHtml).join('<br>')}</div>` : '';
+  m.innerHTML = `<div style="background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:92vh;overflow:auto;padding:18px 20px;box-shadow:0 20px 50px rgba(0,0,0,.3)">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:18px;font-weight:800">🔗 ASOS’tan al</div><button type="button" class="arc-ic" onclick="ashiAsosKapat()">✕</button></div>
+    <ol style="font-size:13px;line-height:1.7;color:#334155;padding-left:20px;margin:10px 0">
+      <li>Aşağıdaki <b>“ASHİ’ye aktar”</b> bağlantısını yer imleri çubuğuna sürükleyin (bir kez yapılır).</li>
+      <li><b>ASOS’u aç</b> düğmesine basın, giriş yapıp <b>Raporlar → Rapor Görüntüleme Ekranı</b>nda raporların hazır olduğundan emin olun (gerekirse “Yeni Rapor Talebi”).</li>
+      <li>ASOS sayfasındayken yer imine tıklayın: en son <b>Nöbet İçi Hareket</b> ve <b>Personel İzin-Muafiyet</b> raporları bu sayfaya gelir.</li>
+      <li>Burada gelen dosyaları kontrol edip arşive yükleyin.</li></ol>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <button type="button" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="ashiAsosPencere=window.open(ASHI_ASOS_URL,'ashiAsos')">ASOS’u aç</button>
+      <a href="${href.replace(/"/g, '&quot;')}" onclick="return false" draggable="true" style="padding:7px 12px;border:1px dashed #0f766e;border-radius:8px;color:#0f766e;font-weight:800;text-decoration:none;cursor:grab" title="Yer imleri çubuğuna sürükleyin">⭐ ASHİ’ye aktar</a>
+      <button type="button" class="btn-sec" onclick="navigator.clipboard&&navigator.clipboard.writeText('javascript:'+ashiAsosYerImi().replace(/\\n/g,' ')).then(()=>this.textContent='Kopyalandı ✓')">Kodu kopyala</button></div>
+    <div style="font-size:11px;color:#64748b;margin-top:6px">Giriş şifreniz bu sayfaya gelmez; yer imi ASOS sayfasında, kendi oturumunuzla çalışır ve dosyaları yalnızca bu sayfaya iletir.</div>
+    ${liste}${dbg}</div>`;
+}
+window.addEventListener('message', ev => {
+  if (ev.origin !== 'https://asos.saglik.gov.tr' || !ev.data || ev.data.t !== 'ashi-asos') return;
+  const ok = x => x && x.buf instanceof ArrayBuffer && x.buf.byteLength > 100 && (x.k === 'hareket' || x.k === 'izin');
+  ashiAsosItemler = (ev.data.items || []).filter(ok);
+  ashiAsosDbg = Array.isArray(ev.data.dbg) ? ev.data.dbg.map(String) : [];
+  ashiAsosAc();
+});
+function ashiAsosYukle(i) {
+  const it = ashiAsosItemler[i]; if (!it) return;
+  const ad = it.k === 'hareket' ? (/hareket/i.test(it.name || '') ? it.name : 'Nöbet İçi Hareket Raporu_asos.xls') : (it.name || 'Personel İzin-Muafiyet Raporu_asos.xls');
+  const file = new File([it.buf], /\.xlsx?$/i.test(ad) ? ad : ad + '.xls', {type:'application/vnd.ms-excel'});
+  ashiAsosKapat();
+  if (it.k === 'hareket') processFile(file); else handleIzinRaporFile(file);
 }
 
 // ═══════════════════════════════════════════════════════════
