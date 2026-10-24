@@ -5844,7 +5844,9 @@ function getFilteredIstasyonPersonelRows(){
 const ASHI_ASOS_URL = 'https://asos.saglik.gov.tr/Report/RequestedReports';
 let ashiAsosPencere = null, ashiAsosItemler = [], ashiAsosDbg = [];
 function ashiAsosYerImi() {
-  const kod = "(async()=>{try{const O='" + location.origin + "';if(!window.opener){prompt('Önce ASHİ sayfasındaki ASOS’tan al düğmesiyle bu sayfayı açın.','');return}"
+  // Yer imi ASOS sayfasında çalışır: ASHİ sayfasını (yeni sekme) açar, raporları kendi oturumuyla indirir, ASHİ onaylayana kadar postMessage ile yollar.
+  const U = location.origin + location.pathname;
+  const kod = "(async()=>{try{const O='" + location.origin + "',U='" + U + "';const w=window.open(U+'#asos','ashiAsos');if(!w){alert('Açılır pencere engellendi: bu site için izin verip yer imine tekrar tıklayın.');return}"
     + "const defs=[['hareket',/N[öo]bet\\s*[İIi]çi\\s*Hareket/i],['izin',/[İIi]zin.?Muafiyet/i]];const rows=[...document.querySelectorAll('tr')];const items=[],dbg=[],tr=[];"
     + "for(const [k,re] of defs){const r=rows.find(x=>re.test(x.textContent)&&x.querySelector('a,button'));if(!r){dbg.push(k+': satır yok');continue}"
     + "const cells=[...r.children].map(c=>c.textContent.trim().replace(/\\s+/g,' '));const el=[...r.querySelectorAll('a,button')].find(e=>/[İIi]ndir/i.test(e.textContent));"
@@ -5852,8 +5854,10 @@ function ashiAsosYerImi() {
     + "const res=await fetch(href,{credentials:'include'});if(!res.ok){dbg.push(k+': HTTP '+res.status);continue}"
     + "if(/html/i.test(res.headers.get('content-type')||'')){dbg.push(k+': dosya yerine sayfa döndü');continue}"
     + "const buf=await res.arrayBuffer();const cd=res.headers.get('content-disposition')||'';const m=/filename\\*?=(?:UTF-8'')?\"?([^\";]+)/i.exec(cd);"
-    + "let name='';try{name=m?decodeURIComponent(m[1]):''}catch(e){}items.push({k,cells,name,buf});tr.push(buf)}"
-    + "window.opener.postMessage({t:'ashi-asos',items,dbg},O,tr);if(dbg.length)prompt('Bazı raporlar alınamadı. Bu metni kopyalayıp gönderin:',dbg.join(' | '));else alert('Raporlar ASHİ sayfasına gönderildi.')"
+    + "let name='';try{name=m?decodeURIComponent(m[1]):''}catch(e){}items.push({k,cells,name,buf})}"
+    + "let ok=false;addEventListener('message',e=>{if(e.origin===O&&e.data&&e.data.t==='ashi-ack')ok=true});"
+    + "for(let i=0;i<60&&!ok;i++){w.postMessage({t:'ashi-asos',items,dbg},O);await new Promise(r=>setTimeout(r,1000))}"
+    + "if(!ok)prompt('ASHİ sayfası yanıt vermedi. Bu metni kopyalayıp gönderin:',dbg.join(' | ')||'yanit yok');else if(dbg.length)prompt('Bazı raporlar alınamadı. Bu metni kopyalayıp gönderin:',dbg.join(' | '))"
     + "}catch(e){prompt('Hata: kopyalayıp gönderin',String(e))}})()";
   return kod;
 }
@@ -5878,7 +5882,7 @@ function ashiAsosCiz() {
     <ol style="font-size:13px;line-height:1.7;color:#334155;padding-left:20px;margin:10px 0">
       <li>Aşağıdaki <b>“ASHİ’ye aktar”</b> bağlantısını yer imleri çubuğuna sürükleyin (bir kez yapılır).</li>
       <li><b>ASOS’u aç</b> düğmesine basın, giriş yapıp <b>Raporlar → Rapor Görüntüleme Ekranı</b>nda raporların hazır olduğundan emin olun (gerekirse “Yeni Rapor Talebi”).</li>
-      <li>ASOS sayfasındayken yer imine tıklayın: en son <b>Nöbet İçi Hareket</b> ve <b>Personel İzin-Muafiyet</b> raporları bu sayfaya gelir.</li>
+      <li>ASOS sayfasındayken yer imine tıklayın: ASHİ yeni bir sekmede açılır ve en son <b>Nöbet İçi Hareket</b> ile <b>Personel İzin-Muafiyet</b> raporları oraya gelir (birkaç saniye sürebilir; tarayıcı pencere açmayı engellerse izin verin).</li>
       <li>Burada gelen dosyaları kontrol edip arşive yükleyin.</li></ol>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
       <button type="button" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="ashiAsosPencere=window.open(ASHI_ASOS_URL,'ashiAsos')">ASOS’u aç</button>
@@ -5890,6 +5894,8 @@ function ashiAsosCiz() {
 window.addEventListener('message', ev => {
   if (ev.origin !== 'https://asos.saglik.gov.tr' || !ev.data || ev.data.t !== 'ashi-asos') return;
   const ok = x => x && x.buf instanceof ArrayBuffer && x.buf.byteLength > 100 && (x.k === 'hareket' || x.k === 'izin');
+  try { ev.source && ev.source.postMessage({t:'ashi-ack'}, ev.origin); } catch (e) {}
+  if (Date.now() - (window.__asosSon || 0) < 4000) return; window.__asosSon = Date.now();   // yer imi onay gelene dek tekrar yollar; tekrarlar yok sayılır
   ashiAsosItemler = (ev.data.items || []).filter(ok);
   ashiAsosDbg = Array.isArray(ev.data.dbg) ? ev.data.dbg.map(String) : [];
   ashiAsosAc();
