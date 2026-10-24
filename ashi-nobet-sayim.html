@@ -1737,12 +1737,17 @@ function archiveShortDate(value) {
 // Arşiv ay sınırı yok; eski aylar otomatik silinmez.
 async function pruneArchive() { return archiveGetAll(); }
 // Eğitim/koordinasyon okumasından (v02.06) önce kaydedilmiş slotlarda specialDutyLists.mesai hiç yoktur.
-function ashiSlotEski(slot) { return !!slot && !(slot.specialDutyLists && Array.isArray(slot.specialDutyLists.mesai)); }
+// Arşiv kaydı yapısı sürümü (İstatistik Merkezi'ndeki SCHEMA_VERSION mantığı): kayıt, ham Excel yerine işlenmiş veriyi tuttuğu için
+// yeni bir alan eklendiğinde (v2: telefon) eski kayıtlar yeniden hesaplanamaz — nöbet dosyasının yeniden yüklenmesi gerekir. Artırınca tüm eski kayıtlar işaretlenir.
+const ASHI_SLOT_SV = 2;
+function ashiSlotEski(slot) { return !!slot && (!(slot.specialDutyLists && Array.isArray(slot.specialDutyLists.mesai)) || (slot.sv || 1) < ASHI_SLOT_SV); }
+function ashiSlotEksikNe(slot) { return !(slot && slot.specialDutyLists && Array.isArray(slot.specialDutyLists.mesai)) ? 'eğitim/koordinasyon' : 'telefon bilgisi'; }
 function ashiKayitEski(rec) { return !!rec && Object.values(rec.slots || {}).some(sl => ashiSlotEski(sl)); }
 function makeArchiveSlot(fileName) {
   return {
     sourceFileName: String(fileName || currentSourceFileName || '').trim(),
     savedAt: new Date().toISOString(),
+    sv: ASHI_SLOT_SV,
     allData: archiveClone(allData),
     allCoklu: archiveClone(allCoklu),
     specialDutyLists: archiveClone(specialDutyLists),
@@ -1965,6 +1970,7 @@ function archiveViewHtml(records) {
     else if (hasS) badge = '<span class="arc-badge warn">Ay Başı yok</span>';
     else if (hasB) badge = '<span class="arc-badge warn">Ay Sonu yok</span>';
     else badge = '<span class="arc-badge off">Yalnız izin</span>';
+    if (ashiKayitEski(rec)) badge += ` <span class="arc-badge warn" title="Eski sürümle kaydedilmiş (${escapeHtml([...new Set(Object.values(rec.slots || {}).filter(sl => ashiSlotEski(sl)).map(ashiSlotEksikNe))].join(' / '))} yok): nöbet dosyasını yeniden yükleyip aynı kaydı güncelleyin">⚠ Yeniden yükleyin</span>`;
     const act = rec.key === archiveActiveKey ? ' act' : '';
     return `<tr class="${act}" onclick="loadArchivedMonth('${k}')">
       <td class="arc-month">${escapeHtml(archiveMonthLabel(rec.reportMonthInfo))}</td>
@@ -2294,7 +2300,7 @@ const ashiDrive = (() => {
         if (Array.isArray(keys)) { if (keys.includes(f.ym)) is.push(f); }
         else if (f.ym === enGuncel && (!yerel || degisti || yildizli)) is.push(f);   // otomatik: en güncel ay
         else if (yerel && degisti) is.push(f);   // daha önce seçilip indirilmiş aylar Drive'da değişirse girişte otomatik güncellenir (seçilmemiş aylar gelmez)
-        else if (yerel && ashiKayitEski(yerel) && eskiDeneme[f.ym] !== ASHI_APP_VERSION) { is.push(f); eskiDeneme[f.ym] = ASHI_APP_VERSION; }   // yeni sürüm: eski yapıdaki yerel aylar Drive'daki yeni yapıyla bir kez yenilenir
+        else if (yerel && ashiKayitEski(yerel) && eskiDeneme[f.ym] !== ASHI_APP_VERSION + '|' + ASHI_SLOT_SV) { is.push(f); eskiDeneme[f.ym] = ASHI_APP_VERSION + '|' + ASHI_SLOT_SV; }   // yeni sürüm: eski yapıdaki yerel aylar Drive'daki yeni yapıyla bir kez yenilenir
       }
       const alinan = [], okunamayan = []; let acilan = 0, kimlikYanlis = false, kimlikKapali = 0, kimlikYok = 0;
       for (let i = 0; i < is.length; i++) {
@@ -2578,7 +2584,7 @@ function driveAutoPublish(key) {
 }
 function driveAyDurum(ym, rec, remoteMod) {
   const d = driveAyDurum0(ym, rec, remoteMod);
-  if (rec && ashiKayitEski(rec) && d.k === 'ok') return {k:'warn', t:'⚠ Eski sürümle kaydedilmiş: eğitim/koordinasyon yok. Nöbet dosyasını yeniden yükleyin', gunc:false};
+  if (rec && ashiKayitEski(rec) && d.k === 'ok') return {k:'warn', t:`⚠ Eski sürümle kaydedilmiş: ${[...new Set(Object.values(rec.slots || {}).filter(sl => ashiSlotEski(sl)).map(ashiSlotEksikNe))].join(' / ')} yok. Nöbet dosyasını yeniden yükleyin`, gunc:false};
   return d;
 }
 function driveAyDurum0(ym, rec, remoteMod) {
