@@ -2046,6 +2046,7 @@ const ashiDrive = (() => {
       else if (k === 'ad' && e && e[1]) o[k] = e[1];
       else if (k === 'soyad' && e && e[2]) o[k] = e[2];
       else if (k === 'name' && e && e[3]) o[k] = e[3];
+      else if (k === 'tel' && e && e[4]) o[k] = e[4];
       else if (k === 'personKey' && typeof val === 'string') {
         if (val.startsWith('tc:')) { const t = id.t[val.slice(3)]; o[k] = t ? 'tc:' + t[0] : val; }
         else o[k] = id.n[val] || val;
@@ -2225,11 +2226,12 @@ const ashiDrive = (() => {
       const tcv = v.tc != null && v.tc !== '' ? v.tc : (v.tckn != null && v.tckn !== '' ? v.tckn : '');
       if (tcv !== '') {
         const t = tm.get(String(tcv));
-        if (t) { const e = id.t[t] || (id.t[t] = [String(tcv), '', '', '']); if (!e[1] && v.ad) e[1] = String(v.ad); if (!e[2] && v.soyad) e[2] = String(v.soyad); if (!e[3] && v.name) e[3] = String(v.name); }
+        if (t) { const e = id.t[t] || (id.t[t] = [String(tcv), '', '', '']); if (!e[1] && v.ad) e[1] = String(v.ad); if (!e[2] && v.soyad) e[2] = String(v.soyad); if (!e[3] && v.name) e[3] = String(v.name); if (!e[4] && v.tel) e[4] = String(v.tel); }
       }
     }
     for (const [k, val] of Object.entries(v)) {
       if ((k === 'tc' || k === 'tckn') && val != null && val !== '') o[k] = tm.get(String(val)) || val;
+      else if (k === 'tel') o[k] = '';   // telefon Drive'a açık yazılmaz; yalnızca kimlik tablosunda (kimlik parolasıyla) taşınır
       else if (k === 'ad' || k === 'soyad') o[k] = maskName(val);
       else if (withName && k === 'name') o[k] = maskName(val);
       else if (k === 'personKey' && typeof val === 'string') { o[k] = val.startsWith('tc:') ? 'tc:' + (tm.get(val.slice(3)) || val.slice(3)) : (nm.get(val) || val); if (id && !val.startsWith('tc:') && nm.get(val)) id.n[nm.get(val)] = val; }
@@ -3119,7 +3121,7 @@ function processFile(file) {
       if (rows.length < 2) throw new Error('Dosya boş.');
 
       // Başlık satırından kolon indekslerini bul
-      const hdr = rows[0].map(h => String(h||'').trim()); const normalizeReportHeader = value => String(value || '').toLocaleUpperCase('tr-TR').normalize('NFD').split('').filter(ch => { const code = ch.charCodeAt(0); return code < 0x300 || code > 0x36f; }).join('').replace(/[ÇĞİÖŞÜ]/g, ch => ({Ç:'C', Ğ:'G', İ:'I', Ö:'O', Ş:'S', Ü:'U'}[ch] || ch)); const hdrNorm = hdr.map(normalizeReportHeader); const stationInfoIndex = hdrNorm.findIndex(h => /EKIBIN\s+ISTASYON\s+BILGISI/.test(h)); const ci = { tckn: hdr.findIndex(h => /TCKN|TC Kimlik/i.test(h)), ad: hdr.findIndex(h => /^Ad$/i.test(h)), soyad: hdr.findIndex(h => /soyad/i.test(h)), tur: hdr.findIndex(h => /Ekip T[üu]r[üu]/i.test(h)), tip: hdr.findIndex(h => /Ekip Tipi/i.test(h)), ist: stationInfoIndex, gorev: hdr.findIndex(h => /N[öo]bet G[öo]revi/i.test(h)), sure: hdr.findIndex(h => /N[öo]bet S[üu]resi/i.test(h)), bas: hdr.findIndex(h => /Ba[sş]lang[iı][cç]/i.test(h)), bitis: hdr.findIndex(h => /Bit[iı][şs] tarihi|Bit[iı][şs]/i.test(h)), bran: (() => { const n=hdr.findIndex(h=>/N[öo]bet Listesi Bran/i.test(h)); return n>=0?n:hdr.findIndex(h=>/^Bran[sş]/i.test(h)); })(), kadroBran: (() => { const n=hdr.findIndex(h=>/Kadro\s*Bran/i.test(h)); if(n>=0) return n; const n2=hdr.findIndex(h=>/N[öo]bet Listesi Bran/i.test(h)); if(n2>=0) return n2; return hdr.findIndex(h=>/^Bran[sş]/i.test(h)); })(), il: hdr.findIndex(h => /^[İIi]l$/.test(h)), unvan: hdr.findIndex(h => /^Unvan$/i.test(h)), ofBrans: hdr.findIndex(h => /^Bran[sş]$/i.test(h)), istihdam: hdr.findIndex(h => /[İIi]stihdam/i.test(h)), }; const requiredHeaderKeys = ['tckn','ad','soyad','tur','tip','ist','gorev','sure','bas'];
+      const hdr = rows[0].map(h => String(h||'').trim()); const normalizeReportHeader = value => String(value || '').toLocaleUpperCase('tr-TR').normalize('NFD').split('').filter(ch => { const code = ch.charCodeAt(0); return code < 0x300 || code > 0x36f; }).join('').replace(/[ÇĞİÖŞÜ]/g, ch => ({Ç:'C', Ğ:'G', İ:'I', Ö:'O', Ş:'S', Ü:'U'}[ch] || ch)); const hdrNorm = hdr.map(normalizeReportHeader); const stationInfoIndex = hdrNorm.findIndex(h => /EKIBIN\s+ISTASYON\s+BILGISI/.test(h)); const ci = { tckn: hdr.findIndex(h => /TCKN|TC Kimlik/i.test(h)), ad: hdr.findIndex(h => /^Ad$/i.test(h)), soyad: hdr.findIndex(h => /soyad/i.test(h)), tur: hdr.findIndex(h => /Ekip T[üu]r[üu]/i.test(h)), tip: hdr.findIndex(h => /Ekip Tipi/i.test(h)), ist: stationInfoIndex, gorev: hdr.findIndex(h => /N[öo]bet G[öo]revi/i.test(h)), sure: hdr.findIndex(h => /N[öo]bet S[üu]resi/i.test(h)), bas: hdr.findIndex(h => /Ba[sş]lang[iı][cç]/i.test(h)), bitis: hdr.findIndex(h => /Bit[iı][şs] tarihi|Bit[iı][şs]/i.test(h)), bran: (() => { const n=hdr.findIndex(h=>/N[öo]bet Listesi Bran/i.test(h)); return n>=0?n:hdr.findIndex(h=>/^Bran[sş]/i.test(h)); })(), kadroBran: (() => { const n=hdr.findIndex(h=>/Kadro\s*Bran/i.test(h)); if(n>=0) return n; const n2=hdr.findIndex(h=>/N[öo]bet Listesi Bran/i.test(h)); if(n2>=0) return n2; return hdr.findIndex(h=>/^Bran[sş]/i.test(h)); })(), il: hdr.findIndex(h => /^[İIi]l$/.test(h)), unvan: hdr.findIndex(h => /^Unvan$/i.test(h)), ofBrans: hdr.findIndex(h => /^Bran[sş]$/i.test(h)), istihdam: hdr.findIndex(h => /[İIi]stihdam/i.test(h)), tel: hdr.findIndex(h => /^Telefon/i.test(h)), }; const requiredHeaderKeys = ['tckn','ad','soyad','tur','tip','ist','gorev','sure','bas'];
       // Yeni rapor sürümünde "Ekibin İstasyon Bilgisi" sütunu yoksa istasyon adı "Ekip Adı"ndan türetilir
       // (ör. "AHMETLİ 1 NOLU ASHİ" → "MANİSA AHMETLİ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU"); arşivdeki eski aylarla aynı ad kalır.
       if (ci.ist < 0) {
@@ -3818,11 +3820,12 @@ function buildPersonelList(rows, tcAsilIst, tcIstAll) {
       tcMap[personKey] = {
         tc, personKey, ad: getAd(r), soyad: getSoyad(r),
         kadro_brans: getKadroBrans(r),
-        il: getRowExtra(r,'il'), unvan: getRowExtra(r,'unvan'), ofBrans: getRowExtra(r,'ofBrans'), istihdam: getRowExtra(r,'istihdam'),
+        il: getRowExtra(r,'il'), unvan: getRowExtra(r,'unvan'), ofBrans: getRowExtra(r,'ofBrans'), istihdam: getRowExtra(r,'istihdam'), tel: getRowExtra(r,'tel'),
         nobetler: [],
         istCount: {},
       };
     }
+    if (!tcMap[personKey].tel) { const t = getRowExtra(r,'tel'); if (t) tcMap[personKey].tel = t; }
     const ist      = getIstasyon(r);
     const saat     = parseSure(getSure(r));
     const bas      = getBas(r);
@@ -3889,7 +3892,7 @@ function buildPersonelList(rows, tcAsilIst, tcIstAll) {
     result.push({
       tc: p.tc, personKey: p.personKey, ad: p.ad, soyad: p.soyad,
       asilIst, kadro_brans: p.kadro_brans,
-      il: p.il, unvan: p.unvan, ofBrans: p.ofBrans, istihdam: p.istihdam,
+      il: p.il, unvan: p.unvan, ofBrans: p.ofBrans, istihdam: p.istihdam, tel: p.tel || '',
       s12, s24, sDiger, sMesai,
       toplamSaat, toplam, toplamStr,
       istCount: p.istCount,
@@ -4383,11 +4386,12 @@ function buildMergedPersonelListAllGorev(force=false, includeBoundary=false){
   const people={};
   Object.entries(roleLabels).forEach(([gKey,roleLabel])=>(allData[gKey]||[]).forEach(person=>{
     const key=String(person.personKey||person.tc||`${person.ad}|${person.soyad}`);
-    if(!people[key]) people[key]={tc:person.tc||'',ad:person.ad||'',soyad:person.soyad||'',kadro_brans:person.kadro_brans||'',asilIst:person.asilIst||'',nobetler:[],mesaiNobetler:[],roles:new Set()};
+    if(!people[key]) people[key]={tc:person.tc||'',ad:person.ad||'',soyad:person.soyad||'',kadro_brans:person.kadro_brans||'',asilIst:person.asilIst||'',tel:person.tel||'',nobetler:[],mesaiNobetler:[],roles:new Set()};
     const p=people[key];
     p.roles.add(roleLabel);
     if(!p.kadro_brans && person.kadro_brans) p.kadro_brans=person.kadro_brans;
     if(!p.asilIst && person.asilIst) p.asilIst=person.asilIst;
+    if(!p.tel && person.tel) p.tel=person.tel;
     // Nöbete Uygun Personel Bulma gibi ay sınırı farkında hesaplamalar için, yerel arşivden
     // otomatik gelen önceki/sonraki ay nöbetleri de (varsa) buraya dahil edilir.
     (person.nobetler||[]).forEach(n=>{ if(!ashiNobetMi(n) && Number.isFinite(n.startMs) && Number.isFinite(n.endMs) && n.endMs>n.startMs) p.mesaiNobetler.push({startMs:n.startMs,endMs:n.endMs,ist:n.ist}); });
@@ -4593,6 +4597,7 @@ function buildUygunPersonelResults(dateStr){
   // Ay sınırı farkında: önceki/sonraki ay yerel arşivde varsa (otomatik), o nöbetler de dikkate alınır.
   const people = buildMergedPersonelListAllGorev(false, true);
   const rows = [];
+  let gunAsiriElenen = 0;
   people.forEach(p=>{
     // Kadro branşı Sürücü olan personel bu aramaya dahil edilmez — onlar nöbet değil, sadece mesai tamamlıyor.
     if (/^s[üu]r[üu]c[üu]/i.test(String(p.kadro_brans||'').trim())) return;
@@ -4608,6 +4613,12 @@ function buildUygunPersonelResults(dateStr){
       ? izinRaporRecords.some(rec => rec.tc === tcNorm && rec.startMs < afterEnd + ANALIZ_EPSILON*EXCEL_HOUR_MS && rec.endMs > beforeStart - ANALIZ_EPSILON*EXCEL_HOUR_MS)
       : false;
     if(hasBefore || hasAfter || hasOnDay || hasLeave) return; // uygun değil
+    // Sürücü düzen analizindeki kural: 24 saatlik nöbetler gün aşırı (2 gün arayla) üst üste 3 olmamalı.
+    // Bu tarihe nöbet yazılırsa (D-4,D-2,D) / (D-2,D,D+2) / (D,D+2,D+4) dizilerinden biri oluşuyorsa kişi önerilmez.
+    const d24 = new Set();
+    p.nobetler.forEach(n=>{ if(n.saat===24 && Math.abs((n.endMs-n.startMs)/EXCEL_HOUR_MS-24)<0.05){ const w=getDutyWindowStartMs(n.startMs); if(w!=null) d24.add(w); } });
+    const has24 = k => d24.has(dStart + k*DAY_MS);
+    if((has24(-4)&&has24(-2)) || (has24(-2)&&has24(2)) || (has24(2)&&has24(4))){ gunAsiriElenen++; return; }
     // Son nöbeti (girilen tarihten önceki en yakın nöbet) ve sonraki nöbeti (girilen tarihten sonraki en yakın nöbet)
     let lastDuty=null, nextDuty=null;
     p.nobetler.forEach(n=>{
@@ -4651,13 +4662,13 @@ function buildUygunPersonelResults(dateStr){
       else hedefUyum = `Aranan tarih son nöbetten ${gapBeforeDays} gün sonra`;
     }
     rows.push({
-      tc:p.tc, fullName:p.fullName, kadroBrans:p.kadro_brans||'', asilIst:p.asilIst||'—', roles:p.roles, roleText:p.roles.join(' / '),
+      tc:p.tc, tel:p.tel||'', fullName:p.fullName, kadroBrans:p.kadro_brans||'', asilIst:p.asilIst||'—', roles:p.roles, roleText:p.roles.join(' / '),
       lastDuty: formatUygunDutyInfo(lastDuty), nextDuty: formatUygunDutyInfo(nextDuty),
       gapBeforeDays, gapAfterDays, totalGapDays, araIzinVar, izinler, uyumNotu, hedefUyum
     });
   });
   rows.sort((a,b)=>trColl.compare(a.asilIst,b.asilIst)||trColl.compare(a.fullName,b.fullName));
-  return { rows, targetDate: target };
+  return { rows, targetDate: target, gunAsiriElenen };
 }
 function parseHtmlDateInput(str){
   if(!str) return null;
@@ -4688,6 +4699,7 @@ function renderUygunPersonelRows(rows){
   return (rows||[]).map(row=>`<tr>
     <td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc||'—')}</span></td>
     <td><strong>${escapeHtml(row.roleText||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.kadroBrans||'—')}</span></td>
+    <td style="white-space:nowrap">${row.tel?`<a href="tel:${escapeHtml(String(row.tel).replace(/[^\d+]/g,''))}" style="color:#0f766e;font-weight:700;text-decoration:none">${escapeHtml(row.tel)}</a>`:'—'}</td>
     <td>${escapeHtml(row.asilIst||'—')}</td>
     <td>${renderUygunPersonelDutyCell(row.lastDuty)}</td>
     <td>${renderUygunPersonelDutyCell(row.nextDuty)}</td>
@@ -4719,8 +4731,8 @@ function renderUygunPersonelModal(){
   const data=uygunPersonelResultsCache;
   const visible=getUygunPersonelFilteredRows(data.rows);
   const ozet=document.getElementById('uygunPersonelOzet');
-  if(ozet) ozet.textContent=`${formatDutyDate(data.targetDate.getTime())} için ${visible.length} / ${data.rows.length} uygun personel`;
-  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen tarih ve filtrelere uyan uygun personel bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>PERSONEL</th><th>NÖBET BRANŞI</th><th>ASIL İSTASYON</th><th>SON NÖBETİ</th><th>SONRAKİ NÖBETİ</th><th>GÜN FARKI (SON → SONRAKİ)</th><th>İZİN / RAPOR (BOŞLUKTA)</th></tr></thead><tbody>'+renderUygunPersonelRows(visible)+'</tbody></table></div>';
+  if(ozet) ozet.textContent=`${formatDutyDate(data.targetDate.getTime())} için ${visible.length} / ${data.rows.length} uygun personel${data.gunAsiriElenen?` · gün aşırı 3’lü dizi oluşacağı için ${data.gunAsiriElenen} kişi önerilmedi`:''}`;
+  body.innerHTML=!visible.length?'<div style="padding:38px;text-align:center;color:#64748b;font-weight:700">Seçilen tarih ve filtrelere uyan uygun personel bulunamadı.</div>':'<div style="overflow:auto;padding:0 20px 18px"><table class="tbl surucu-duzen-table"><thead><tr><th>PERSONEL</th><th>NÖBET BRANŞI</th><th>TELEFON</th><th>ASIL İSTASYON</th><th>SON NÖBETİ</th><th>SONRAKİ NÖBETİ</th><th>GÜN FARKI (SON → SONRAKİ)</th><th>İZİN / RAPOR (BOŞLUKTA)</th></tr></thead><tbody>'+renderUygunPersonelRows(visible)+'</tbody></table></div>';
 }
 function runUygunPersonelSearch(){
   const dateEl=document.getElementById('uygunPersonelDate');
@@ -4751,16 +4763,16 @@ function exportUygunPersonelExcel(){
   if(!uygunPersonelResultsCache || !uygunPersonelResultsCache.targetDate){ alert('Önce bir tarih seçip arama yapın.'); return; }
   const data=uygunPersonelResultsCache, rows=getUygunPersonelFilteredRows(data.rows);
   const fmtDuty=info=>info?`${info.date} · ${info.role} · ${info.station} · ${info.start} → ${info.end}`:'Bu ay kaydı yok';
-  const aoa=[[`Nöbet Tarihi: ${formatDutyDate(data.targetDate.getTime())}`],['PERSONEL','TCKN','NÖBET BRANŞI','KADRO BRANŞI','ASIL İSTASYON','SON NÖBETİ','SONRAKİ NÖBETİ','GÜN FARKI (SON→SONRAKİ)','ARANAN TARİH UYUMU','İZİN / RAPOR (BOŞLUKTA)']];
-  rows.forEach(r=>aoa.push([r.fullName,r.tc,r.roleText||'—',r.kadroBrans||'—',r.asilIst||'—',fmtDuty(r.lastDuty),fmtDuty(r.nextDuty),r.uyumNotu||'—',r.hedefUyum||'—',(r.izinler&&r.izinler.length)?r.izinler.map(uygunIzinMetni).join('\n'):'—']));
+  const aoa=[[`Nöbet Tarihi: ${formatDutyDate(data.targetDate.getTime())}`],['PERSONEL','TCKN','NÖBET BRANŞI','KADRO BRANŞI','TELEFON','ASIL İSTASYON','SON NÖBETİ','SONRAKİ NÖBETİ','GÜN FARKI (SON→SONRAKİ)','ARANAN TARİH UYUMU','İZİN / RAPOR (BOŞLUKTA)']];
+  rows.forEach(r=>aoa.push([r.fullName,r.tc,r.roleText||'—',r.kadroBrans||'—',r.tel||'—',r.asilIst||'—',fmtDuty(r.lastDuty),fmtDuty(r.nextDuty),r.uyumNotu||'—',r.hedefUyum||'—',(r.izinler&&r.izinler.length)?r.izinler.map(uygunIzinMetni).join('\n'):'—']));
   const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws['!cols']=[{wch:28},{wch:16},{wch:22},{wch:26},{wch:22},{wch:42},{wch:42},{wch:34},{wch:34},{wch:46}];
-  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:9}}];
+  ws['!cols']=[{wch:28},{wch:16},{wch:22},{wch:26},{wch:15},{wch:22},{wch:42},{wch:42},{wch:34},{wch:34},{wch:46}];
+  ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:10}}];
   const titleStyle={fill:{fgColor:{rgb:'0F766E'}},font:{bold:true,color:{rgb:'FFFFFF'}},alignment:{vertical:'center'}};
   const headerStyle={fill:{fgColor:{rgb:'134E4A'}},font:{bold:true,color:{rgb:'FFFFFF'}},alignment:{horizontal:'center',vertical:'center',wrapText:true}};
   if(ws['A1']) ws['A1'].s=titleStyle;
-  ['A','B','C','D','E','F','G','H','I','J'].forEach(col=>{ if(ws[`${col}2`]) ws[`${col}2`].s=headerStyle; });
-  for(let r=3;r<=aoa.length;r++){ ['A','B','C','D','E','F','G','H','I','J'].forEach(col=>{ if(ws[`${col}${r}`]) ws[`${col}${r}`].s={alignment:{vertical:'top',wrapText:true}}; }); }
+  ['A','B','C','D','E','F','G','H','I','J','K'].forEach(col=>{ if(ws[`${col}2`]) ws[`${col}2`].s=headerStyle; });
+  for(let r=3;r<=aoa.length;r++){ ['A','B','C','D','E','F','G','H','I','J','K'].forEach(col=>{ if(ws[`${col}${r}`]) ws[`${col}${r}`].s={alignment:{vertical:'top',wrapText:true}}; }); }
   XLSX.utils.book_append_sheet(wb,ws,'Uygun Personel');
   XLSX.writeFile(wb,'ashi_nobete_uygun_personel.xlsx');
 }
