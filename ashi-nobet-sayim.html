@@ -5844,21 +5844,25 @@ function getFilteredIstasyonPersonelRows(){
 const ASHI_ASOS_URL = 'https://asos.saglik.gov.tr/Report/RequestedReports';
 let ashiAsosPencere = null, ashiAsosItemler = [], ashiAsosDbg = [];
 function ashiAsosYerImi() {
-  // Yer imi ASOS sayfasında çalışır: ASHİ sayfasını (yeni sekme) açar, raporları kendi oturumuyla indirir, ASHİ onaylayana kadar postMessage ile yollar.
+  // ASOS sayfasında çalışır (yer imi ya da konsol). Ekranda durum kutusu gösterir; ASHİ sayfasına (açık opener ya da yeni sekme) postMessage ile yollar,
+  // pencere açılamazsa dosyaları normal indirme olarak kaydeder.
   const U = location.origin + location.pathname;
-  const kod = "(async()=>{try{const O='" + location.origin + "',U='" + U + "';const w=window.open(U+'#asos','ashiAsos');if(!w){alert('Açılır pencere engellendi: bu site için izin verip yer imine tekrar tıklayın.');return}"
-    + "const defs=[['hareket',/N[öo]bet\\s*[İIi]çi\\s*Hareket/i],['izin',/[İIi]zin.?Muafiyet/i]];const rows=[...document.querySelectorAll('tr')];const items=[],dbg=[],tr=[];"
-    + "for(const [k,re] of defs){const r=rows.find(x=>re.test(x.textContent)&&x.querySelector('a,button'));if(!r){dbg.push(k+': satır yok');continue}"
+  const kod = "(async()=>{const S=t=>{let d=document.getElementById('__ashi');if(!d){d=document.createElement('div');d.id='__ashi';d.style.cssText='position:fixed;top:10px;right:10px;z-index:2147483647;background:#0f766e;color:#fff;padding:12px 16px;border-radius:10px;font:700 14px sans-serif;max-width:380px;box-shadow:0 6px 20px rgba(0,0,0,.35)';document.body.appendChild(d)}d.textContent=t};"
+    + "try{S('ASHİ’ye aktarılıyor…');const O='" + location.origin + "',U='" + U + "';let w=null;try{w=(window.opener&&!window.opener.closed)?window.opener:window.open(U+'#asos','ashiAsos')}catch(e){}"
+    + "const defs=[['hareket',/N[öo]bet\\s*[İIi]çi\\s*Hareket/i],['izin',/[İIi]zin.?Muafiyet/i]];const rows=[...document.querySelectorAll('tr')];const items=[],dbg=[];"
+    + "for(const [k,re] of defs){const r=rows.find(x=>re.test(x.textContent)&&x.querySelector('a,button'));if(!r){dbg.push(k+': satır yok (rapor listesi yüklendi mi?)');continue}"
     + "const cells=[...r.children].map(c=>c.textContent.trim().replace(/\\s+/g,' '));const el=[...r.querySelectorAll('a,button')].find(e=>/[İIi]ndir/i.test(e.textContent));"
     + "const href=el&&(el.href||el.dataset.href||el.dataset.url);if(!href||/^javascript/i.test(href)){dbg.push(k+': indir bağlantısı yok: '+(el?el.outerHTML.slice(0,400):'eleman yok'));continue}"
-    + "const res=await fetch(href,{credentials:'include'});if(!res.ok){dbg.push(k+': HTTP '+res.status);continue}"
+    + "S(k+' indiriliyor…');const res=await fetch(href,{credentials:'include'});if(!res.ok){dbg.push(k+': HTTP '+res.status);continue}"
     + "if(/html/i.test(res.headers.get('content-type')||'')){dbg.push(k+': dosya yerine sayfa döndü');continue}"
     + "const buf=await res.arrayBuffer();const cd=res.headers.get('content-disposition')||'';const m=/filename\\*?=(?:UTF-8'')?\"?([^\";]+)/i.exec(cd);"
     + "let name='';try{name=m?decodeURIComponent(m[1]):''}catch(e){}items.push({k,cells,name,buf})}"
-    + "let ok=false;addEventListener('message',e=>{if(e.origin===O&&e.data&&e.data.t==='ashi-ack')ok=true});"
-    + "for(let i=0;i<60&&!ok;i++){w.postMessage({t:'ashi-asos',items,dbg},O);await new Promise(r=>setTimeout(r,1000))}"
-    + "if(!ok)prompt('ASHİ sayfası yanıt vermedi. Bu metni kopyalayıp gönderin:',dbg.join(' | ')||'yanit yok');else if(dbg.length)prompt('Bazı raporlar alınamadı. Bu metni kopyalayıp gönderin:',dbg.join(' | '))"
-    + "}catch(e){prompt('Hata: kopyalayıp gönderin',String(e))}})()";
+    + "if(!items.length){S('Rapor alınamadı: '+dbg.join(' | '));return}"
+    + "if(!w){for(const it of items){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([it.buf]));a.download=it.name||(it.k+'.xls');document.body.appendChild(a);a.click();a.remove()}S('ASHİ penceresi açılamadı; dosyalar indirildi. ASHİ’de normal Excel yükleme ile seçin.');return}"
+    + "let ok=false;addEventListener('message',e=>{if(e.origin===O&&e.data&&e.data.t==='ashi-ack')ok=true});S('ASHİ’nin yanıtı bekleniyor…');"
+    + "for(let i=0;i<60&&!ok;i++){try{w.postMessage({t:'ashi-asos',items,dbg},O)}catch(e){}await new Promise(r=>setTimeout(r,1000))}"
+    + "if(ok){S('Raporlar ASHİ’ye gönderildi ✓'+(dbg.length?' (alınamayan: '+dbg.join(' | ')+')':''));setTimeout(()=>{const d=document.getElementById('__ashi');d&&d.remove()},6000)}else S('ASHİ sayfası yanıt vermedi. Yeni açılan ASHİ sekmesine bakın.')"
+    + "}catch(e){S('Hata: '+e)}})()";
   return kod;
 }
 function ashiAsosAc() {
@@ -5887,7 +5891,9 @@ function ashiAsosCiz() {
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
       <button type="button" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="ashiAsosPencere=window.open(ASHI_ASOS_URL,'ashiAsos')">ASOS’u aç</button>
       <a href="${href.replace(/"/g, '&quot;')}" onclick="document.getElementById('ashiAsosIpucu').style.display='block';return false" draggable="true" style="padding:7px 12px;border:1px dashed #0f766e;border-radius:8px;color:#0f766e;font-weight:800;text-decoration:none;cursor:grab" title="Tıklamayın: yer imleri çubuğuna sürükleyin">⭐ ASHİ’ye aktar</a><span style="font-size:12px;color:#0f766e;font-weight:700">← tutup yer imi çubuğuna sürükleyin</span>
-      <button type="button" class="btn-sec" onclick="navigator.clipboard&&navigator.clipboard.writeText('javascript:'+ashiAsosYerImi().replace(/\\n/g,' ')).then(()=>this.textContent='Kopyalandı ✓')">Kodu kopyala</button></div>
+      <button type="button" class="btn-sec" title="Yer imi adres alanına yapıştırmak için" onclick="navigator.clipboard&&navigator.clipboard.writeText('javascript:'+encodeURIComponent(ashiAsosYerImi())).then(()=>this.textContent='Kopyalandı ✓')">Yer imi kodunu kopyala</button>
+      <button type="button" class="btn-sec" title="Yer imi kullanmadan: ASOS sayfasında Cmd/Ctrl+Option/Shift+J ile konsolu açıp yapıştırın" onclick="navigator.clipboard&&navigator.clipboard.writeText(ashiAsosYerImi()).then(()=>this.textContent='Konsol kodu kopyalandı ✓')">Konsol kodunu kopyala</button></div>
+    <div style="font-size:12px;color:#475569;margin-top:6px"><b>Yer imi çalışmazsa:</b> ASOS rapor listesi açıkken Chrome’da <b>Cmd+Option+J</b> (Windows: Ctrl+Shift+J) ile konsolu açın, “Konsol kodunu kopyala” ile kopyaladığınız kodu yapıştırıp Enter’a basın (ilk seferde “allow pasting” yazmanız istenebilir).</div>
     <div id="ashiAsosIpucu" style="display:none;margin-top:8px;padding:8px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;font-size:13px;font-weight:700">Bu bağlantıya burada tıklamak işe yaramaz. Fareyle tutup <u>yer imleri çubuğuna sürükleyin</u>; sonra ASOS sayfasındayken çubuktaki “ASHİ’ye aktar” yer imine tıklayın. (Çubuk görünmüyorsa Cmd/Ctrl+Shift+B.)</div>
     <div style="font-size:11px;color:#64748b;margin-top:6px">Giriş şifreniz bu sayfaya gelmez; yer imi ASOS sayfasında, kendi oturumunuzla çalışır ve dosyaları yalnızca bu sayfaya iletir.</div>
     ${liste}${dbg}</div>`;
