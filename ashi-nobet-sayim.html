@@ -4708,7 +4708,7 @@ function getUygunPersonelFilteredRows(rows){
 }
 function renderUygunPersonelDutyCell(info){
   if(!info) return '<span style="color:#94a3b8">Bu ay kaydı yok</span>';
-  return `<div><strong>${escapeHtml(info.date)}</strong> · ${escapeHtml(info.role)}<br><span style="font-size:11px;color:#64748b"><span title="${escapeHtml(info.station)}">${escapeHtml(ashiIstKisa(info.station))}</span> · ${escapeHtml(info.start)} → ${escapeHtml(info.end)}${info.tip?` <strong>(${escapeHtml(info.tip)})</strong>`:''}</span></div>`;
+  return `<div><strong>${escapeHtml(info.date)}</strong> · ${escapeHtml(abbrRoleLabel(info.role))}<br><span style="font-size:11px;color:#64748b"><span title="${escapeHtml(info.station)}">${escapeHtml(ashiIstKisa(info.station))}</span> · ${escapeHtml(info.start)} → ${escapeHtml(info.end)}${info.tip?` <strong>(${escapeHtml(info.tip)})</strong>`:''}</span></div>`;
 }
 function uygunIzinMetni(z){ return `${z.type} · Başlangıç: ${z.start}${z.end ? ' · Bitiş: ' + z.end : ''} · Alınan gün: ${z.days}`; }
 function renderUygunPersonelRows(rows){
