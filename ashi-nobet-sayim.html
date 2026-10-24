@@ -5843,27 +5843,113 @@ function getFilteredIstasyonPersonelRows(){
 // ═══════════════════════════════════════════════════════════
 const ASHI_ASOS_URL = 'https://asos.saglik.gov.tr/Report/RequestedReports';
 let ashiAsosPencere = null, ashiAsosItemler = [], ashiAsosDbg = [];
+// ASOS sayfasında çalışan istemci (yer imi/konsol). Tek başına çalışır; dışarıdan yalnızca cfg alır. Satır içi // yorum kullanmayın (tek satıra sıkıştırılır).
+async function ashiAsosIstemci(cfg) {
+  const O = cfg.O, U = cfg.U;
+  const S = t => { let d = document.getElementById('__ashi'); if (!d) { d = document.createElement('div'); d.id = '__ashi'; d.style.cssText = 'position:fixed;top:10px;right:10px;z-index:2147483647;background:#0f766e;color:#fff;padding:12px 16px;border-radius:10px;font:700 14px sans-serif;max-width:380px;box-shadow:0 6px 20px rgba(0,0,0,.35)'; document.body.appendChild(d); } d.textContent = t; };
+  const bekle = ms => new Promise(r => setTimeout(r, ms));
+  const p2 = n => String(n).padStart(2, '0');
+  try {
+    let w = null;
+    if (!cfg.test) { try { w = (window.opener && !window.opener.closed) ? window.opener : window.open(U + '#asos', 'ashiAsos'); } catch (e) {} }
+    S('ASHİ’ye aktarılıyor…');
+    const now = new Date();
+    let gir = cfg.ay;
+    if (gir === undefined) gir = prompt('Hangi ayın raporları hazırlansın? (YYYY-AA)\nBoş bırakırsanız yeni rapor istenmez; listedeki en son iki rapor alınır.', now.getFullYear() + '-' + p2(now.getMonth() + 1));
+    if (gir === null) { S('İptal edildi.'); return; }
+    gir = String(gir).trim();
+    let ay = null;
+    if (gir) { const mm = /^(\d{4})-(\d{1,2})$/.exec(gir); if (!mm || +mm[2] < 1 || +mm[2] > 12) { S('Ay biçimi hatalı (örnek: 2026-10).'); return; } ay = { y: +mm[1], m: +mm[2] }; }
+    const jq = window.jQuery;
+    const grid = () => { try { return jq && jq('[data-role=grid]').data('kendoGrid'); } catch (e) { return null; } };
+    const satirlar = () => [...document.querySelectorAll('tbody tr')].filter(r => r.children.length >= 5);
+    const indirVar = r => [...r.querySelectorAll('a,button')].some(e => /[İIi]ndir/i.test(e.textContent));
+    const yenile = async () => { const g = grid(); if (g) g.dataSource.read(); else { const b = [...document.querySelectorAll('a,button')].find(e => /^\s*Listele\s*$/i.test(e.textContent)); if (b) b.click(); } await bekle(2500); };
+    const basarisiz = r => /Başar[ıi]s[ıi]z|Hata/i.test(r.lastElementChild ? r.lastElementChild.textContent : '');
+    const defs = [['hareket', /N[öo]bet\s*[İIi]çi\s*Hareket/i, 'Nöbet İçi Hareket'], ['izin', /[İIi]zin.?Muafiyet/i, 'Personel İzin-Muafiyet']];
+    if (ay) {
+      if (!jq || !grid()) { S('Önce Raporlar › Rapor Görüntüleme Ekranı sayfasını açın, sonra yer imine tekrar tıklayın.'); return; }
+      const sy = ay.m === 12 ? ay.y + 1 : ay.y, sa = ay.m === 12 ? 1 : ay.m + 1;
+      const bas0 = '01.' + p2(ay.m) + '.' + ay.y, bit0 = '01.' + p2(sa) + '.' + sy;
+      const saat = { hareket: ['00:00', '00:00'], izin: ['09:00', '09:00'] };
+      const ad = x => x.Name || x.TemplateName || x.OptionName || x.Text || '';
+      const idOf = x => x.ID || x.Id;
+      for (const [k, re, etiket] of defs) {
+        S(etiket + ' raporu için sıra bekleniyor…');
+        let temiz = false;
+        for (let i = 0; i < 60 && !temiz; i++) { await yenile(); temiz = !satirlar().some(r => !indirVar(r) && !basarisiz(r)); if (!temiz) { S('Önceki rapor hazırlanıyor, bekleniyor…'); await bekle(3000); } }
+        if (!temiz) throw new Error('Bekleyen rapor tamamlanmadı');
+        const onceki = new Set(satirlar().filter(r => re.test(r.textContent)).map(r => r.children[0].textContent.trim()));
+        const btn = [...document.querySelectorAll('a,button')].find(e => /Yeni\s*Rapor\s*Talebi/i.test(e.textContent));
+        if (!btn) throw new Error('“Yeni Rapor Talebi” düğmesi bulunamadı');
+        S(etiket + ' raporu talep ediliyor…');
+        btn.click();
+        const form = () => document.getElementById('RequestReportForm');
+        const kd = id => jq('#' + id).data('kendoDropDownList') || jq('#' + id).data('kendoComboBox');
+        let g = null;
+        for (let i = 0; i < 40 && !g; i++) { await bekle(500); if (form() && form().offsetParent) g = kd('ReportGroupGenericLookupId'); }
+        if (!g) throw new Error('Talep penceresi açılmadı');
+        const grp = g.dataSource.data().toJSON().find(x => /^Personel$/i.test(ad(x)));
+        if (!grp) throw new Error('Personel rapor grubu bulunamadı');
+        g.value(String(idOf(grp))); g.trigger('change');
+        await bekle(2000);
+        const t = kd('TemplateId');
+        const tpl = t && t.dataSource.data().toJSON().find(x => re.test(ad(x)));
+        if (!tpl) throw new Error(etiket + ' şablonu listede yok');
+        t.value(String(idOf(tpl))); t.trigger('change');
+        for (let i = 0; i < 30 && !jq('#StartDate').length; i++) await bekle(500);
+        await bekle(1000);
+        const tarih = (id, d) => { const kw = jq('#' + id).data('kendoDateTimePicker'); if (kw) { kw.value(d); kw.trigger('change'); } else { jq('#' + id).val(p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes())).trigger('change'); } };
+        const sH = +saat[k][0].slice(0, 2);
+        tarih('StartDate', new Date(ay.y, ay.m - 1, 1, sH, 0));
+        tarih('EndDate', new Date(sy, sa - 1, 1, sH, 0));
+        const kay = [...document.querySelectorAll('button.btn-save,button')].find(b => b.offsetParent && /Oluştur/.test(b.textContent)); if (!kay) throw new Error('“Oluştur” düğmesi bulunamadı'); kay.click();
+        let yeni = null, kapanis = 0;
+        for (let i = 0; i < 60 && !yeni; i++) {
+          await bekle(5000);
+          if (form() && form().offsetParent) { kapanis++; if (kapanis >= 3) { const hata = [...document.querySelectorAll('.field-validation-error,.text-danger,.alert-danger,.toast-message')].map(e => e.textContent.trim()).filter(Boolean).join(' | '); throw new Error('Talep gönderilemedi' + (hata ? ': ' + hata : '')); } }
+          S(etiket + ' raporu hazırlanıyor… (' + ((i + 1) * 5) + ' sn)');
+          await yenile();
+          const adayRow = satirlar().find(r => re.test(r.textContent) && !onceki.has(r.children[0].textContent.trim()));
+          if (adayRow && basarisiz(adayRow)) throw new Error(etiket + ' raporu ASOS’ta başarısız oldu');
+          yeni = adayRow && indirVar(adayRow) ? adayRow : null;
+        }
+        if (!yeni) throw new Error(etiket + ' raporu zamanında hazırlanmadı');
+      }
+    }
+    const rows = [...document.querySelectorAll('tr')];
+    const items = [], dbg = [];
+    for (const [k, re] of defs) {
+      const r = rows.find(x => re.test(x.textContent) && x.querySelector('a,button'));
+      if (!r) { dbg.push(k + ': satır yok (rapor listesi yüklendi mi?)'); continue; }
+      const cells = [...r.children].map(c => c.textContent.trim().replace(/\s+/g, ' '));
+      const el = [...r.querySelectorAll('a,button')].find(e => /[İIi]ndir/i.test(e.textContent));
+      const href = el && (el.href || el.dataset.href || el.dataset.url);
+      if (!href || /^javascript/i.test(href)) { dbg.push(k + ': indir bağlantısı yok: ' + (el ? el.outerHTML.slice(0, 400) : 'eleman yok')); continue; }
+      S(k + ' indiriliyor…');
+      const res = await fetch(href, { credentials: 'include' });
+      if (!res.ok) { dbg.push(k + ': HTTP ' + res.status); continue; }
+      if (/html/i.test(res.headers.get('content-type') || '')) { dbg.push(k + ': dosya yerine sayfa döndü'); continue; }
+      const buf = await res.arrayBuffer();
+      const cd = res.headers.get('content-disposition') || '';
+      const m = /filename\*?=(?:UTF-8'')?"?([^";]+)/i.exec(cd);
+      let name = ''; try { name = m ? decodeURIComponent(m[1]) : ''; } catch (e) {}
+      items.push({ k, cells, name, buf });
+    }
+    if (!items.length) { S('Rapor alınamadı: ' + dbg.join(' | ')); return; }
+    if (cfg.test) { S('TEST TAMAM: ' + items.map(i => i.k + ' ' + i.buf.byteLength + ' B ' + i.cells.slice(0, 1).join('')).join(' ; ')); return; }
+    if (!w) { for (const it of items) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([it.buf])); a.download = it.name || (it.k + '.xls'); document.body.appendChild(a); a.click(); a.remove(); } S('ASHİ penceresi açılamadı; dosyalar indirildi. ASHİ’de normal Excel yükleme ile seçin.'); return; }
+    let ok = false;
+    addEventListener('message', e => { if (e.origin === O && e.data && e.data.t === 'ashi-ack') ok = true; });
+    S('ASHİ’nin yanıtı bekleniyor…');
+    for (let i = 0; i < 60 && !ok; i++) { try { w.postMessage({ t: 'ashi-asos', items, dbg }, O); } catch (e) {} await bekle(1000); }
+    if (ok) { S('Raporlar ASHİ’ye gönderildi ✓' + (dbg.length ? ' (alınamayan: ' + dbg.join(' | ') + ')' : '')); setTimeout(() => { const d = document.getElementById('__ashi'); if (d) d.remove(); }, 6000); }
+    else S('ASHİ sayfası yanıt vermedi. Yeni açılan ASHİ sekmesine bakın.');
+  } catch (e) { S('Hata: ' + (e && e.message || e)); }
+}
 function ashiAsosYerImi() {
-  // ASOS sayfasında çalışır (yer imi ya da konsol). Ekranda durum kutusu gösterir; ASHİ sayfasına (açık opener ya da yeni sekme) postMessage ile yollar,
-  // pencere açılamazsa dosyaları normal indirme olarak kaydeder.
   const U = location.origin + location.pathname;
-  const kod = "(async()=>{const S=t=>{let d=document.getElementById('__ashi');if(!d){d=document.createElement('div');d.id='__ashi';d.style.cssText='position:fixed;top:10px;right:10px;z-index:2147483647;background:#0f766e;color:#fff;padding:12px 16px;border-radius:10px;font:700 14px sans-serif;max-width:380px;box-shadow:0 6px 20px rgba(0,0,0,.35)';document.body.appendChild(d)}d.textContent=t};"
-    + "try{S('ASHİ’ye aktarılıyor…');const O='" + location.origin + "',U='" + U + "';let w=null;try{w=(window.opener&&!window.opener.closed)?window.opener:window.open(U+'#asos','ashiAsos')}catch(e){}"
-    + "const defs=[['hareket',/N[öo]bet\\s*[İIi]çi\\s*Hareket/i],['izin',/[İIi]zin.?Muafiyet/i]];const rows=[...document.querySelectorAll('tr')];const items=[],dbg=[];"
-    + "for(const [k,re] of defs){const r=rows.find(x=>re.test(x.textContent)&&x.querySelector('a,button'));if(!r){dbg.push(k+': satır yok (rapor listesi yüklendi mi?)');continue}"
-    + "const cells=[...r.children].map(c=>c.textContent.trim().replace(/\\s+/g,' '));const el=[...r.querySelectorAll('a,button')].find(e=>/[İIi]ndir/i.test(e.textContent));"
-    + "const href=el&&(el.href||el.dataset.href||el.dataset.url);if(!href||/^javascript/i.test(href)){dbg.push(k+': indir bağlantısı yok: '+(el?el.outerHTML.slice(0,400):'eleman yok'));continue}"
-    + "S(k+' indiriliyor…');const res=await fetch(href,{credentials:'include'});if(!res.ok){dbg.push(k+': HTTP '+res.status);continue}"
-    + "if(/html/i.test(res.headers.get('content-type')||'')){dbg.push(k+': dosya yerine sayfa döndü');continue}"
-    + "const buf=await res.arrayBuffer();const cd=res.headers.get('content-disposition')||'';const m=/filename\\*?=(?:UTF-8'')?\"?([^\";]+)/i.exec(cd);"
-    + "let name='';try{name=m?decodeURIComponent(m[1]):''}catch(e){}items.push({k,cells,name,buf})}"
-    + "if(!items.length){S('Rapor alınamadı: '+dbg.join(' | '));return}"
-    + "if(!w){for(const it of items){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([it.buf]));a.download=it.name||(it.k+'.xls');document.body.appendChild(a);a.click();a.remove()}S('ASHİ penceresi açılamadı; dosyalar indirildi. ASHİ’de normal Excel yükleme ile seçin.');return}"
-    + "let ok=false;addEventListener('message',e=>{if(e.origin===O&&e.data&&e.data.t==='ashi-ack')ok=true});S('ASHİ’nin yanıtı bekleniyor…');"
-    + "for(let i=0;i<60&&!ok;i++){try{w.postMessage({t:'ashi-asos',items,dbg},O)}catch(e){}await new Promise(r=>setTimeout(r,1000))}"
-    + "if(ok){S('Raporlar ASHİ’ye gönderildi ✓'+(dbg.length?' (alınamayan: '+dbg.join(' | ')+')':''));setTimeout(()=>{const d=document.getElementById('__ashi');d&&d.remove()},6000)}else S('ASHİ sayfası yanıt vermedi. Yeni açılan ASHİ sekmesine bakın.')"
-    + "}catch(e){S('Hata: '+e)}})()";
-  return kod;
+  return '(' + ashiAsosIstemci.toString() + ')(' + JSON.stringify({ O: location.origin, U }) + ')';
 }
 function ashiAsosAc() {
   let m = document.getElementById('ashiAsosModal');
@@ -5885,8 +5971,8 @@ function ashiAsosCiz() {
     <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:18px;font-weight:800">🔗 ASOS’tan al</div><button type="button" class="arc-ic" onclick="ashiAsosKapat()">✕</button></div>
     <ol style="font-size:13px;line-height:1.7;color:#334155;padding-left:20px;margin:10px 0">
       <li>Aşağıdaki <b>“ASHİ’ye aktar”</b> bağlantısını yer imleri çubuğuna sürükleyin (bir kez yapılır).</li>
-      <li><b>ASOS’u aç</b> düğmesine basın, giriş yapıp <b>Raporlar → Rapor Görüntüleme Ekranı</b>nda raporların hazır olduğundan emin olun (gerekirse “Yeni Rapor Talebi”).</li>
-      <li>ASOS sayfasındayken yer imine tıklayın: ASHİ yeni bir sekmede açılır ve en son <b>Nöbet İçi Hareket</b> ile <b>Personel İzin-Muafiyet</b> raporları oraya gelir (birkaç saniye sürebilir; tarayıcı pencere açmayı engellerse izin verin).</li>
+      <li><b>ASOS’u aç</b> düğmesine basın, giriş yapıp <b>Raporlar → Rapor Görüntüleme Ekranı</b> sayfasında kalın (raporları kendisi talep edecek, elle “Oluştur” demeniz gerekmez).</li>
+      <li>ASOS sayfasındayken yer imine tıklayın. Hangi ay istendiğini sorar (varsayılan bu ay; boş bırakırsanız yeni rapor istenmez, listedeki son iki rapor alınır). <b>Nöbet İçi Hareket</b> ve <b>Personel İzin-Muafiyet</b> raporları sırayla talep edilir (her biri yaklaşık 20–60 sn), hazır olunca ASHİ yeni sekmede açılır ve dosyalar oraya gelir. Tarayıcı pencere açmayı engellerse izin verin.</li>
       <li>Burada gelen dosyaları kontrol edip arşive yükleyin.</li></ol>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
       <button type="button" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="ashiAsosPencere=window.open(ASHI_ASOS_URL,'ashiAsos')">ASOS’u aç</button>
