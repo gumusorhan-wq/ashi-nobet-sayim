@@ -4714,7 +4714,7 @@ function uygunIzinMetni(z){ return `${z.type} · Başlangıç: ${z.start}${z.end
 function renderUygunPersonelRows(rows){
   return (rows||[]).map(row=>`<tr>
     <td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc||'—')}</span></td>
-    <td><strong>${escapeHtml(row.roleText||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.kadroBrans||'—')}</span></td>
+    <td><strong title="${escapeHtml(row.roleText||'')}">${escapeHtml((row.roles||[]).map(abbrRoleLabel).join(' / ')||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.kadroBrans||'—')}</span></td>
     <td style="white-space:nowrap">${row.tel?`<a href="tel:${escapeHtml(String(row.tel).replace(/[^\d+]/g,''))}" style="color:#0f766e;font-weight:700;text-decoration:none">${escapeHtml(row.tel)}</a>`:'—'}</td>
     <td>${escapeHtml(row.asilIst||'—')}</td>
     <td>${renderUygunPersonelDutyCell(row.lastDuty)}</td>
