@@ -6968,7 +6968,7 @@ function renderFilteredAnalizTable() {
     const fark = isExcess ? `+${day.excessHours} saat fazla` : `-${day.missingHours} saat eksik`;
     const personnelText = getAnalizPersonnelText(day);
     return `<tr style="background:${bg}">
-      <td style="padding:9px 12px;font-weight:700;color:#1e3a5f"><div class="analiz-station-name">${escapeHtml(day.ist)}</div>${personnelText ? `<div class="analiz-personel-inline">${escapeHtml(personnelText)}</div>` : ''}</td>
+      <td style="padding:9px 12px;font-weight:700;color:#1e3a5f"><div class="analiz-station-name">${escapeHtml(ashiIstKisa(day.ist))}</div>${personnelText ? `<div class="analiz-personel-inline">${escapeHtml(personnelText)}</div>` : ''}</td>
       <td style="padding:9px 12px;font-weight:700;color:${color};white-space:nowrap">${escapeHtml(day.date)}</td>
       <td class="analiz-window-two-lines" style="padding:9px 12px;color:#4b5563">${formatAnalizWindowHtml(day.window)}</td>
       <td style="padding:9px 12px;text-align:center;white-space:nowrap">${day.heldHours} saat</td>
@@ -6985,7 +6985,7 @@ function renderFilteredAnalizTable() {
     const personnelText = getAnalizPersonnelText(day) || 'Personel bilgisi bulunamadı';
     const departmentText = getAnalizDepartmentText(day) || 'Görev bilgisi bulunamadı';
     return `<article class="analiz-card">
-      <div class="analiz-card-head"><div><div class="analiz-card-station analiz-station-name">${escapeHtml(day.ist)}</div><div class="analiz-card-person">👤 ${escapeHtml(personnelText)}</div><div class="analiz-card-person">▣ ${escapeHtml(departmentText)}</div></div>${getAnalizIssueBadge(day)}</div>
+      <div class="analiz-card-head"><div><div class="analiz-card-station analiz-station-name">${escapeHtml(ashiIstKisa(day.ist))}</div><div class="analiz-card-person">👤 ${escapeHtml(personnelText)}</div><div class="analiz-card-person">▣ ${escapeHtml(departmentText)}</div></div>${getAnalizIssueBadge(day)}</div>
       <div class="analiz-card-window"><strong>${escapeHtml(day.date)}</strong><br><span class="analiz-window-two-lines">${formatAnalizWindowHtml(day.window)}</span></div>
       <div class="analiz-card-meta"><div class="analiz-card-metric">Atanan toplam<strong>${day.heldHours} saat</strong></div><div class="analiz-card-metric">Kapsanan<strong>${day.coveredHours} saat</strong></div><div class="analiz-card-metric">Çakışan<strong>${day.overlapHours > ANALIZ_EPSILON ? day.overlapHours+' saat' : '—'}</strong></div><div class="analiz-card-metric">24 saate fark<strong>${escapeHtml(fark)}</strong></div></div>
       <div style="margin-top:10px">Durum: ${getAnalizStatusBadge(day)}</div>
@@ -7072,7 +7072,7 @@ function showAnalizModal(gKey) {
   const gr = ANALIZ_GOREVLER[gKey];
   const monthInfo = paket.monthInfo;
   const bounds = getReportMonthBounds(monthInfo);
-  const stationOptions = [...new Set((data.stations || []).map(station => String(station.ist || '').trim()).filter(Boolean))].sort((a,b) => trColl.compare(a,b)).map(station => `<option value="${escapeHtml(station)}">${escapeHtml(station)}</option>`).join('');
+  const stationOptions = [...new Set((data.stations || []).map(station => String(station.ist || '').trim()).filter(Boolean))].sort((a,b) => trColl.compare(a,b)).map(station => `<option value="${escapeHtml(station)}">${escapeHtml(ashiIstKisa(station))}</option>`).join('');
   const departmentOptions = [...new Set((data.stations || []).flatMap(station => (station.missingDays || []).flatMap(day => getAnalizDepartmentValues({personnel:day.personnel || []}))))].sort((a,b) => trColl.compare(a,b)).map(department => `<option value="${escapeHtml(department)}">${escapeHtml(department)}</option>`).join('');
   const defaultAnalizView = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(max-width:760px)').matches) ? 'card' : 'table';
   analizUIState = { gKey, data, filters:{search:'',personel:'',department:'',status:'all', issue:'all', station:'', minOverlap:0, sort:'desc'}, view:defaultAnalizView };
@@ -7258,7 +7258,7 @@ function exportAnalizExcel(gKey, label, data) {
   (data.stations || []).forEach(station => station.missingDays.forEach(day => {
     const isExcess = day.difference > 0;
     const bg = isExcess ? 'FFF7ED' : 'FEF2F2';
-    S('A'+row, mkCell(station.ist, {bg, font:fn(9,true,'1E3A5F')}));
+    S('A'+row, mkCell(ashiIstKisa(station.ist), {bg, font:fn(9,true,'1E3A5F')}));
     S('B'+row, mkCell(day.date, {bg, font:fn(9,true,isExcess?'9A3412':'991B1B'), halign:'center'}));
     S('C'+row, mkCell(day.window, {bg, color:'374151', halign:'center'}));
     S('D'+row, mkCell(day.heldHours, {bg, color:'374151', halign:'center'}));
