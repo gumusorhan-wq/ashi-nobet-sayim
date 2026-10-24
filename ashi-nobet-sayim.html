@@ -873,13 +873,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     </div>
     <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="this.classList.remove('drag');handleDrop(event)">
       <div class="dropzone-icon">📊</div>
-      <div class="dropzone-title">Nöbet İçi Hareket Raporu veya Nöbet Listesi Raporu Excel dosyanızı buraya sürükleyin</div>
+      <div class="dropzone-title">Nöbet İçi Hareket Raporu ve (varsa) Personel İzin-Muafiyet Raporu dosyalarını birlikte buraya sürükleyin</div>
       <div class="dropzone-sub">veya tıklayarak bilgisayarınızdan seçin</div>
-      <div class="dropzone-sub" style="margin-top:6px;color:#94a3b8">Dosya adında <strong>(Nöbet İçi Hareket Raporu)</strong> veya <strong>(Nöbet Listesi Raporu)</strong> bulunan .xls veya .xlsx raporları kabul edilir.</div>
+      <div class="dropzone-sub" style="margin-top:6px;color:#94a3b8">İki dosyayı aynı anda seçebilir veya bırakabilirsiniz; hangisinin hangisi olduğu dosya adından anlaşılır. Önce nöbet listesi, ardından izin/muafiyet dosyası arşive işlenir. Adında <strong>(Nöbet İçi Hareket Raporu)</strong>, <strong>(Nöbet Listesi Raporu)</strong> veya <strong>(İzin-Muafiyet Raporu)</strong> geçen .xls/.xlsx dosyaları kabul edilir.</div>
       <div style="display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap">
         <label class="file-picker-wrap" onclick="event.stopPropagation()" aria-label="Nöbet İçi Hareket Raporu veya Nöbet Listesi Raporu Excel dosyası seç">
           <span class="btn-primary">📂 Dosya Seç</span>
-          <input type="file" id="fileInput" name="ashiNobetRaporu" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="processFile(this.files[0])">
+          <input type="file" id="fileInput" name="ashiNobetRaporu" multiple accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="ashiCokluDosya(this.files)">
         </label>
         <button type="button" class="btn-sec" style="margin-top:16px;background:#fff7ed;color:#9a3412;border-color:#fdba74" onclick="event.stopPropagation();openTopIzinPicker()" title="İzin/muafiyet/rapor Excel dosyasını yükler; ayı dosyadaki tarihlerden belirler ve arşive kaydeder">📄 İzin/Rapor Dosyası Yükle</button>
         <button type="button" class="btn-sec" style="margin-top:16px;background:#eef2ff;color:#3730a3;border-color:#c7d2fe" onclick="event.stopPropagation();openGuide()">📖 Kılavuzu Aç</button>
@@ -3291,6 +3291,7 @@ function processFile(file) {
       document.getElementById('uploadSection').style.display = 'none';
       document.getElementById('reportSection').style.display = 'block';
       switchGorev(activeGorev);
+      if (window.__ashiBekleyenIzin) { const bf = window.__ashiBekleyenIzin; window.__ashiBekleyenIzin = null; setTimeout(() => handleIzinRaporFile(bf), 400); }
 
     } catch(err) {
       console.error(err);
@@ -5855,8 +5856,8 @@ async function ashiAsosIstemci(cfg) {
       if (!/\/Report\/RequestedReports/i.test(location.pathname)) { S('Önce ASOS’ta Raporlar › Rapor Görüntüleme Ekranı sayfasını açın (rapor listesi görünmeli), sonra yer imine tekrar tıklayın.'); return; }
     }
     let w = null;
-    if (!cfg.test) { try { w = (window.opener && !window.opener.closed) ? window.opener : window.open(U + '#asos', 'ashiAsos'); } catch (e) {} }
-    S('ASHİ’ye aktarılıyor…');
+    if (!cfg.test) { try { if (window.opener && !window.opener.closed) { window.opener.location.href; w = null; } } catch (e) { w = window.opener; } }
+    S('Başlıyor…');
     const now = new Date();
     let gir = cfg.ay;
     if (gir === undefined) gir = prompt('Hangi ayın raporları hazırlansın? (YYYY-AA)\nBoş bırakırsanız yeni rapor istenmez; listedeki en son iki rapor alınır.', now.getFullYear() + '-' + p2(now.getMonth() + 1));
@@ -5942,7 +5943,22 @@ async function ashiAsosIstemci(cfg) {
     }
     if (!items.length) { S('Rapor alınamadı: ' + dbg.join(' | ')); return; }
     if (cfg.test) { S('TEST TAMAM: ' + items.map(i => i.k + ' ' + i.buf.byteLength + ' B ' + i.cells.slice(0, 1).join('')).join(' ; ')); return; }
-    if (!w) { for (const it of items) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([it.buf])); a.download = it.name || (it.k + '.xls'); document.body.appendChild(a); a.click(); a.remove(); } S('ASHİ penceresi açılamadı; dosyalar indirildi. ASHİ’de normal Excel yükleme ile seçin.'); return; }
+    if (!w) {
+      const d = document.getElementById('__ashi');
+      d.textContent = 'Raporlar hazır ✓ (' + items.map(i => i.k === 'hareket' ? 'nöbet hareket' : 'izin-muafiyet').join(' + ') + '). ';
+      d.style.cursor = 'default';
+      const git = await new Promise(res => {
+        const b = document.createElement('button'); b.textContent = 'ASHİ’ye aktar ›';
+        b.style.cssText = 'display:block;margin-top:8px;padding:8px 14px;border:0;border-radius:8px;background:#fff;color:#0f766e;font:800 14px sans-serif;cursor:pointer';
+        b.onclick = () => res('ashi');
+        const c = document.createElement('button'); c.textContent = 'Dosyaları bilgisayara indir';
+        c.style.cssText = 'display:block;margin-top:6px;padding:4px 0;border:0;background:none;color:#d1fae5;font:600 12px sans-serif;cursor:pointer;text-decoration:underline';
+        c.onclick = () => res('indir');
+        d.appendChild(b); d.appendChild(c);
+      });
+      if (git === 'ashi') { try { w = window.open(U + '#asos', 'ashiAsos'); } catch (e) {} }
+    }
+    if (!w) { for (const it of items) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([it.buf])); a.download = it.name || (it.k + '.xls'); document.body.appendChild(a); a.click(); a.remove(); } S('Dosyalar indirildi. ASHİ’de yükleme alanına bırakın (iki dosyayı birlikte seçebilirsiniz).'); return; }
     let ok = false;
     addEventListener('message', e => { if (e.origin === O && e.data && e.data.t === 'ashi-ack') ok = true; });
     S('ASHİ’nin yanıtı bekleniyor…');
@@ -5974,10 +5990,10 @@ function ashiAsosCiz() {
   m.innerHTML = `<div style="background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:92vh;overflow:auto;padding:18px 20px;box-shadow:0 20px 50px rgba(0,0,0,.3)">
     <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:18px;font-weight:800">🔗 ASOS’tan al</div><button type="button" class="arc-ic" onclick="ashiAsosKapat()">✕</button></div>
     <ol style="font-size:13px;line-height:1.7;color:#334155;padding-left:20px;margin:10px 0">
-      <li>Aşağıdaki <b>“ASHİ’ye aktar”</b> bağlantısını yer imleri çubuğuna sürükleyin (bir kez yapılır).</li>
-      <li><b>ASOS’u aç</b> düğmesine basın, giriş yapıp <b>Raporlar → Rapor Görüntüleme Ekranı</b> sayfasında kalın (raporları kendisi talep edecek, elle “Oluştur” demeniz gerekmez).</li>
-      <li>ASOS sayfasındayken yer imine tıklayın. Hangi ay istendiğini sorar (varsayılan bu ay; boş bırakırsanız yeni rapor istenmez, listedeki son iki rapor alınır). <b>Nöbet İçi Hareket</b> ve <b>Personel İzin-Muafiyet</b> raporları sırayla talep edilir (her biri yaklaşık 20–60 sn), hazır olunca ASHİ yeni sekmede açılır ve dosyalar oraya gelir. Tarayıcı pencere açmayı engellerse izin verin.</li>
-      <li>Burada gelen dosyaları kontrol edip arşive yükleyin.</li></ol>
+      <li>Aşağıdaki <b>“ASHİ’ye aktar”</b> bağlantısını yer imleri çubuğuna <b>sürükleyin</b> (bir kez yapılır; çubuk görünmüyorsa Cmd/Ctrl+Shift+B).</li>
+      <li><b>ASOS’u aç</b> düğmesine basın, giriş yapın ve <b>Raporlar → Rapor Görüntüleme Ekranı</b> sayfasını açın. <b>Yer imine bu ASOS sekmesinde tıklayın</b> (ASHİ sekmesinde değil).</li>
+      <li>Ay sorulur (örn. <code>2026-10</code>). Raporlar kendiliğinden talep edilir; ASOS sekmesinde kalıp sağ üstteki yeşil kutuyu izleyin (1–2 dk).</li>
+      <li>Kutuda <b>“ASHİ’ye aktar ›”</b> düğmesi çıkınca ona basın. ASHİ yeni sekmede açılır ve iki rapor burada listelenir.</li></ol>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
       <button type="button" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="ashiAsosPencere=window.open(ASHI_ASOS_URL,'ashiAsos')">ASOS’u aç</button>
       <a href="${href.replace(/"/g, '&quot;')}" onclick="document.getElementById('ashiAsosIpucu').style.display='block';return false" draggable="true" style="padding:7px 12px;border:1px dashed #0f766e;border-radius:8px;color:#0f766e;font-weight:800;text-decoration:none;cursor:grab" title="Tıklamayın: yer imleri çubuğuna sürükleyin">⭐ ASHİ’ye aktar</a><span style="font-size:12px;color:#0f766e;font-weight:700">← tutup yer imi çubuğuna sürükleyin</span>
@@ -5986,6 +6002,13 @@ function ashiAsosCiz() {
     <div style="font-size:12px;color:#475569;margin-top:6px"><b>Yer imi çalışmazsa:</b> ASOS rapor listesi açıkken Chrome’da <b>Cmd+Option+J</b> (Windows: Ctrl+Shift+J) ile konsolu açın, “Konsol kodunu kopyala” ile kopyaladığınız kodu yapıştırıp Enter’a basın (ilk seferde “allow pasting” yazmanız istenebilir).</div>
     <div id="ashiAsosIpucu" style="display:none;margin-top:8px;padding:8px 10px;border-radius:8px;background:#fee2e2;color:#991b1b;font-size:13px;font-weight:700">Bu bağlantıya burada tıklamak işe yaramaz. Fareyle tutup <u>yer imleri çubuğuna sürükleyin</u>; sonra ASOS sayfasındayken çubuktaki “ASHİ’ye aktar” yer imine tıklayın. (Çubuk görünmüyorsa Cmd/Ctrl+Shift+B.)</div>
     <div style="font-size:11px;color:#64748b;margin-top:6px">Giriş şifreniz bu sayfaya gelmez; yer imi ASOS sayfasında, kendi oturumunuzla çalışır ve dosyaları yalnızca bu sayfaya iletir.</div>
+    <details style="margin-top:14px;border-top:1px solid #e2e8f0;padding-top:10px">
+      <summary style="cursor:pointer;font-weight:700;font-size:13px;color:#475569">Elle yükleme: ASOS’tan indirdiğiniz iki dosyayı birlikte bırakın</summary>
+      <div style="font-size:12.5px;color:#475569;margin:8px 0">ASOS’ta iki raporun <b>İndir</b> düğmesine basın, inen dosyaları aşağıya birlikte bırakın.</div>
+    <div id="ashiAsosBirak" style="border:2px dashed #0f766e;border-radius:12px;padding:22px 14px;text-align:center;background:#f0fdfa;color:#0f766e;font-weight:800;cursor:pointer" onclick="ashiAsosKapat();document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.style.background='#ccfbf1'" ondragleave="this.style.background='#f0fdfa'" ondrop="event.preventDefault();this.style.background='#f0fdfa';ashiAsosKapat();ashiCokluDosya(event.dataTransfer.files)">
+      📥 İki dosyayı buraya bırakın<div style="font-weight:600;font-size:12px;color:#475569;margin-top:4px">Nöbet İçi Hareket Raporu + Personel İzin-Muafiyet Raporu · veya tıklayıp seçin</div></div>
+    <div style="font-size:11.5px;color:#64748b;margin-top:6px">Önce nöbet listesi işlenir (Ay Başı/Ay Sonu sorulur), ardından izin/muafiyet dosyası aynı aya kaydedilir. Ekim gibi ay sonunu alıyorsanız <b>Ay Sonu</b>’nu seçin.</div>
+    </details>
     ${liste}${dbg}</div>`;
 }
 window.addEventListener('message', ev => {
@@ -7759,8 +7782,26 @@ function exportSpecialListExcel(kind) {
 // Excel: Personel Detay (istasyon gruplu - nöbetin tutulduğu istasyona göre)
 function handleDrop(e) {
   e.preventDefault();
-  const f = e.dataTransfer.files[0];
-  if (f) processFile(f);
+  if (e.dataTransfer.files && e.dataTransfer.files.length) ashiCokluDosya(e.dataTransfer.files);
+}
+// Birden çok dosya: Nöbet İçi Hareket/Nöbet Listesi raporu ve Personel İzin-Muafiyet raporu birlikte seçilebilir.
+// Nöbet listesi önce işlenir (ay ve Ay Başı/Ay Sonu seçimi); izin dosyası onun ardından aynı aya yazılır.
+function ashiCokluDosya(liste) {
+  const arr = Array.from(liste || []).filter(Boolean);
+  if (!arr.length) return;
+  const izin = arr.find(f => /zin.?muafiyet/i.test(f.name));
+  const harOrj = arr.find(f => f !== izin && (isNobetIciHareketRaporuName(f.name) || /hareket/i.test(f.name))) || (izin ? null : arr[0]);
+  let har = harOrj;
+  if (har && !isNobetIciHareketRaporuName(har.name) && /hareket/i.test(har.name)) har = new File([har], 'Nöbet İçi Hareket Raporu_' + har.name, {type: har.type});
+  window.__ashiBekleyenIzin = null;
+  if (har) {
+    if (izin) window.__ashiBekleyenIzin = izin;
+    processFile(har);
+  } else if (izin) {
+    handleIzinRaporFile(izin);
+  }
+  const fazla = arr.filter(f => f !== izin && f !== harOrj);
+  if (fazla.length) setTimeout(() => { try { showError('Şu dosya(lar) atlandı: ' + fazla.map(f => f.name).join(', ') + '. Yalnızca Nöbet İçi Hareket/Nöbet Listesi ve İzin-Muafiyet raporları işlenir.'); } catch (e) {} }, 50);
 }
 function showLoading(v) { document.getElementById('loadingBox').style.display = v?'block':'none'; }
 function showError(m) { const b=document.getElementById('errorBox'); b.textContent=m; b.style.display='block'; }
