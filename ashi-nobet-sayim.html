@@ -4274,10 +4274,10 @@ function abbrRoleLabel(label) {
 }
 function makeSurucuDuzenRow(person, run, kind) {
   const allRecords = run.flatMap(day => day.records);
-  const stations = [...new Set(allRecords.map(record => record.station).filter(Boolean))];
+  const stations = [...new Set(allRecords.map(record => ashiIstKisa(record.station)).filter(Boolean))];
   const roles = [...new Set(allRecords.map(record => abbrRoleLabel(record.roleLabel)).filter(Boolean))];
   const dateLabels = run.map(day => {
-    const times = day.records.map(record => `${record.roleLabel ? record.roleLabel + ' · ' : ''}${record.startText} → ${record.endText}`).join(' / ');
+    const times = day.records.map(record => `${record.roleLabel ? abbrRoleLabel(record.roleLabel) + ' · ' : ''}${record.startText} → ${record.endText}`).join(' / ');
     const boundaryTag = day.records.some(r=>r.isBoundary) ? ' (sınır ay)' : '';
     return `${day.date}${boundaryTag} · ${times}`;
   });
@@ -4538,12 +4538,12 @@ function renderCokluTumPersonelRows(rows, stationFilter, roleFilter){
     const extraDuty=recs.length;
     const istHtml=stationList.map(st=>{
       const roleLabel=[...grouped[st].roles].map(r=>roleShortMap[r]||r).join('/');
-      return `<div class="tp-duty-line"><span class="tp-duty-date" style="min-width:0">${escapeHtml(st)}</span><span class="tp-duty-role" style="min-width:0">${grouped[st].count} nöbet${roleFilter?'':` · ${escapeHtml(roleLabel)}`}</span></div>`;
+      return `<div class="tp-duty-line"><span class="tp-duty-date" style="min-width:0" title="${escapeHtml(st)}">${escapeHtml(ashiIstKisa(st))}</span><span class="tp-duty-role" style="min-width:0">${grouped[st].count} nöbet${roleFilter?'':` · ${escapeHtml(roleLabel)}`}</span></div>`;
     }).join('');
     return `<tr>
       <td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc||'—')}</span></td>
-      <td><strong>${escapeHtml(row.kadroBrans||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.roleText||'—')}</span></td>
-      <td>${escapeHtml(row.asilIst||'—')}</td>
+      <td><strong>${escapeHtml(row.kadroBrans||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml((row.roles||[]).map(abbrRoleLabel).join(' / ')||'—')}</span></td>
+      <td>${escapeHtml(row.asilIst&&row.asilIst!=='—'?ashiIstKisa(row.asilIst):'—')}</td>
       <td class="tp-duty-cell">${istHtml}</td>
       <td class="surucu-duzen-count">${stationCount} istasyon</td>
       <td class="c" style="font-weight:700">${extraDuty} nöbet</td>
