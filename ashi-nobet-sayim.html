@@ -5850,6 +5850,10 @@ async function ashiAsosIstemci(cfg) {
   const bekle = ms => new Promise(r => setTimeout(r, ms));
   const p2 = n => String(n).padStart(2, '0');
   try {
+    if (!cfg.test) {
+      if (location.hostname !== 'asos.saglik.gov.tr') { S('Bu yer imi ASHİ sayfasında değil, ASOS sekmesinde tıklanır. ASOS’a girip Raporlar › Rapor Görüntüleme Ekranı’nı açın, sonra yer imine tıklayın.'); return; }
+      if (!/\/Report\/RequestedReports/i.test(location.pathname)) { S('Önce ASOS’ta Raporlar › Rapor Görüntüleme Ekranı sayfasını açın (rapor listesi görünmeli), sonra yer imine tekrar tıklayın.'); return; }
+    }
     let w = null;
     if (!cfg.test) { try { w = (window.opener && !window.opener.closed) ? window.opener : window.open(U + '#asos', 'ashiAsos'); } catch (e) {} }
     S('ASHİ’ye aktarılıyor…');
