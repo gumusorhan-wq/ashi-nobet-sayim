@@ -4582,9 +4582,18 @@ let uygunPersonelResultsCache = null;
 function dutyOverlapsCalendarDay(n, dayStartMs, dayEndMs){
   return Number.isFinite(n.startMs) && Number.isFinite(n.endMs) && n.startMs < dayEndMs && n.endMs > dayStartMs;
 }
+// Nöbet türü etiketi: 24 saat → "24"; 12 saat → başlangıç saatine göre "12 G" (gündüz) / "12 A" (akşam-gece); diğer → saat
+function uygunNobetTip(n){
+  const h = Number(n.saat) || ((n.endMs - n.startMs) / EXCEL_HOUR_MS);
+  if (!(h > 0)) return '';
+  const r = Math.round(h * 100) / 100;
+  if (Math.abs(r - 24) < 0.1) return '24';
+  if (Math.abs(r - 12) < 0.1) { const sh = new Date(n.startMs).getUTCHours(); return sh >= 6 && sh < 15 ? '12 G' : '12 A'; }
+  return String(r);
+}
 function formatUygunDutyInfo(n){
   if(!n) return null;
-  return { date: formatDutyDate(getDutyWindowStartMs(n.startMs)), station: n.ist||'—', role: n.roleLabel||'—', start: n.basRaw||'—', end: n.bitisRaw||'—', saat: n.saat||null };
+  return { date: formatDutyDate(getDutyWindowStartMs(n.startMs)), station: n.ist||'—', role: n.roleLabel||'—', start: n.basRaw||'—', end: n.bitisRaw||'—', saat: n.saat||null, tip: uygunNobetTip(n) };
 }
 function buildUygunPersonelResults(dateStr){
   const target = parseHtmlDateInput(dateStr);
@@ -4692,7 +4701,7 @@ function getUygunPersonelFilteredRows(rows){
 }
 function renderUygunPersonelDutyCell(info){
   if(!info) return '<span style="color:#94a3b8">Bu ay kaydı yok</span>';
-  return `<div><strong>${escapeHtml(info.date)}</strong> · ${escapeHtml(info.role)}<br><span style="font-size:11px;color:#64748b">${escapeHtml(info.station)} · ${escapeHtml(info.start)} → ${escapeHtml(info.end)}</span></div>`;
+  return `<div><strong>${escapeHtml(info.date)}</strong> · ${escapeHtml(info.role)}<br><span style="font-size:11px;color:#64748b">${escapeHtml(info.station)} · ${escapeHtml(info.start)} → ${escapeHtml(info.end)}${info.tip?` <strong>(${escapeHtml(info.tip)})</strong>`:''}</span></div>`;
 }
 function uygunIzinMetni(z){ return `${z.type} · Başlangıç: ${z.start}${z.end ? ' · Bitiş: ' + z.end : ''} · Alınan gün: ${z.days}`; }
 function renderUygunPersonelRows(rows){
@@ -4762,7 +4771,7 @@ function showUygunPersonelModal(){
 function exportUygunPersonelExcel(){
   if(!uygunPersonelResultsCache || !uygunPersonelResultsCache.targetDate){ alert('Önce bir tarih seçip arama yapın.'); return; }
   const data=uygunPersonelResultsCache, rows=getUygunPersonelFilteredRows(data.rows);
-  const fmtDuty=info=>info?`${info.date} · ${info.role} · ${info.station} · ${info.start} → ${info.end}`:'Bu ay kaydı yok';
+  const fmtDuty=info=>info?`${info.date} · ${info.role} · ${info.station} · ${info.start} → ${info.end}${info.tip?` (${info.tip})`:''}`:'Bu ay kaydı yok';
   const aoa=[[`Nöbet Tarihi: ${formatDutyDate(data.targetDate.getTime())}`],['PERSONEL','TCKN','NÖBET BRANŞI','KADRO BRANŞI','TELEFON','ASIL İSTASYON','SON NÖBETİ','SONRAKİ NÖBETİ','GÜN FARKI (SON→SONRAKİ)','ARANAN TARİH UYUMU','İZİN / RAPOR (BOŞLUKTA)']];
   rows.forEach(r=>aoa.push([r.fullName,r.tc,r.roleText||'—',r.kadroBrans||'—',r.tel||'—',r.asilIst||'—',fmtDuty(r.lastDuty),fmtDuty(r.nextDuty),r.uyumNotu||'—',r.hedefUyum||'—',(r.izinler&&r.izinler.length)?r.izinler.map(uygunIzinMetni).join('\n'):'—']));
   const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);
