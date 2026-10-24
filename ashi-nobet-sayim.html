@@ -1526,6 +1526,7 @@ let allCoklu  = { ef:[], ysp:[], sur:[] };
 let specialDutyLists = { komuta:[], bashekimlik:[] };
 let izinRaporRecords = [];
 let izinRaporFileName = '';
+let boundaryIzinRecords = []; // Komşu (önceki/sonraki) aylara ait izin kayıtları (arşivden): ay sınırını aşan nöbet boşluklarında izin gösterimi için
 let boundaryDutyByTc = {}; // Sınır Ay Verisi: {tc: [{ist,startMs,endMs,saat,basRaw,bitisRaw,isBoundary:true}, ...]}
 let boundaryFileName = '';
 let boundaryRecordCount = 0;
@@ -3537,7 +3538,7 @@ async function autoFillBoundaryFromArchive() {
   const currentKey = archiveKeyFromInfo(reportMonthInfo);
   let anyFound = false;
   const hadBefore = boundaryRecordCount > 0;
-  boundaryDutyByTc = {}; boundaryRecordCount = 0; boundaryArchiveSourceLabel = '';
+  boundaryDutyByTc = {}; boundaryRecordCount = 0; boundaryArchiveSourceLabel = ''; const hadIzinB = boundaryIzinRecords.length; boundaryIzinRecords = [];
   const sourceLabels = [];
   try {
     const [prevSnap, nextSnap] = await Promise.all([
@@ -3570,6 +3571,14 @@ async function autoFillBoundaryFromArchive() {
       });
       mergeIntoBoundaryDutyByTc(byTc);
     });
+    // Komşu ayların izin kayıtları (önceki ay: Ay Sonu, yoksa Ay Başı; sonraki ay: Ay Başı, yoksa Ay Sonu)
+    try {
+      for (const [rec, order] of [[prevSnap, ['izin','izinBasi']], [nextSnap, ['izinBasi','izin']]]) {
+        if (!rec || rec.key === currentKey) continue;
+        const iz = order.map(k => rec[k]).find(x => x && Array.isArray(x.records) && x.records.length);
+        if (iz) { anyFound = true; boundaryIzinRecords = boundaryIzinRecords.concat(await ashiAlignIzin(archiveClone(iz.records))); }
+      }
+    } catch (e) { console.warn('Komşu ay izinleri alınamadı:', e); }
     // Maskeli/açık TC karışıklığında kişileri anahtarlı özetle eşle.
     const pw = ashiDrive.parola();
     if (pw && Object.keys(boundaryDutyByTc).length) {
@@ -3581,7 +3590,7 @@ async function autoFillBoundaryFromArchive() {
   } catch (err) {
     console.warn('Sınır ay verisi arşivden alınamadı:', err);
   }
-  if (anyFound || hadBefore) {
+  if (anyFound || hadBefore || hadIzinB) {
     recountBoundaryRecords();
     boundaryArchiveSourceLabel = sourceLabels.join(', ');
     updateSinirAyButton();
@@ -3629,13 +3638,21 @@ function getExtendedNobetler(person, bounds) {
   if (!additions.length) return base;
   return base.concat(additions);
 }
+// Boşluk/uygun personel hesabında: açık ayın izin kayıtları + komşu ayların arşivlenmiş izin kayıtları (tekrarsız).
+function ashiIzinHavuzu() {
+  if (!boundaryIzinRecords.length) return izinRaporRecords;
+  const seen = new Set(izinRaporRecords.map(ashiIzinAnahtar));
+  const ek = boundaryIzinRecords.filter(r => { const k = ashiIzinAnahtar(r); if (seen.has(k)) return false; seen.add(k); return true; });
+  return izinRaporRecords.concat(ek);
+}
 function getLeaveMatchesForGap(row) {
   const tc = normalizeTcValue(row.tc);
-  if (!tc || !izinRaporRecords.length) return [];
+  const havuz = ashiIzinHavuzu();
+  if (!tc || !havuz.length) return [];
   const gapStart = Number(row.previousEndMs);
   const gapEnd = Number(row.nextStartMs);
   if (!Number.isFinite(gapStart) || !Number.isFinite(gapEnd) || gapEnd <= gapStart) return [];
-  return izinRaporRecords.filter(record => record.tc === tc && record.startMs < gapEnd + ANALIZ_EPSILON * EXCEL_HOUR_MS && record.endMs > gapStart - ANALIZ_EPSILON * EXCEL_HOUR_MS);
+  return havuz.filter(record => record.tc === tc && record.startMs < gapEnd + ANALIZ_EPSILON * EXCEL_HOUR_MS && record.endMs > gapStart - ANALIZ_EPSILON * EXCEL_HOUR_MS);
 }
 
 // Boşluğun içine denk gelen nöbet dışı çalışma (Mesai / Eğitim / Koordinasyon / Diğer görev) özeti: "Mesai: 3 gün (06.10, 07.10, 08.10)"
@@ -4627,8 +4644,9 @@ function buildUygunPersonelResults(dateStr){
     // İzin/Rapor dosyası yüklendiyse: girilen tarihten bir gün önce, kendisi veya bir gün sonrasında
     // izin/rapor kaydı olan personeli de uygun olmayanlar arasına al.
     const tcNorm = normalizeTcValue(p.tc);
-    const hasLeave = tcNorm && izinRaporRecords.length
-      ? izinRaporRecords.some(rec => rec.tc === tcNorm && rec.startMs < afterEnd + ANALIZ_EPSILON*EXCEL_HOUR_MS && rec.endMs > beforeStart - ANALIZ_EPSILON*EXCEL_HOUR_MS)
+    const izHavuz = ashiIzinHavuzu();
+    const hasLeave = tcNorm && izHavuz.length
+      ? izHavuz.some(rec => rec.tc === tcNorm && rec.startMs < afterEnd + ANALIZ_EPSILON*EXCEL_HOUR_MS && rec.endMs > beforeStart - ANALIZ_EPSILON*EXCEL_HOUR_MS)
       : false;
     if(hasBefore || hasAfter || hasOnDay || hasLeave) return; // uygun değil
     // Sürücü düzen analizindeki kural: 24 saatlik nöbetler gün aşırı (2 gün arayla) üst üste 3 olmamalı.
@@ -4649,16 +4667,16 @@ function buildUygunPersonelResults(dateStr){
     // (ör. 24.09 09:00 çıkış, 29.09 09:00 sonraki nöbet → 24,25,26,27,28 boş = 5 gün boşluk).
     const totalGapDays = (lastDuty && nextDuty) ? Math.round(((nextDuty.startMs - lastDuty.endMs)/DAY_MS)*100)/100 : null;
     // Bu boşluk aralığında (son nöbet bitişi ile sonraki nöbet başlangıcı arasında) izin/rapor kaydı var mı?
-    const araIzinVar = (lastDuty && nextDuty && tcNorm && izinRaporRecords.length)
-      ? izinRaporRecords.some(rec => rec.tc===tcNorm && rec.startMs < nextDuty.startMs && rec.endMs > lastDuty.endMs)
+    const araIzinVar = (lastDuty && nextDuty && tcNorm && izHavuz.length)
+      ? izHavuz.some(rec => rec.tc===tcNorm && rec.startMs < nextDuty.startMs && rec.endMs > lastDuty.endMs)
       : false;
     // Boşluk aralığındaki (son nöbet bitişi → sonraki nöbet başlangıcı; uç yoksa ay sınırı) tüm izin/rapor kayıtları: tür, başlangıç, gün
     const izinler = [];
-    if (tcNorm && izinRaporRecords.length) {
+    if (tcNorm && izHavuz.length) {
       const b = getReportMonthBounds();
       const gS = lastDuty ? lastDuty.endMs : (b ? b.monthStartMs : -Infinity);
       const gE = nextDuty ? nextDuty.startMs : (b ? b.monthEndMs : Infinity);
-      izinRaporRecords.filter(rec => rec.tc === tcNorm && rec.startMs < gE && rec.endMs > gS)
+      izHavuz.filter(rec => rec.tc === tcNorm && rec.startMs < gE && rec.endMs > gS)
         .sort((x, y) => x.startMs - y.startMs)
         .forEach(rec => izinler.push({type:rec.type || 'İzin/Rapor', start:rec.start || '', end:rec.end || '', days:rec.days}));
     }
@@ -7830,7 +7848,7 @@ function resetPage() {
   allData={ef:[],ysp:[],sur:[]}; allCoklu={ef:[],ysp:[],sur:[]}; specialDutyLists={komuta:[],bashekimlik:[]};
   mergedPersonelAllGorevCache=null; mergedPersonelAllGorevWithBoundaryCache=null; cokluTumPersonelDataCache=null; cokluTumPersonelRoleFilter=''; uygunPersonelResultsCache=null;
   izinRaporRecords=[]; izinRaporFileName=''; updateIzinRaporButton();
-  boundaryDutyByTc={}; boundaryFileName=''; boundaryRecordCount=0; boundaryArchiveSourceLabel=''; updateSinirAyButton();
+  boundaryIzinRecords=[]; boundaryDutyByTc={}; boundaryFileName=''; boundaryRecordCount=0; boundaryArchiveSourceLabel=''; updateSinirAyButton();
   specialListLastKind = null;
   filteredRows=[]; currentPage=1;
   document.getElementById('tableBody').innerHTML='';
