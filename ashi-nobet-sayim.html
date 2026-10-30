@@ -1572,7 +1572,7 @@ function ashiDosyaIlUygun() {
   if (!f || f === ashiAktifIl()) return true;
   return ashiIlAyarla(f);
 }
-function archiveIlSec(il) { if (ashiIlAyarla(il)) { driveRemote = []; driveRemoteMod = {}; driveSel.clear && driveSel.clear(); renderArchivePanel(); } }
+function archiveIlSec(il) { if (ashiIlAyarla(il)) { driveRemote = []; driveRemoteMod = {}; driveSel.clear && driveSel.clear(); renderArchivePanel(); if (ashiEnteg()) setTimeout(() => driveSync(true), 50); } }
 let archiveActiveKey = null;
 
 // ═══════════════════════════════════════════════════════════
@@ -1979,7 +1979,7 @@ function archiveIlSecici() {
   const il = ashiAktifIl();
   const serbest = !ashiEnteg() || ashiRol() === 'super_admin';
   if (!serbest) return `<b>İl: ${escapeHtml(il)}</b>`;
-  const liste = Object.keys(ASHI_IL_ILCE).map(x => ashiIlAd(x));
+  const liste = (ashiEnteg() && Array.isArray(window.ASHI_ENTEG.iller) && window.ASHI_ENTEG.iller.length ? window.ASHI_ENTEG.iller : Object.keys(ASHI_IL_ILCE)).map(x => ashiIlAd(x));
   if (!liste.includes(il)) liste.push(il);
   return `İl: <select class="arc-il" onchange="archiveIlSec(this.value)">${liste.map(x => `<option value="${escapeHtml(x)}"${x === il ? ' selected' : ''}>${escapeHtml(x)}</option>`).join('')}</select>`;
 }
@@ -8044,6 +8044,7 @@ const ASHI_YERLESIK = (() => {
   const esles = h => { h = String(h || '').toLowerCase(); return ASHI_YERLESIK_HOSTLAR.some(x => h === x || h.endsWith('.' + x)); };
   const hostOf = u => { try { return new URL(u).hostname; } catch (e) { return ''; } };
   try {
+    if (window.ASHI_ENTEG && window.ASHI_ENTEG.aktif) return true;
     if (esles(location.hostname)) return true;
     if (/[?&]gomulu=1\b/.test(location.search)) return true;             // iframe adresine ?gomulu=1 eklenirse her yerde çalışır
     if (window.top !== window.self) {                                      // başka adreste, iframe içinde gömülü çalışıyorsa
