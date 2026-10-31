@@ -195,7 +195,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .report-header .report-subtitle{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;font-size:12.5px;margin:0}
     body.ui-side .istasyon-personel-filters button[onclick^="exportDokumCetveliExcel"],body.ui-side .istasyon-personel-filters button[onclick^="showKontrolRaporuModal"]{display:none}
     body.ui-side .istasyon-personel-filters{grid-template-columns:minmax(160px,1.3fr) minmax(140px,1fr) auto auto auto}
-    body.ui-side .istasyon-personel-main-section,body.ui-side .istasyon-personel-main-box,body.ui-side #istasyonPersonelKontrol,body.ui-side #raporContent{min-width:0;max-width:100%;box-sizing:border-box}
+    body.ui-side .istasyon-personel-main-section,body.ui-side .istasyon-personel-main-box,body.ui-side #istasyonPersonelKontrol,body.ui-side #istasyonPersonelDokum,body.ui-side #raporContent{min-width:0;max-width:100%;box-sizing:border-box}
     body.ui-side #krTablo{max-width:100%;overflow-x:auto}
     /* analizler: açılır pencere yerine ana ekranda sayfa olarak */
     body.ui-side.an-ov{overflow:hidden!important}
@@ -707,7 +707,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-main-box>.istasyon-personel-filters{flex:0 0 100%}
   .istasyon-personel-main-box>.istasyon-personel-view-tabs{order:1;flex:1 1 auto;min-width:0}
   .istasyon-personel-main-box>.istasyon-personel-summary{order:2;flex:0 1 auto;max-width:100%;flex-wrap:nowrap;justify-content:flex-end;background:#fff;padding:10px 18px 8px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
-  .istasyon-personel-main-box>#istasyonPersonelList,.istasyon-personel-main-box>#istasyonPersonelSummaryTable,.istasyon-personel-main-box>#istasyonPersonelKontrol{order:3;flex:0 0 100%;min-width:0}
+  .istasyon-personel-main-box>#istasyonPersonelList,.istasyon-personel-main-box>#istasyonPersonelSummaryTable,.istasyon-personel-main-box>#istasyonPersonelKontrol,.istasyon-personel-main-box>#istasyonPersonelDokum{order:3;flex:0 0 100%;min-width:0;max-width:100%;box-sizing:border-box}
   @media(max-width:1250px){.istasyon-personel-main-box>.istasyon-personel-summary{flex-wrap:wrap;white-space:normal}}
   .ozet-not{font-size:9.5px;font-weight:600;color:#64748b;line-height:1.2;margin-top:2px}
   .istasyon-personel-summary-table-wrap{overflow:auto;border:1px solid #dbe4ee;border-radius:8px;background:#fff}
@@ -1293,10 +1293,12 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="istasyon-personel-view-tabs">
       <button type="button" id="istasyonPersonelDetailTab" onclick="setIstasyonPersonelView('detail')">📅 Nöbet Detayları</button>
       <button type="button" id="istasyonPersonelSummaryTab" class="active" onclick="setIstasyonPersonelView('summary')">📊 Personel Özeti</button>
+      <button type="button" id="istasyonPersonelDokumTab" onclick="setIstasyonPersonelView('dokum')">🗓️ Döküm Cetveli</button>
       <button type="button" id="istasyonPersonelKontrolTab" onclick="showKontrolRaporuModal()">📋 Kontrol Raporu</button>
     </div>
     <div id="istasyonPersonelList" class="istasyon-personel-list" style="display:none"></div>
     <div id="istasyonPersonelSummaryTable" class="istasyon-personel-list" style="display:block"></div>
+    <div id="istasyonPersonelDokum" style="display:none;padding:0 14px 14px"></div>
     <div id="istasyonPersonelKontrol" style="display:none;position:relative">
       <div style="padding:10px 4px;display:flex;flex-wrap:wrap;gap:10px;align-items:center">
         <div style="position:relative">
@@ -6003,7 +6005,7 @@ function ozelGunRender(){
 // AKILLI FİLTRELER + DENETİM KARTLARI (İstasyon Listesi › Personel Özeti)
 const ASHI_UYARI_FARK = 72;   // kadro süresinden ±72 saat (3 nöbet) sapma = denetim uyarısı
 let ashiOzetFiltre = {fazla:0, eksik:0, gece:0, coklu:0, uyari:0};
-function ashiOzetFiltreToggle(k){ const acik = ashiOzetFiltre[k]; Object.keys(ashiOzetFiltre).forEach(x => ashiOzetFiltre[x] = 0); ashiOzetFiltre[k] = acik ? 0 : 1; renderIstasyonPersonelSummaryTable(); }
+function ashiOzetFiltreToggle(k){ const acik = ashiOzetFiltre[k]; Object.keys(ashiOzetFiltre).forEach(x => ashiOzetFiltre[x] = 0); ashiOzetFiltre[k] = acik ? 0 : 1; renderIstasyonPersonelSummaryTable(); if (document.getElementById('istasyonPersonelDokum')?.style.display === 'block') ashiDokumEkranCiz(); }
 function ashiOzetUyar(x){
   const f = ashiOzetFiltre, fark = x.kadro == null ? null : x.total - x.kadro;
   if (f.fazla && !(fark != null && fark > 0)) return false;
@@ -6481,8 +6483,18 @@ function buildDokumCetveliAoa() {
   DOKUM_TAIL_HEADERS.forEach(h => header.push(h));
   const rows = [header], T = n => DOKUM_TAIL_HEADERS.findIndex(h => h.replace(/\s+/g, ' ') === n.replace(/\s+/g, ' '));
   const ti = {kadro:0, calis:1, fark:2, nobet:3, dis:4, gece:5, post:6, postBayram:7, egHi:15, egHs:16};
-  list.forEach((x, i) => {
-    const s = ashiDokumSatirHesapla(x, info);
+  const fz = ashiOzetFiltre || {}, uyar = (x, s) => {
+    const fark = s.calis - s.kadro;
+    if (fz.fazla && !(fark > 0)) return false;
+    if (fz.eksik && !(fark < 0)) return false;
+    if (fz.gece && !(s.night > 0)) return false;
+    if (fz.coklu && !(Object.keys(x.istCount || {}).length > 1)) return false;
+    if (fz.uyari && !(Math.abs(fark) > ASHI_UYARI_FARK)) return false;
+    return true;
+  };
+  const hesap = list.map(x => [x, ashiDokumSatirHesapla(x, info)]).filter(([x, s]) => uyar(x, s));
+  list.length = 0; hesap.forEach(([x]) => list.push(x));
+  hesap.forEach(([x, s], i) => {
     const gecici = x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : '');
     const tip = x.komuta ? 'İASB Komuta Birimi' : (x.bashek ? 'İASB Başhekimlik' : 'İASB İstasyon');
     const row = [i + 1, x.tc, `${x.ad} ${x.soyad}`.trim(), x.il || 'MANİSA', ashiBirimKodlu(x.asil), gecici && gecici !== x.asil ? ashiBirimKodlu(gecici) : '', tip, x.istihdam, x.unvan, x.ofBrans || x.brans];
@@ -6498,6 +6510,36 @@ function buildDokumCetveliAoa() {
     rows.push(row);
   });
   return {rows, days, count:list.length, year, month};
+}
+// Döküm Cetveli ekran görünümü: Excel'e aktarılanla aynı tablo (aynı filtreler)
+function ashiDokumEkranCiz() {
+  const wrap = document.getElementById('istasyonPersonelDokum'); if (!wrap) return;
+  let d;
+  try { d = buildDokumCetveliAoa(); } catch (err) { wrap.innerHTML = `<div style="padding:20px;color:#991b1b">Döküm Cetveli hazırlanamadı: ${escapeHtml(err && err.message || err)}</div>`; return; }
+  const {rows, days, count, year, month} = d, H = rows[0];
+  const fz = ashiOzetFiltre || {}, chip = (k, t) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" style="padding:5px 11px;border-radius:999px;border:1px solid ${fz[k] ? '#0f766e' : '#cbd5e1'};background:${fz[k] ? '#0f766e' : '#fff'};color:${fz[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
+  const hafsonu = c => { if (c < 10 || c >= 10 + days) return false; const w = new Date(Date.UTC(year, month - 1, c - 9)).getUTCDay(); return w === 0 || w === 6; };
+  const th = (h, c) => {
+    const dikey = c >= 10, gun = c >= 10 && c < 10 + days;
+    const txt = gun ? `${c - 9}<br><span style="font-weight:600;color:#475569">${escapeHtml(DOKUM_GUN_ADLARI[new Date(Date.UTC(year, month - 1, c - 9)).getUTCDay()].slice(0, 3))}</span>` : escapeHtml(String(h));
+    return `<th style="position:sticky;top:0;z-index:2;background:${hafsonu(c) ? '#bae6fd' : '#f1f5f9'};border:1px solid #cbd5e1;padding:4px;font-size:10.5px;font-weight:800;color:#0f172a;vertical-align:bottom;${dikey && !gun ? 'writing-mode:vertical-rl;transform:rotate(180deg);min-height:120px;max-height:190px;white-space:normal;' : ''}${c === 2 ? 'left:0;z-index:3;min-width:150px;' : ''}${gun ? 'min-width:34px;text-align:center;' : ''}">${txt}</th>`;
+  };
+  const td = (v, c) => {
+    const val = v == null ? '' : String(v);
+    return `<td style="border:1px solid #e2e8f0;padding:3px 4px;font-size:11px;white-space:nowrap;${c >= 10 ? 'text-align:center;' : ''}${hafsonu(c) ? 'background:#e0f2fe;' : ''}${c === 2 ? 'position:sticky;left:0;background:#fff;z-index:1;font-weight:700;' : ''}${c >= 10 + days && c <= 10 + days + 2 ? 'font-weight:700;' : ''}">${escapeHtml(val).replace(/\n/g, '<br>')}</td>`;
+  };
+  const ay = `${DOKUM_AY_ADLARI[month]} ${year}`;
+  wrap.innerHTML = `<div style="padding:10px 4px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+      <span style="font-size:13px;font-weight:800;color:#0f172a">🗓️ Nöbet Listesi Döküm Cetveli · ${escapeHtml(ay)}</span>
+      <span class="istasyon-personel-chip">${count} personel</span>
+      <span style="font-size:12px;font-weight:800;color:#475569;margin-left:8px">Akıllı filtre:</span>
+      ${chip('fazla', 'Kadro üstü')}${chip('eksik', 'Kadro altı')}${chip('gece', 'Gece nöbeti var')}${chip('coklu', 'Çoklu istasyon')}${chip('uyari', 'Denetim uyarısı')}
+      <button type="button" class="btn-sec" style="background:#a16207!important;color:#fff!important;border-color:#a16207!important;margin-left:auto" onclick="exportDokumCetveliExcel()">📥 Excel olarak indir</button></div>
+    <div style="font-size:11.5px;color:#64748b;margin:0 4px 6px">Ekrandaki tablo, Excel'e indirilen döküm cetveliyle aynıdır; üstteki istasyon / personel seçimi ve akıllı filtreler ikisine birden uygulanır. Mavi sütunlar hafta sonudur. (*) sütunları Personel Özeti ile aynı kurallarla hesaplanır.</div>
+    ${count ? `<div style="overflow:auto;max-height:70vh;border:1px solid #cbd5e1;border-radius:8px;background:#fff" data-testid="dokum-ekran"><table style="border-collapse:collapse;min-width:100%">
+      <thead><tr>${H.map(th).join('')}</tr></thead>
+      <tbody>${rows.slice(1).map(r => `<tr>${r.map(td).join('')}</tr>`).join('')}</tbody></table></div>`
+      : '<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun personel bulunamadı.</div>'}`;
 }
 function buildDokumCetveliSheet() {
   const {rows, days, count, year, month} = buildDokumCetveliAoa();
@@ -6758,6 +6800,9 @@ function setIstasyonPersonelView(view){
   if(detailWrap) detailWrap.style.display=view==='detail'?'grid':'none';
   if(summaryWrap) summaryWrap.style.display=view==='summary'?'block':'none';
   if(kontrolWrap) kontrolWrap.style.display=view==='kontrol'?'block':'none';
+  const dokumWrap=document.getElementById('istasyonPersonelDokum'); if(dokumWrap) dokumWrap.style.display=view==='dokum'?'block':'none';
+  document.getElementById('istasyonPersonelDokumTab')?.classList.toggle('active',view==='dokum');
+  if(view==='dokum') ashiDokumEkranCiz();
   document.getElementById('istasyonPersonelDetailTab')?.classList.toggle('active',view==='detail');
   document.getElementById('istasyonPersonelSummaryTab')?.classList.toggle('active',view==='summary');
   document.getElementById('istasyonPersonelKontrolTab')?.classList.toggle('active',view==='kontrol');
@@ -6802,6 +6847,7 @@ function renderIstasyonPersonelList(){
   const roleOrder={ef:1,ysp:2,sur:3,ref:4};
   list.innerHTML=stations.map(([station,g])=>{const stationPeople=Object.values(g.people).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));return `<section class="istasyon-personel-station-group"><div class="istasyon-personel-station-head"><div class="istasyon-personel-station-name">🏥 ${escapeHtml(station)}</div><div class="istasyon-personel-station-meta">${stationPeople.length} personel · ${g.duties} nöbet</div></div>${stationPeople.map(p=>{const total=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);const roleGroups={};p.duties.sort((a,b)=>(roleOrder[a.roleKey]||9)-(roleOrder[b.roleKey]||9)||(a.startMs||0)-(b.startMs||0)).forEach(n=>{if(!roleGroups[n.roleKey])roleGroups[n.roleKey]={label:n.role,items:[]};roleGroups[n.roleKey].items.push(n);});return `<div class="istasyon-personel-person-row"><div class="istasyon-personel-person-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')} ${p.isMulti?'<span class="badge b-coklu" title="Birden fazla istasyonda nöbet tutuyor">↔ Çoklu</span>':''}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${total.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div>${Object.values(roleGroups).map(r=>`<div class="istasyon-personel-role-line"><span class="istasyon-personel-role-label">${escapeHtml(r.label)}</span><div class="istasyon-personel-role-duties">${r.items.map(n=>`<div class="istasyon-personel-role-duty">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''} · <strong>${escapeHtml(n.duration||`${n.hours||'—'} saat`)}</strong></div>`).join('')}</div></div>`).join('')}</div>`}).join('')}</section>`}).join('');
   if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable();
+  if(document.getElementById('istasyonPersonelDokum')?.style.display==='block') ashiDokumEkranCiz();
 }
 
 // ═══════════════════════════════════════════════════════════
