@@ -293,6 +293,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .istasyon-personel-main-section{overflow:visible}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-filters{position:sticky;top:62px;z-index:35}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-view-tabs,body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{position:sticky;top:calc(62px + var(--ip-f,66px));z-index:34;background:var(--gray)}
+    /* Döküm Cetveli açıkken üstteki filtre/sekme/özet bölümleri sabit kalmaz, yukarı kayıp gider; cetvel ekranın neredeyse tamamını kullanır */
+    body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelDokum[style*="block"])>.istasyon-personel-filters,
+    body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelDokum[style*="block"])>.istasyon-personel-view-tabs,
+    body.ui-side .istasyon-personel-main-box:has(#istasyonPersonelDokum[style*="block"])>.istasyon-personel-summary{position:static!important}
     body.ui-side .istasyon-personel-main-box>.istasyon-personel-summary{background:#fff}
     body.ui-side .istasyon-personel-summary-table-wrap,body.ui-side #krTablo{overflow:visible!important}
     body.ui-side .istasyon-personel-summary-table th{position:sticky;top:calc(62px + var(--ip-f,66px) + var(--ip-t,46px) - 6px);z-index:20}
@@ -6578,7 +6582,7 @@ function ashiDokumEkranCiz() {
   const th = (h, c) => {
     const dikey = c >= 10, gun = c >= 10 && c < 10 + days;
     const txt = gun ? `${c - 9}<br><span style="font-weight:600;color:#475569">${escapeHtml(DOKUM_GUN_ADLARI[new Date(Date.UTC(year, month - 1, c - 9)).getUTCDay()].slice(0, 3))}</span>` : escapeHtml(String(h));
-    return `<th style="position:sticky;top:0;z-index:2;background:${hafsonu(c) ? '#bae6fd' : '#f1f5f9'};border:1px solid #cbd5e1;padding:4px;font-size:10.5px;font-weight:800;color:#0f172a;vertical-align:bottom;${dikey && !gun ? 'writing-mode:vertical-rl;transform:rotate(180deg);min-height:120px;max-height:190px;white-space:normal;' : ''}${c === 2 ? 'left:0;z-index:3;min-width:150px;' : ''}${gun ? 'min-width:34px;text-align:center;' : ''}">${txt}</th>`;
+    return `<th style="position:sticky;top:0;z-index:2;background:${hafsonu(c) ? '#bae6fd' : '#f1f5f9'};border:1px solid #cbd5e1;padding:4px;font-size:10.5px;font-weight:800;color:#0f172a;vertical-align:bottom;${dikey && !gun ? 'white-space:normal;min-width:84px;max-width:130px;font-size:9.5px;line-height:1.2;font-weight:700;text-align:center;' : ''}${c === 2 ? 'left:0;z-index:3;min-width:150px;' : ''}${gun ? 'min-width:34px;text-align:center;' : ''}">${txt}</th>`;
   };
   const td = (v, c) => {
     const val = v == null ? '' : String(v);
@@ -6592,7 +6596,7 @@ function ashiDokumEkranCiz() {
       ${chip('fazla', 'Kadro üstü')}${chip('eksik', 'Kadro altı')}${chip('gece', 'Gece nöbeti var')}${chip('coklu', 'Çoklu istasyon')}${chip('uyari', 'Denetim uyarısı')}
       <button type="button" class="btn-sec" style="background:#a16207!important;color:#fff!important;border-color:#a16207!important;margin-left:auto" onclick="exportDokumCetveliExcel()">📥 Excel olarak indir</button></div>
     <div style="font-size:11.5px;color:#64748b;margin:0 4px 6px">Ekrandaki tablo, Excel'e indirilen döküm cetveliyle aynıdır; üstteki istasyon / personel seçimi ve akıllı filtreler ikisine birden uygulanır. Mavi sütunlar hafta sonudur. (*) sütunları Personel Özeti ile aynı kurallarla hesaplanır.</div>
-    ${count ? `<div style="overflow:auto;max-height:70vh;border:1px solid #cbd5e1;border-radius:8px;background:#fff" data-testid="dokum-ekran"><table style="border-collapse:collapse;min-width:100%">
+    ${count ? `<div style="overflow:auto;max-height:calc(100vh - 80px);border:1px solid #cbd5e1;border-radius:8px;background:#fff" data-testid="dokum-ekran"><table style="border-collapse:collapse;min-width:100%">
       <thead><tr>${H.map(th).join('')}</tr></thead>
       <tbody>${rows.slice(1).map(r => `<tr>${r.map(td).join('')}</tr>`).join('')}</tbody></table></div>`
       : '<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun personel bulunamadı.</div>'}`;
