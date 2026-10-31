@@ -362,6 +362,18 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .modal-overlay .bosluk-filter.wide,body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter.wide{flex:1 1 100%}
     body.ui-side .modal-overlay .bosluk-filter:has(.bosluk-view-switch),body.ui-side #analizToolbar .analiz-filter-row .bosluk-filter:has(.bosluk-view-switch){flex:0 0 auto}
   }
+  /* Telefon yatay (alçak ekran): analiz sayfası tek parça kayar; başlık/özet/filtreler listeyi ekrandan itmez */
+  @media screen and (max-height:520px){
+    body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{overflow-y:auto!important;-webkit-overflow-scrolling:touch;padding-bottom:10px}
+    body.ui-side #nobelAnaliziModal>.modal-box,body.ui-side #cokluModal>.modal-box,body.ui-side #boslukModal>.modal-box,body.ui-side #surucuDuzenModal>.modal-box,body.ui-side #tumPersonelDuzenModal>.modal-box,body.ui-side #cokluTumPersonelModal>.modal-box,body.ui-side #uygunPersonelModal>.modal-box{height:auto!important;min-height:100%;display:block!important}
+    body.ui-side .modal-overlay>.modal-box>.modal-body{overflow:visible!important;max-height:none!important}
+    body.ui-side #nobelAnaliziBody{display:block!important;overflow:visible!important}
+    body.ui-side #analizTableWrap{overflow-x:auto!important;overflow-y:visible!important;max-height:none!important}
+    body.ui-side .modal-overlay .modal-body [style*="max-height"]{max-height:none!important}
+    body.ui-side .modal-overlay .modal-head>div:first-child>div:not(:first-child){display:none}
+    body.ui-side .modal-overlay .modal-head{padding:6px 12px!important}
+    body.ui-side .modal-overlay thead th{position:static!important}
+  }
   @media(max-width:640px){
     body.ui-side .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     body.ui-side .report-header .report-subtitle{display:none}
