@@ -6137,13 +6137,24 @@ async function ashiAsosIstemci(cfg) {
         let g = null;
         for (let i = 0; i < 40 && !g; i++) { await bekle(500); if (form() && form().offsetParent) g = kd('ReportGroupGenericLookupId'); }
         if (!g) throw new Error('Talep penceresi açılmadı');
-        const grp = g.dataSource.data().toJSON().find(x => /^Personel$/i.test(ad(x)));
-        if (!grp) throw new Error('Personel rapor grubu bulunamadı');
-        g.value(String(idOf(grp))); g.trigger('change');
-        await bekle(2000);
-        const t = kd('TemplateId');
-        const tpl = t && t.dataSource.data().toJSON().find(x => re.test(ad(x)));
-        if (!tpl) throw new Error(etiket + ' şablonu listede yok');
+        const gruplar = g.dataSource.data().toJSON();
+        const sira = [...gruplar.filter(x => /^Personel$/i.test(ad(x))), ...gruplar.filter(x => /personel/i.test(ad(x)) && !/^Personel$/i.test(ad(x))), ...gruplar.filter(x => !/personel/i.test(ad(x)))];
+        let t = null, tpl = null;
+        const denenen = [];
+        for (const grp of sira) {
+          g.value(String(idOf(grp))); g.trigger('change'); denenen.push(ad(grp));
+          S(etiket + ' şablonu aranıyor (' + ad(grp) + ')…');
+          for (let i = 0; i < 12 && !tpl; i++) {
+            await bekle(400);
+            t = kd('TemplateId');
+            const L = t && t.dataSource && t.dataSource.data ? t.dataSource.data().toJSON() : [];
+            tpl = L.find(x => re.test(ad(x))) || null;
+            if (L.length && !tpl && i >= 4) break;
+          }
+          if (tpl) break;
+        }
+        if (!sira.length) throw new Error('Rapor grubu listesi boş (ASOS sayfasını yenileyip tekrar deneyin)');
+        if (!tpl) throw new Error(etiket + ' şablonu hiçbir rapor grubunda bulunamadı (denenen gruplar: ' + denenen.join(', ') + '). Bu raporu talep etme yetkiniz olmayabilir.');
         t.value(String(idOf(tpl))); t.trigger('change');
         for (let i = 0; i < 30 && !jq('#StartDate').length; i++) await bekle(500);
         await bekle(1000);
