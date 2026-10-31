@@ -2368,7 +2368,16 @@ const ashiDrive = (() => {
   }
   // Entegrasyon modu: şifresiz, yalnızca maskelenmiş (KVKK) paket; kimlik tablosu hiç üretilmez.
   // Kurum arşivi (HUSER Yönetim Sistemi sunucusu): veri yıldızlanmadan, olduğu gibi yüklenir (31.10.2026 kararı).
+  function yildizliParcalar(rec) {
+    const p = [];
+    for (const sl of ['basi','sonu']) if (rec?.slots?.[sl]?.anon) p.push(sl === 'basi' ? 'ay başı Excel' : 'ay sonu Excel');
+    if (rec?.izin?.anon) p.push('izin listesi'); if (rec?.izinBasi?.anon) p.push('ay başı izin listesi');
+    return p;
+  }
   async function entegPaket(rec) {
+    // Yıldızlı (eski Drive paketinden gelmiş) veri kurum arşivine yüklenmez: gerçek veriyi ezip yıldızlı kopya bırakırdı.
+    const yz = yildizliParcalar(rec);
+    if (yz.length) throw new Error(`${rec.key}: bu cihazdaki kayıt yıldızlı (${yz.join(', ')}). Orijinal Excel'in bulunduğu cihazdan yükleyin ya da Excel'i bu cihazda yeniden yükleyip arşive kaydedin.`);
     return {v:3, key:rec.key, reportMonthInfo:rec.reportMonthInfo, savedAt:rec.savedAt, slots:{...(rec.slots || {})}, izin:rec.izin || null, izinBasi:rec.izinBasi || null, yayin:new Date().toISOString()};
   }
   async function yayinla(rec, pw, mevcut) {
@@ -2452,7 +2461,7 @@ const ashiDrive = (() => {
     }
     return recs.length;
   }
-  return {entegPaket, birlestir, imza, izinHatalari,parolaDegistir, parolaSifirla, kimlikParola, kimlikParolaAyarla, yoneticiDogrula, sahipKapat, tokenMap, CFG, LS, klasor, klasorAyikla, parola, parolaAyarla, parolaGuclu, sahip, oto, otoAyarla, tokenVar, bekleyenler, esitle, topluYayinla, syncMap, pubMap, imza};
+  return {entegPaket, yildizliParcalar, birlestir, imza, izinHatalari,parolaDegistir, parolaSifirla, kimlikParola, kimlikParolaAyarla, yoneticiDogrula, sahipKapat, tokenMap, CFG, LS, klasor, klasorAyikla, parola, parolaAyarla, parolaGuclu, sahip, oto, otoAyarla, tokenVar, bekleyenler, esitle, topluYayinla, syncMap, pubMap, imza};
 })();
 
 let driveMsg = {text:'', kind:''};
@@ -2750,7 +2759,7 @@ async function entegSync(silent, keys) {
 }
 function entegBekleyenler(records, il) {
   const pub = entegLs.get('ashi_enteg_pub_' + il, {});
-  return (records || []).filter(r => r && (r.slots?.basi || r.slots?.sonu || r.izin || r.izinBasi) && pub[r.key] !== ashiDrive.imza(r)).map(r => r.key).sort();
+  return (records || []).filter(r => r && (r.slots?.basi || r.slots?.sonu || r.izin || r.izinBasi) && pub[r.key] !== ashiDrive.imza(r) && !ashiDrive.yildizliParcalar(r).length).map(r => r.key).sort();
 }
 async function entegPublish(onlyKeys) {
   if (driveBusy) return;
@@ -2809,6 +2818,8 @@ function entegHtml(records) {
     <div class="arc-drive-row" style="margin-top:0"><button type="button" class="${bekleyen.length ? 'pri' : ''}" data-testid="ashi-kurum-secilen-indir" ${bekleyen.length ? '' : 'disabled'} onclick="driveSync(false, ${escapeHtml(JSON.stringify(bekleyen)).replace(/&quot;/g, "'")})">⬇ Seçilenleri indir${bekleyen.length ? ` (${bekleyen.length})` : ''}</button></div>
     <div class="arc-drive-note" style="margin:6px 0">Açılışta yalnızca en yeni ay kendiliğinden iner. Başka ay istiyorsanız yılı seçip ayları işaretleyin ve “⬇ Seçilenleri indir”e basın. İşaretli aylar ve sonradan yüklenen yeni aylar her açılışta güncel tutulur. İşareti kaldırılan ay güncellenmez; inmişse bu cihazda kalır.</div>
     <div style="max-height:280px;overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #e2e8f0;border-radius:8px;background:#fff"><table style="width:100%;border-collapse:collapse" data-testid="ashi-kurum-tablo"><thead><tr><th style="${M};width:30px"><input type="checkbox" data-testid="ashi-kurum-sec-tumu" title="Listelenen ayların tümü" ${tumSecili ? 'checked' : ''} onchange="entegSecTik(${escapeHtml(JSON.stringify(LG.map(f => f.ym))).replace(/&quot;/g, "'")}, this.checked)"></th>${['Ay', 'Güncelleme', 'Boyut', 'Yükleyen', 'Durum', ''].map(h => `<th style="${M};font-size:11.5px;color:#475569">${h}</th>`).join('')}</tr></thead><tbody>${satirlar}</tbody></table></div></details>`;
+  const yildizli = (records || []).filter(r => ashiDrive.yildizliParcalar(r).length).map(r => r.key).sort();
+  const yildizUyari = yildizli.length ? `<div class="arc-drive-msg err" style="display:block;margin-top:8px" data-testid="ashi-kurum-yildizli">⚠ Bu cihazda yıldızlı (TC/ad gizlenmiş) aylar var: <b>${yildizli.map(entegAyAd).join(', ')}</b>. Bunlar eski bir sürümle yıldızlanarak yüklenmiş paketlerden gelmiştir. Kurum arşivinde bu ayı, orijinal Excel'in bulunduğu cihazdan (sayfayı yeniledikten sonra) yeniden yükleyin; bu cihaz bir sonraki eşitlemede yıldızsız haline kendiliğinden geçer.</div>` : '';
   const uzakSet = new Set(L.map(f => f.ym)), pend = new Set(entegBekleyenler(records, il));
   const yerelAylar = (records || []).filter(r => r && (r.slots?.basi || r.slots?.sonu || r.izin || r.izinBasi)).map(r => r.key).sort().reverse();
   const yukle = yetkili ? `<details ${entegAcik.yukle ? 'open' : ''} ontoggle="entegAcik.yukle=this.open" data-testid="ashi-kurum-yukle" style="margin-top:12px"><summary style="cursor:pointer;font-weight:800;font-size:13px">${escapeHtml(rolAd)}: aylarımı ${escapeHtml(il)} kurum arşivine yükle${pend.size ? ` <span style="font-weight:600;font-size:11px;color:#b45309">${pend.size} ay yüklenmeyi bekliyor</span>` : ''}</summary>
@@ -2821,6 +2832,7 @@ function entegHtml(records) {
     <div class="arc-drive-head" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>🏛 Kurum Arşivi · ${escapeHtml(il)}</b><span class="arc-drive-note" style="margin:0">${escapeHtml(rolAd)} · Bu cihazda: ${(records || []).length - kurumSay} ay sizin kaydınız · ${kurumSay} ay kurum arşivinden</span></div>
     <div class="arc-drive-row"><button type="button" class="pri" data-testid="ashi-kurum-esitle" onclick="driveSync()">⟳ Şimdi eşitle</button><button type="button" onclick="entegListeYenile()">Listeyi yenile</button></div>
     <div class="arc-drive-msg${driveMsg.kind ? ' ' + driveMsg.kind : ''}" style="display:${driveMsg.text ? 'block' : 'none'}">${escapeHtml(driveMsg.text)}</div>
+    ${yildizUyari}
     ${liste}
     ${yukle}
   </div>`;
