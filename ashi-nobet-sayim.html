@@ -6885,7 +6885,9 @@ function renderIstasyonPersonelList(){
   const stationSelect=document.getElementById('istasyonPersonelStation');
   const selectedStation=stationSelect?.value||'現';
   if(stationSelect){
-    const stations=[...new Set(getIstasyonPersonelRows().flatMap(p=>p.duties.map(n=>n.station)).filter(Boolean))].sort((a,b)=>trColl.compare(a,b));
+    // Başhekimlik ve Komuta Kontrol birimleri de seçilebilir ("Diğer" grubunda; Döküm Cetveli ve Kontrol Raporu'na uygulanır)
+    const ozelBirim=[];['komuta','bashekimlik'].forEach(k=>((specialDutyLists||{})[k]||[]).forEach(sp=>(sp.records||[]).forEach(n=>{const i=String(n.ist||'').trim();if(i)ozelBirim.push(i);})));
+    const stations=[...new Set(getIstasyonPersonelRows().flatMap(p=>p.duties.map(n=>n.station)).concat(ozelBirim).filter(Boolean))].sort((a,b)=>trColl.compare(a,b));
     const options='<option value="">Tüm istasyonlar</option>'+stations.map(st=>`<option value="${escapeHtml(st)}">${escapeHtml(st)}</option>`).join('');
     if(stationSelect.innerHTML!==options) stationSelect.innerHTML=options;
     if(selectedStation!=='現' && stations.includes(selectedStation)) stationSelect.value=selectedStation;
