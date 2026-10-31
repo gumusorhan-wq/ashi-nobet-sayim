@@ -1572,7 +1572,7 @@ function ashiDosyaIlUygun() {
   if (!f || f === ashiAktifIl()) return true;
   return ashiIlAyarla(f);
 }
-function archiveIlSec(il) { if (ashiIlAyarla(il)) { driveRemote = []; driveRemoteMod = {}; driveSel.clear && driveSel.clear(); renderArchivePanel(); if (ashiEnteg()) setTimeout(() => driveSync(true), 50); } }
+function archiveIlSec(il) { if (ashiIlAyarla(il)) { entegListe = []; entegYillar = null; entegYay = new Set(); driveRemote = []; driveRemoteMod = {}; driveSel.clear && driveSel.clear(); renderArchivePanel(); if (ashiEnteg()) setTimeout(() => driveSync(true), 50); } }
 let archiveActiveKey = null;
 
 // ═══════════════════════════════════════════════════════════
@@ -2365,10 +2365,9 @@ const ashiDrive = (() => {
     try { return await KILIT; } finally { KILIT = null; }
   }
   // Entegrasyon modu: şifresiz, yalnızca maskelenmiş (KVKK) paket; kimlik tablosu hiç üretilmez.
-  async function entegPaket(rec, anahtar) {
-    const slots = {};
-    for (const sl of ['basi','sonu']) if (rec.slots?.[sl]) slots[sl] = await anonSlot(rec.slots[sl], anahtar, null);
-    return {v:2, key:rec.key, reportMonthInfo:rec.reportMonthInfo, savedAt:rec.savedAt, slots, izin:rec.izin ? await anonIzin(rec.izin, anahtar, null) : null, izinBasi:rec.izinBasi ? await anonIzin(rec.izinBasi, anahtar, null) : null, yayin:new Date().toISOString()};
+  // Kurum arşivi (HUSER Yönetim Sistemi sunucusu): veri yıldızlanmadan, olduğu gibi yüklenir (31.10.2026 kararı).
+  async function entegPaket(rec) {
+    return {v:3, key:rec.key, reportMonthInfo:rec.reportMonthInfo, savedAt:rec.savedAt, slots:{...(rec.slots || {})}, izin:rec.izin || null, izinBasi:rec.izinBasi || null, yayin:new Date().toISOString()};
   }
   async function yayinla(rec, pw, mevcut) {
     const slots = {}, id = {t:{}, n:{}};
@@ -2573,7 +2572,7 @@ async function driveSync(silent, keys) {
   if (drivePwDraft != null && !ashiDrive.parola()) ashiDrive.parolaAyarla(pw, driveRememberDraft);
   driveBusy = true;
   try {
-    driveSetMsg('Ortak arşiv kontrol ediliyor…', '');
+    driveSetMsg('Kurum arşivi kontrol ediliyor…', '');
     const r = await ashiDrive.esitle(pw, m => driveSetMsg('⬇ ' + m, ''), keys);
     driveRemote = r.liste.map(f => f.ym);
     driveRemoteMod = {}; r.liste.forEach(f => { driveRemoteMod[f.ym] = f.modifiedTime; });
@@ -2701,6 +2700,7 @@ function ashiYuklemeYetkisi(il) {
   return r === 'il_admin' && ashiIlAd(il) === ashiIlAd(window.ASHI_ENTEG.il);
 }
 function entegAnahtar(il) { return String(window.ASHI_ENTEG.tokenAnahtari || '') + '|' + ashiIlAd(il); }
+let entegListe = [], entegYillar = null, entegYay = new Set(), entegAcik = {liste:true, yukle:false};
 const entegLs = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
@@ -2711,15 +2711,16 @@ async function entegSync(silent, keys) {
   if (!E || !E.api || typeof E.api.liste !== 'function') { if (!silent) driveSetMsg('Ortak arşiv bağlantısı (api) tanımlı değil.', 'err'); return; }
   driveBusy = true;
   try {
-    driveSetMsg('Ortak arşiv kontrol ediliyor…', '');
+    driveSetMsg('Kurum arşivi kontrol ediliyor…', '');
     const L = (await E.api.liste(il) || []).filter(f => f && /^\d{4}-\d{2}$/.test(f.ym)).sort((a, b) => b.ym.localeCompare(a.ym));
-    driveRemote = L.map(f => f.ym); driveRemoteMod = {}; L.forEach(f => { driveRemoteMod[f.ym] = f.mod || ''; });
+    entegListe = L; driveRemote = L.map(f => f.ym); driveRemoteMod = {}; L.forEach(f => { driveRemoteMod[f.ym] = f.mod || ''; });
+    const secAy = new Set(entegSecAl(il));
     const sKey = 'ashi_enteg_sync_' + il, sync = entegLs.get(sKey, {}), alinan = [];
     const is = [];
     for (const f of L) {
       const yerel = await archiveGet(f.ym), degisti = sync[f.ym] !== (f.mod || '');
       if (Array.isArray(keys)) { if (keys.includes(f.ym)) is.push(f); }
-      else if (f.ym === L[0].ym && (!yerel || degisti)) is.push(f);
+      else if ((f.ym === L[0].ym || secAy.has(f.ym)) && (!yerel || degisti)) is.push(f);
       else if (yerel && degisti) is.push(f);
     }
     for (let i = 0; i < is.length; i++) {
@@ -2731,7 +2732,7 @@ async function entegSync(silent, keys) {
       sync[f.ym] = f.mod || ''; alinan.push(f.ym); driveSel.delete(f.ym);
     }
     entegLs.set(sKey, sync);
-    driveSetMsg(alinan.length ? `Ortak arşivden ${alinan.length} ay alındı: ${alinan.join(', ')}` : (L.length ? `Ortak arşivde ${L.length} ay var; yerel arşiv güncel.` : `${il} için ortak arşivde henüz paket yok.`), 'ok');
+    driveSetMsg(alinan.length ? `Kurum arşivinden ${alinan.length} ay alındı: ${alinan.map(entegAyAd).join(', ')}` : (L.length ? `Kurum arşivinde ${L.length} ay var; bu cihaz güncel.` : `${il} için kurum arşivinde henüz ay yok.`), 'ok');
     await renderArchivePanel();
     if (archiveActiveKey && alinan.includes(archiveActiveKey)) await loadArchivedMonth(archiveActiveKey, archiveActiveSlot);
     else if (alinan.length && archiveKeyFromInfo(reportMonthInfo)) autoFillBoundaryFromArchive();
@@ -2759,15 +2760,21 @@ async function entegPublish(onlyKeys) {
     const all = await archiveGetAll();
     const keys = Array.isArray(onlyKeys) ? onlyKeys : entegBekleyenler(all, il);
     const recs = all.filter(r => keys.includes(r.key));
-    if (!recs.length) { driveSetMsg('Yüklenecek yeni değişiklik yok.', 'ok'); return; }
+    if (!recs.length) { driveSetMsg('Yüklenecek ay seçilmedi.', 'ok'); return; }
     const pub = entegLs.get('ashi_enteg_pub_' + il, {});
     for (let i = 0; i < recs.length; i++) {
       driveSetMsg(`⬆ ${recs[i].key} hazırlanıyor ve yükleniyor (${i + 1}/${recs.length})…`, '');
-      await E.api.yukle(il, recs[i].key, await ashiDrive.entegPaket(recs[i], entegAnahtar(il)));
+      await E.api.yukle(il, recs[i].key, await ashiDrive.entegPaket(recs[i]));
       pub[recs[i].key] = ashiDrive.imza(recs[i]);
     }
     entegLs.set('ashi_enteg_pub_' + il, pub);
-    driveSetMsg(`${recs.length} ay ortak arşive yüklendi: ${recs.map(r => r.key).join(', ')}`, 'ok');
+    try {
+      const L2 = await E.api.liste(il) || [], sKey = 'ashi_enteg_sync_' + il, sync = entegLs.get(sKey, {});
+      recs.forEach(r => { const f = L2.find(x => x.ym === r.key); if (f) sync[r.key] = f.mod || ''; });
+      entegLs.set(sKey, sync); entegListe = L2.filter(f => f && /^\d{4}-\d{2}$/.test(f.ym)).sort((a, b) => b.ym.localeCompare(a.ym));
+    } catch (e) { console.warn('[kurum arşivi] liste', e); }
+    entegYay = new Set();
+    driveSetMsg(`${recs.length} ay kurum arşivine yüklendi: ${recs.map(r => entegAyAd(r.key)).join(', ')}`, 'ok');
     renderArchivePanel();
     setTimeout(() => driveSync(true), 600);
   } catch (err) {
@@ -2775,29 +2782,88 @@ async function entegPublish(onlyKeys) {
   } finally { driveBusy = false; }
 }
 function entegHtml(records) {
-  const il = ashiAktifIl(), yetkili = ashiYuklemeYetkisi(il), pend = entegBekleyenler(records, il);
-  const rolAd = {super_admin:'Süper admin', il_admin:'İl admini', kullanici:'Kullanıcı'}[ashiRol()] || '';
-  const localKeys = new Set((records || []).map(x => x.key));
-  const AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-  const years = [...new Set(driveRemote.map(ym => ym.slice(0, 4)))].sort().reverse();
-  const pick = years.map(y => `<div class="arc-pick-year"><div class="arc-pick-yhead"><b>${y}</b></div><div class="arc-pick-months">${AYK.map((n, i) => {
-    const ym = `${y}-${String(i + 1).padStart(2, '0')}`;
-    if (!driveRemote.includes(ym)) return `<span class="arc-pick-m off">${n}</span>`;
-    if (localKeys.has(ym)) return `<button type="button" data-ym="${ym}" class="arc-pick-m done" onclick="drivePickToggle('${ym}')">${n}</button>`;
-    return `<button type="button" data-ym="${ym}" class="arc-pick-m${driveSel.has(ym) ? ' sel' : ''}" onclick="drivePickToggle('${ym}')">${n}</button>`;
-  }).join('')}</div></div>`).join('');
-  return `<div class="arc-drive">
-    <div class="arc-drive-head"><b>🌐 Ortak Arşiv · ${escapeHtml(il)}</b> <span class="arc-drive-note" style="margin:0 0 0 6px">${escapeHtml(rolAd)} · v${ASHI_APP_VERSION}</span></div>
-    <div class="arc-drive-row"><button type="button" class="pri" onclick="driveSync()">⟳ Yenile</button>${driveRemote.length ? `<button type="button" onclick="driveDownloadSelected()" ${driveSel.size ? '' : 'disabled'}>⬇ Seçilenleri indir${driveSel.size ? ` (${driveSel.size})` : ''}</button>` : ''}</div>
-    ${pick ? `<details class="arc-drive-pick" open><summary>📥 Ortak arşivdeki aylar</summary>${pick}</details>` : ''}
+  const il = ashiAktifIl(), yetkili = ashiYuklemeYetkisi(il);
+  const rolAd = {super_admin:'Süper admin', il_admin:'Arşiv yetkilisi', kullanici:'Kullanıcı'}[ashiRol()] || '';
+  const L = entegListe || [], sync = entegLs.get('ashi_enteg_sync_' + il, {}), localKeys = new Set((records || []).map(x => x.key));
+  const sec = entegSecAl(il), enSon = L[0] ? L[0].ym : null, secili = ym => ym === enSon || sec.includes(ym);
+  const YIL = [...new Set(L.map(f => f.ym.slice(0, 4)))].sort().reverse();
+  const yA = entegYillar === null ? new Set(YIL.slice(0, 1)) : entegYillar;
+  const LG = yA.size ? L.filter(f => yA.has(f.ym.slice(0, 4))) : L;
+  const DUR = {yeni:['Yeni — henüz inmedi', '#b45309'], degisti:['Güncellenmiş — yeniden inecek', '#b45309'], guncel:['✓ Bu cihazda güncel', '#15803d'], yerel:['Bu cihazda sizin kaydınız var', '#1d4ed8']};
+  const bekleyen = L.filter(f => secili(f.ym) && ['yeni', 'degisti'].includes(entegDurum(f, localKeys, sync))).map(f => f.ym);
+  const kurumSay = (records || []).filter(r => sync[r.key] != null).length;
+  const M = 'padding:6px 8px;border-bottom:1px solid #e2e8f0;font-size:12.5px;text-align:left';
+  const tarih = v => { if (!v) return '—'; const d = new Date(v); return isNaN(d) ? escapeHtml(String(v)) : d.toLocaleString('tr-TR'); };
+  const MB = n => n ? (n / 1048576).toLocaleString('tr-TR', {maximumFractionDigits:1}) + ' MB' : '—';
+  const chip = (on, extra) => `border:1px solid ${on ? '#0369a1' : '#cbd5e1'};background:${on ? '#0369a1' : '#fff'};color:${on ? '#fff' : '#0f172a'};border-radius:8px;font:inherit;font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer;${extra || ''}`;
+  const yillar = YIL.length ? `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:6px 0 8px" data-testid="ashi-kurum-yillar">${YIL.map(y => `<button type="button" data-testid="ashi-kurum-yil-${y}" style="${chip(yA.has(y))}" onclick="entegYilTik('${y}')">${y} (${L.filter(f => f.ym.startsWith(y)).length})</button>`).join('')}${YIL.length > 1 ? `<button type="button" data-testid="ashi-kurum-yil-tumu" style="${chip(!yA.size)}" onclick="entegYilTik(null)">Tümü</button>` : ''}</div>` : '';
+  const satirlar = LG.length ? LG.map(f => {
+    const d = entegDurum(f, localKeys, sync), x = !secili(f.ym), [ad, renk] = x && (d === 'yeni' || d === 'degisti') ? ['İndirilmeyecek (seçili değil)', '#94a3b8'] : DUR[d];
+    return `<tr data-testid="ashi-kurum-ay-${f.ym}" style="${x ? 'opacity:.7' : ''}"><td style="${M};width:30px"><input type="checkbox" data-testid="ashi-kurum-sec-${f.ym}" ${!x ? 'checked' : ''} ${f.ym === enSon ? 'disabled title="En yeni ay her zaman iner"' : 'title="Bu ayı bu cihazda güncel tut"'} onchange="entegSecTik(['${f.ym}'], this.checked)"></td><td style="${M};font-weight:700">${entegAyAd(f.ym)}</td><td style="${M}">${tarih(f.mod)}</td><td style="${M}">${MB(f.boyut)}</td><td style="${M}">${escapeHtml(f.yukleyen || '—')}</td><td style="${M};color:${renk}" data-testid="ashi-kurum-durum-${f.ym}">${ad}</td><td style="${M};text-align:right">${yetkili ? `<button type="button" data-testid="ashi-kurum-sil-${f.ym}" style="${chip(false, 'padding:2px 8px;font-size:11.5px')}" onclick="entegSil('${f.ym}')">Sil</button>` : ''}</td></tr>`;
+  }).join('') : `<tr><td colspan="7" style="${M};color:#64748b">${L.length ? 'Seçilen yıllarda ay yok.' : escapeHtml(il) + ' için kurum arşivinde henüz ay yok.'}</td></tr>`;
+  const tumSecili = LG.length > 0 && LG.every(f => secili(f.ym));
+  const liste = `<details ${entegAcik.liste ? 'open' : ''} ontoggle="entegAcik.liste=this.open" data-testid="ashi-kurum-liste" style="margin-top:8px"><summary style="cursor:pointer;font-weight:800;font-size:13px">Kurum arşivindeki aylar (${L.length})${bekleyen.length ? ` <span style="font-weight:600;font-size:11px;color:#b45309">${bekleyen.length} ay inmeyi bekliyor</span>` : ''}</summary>
+    ${yillar}
+    <div class="arc-drive-row" style="margin-top:0"><button type="button" class="${bekleyen.length ? 'pri' : ''}" data-testid="ashi-kurum-secilen-indir" ${bekleyen.length ? '' : 'disabled'} onclick="driveSync(false, ${escapeHtml(JSON.stringify(bekleyen)).replace(/&quot;/g, "'")})">⬇ Seçilenleri indir${bekleyen.length ? ` (${bekleyen.length})` : ''}</button></div>
+    <div class="arc-drive-note" style="margin:6px 0">Açılışta yalnızca en yeni ay kendiliğinden iner. Başka ay istiyorsanız yılı seçip ayları işaretleyin ve “⬇ Seçilenleri indir”e basın. İşaretli aylar ve sonradan yüklenen yeni aylar her açılışta güncel tutulur. İşareti kaldırılan ay güncellenmez; inmişse bu cihazda kalır.</div>
+    <div style="max-height:280px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;background:#fff"><table style="width:100%;border-collapse:collapse" data-testid="ashi-kurum-tablo"><thead><tr><th style="${M};width:30px"><input type="checkbox" data-testid="ashi-kurum-sec-tumu" title="Listelenen ayların tümü" ${tumSecili ? 'checked' : ''} onchange="entegSecTik(${escapeHtml(JSON.stringify(LG.map(f => f.ym))).replace(/&quot;/g, "'")}, this.checked)"></th>${['Ay', 'Güncelleme', 'Boyut', 'Yükleyen', 'Durum', ''].map(h => `<th style="${M};font-size:11.5px;color:#475569">${h}</th>`).join('')}</tr></thead><tbody>${satirlar}</tbody></table></div></details>`;
+  const uzakSet = new Set(L.map(f => f.ym)), pend = new Set(entegBekleyenler(records, il));
+  const yerelAylar = (records || []).filter(r => r && (r.slots?.basi || r.slots?.sonu || r.izin || r.izinBasi)).map(r => r.key).sort().reverse();
+  const yukle = yetkili ? `<details ${entegAcik.yukle ? 'open' : ''} ontoggle="entegAcik.yukle=this.open" data-testid="ashi-kurum-yukle" style="margin-top:12px"><summary style="cursor:pointer;font-weight:800;font-size:13px">${escapeHtml(rolAd)}: aylarımı ${escapeHtml(il)} kurum arşivine yükle${pend.size ? ` <span style="font-weight:600;font-size:11px;color:#b45309">${pend.size} ay yüklenmeyi bekliyor</span>` : ''}</summary>
+    <div class="arc-drive-note" style="margin:6px 0">Seçilen aylar bu cihazdaki arşivden alınır ve kurumun sunucusuna (il bazında, yetkiye bağlı) yüklenir. Aynı ay yeniden yüklenirse güncellenir. ✓ kurum arşivinde var, • bu cihazda değişmiş.</div>
+    ${yerelAylar.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin:6px 0">${yerelAylar.map(ym => `<button type="button" data-testid="ashi-kurum-yay-${ym}" style="${chip(entegYay.has(ym))}" onclick="entegYayTik('${ym}')">${entegAyAd(ym)}${uzakSet.has(ym) ? ' ✓' : ''}${pend.has(ym) ? ' •' : ''}</button>`).join('')}</div>
+    <div class="arc-drive-row"><button type="button" onclick="entegYayTumu('hepsi')">Tümünü seç</button>${pend.size ? `<button type="button" onclick="entegYayTumu('degisen')">Değişenleri seç</button>` : ''}<button type="button" class="pri" data-testid="ashi-kurum-yukle-btn" ${entegYay.size ? '' : 'disabled'} onclick="drivePublish([...entegYay])">⬆ Seçilenleri yükle${entegYay.size ? ` (${entegYay.size})` : ''}</button></div>`
+      : `<div class="arc-drive-note">Yüklenecek yerel ay yok. Excel yükleyip arşive kaydettikten sonra burada görünür.</div>`}</details>`
+    : `<div class="arc-drive-note" style="margin-top:10px">Bu arşiv sizin için salt okunurdur; yükleme yetkisi Kullanıcılar ekranından verilir.</div>`;
+  return `<div class="arc-drive" data-testid="ashi-kurum-arsiv">
+    <div class="arc-drive-head" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>🏛 Kurum Arşivi · ${escapeHtml(il)}</b><span class="arc-drive-note" style="margin:0">${escapeHtml(rolAd)} · Bu cihazda: ${(records || []).length - kurumSay} ay sizin kaydınız · ${kurumSay} ay kurum arşivinden</span></div>
+    <div class="arc-drive-row"><button type="button" class="pri" data-testid="ashi-kurum-esitle" onclick="driveSync()">⟳ Şimdi eşitle</button><button type="button" onclick="entegListeYenile()">Listeyi yenile</button></div>
     <div class="arc-drive-msg${driveMsg.kind ? ' ' + driveMsg.kind : ''}" style="display:${driveMsg.text ? 'block' : 'none'}">${escapeHtml(driveMsg.text)}</div>
-    ${yetkili ? `<details class="arc-drive-admin" open><summary>${escapeHtml(rolAd)}: ${escapeHtml(il)} arşivini ortak alana yükle</summary>
-      <div class="arc-drive-note">Yüklenen pakette TC kimlik no yıldızlanır, ad/soyad ilk harf dışında gizlenir; gerçek kimlik hiçbir zaman ortak alana gitmez.</div>
-      <div class="arc-drive-row"><button type="button" class="pri" onclick="drivePublish()">⬆ Yükle${pend.length ? ` (${pend.length} bekleyen)` : ''}</button></div></details>`
-      : `<div class="arc-drive-note">Bu arşiv salt okunurdur; yükleme yalnızca il admini ve süper admin tarafından yapılır.</div>`}
-    <div class="arc-drive-note">TC kimlik no ve ad/soyad ortak arşivde yıldızlıdır; gerçek kimlik gösterilmez (KVKK).</div>
+    ${liste}
+    ${yukle}
   </div>`;
 }
+const ENTEG_AY = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function entegAyAd(ym) { const m = /^(\d{4})-(\d{2})$/.exec(String(ym || '')); return m ? `${ENTEG_AY[+m[2] - 1]} ${m[1]}` : escapeHtml(String(ym || '')); }
+function entegDurum(f, localKeys, sync) {
+  if (!localKeys.has(f.ym)) return 'yeni';
+  if (sync[f.ym] == null) return 'yerel';
+  return sync[f.ym] === (f.mod || '') ? 'guncel' : 'degisti';
+}
+function entegSecAl(il) { const v = entegLs.get('ashi_kurum_sec_' + ashiIlAd(il), []); return Array.isArray(v) ? v.filter(x => /^\d{4}-\d{2}$/.test(x)) : []; }
+function entegSecTik(aylar, on) { const il = ashiAktifIl(), S = new Set(entegSecAl(il)); (aylar || []).forEach(ym => on ? S.add(ym) : S.delete(ym)); entegLs.set('ashi_kurum_sec_' + ashiIlAd(il), [...S].sort()); renderArchivePanel(); }
+function entegYilTik(y) {
+  const YIL = [...new Set((entegListe || []).map(f => f.ym.slice(0, 4)))].sort().reverse();
+  if (y === null) entegYillar = new Set();
+  else { const S = entegYillar === null ? new Set(YIL.slice(0, 1)) : new Set(entegYillar); S.has(y) ? S.delete(y) : S.add(y); entegYillar = S; }
+  renderArchivePanel();
+}
+function entegYayTik(ym) { entegYay.has(ym) ? entegYay.delete(ym) : entegYay.add(ym); renderArchivePanel(); }
+async function entegYayTumu(tur) {
+  const recs = await archiveGetAll(), il = ashiAktifIl();
+  entegYay = new Set(tur === 'degisen' ? entegBekleyenler(recs, il) : recs.filter(r => r && (r.slots?.basi || r.slots?.sonu || r.izin || r.izinBasi)).map(r => r.key));
+  renderArchivePanel();
+}
+async function entegListeYenile() {
+  const E = window.ASHI_ENTEG, il = ashiAktifIl();
+  try { entegListe = (await E.api.liste(il) || []).filter(f => f && /^\d{4}-\d{2}$/.test(f.ym)).sort((a, b) => b.ym.localeCompare(a.ym)); driveRemote = entegListe.map(f => f.ym); driveSetMsg('Liste yenilendi.', 'ok'); }
+  catch (err) { driveSetMsg('Liste alınamadı: ' + (err.message || err), 'err'); }
+  renderArchivePanel();
+}
+async function entegSil(ym) {
+  const E = window.ASHI_ENTEG, il = ashiAktifIl();
+  if (!ashiYuklemeYetkisi(il) || !E.api.sil) return;
+  if (!confirm(`${entegAyAd(ym)} ${il} kurum arşivinden silinsin mi? Bu cihazdaki kayıt silinmez; diğer kullanıcılar bir sonraki eşitlemede bu ayı artık görmez.`)) return;
+  try {
+    await E.api.sil(il, ym);
+    const sKey = 'ashi_enteg_sync_' + il, sync = entegLs.get(sKey, {}); delete sync[ym]; entegLs.set(sKey, sync);
+    const pub = entegLs.get('ashi_enteg_pub_' + il, {}); delete pub[ym]; entegLs.set('ashi_enteg_pub_' + il, pub);
+    entegSecTik([ym], false);
+    driveSetMsg(`${entegAyAd(ym)} kurum arşivinden silindi.`, 'ok');
+    await entegListeYenile();
+  } catch (err) { driveSetMsg('Silinemedi: ' + (err.message || err), 'err'); renderArchivePanel(); }
+}
+
 
 function driveHtml(records) {
   if (ashiEnteg()) return entegHtml(records);
@@ -6131,7 +6197,7 @@ async function ashiAsosIstemci(cfg) {
         c.onclick = () => res('indir');
         d.appendChild(b); d.appendChild(c);
       });
-      if (git === 'ashi') { try { w = window.open(U + '#asos', 'ashiAsos'); } catch (e) {} }
+      if (git === 'ashi') { try { w = window.open(U + '#asos', 'ashiHedef'); } catch (e) {} }
     }
     if (!w) { for (const it of items) { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([it.buf])); a.download = it.name || (it.k + '.xls'); document.body.appendChild(a); a.click(); a.remove(); } S('Dosyalar indirildi. ASHİ’de yükleme alanına bırakın (iki dosyayı birlikte seçebilirsiniz).'); return; }
     let ok = false;
