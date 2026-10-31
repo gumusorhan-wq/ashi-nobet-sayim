@@ -3205,8 +3205,11 @@ function ashiIstUyar(sel, ist) {
 function ashiIstSecimLC(id) { return ashiIstSecim(id).map(s => String(s).toLocaleLowerCase('tr-TR')); }
 function ashiIstUyarLC(q, text) {
   if (!q || !q.length) return true;
-  const t = String(text || '').toLocaleLowerCase('tr-TR');
-  return q.some(x => t === x || t.includes(x));
+  // Tam ad eşleşmesi (sondaki birim kodu yok sayılır). "İçerir" eşleşmesi kaldırıldı: Başhekimlik seçilince
+  // adı "…BAŞHEKİMLİĞİ" ile başlayan Komuta Kontrol birimi de geliyordu.
+  const sade = v => String(v || '').toLocaleLowerCase('tr-TR').replace(/\s*\(?\d{3,7}\)?\s*$/, '').replace(/\s+/g, ' ').trim();
+  const t = sade(text);
+  return q.some(x => t === sade(x));
 }
 (function () {
   let openPop = null;
@@ -3971,6 +3974,8 @@ function buildSpecialDutyList(rows, kind, bransLookup) {
     const text = kind === 'bashekimlik'
       ? station
       : [station, getGorev(r), getBrans(r)].join(' ');
+    // Komuta Kontrol birimi (adı "…BAŞHEKİMLİĞİ KOMUTA KONTROL…" olsa da) Başhekimlik listesine girmez
+    if (kind === 'bashekimlik' && /KOMUTA\s*KONTROL/.test(normalizeSpecialText(text))) return false;
     return pattern.test(normalizeSpecialText(text));
   }).map(r => {
     const saat = parseSure(getSure(r));
