@@ -5791,14 +5791,14 @@ function renderTable() {
 }
 
 // Kadro branşı sınıflandırma: yazım farkları da tanınır ("Acil Tıp Teknisyeni", "ATT (Sözleşmeli)",
-// "Ambulans ve Acil Bakım Teknikeri", "AABT - 4/B" gibi). AABT önce denetlenir.
+// "Ambulans ve Acil Bakım Teknikeri", "AABT - 4/B", "Paramedik" gibi; paramedik AABT sayılır). AABT önce denetlenir.
 function ashiBransKatla(b) {
   return String(b || '').toLocaleUpperCase('tr-TR').replace(/Ç/g,'C').replace(/Ğ/g,'G').replace(/İ/g,'I').replace(/Ö/g,'O').replace(/Ş/g,'S').replace(/Ü/g,'U')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
 }
 function ashiBransAabt(b) {
   const f = ashiBransKatla(b);
-  return /(^|[^A-Z])AABT([^A-Z]|$)/.test(f) || /AMBULANS VE ACIL BAKIM/.test(f) || (/ACIL BAKIM/.test(f) && /TEKNIKER/.test(f));
+  return /(^|[^A-Z])AABT([^A-Z]|$)/.test(f) || /AMBULANS VE ACIL BAKIM/.test(f) || (/ACIL BAKIM/.test(f) && /TEKNIKER/.test(f)) || /PARAMEDIK/.test(f);  // paramedik = AABT
 }
 function ashiBransAtt(b) {
   if (ashiBransAabt(b)) return false;
