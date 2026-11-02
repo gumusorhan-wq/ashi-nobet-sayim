@@ -440,6 +440,16 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .lf-sel.on{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e;font-weight:600}
   .lf-clr{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;font:inherit;font-size:12.5px;font-weight:700;color:#334155;cursor:pointer}
   .lf-cnt{font-size:12px;color:var(--muted)}
+  /* Çoklu branş seçimi (birden çok branş işaretlenebilir; hiçbiri işaretli değilse tümü) */
+  .lf-ms{position:relative;display:inline-block}
+  .lf-ms>summary{list-style:none;cursor:pointer;min-width:150px;user-select:none}
+  .lf-ms>summary::-webkit-details-marker{display:none}
+  .lf-ms>summary::after{content:' ▾';color:#94a3b8}
+  .lf-ms.on>summary{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e;font-weight:600}
+  .lf-ms-p{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:220px;max-height:320px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.15);padding:6px}
+  .lf-ms-p label{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap}
+  .lf-ms-p label:hover{background:#f1f5f9}
+  .lf-ms-p .lf-ms-tum{border-bottom:1px solid var(--line);margin-bottom:4px;font-weight:700}
   .ist-pk-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:600;color:#334155;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ist-pk-btn.on,.ist-pk.open .ist-pk-btn{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e}
   .ist-pk-pop{position:fixed;z-index:100000;background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.22);padding:10px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
@@ -1198,7 +1208,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div class="search-row">
       <input class="search-input" id="searchInput" type="text" placeholder="İstasyon, ad, soyad, TC, branş ile ara..." oninput="filterTable()">
       <select class="lf-sel" id="lfListeIst" onchange="filterTable()"><option value="">Tüm istasyonlar</option></select>
-      <select class="lf-sel" id="lfListeBrans" onchange="filterTable()"><option value="">Tüm branşlar</option></select>
+      <details class="lf-ms" id="lfListeBrans" data-on="filterTable"><summary class="lf-sel">Tüm branşlar</summary><div class="lf-ms-p"></div></details>
       <select class="lf-sel" id="lfListeDurum" onchange="filterTable()"><option value="">Tüm kayıtlar</option><option value="coklu">Farklı istasyonda nöbet tutan</option><option value="muaf">Muafiyetli</option><option value="nd">Mesai / diğer kaydı olan</option><option value="sifir">Nöbeti olmayan (0 gün)</option></select>
       <button type="button" class="lf-clr" onclick="lfTemizle('liste')">Temizle</button>
       <span style="font-size:12px;color:var(--muted)" id="searchCount"></span>
@@ -1234,7 +1244,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <div class="lf-bar">
         <input class="search-input" id="lfPerQ" type="search" placeholder="Personel veya istasyon ara…" oninput="lfGec('personel')">
         <select class="lf-sel" id="lfPerIst" onchange="renderPersonelDetay()"><option value="">Tüm istasyonlar</option></select>
-        <select class="lf-sel" id="lfPerBrans" onchange="renderPersonelDetay()"><option value="">Tüm branşlar</option></select>
+        <details class="lf-ms" id="lfPerBrans" data-on="renderPersonelDetay"><summary class="lf-sel">Tüm branşlar</summary><div class="lf-ms-p"></div></details>
         <button type="button" class="lf-clr" onclick="lfTemizle('personel')">Temizle</button>
         <span class="lf-cnt" id="lfPerCnt"></span>
       </div>
@@ -1248,6 +1258,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
             <th style="text-align:center">24 SAAT</th>
             <th style="text-align:center">DİĞER SÜRE</th>
             <th style="text-align:center">TOPLAM GÜN</th>
+            <th style="text-align:center" id="thPerGorevSaat" title="Bu listede açık olan nöbet branşında (Ekip Şefi / YSP / Sürücü) tutulan nöbet saati">BRANŞ ÇALIŞMA SAATİ</th>
+            <th style="text-align:center" title="Ayın mesai saati (memur 8, işçi 7,5 saat/gün; izin ve rapor günleri düşülmüş) — Personel Özeti ile aynı hesap">KADRO SÜRESİ</th>
+            <th style="text-align:center" title="Kişinin bu ay tüm nöbet branşlarında ve istasyonlarda tuttuğu toplam nöbet saati">ÇALIŞMA SÜRESİ</th>
+            <th style="text-align:center" title="Çalışma süresi − kadro süresi">FARK</th>
           </tr></thead>
           <tbody id="tbodyPersonelDetay"></tbody>
         </table>
@@ -1258,7 +1272,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div id="viewIstasyonOzet" style="display:none">
       <div class="lf-bar">
         <input class="search-input" id="lfOzQ" type="search" placeholder="İstasyon ara…" oninput="lfGec('ozet')">
-        <select class="lf-sel" id="lfOzBrans" onchange="renderIstasyonOzet()"><option value="">Tüm branşlar</option></select>
+        <details class="lf-ms" id="lfOzBrans" data-on="renderIstasyonOzet"><summary class="lf-sel">Tüm branşlar</summary><div class="lf-ms-p"></div></details>
         <select class="lf-sel" id="lfOzKap" onchange="renderIstasyonOzet()"><option value="">Tüm istasyonlar</option><option value="tam">Ay tam kapsanan</option><option value="eksik">Ay tam kapsanmayan</option></select>
         <button type="button" class="lf-clr" onclick="lfTemizle('ozet')">Temizle</button>
         <span class="lf-cnt" id="lfOzCnt"></span>
@@ -5539,14 +5553,14 @@ function buildIstasyonData(gorev) {
 function renderPersonelDetay() {
   const ayGun = getAyGunSayisi();
   lfSecenek('personel');
-  const fq = lfNorm(lfEl('lfPerQ').value).trim(), fi = lfEl('lfPerIst').value, fb = lfEl('lfPerBrans').value;
+  const fq = lfNorm(lfEl('lfPerQ').value).trim(), fi = lfEl('lfPerIst').value, fbS = lfMs('lfPerBrans'), fb = fbS.size;
   const tumGrup = buildIstasyonData(activeGorev);
   let toplamP = 0, gorunenP = 0;
   tumGrup.forEach(i => toplamP += i.personeller.length);
   const istGroups = tumGrup.filter(i => !fi || i.ist === fi).map(i => {
     const istEsles = fq && lfNorm(i.ist).includes(fq);
     const pl = i.personeller.filter(p =>
-      (!fb || (p.kadro_brans||'').trim() === fb) &&
+      (!fb || fbS.has((p.kadro_brans||'').trim())) &&
       (!fq || istEsles || lfNorm(`${p.ad||''} ${p.soyad||''}`).includes(fq) || String(p.tc||'').includes(fq)));
     return Object.assign({}, i, { personeller: pl });
   }).filter(i => i.personeller.length);
@@ -5554,12 +5568,18 @@ function renderPersonelDetay() {
   lfEl('lfPerCnt').textContent = (fq||fi||fb) ? `${gorunenP} / ${toplamP} personel · ${istGroups.length} istasyon` : `${toplamP} personel`;
   lfIsaret();
   const tbody = document.getElementById('tbodyPersonelDetay');
+  // Sağdaki süre sütunları: açık nöbet branşındaki saat, kadro süresi, tüm branşlardaki toplam çalışma ve fark (Personel Özeti ile aynı hesap)
+  const thG = document.getElementById('thPerGorevSaat');
+  if (thG) thG.textContent = ((ISTASYON_PERSONEL_ROLE_LABELS[activeGorev] || 'Branş') + ' çalışma saati').toLocaleUpperCase('tr-TR');
+  const sureMap = new Map();
+  getIstasyonPersonelRows().forEach(r => sureMap.set(String(r.personKey), {kadro: ashiKadroSaati(r.tc, r.istihdam), calis: r.duties.reduce((t, n) => t + (Number(n.hours) || 0), 0)}));
+  const r2p = v => Math.round(v * 100) / 100, sfmt = v => r2p(v).toLocaleString('tr-TR');
   let html = '';
   istGroups.forEach(ist => {
     const topGun  = ist.gercekGun;              // interval birleşimine dayalı gerçek gün
     const personelSayi = ist.personeller.length;
     html += `<tr style="background:#e0f2fe">
-      <td colspan="7" style="padding:10px 16px">
+      <td colspan="11" style="padding:10px 16px">
         <div style="font-weight:700;font-size:13px;color:#1e3a5f;text-transform:uppercase">${escapeHtml(ist.ist)}</div>
         <div style="font-size:11px;color:#0369a1;margin-top:2px">${personelSayi} personel · ${topGun}/${ayGun} gün</div>
       </td>
@@ -5582,6 +5602,11 @@ function renderPersonelDetay() {
           ${p.sDiger>0?`<span style="background:#f3e8ff;color:#7e22ce;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700">${p.sDiger}</span>`:'<span style="color:#cbd5e1">0</span>'}
         </td>
         <td style="text-align:center;font-weight:700;font-size:13px;padding:9px 16px">${gun}</td>
+        ${(() => { const sr = sureMap.get(String(p.personKey)) || (p.tc ? sureMap.get(String(p.tc)) : null); const k = sr ? sr.kadro : null, c = sr ? sr.calis : null, f = k == null ? null : c - k;
+          return `<td style="text-align:center;font-weight:700;padding:9px 12px;color:#0f766e">${sfmt(p.toplamSaat)}</td>
+        <td style="text-align:center;padding:9px 12px">${k == null ? '—' : sfmt(k)}</td>
+        <td style="text-align:center;font-weight:600;padding:9px 12px">${c == null ? '—' : sfmt(c)}</td>
+        <td style="text-align:center;font-weight:700;padding:9px 12px;color:${f == null ? '#94a3b8' : f > 0.005 ? '#b91c1c' : f < -0.005 ? '#1d4ed8' : '#166534'}">${f == null ? '—' : (f > 0.005 ? '+' : '') + sfmt(f)}</td>`; })()}
       </tr>`;
     });
   });
@@ -5592,11 +5617,11 @@ function renderPersonelDetay() {
 function renderIstasyonOzet() {
   const ayGun = getAyGunSayisi();
   lfSecenek('ozet');
-  const oq = lfNorm(lfEl('lfOzQ').value).trim(), ob = lfEl('lfOzBrans').value, ok = lfEl('lfOzKap').value;
+  const oq = lfNorm(lfEl('lfOzQ').value).trim(), obS = lfMs('lfOzBrans'), ob = obS.size, ok = lfEl('lfOzKap').value;
   const tumOzet = buildIstasyonData(activeGorev);
   const istGroups = tumOzet.filter(i =>
     (!oq || lfNorm(i.ist).includes(oq)) &&
-    (!ob || i.personeller.some(p => (p.kadro_brans||'').trim() === ob)) &&
+    (!ob || i.personeller.some(p => obS.has((p.kadro_brans||'').trim()))) &&
     (!ok || (ok === 'tam' ? i.gercekGun >= ayGun : i.gercekGun < ayGun)));
   lfEl('lfOzCnt').textContent = (oq||ob||ok) ? `${istGroups.length} / ${tumOzet.length} istasyon` : `${tumOzet.length} istasyon`;
   lfIsaret();
@@ -5667,32 +5692,47 @@ function lfSecenek(v){
   if(_lfSig[v]===sig) return; _lfSig[v]=sig;
   if(v==='liste'){
     lfOpts('lfListeIst',lfSort(d.map(r=>r.asilIst)),'Tüm istasyonlar');
-    lfOpts('lfListeBrans',lfSort(d.map(r=>(r.kadro_brans||'').trim())),'Tüm branşlar');
+    lfMsDoldur('lfListeBrans',lfSort(d.map(r=>(r.kadro_brans||'').trim())));
   } else {
     const g=buildIstasyonData(activeGorev);
     const br=lfSort(g.flatMap(i=>i.personeller.map(p=>(p.kadro_brans||'').trim())));
-    if(v==='personel'){ lfOpts('lfPerIst',lfSort(g.map(i=>i.ist)),'Tüm istasyonlar'); lfOpts('lfPerBrans',br,'Tüm branşlar'); }
-    else lfOpts('lfOzBrans',br,'Tüm branşlar');
+    if(v==='personel'){ lfOpts('lfPerIst',lfSort(g.map(i=>i.ist)),'Tüm istasyonlar'); lfMsDoldur('lfPerBrans',br); }
+    else lfMsDoldur('lfOzBrans',br);
   }
 }
-function lfIsaret(){ document.querySelectorAll('.lf-sel').forEach(e=>e.classList.toggle('on',!!e.value)); }
+function lfIsaret(){ document.querySelectorAll('select.lf-sel').forEach(e=>e.classList.toggle('on',!!e.value)); document.querySelectorAll('.lf-ms').forEach(e=>e.classList.toggle('on',lfMs(e.id).size>0)); }
+// Çoklu branş seçimi: işaretli branşlar (boş küme = tüm branşlar)
+function lfMs(id){ const e=lfEl(id); return new Set(e?[...e.querySelectorAll('input[data-v]:checked')].map(x=>x.dataset.v):[]); }
+function lfMsYazi(id){ const e=lfEl(id); if(!e) return; const s=[...lfMs(id)]; e.querySelector('summary').textContent=!s.length?'Tüm branşlar':s.length<=2?s.join(', '):s.length+' branş seçili'; const t=e.querySelector('input[data-tum]'); if(t) t.checked=!s.length; }
+function lfMsDoldur(id, vals){
+  const e=lfEl(id); if(!e) return; const sec=lfMs(id);
+  e.querySelector('.lf-ms-p').innerHTML='<label class="lf-ms-tum"><input type="checkbox" data-tum="1"> Tüm branşlar</label>'+vals.map(v=>'<label><input type="checkbox" data-v="'+escapeHtml(v)+'"'+(sec.has(v)?' checked':'')+'> '+escapeHtml(v)+'</label>').join('');
+  lfMsYazi(id);
+}
+function lfMsTemizle(id){ const e=lfEl(id); if(!e) return; e.querySelectorAll('input[data-v]').forEach(x=>{x.checked=false;}); lfMsYazi(id); }
+document.addEventListener('change', ev=>{
+  const ms=ev.target.closest&&ev.target.closest('.lf-ms'); if(!ms) return;
+  if(ev.target.dataset.tum) ms.querySelectorAll('input[data-v]').forEach(x=>{x.checked=false;});
+  lfMsYazi(ms.id); const fn=window[ms.dataset.on]; if(typeof fn==='function') fn();
+});
+document.addEventListener('click', ev=>{ document.querySelectorAll('.lf-ms[open]').forEach(d=>{ if(!d.contains(ev.target)) d.removeAttribute('open'); }); });
 let _lfT=null;
 function lfGec(v){ clearTimeout(_lfT); _lfT=setTimeout(()=>{ if(v==='personel') renderPersonelDetay(); else renderIstasyonOzet(); },150); }
 function lfTemizle(v){
   const ids={liste:['searchInput','lfListeIst','lfListeBrans','lfListeDurum'],personel:['lfPerQ','lfPerIst','lfPerBrans'],ozet:['lfOzQ','lfOzBrans','lfOzKap']}[v];
-  ids.forEach(i=>{const e=lfEl(i); if(e) e.value='';});
+  ids.forEach(i=>{const e=lfEl(i); if(!e) return; if(e.classList.contains('lf-ms')) lfMsTemizle(i); else e.value='';});
   if(v==='liste') filterTable(); else if(v==='personel') renderPersonelDetay(); else renderIstasyonOzet();
 }
 const lfNorm=t=>String(t||'').toLocaleLowerCase('tr');
 function filterTable() {
   lfSecenek('liste');
   const q = lfNorm(lfEl('searchInput').value).trim();
-  const ist = lfEl('lfListeIst').value, br = lfEl('lfListeBrans').value, du = lfEl('lfListeDurum').value;
+  const ist = lfEl('lfListeIst').value, brS = lfMs('lfListeBrans'), br = brS.size, du = lfEl('lfListeDurum').value;
   const data = allData[activeGorev];
   const nd = du==='muaf'||du==='nd' ? ashiNobetDisiOzet() : null;
   filteredRows = data.filter(r => {
     if (ist && r.asilIst !== ist) return false;
-    if (br && (r.kadro_brans||'').trim() !== br) return false;
+    if (br && !brS.has((r.kadro_brans||'').trim())) return false;
     if (du==='coklu' && !r.coklu) return false;
     if (du==='sifir' && r.toplamSaat>0) return false;
     if (nd) { const x = nd[String(r.tc || `${r.ad}|${r.soyad}`).trim()] || {}; if (du==='muaf' && !x.muaf) return false; if (du==='nd' && !(x.mesai||x.diger)) return false; }
