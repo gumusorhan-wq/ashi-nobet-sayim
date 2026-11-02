@@ -5327,8 +5327,8 @@ function renderStats(data) {
   data.forEach(r => {
     const b  = (r.kadro_brans||'').trim().toLowerCase();
     const tc = r.tc;
-    if (/^att$/i.test(b))       bransMap.att.add(tc);
-    else if (/^aabt$/i.test(b)) bransMap.aabt.add(tc);
+    if (ashiBransAtt(b))       bransMap.att.add(tc);
+    else if (ashiBransAabt(b)) bransMap.aabt.add(tc);
     else if (/sürücü/i.test(b)) bransMap.surucu.add(tc);
     else                         bransMap.diger.add(tc);
   });
@@ -5358,7 +5358,7 @@ function closeBransPersonelModal(){const modal=document.getElementById('bransPer
 function showBransPersonelList(category){
   const labels={att:'ATT (Kadro)',aabt:'AABT (Kadro)',surucu:'Sürücü (Kadro)',diger:(activeGorev==='ef'?'Doktor (Kadro)':'Diğer (Kadro)')};
   const source=allData[activeGorev]||[]; const people={};
-  source.forEach(p=>{const b=String(p.kadro_brans||'').trim();const ok=category==='att'?/^att$/i.test(b):category==='aabt'?/^aabt$/i.test(b):category==='surucu'?/sürücü/i.test(b):!/^att$/i.test(b)&&!/^aabt$/i.test(b)&&!/sürücü/i.test(b);if(!ok)return;const key=String(p.personKey||p.tc||`${p.ad}|${p.soyad}`);if(!people[key])people[key]={tc:p.tc||'',name:`${p.ad||''} ${p.soyad||''}`.trim(),branch:b||'—',stations:new Set(),duties:0};(p.nobetler||[]).forEach(n=>{if(n.ist)people[key].stations.add(n.ist);people[key].duties++;});});
+  source.forEach(p=>{const b=String(p.kadro_brans||'').trim();const ok=category==='att'?ashiBransAtt(b):category==='aabt'?ashiBransAabt(b):category==='surucu'?/sürücü/i.test(b):!ashiBransAtt(b)&&!ashiBransAabt(b)&&!/sürücü/i.test(b);if(!ok)return;const key=String(p.personKey||p.tc||`${p.ad}|${p.soyad}`);if(!people[key])people[key]={tc:p.tc||'',name:`${p.ad||''} ${p.soyad||''}`.trim(),branch:b||'—',stations:new Set(),duties:0};(p.nobetler||[]).forEach(n=>{if(n.ist)people[key].stations.add(n.ist);people[key].duties++;});});
   const rows=Object.values(people).sort((a,b)=>trColl.compare(a.name,b.name));
   document.getElementById('bransPersonelModalTitle').textContent=`${labels[category]} Personel Listesi`;
   document.getElementById('bransPersonelModalSummary').textContent=`${rows.length} personel · ${activeGorev==='ef'?'Ekip Şefi':activeGorev==='ysp'?'Yardımcı Sağlık Personeli':'Sürücü'} sekmesi`; 
@@ -5640,8 +5640,8 @@ function renderIstasyonOzet() {
     const bransCount = { att:0, aabt:0, surucu:0, diger:0 };
     ist.personeller.forEach(p => {
       const b = (p.kadro_brans||'').trim().toLowerCase();
-      if (/^att$/i.test(b))       bransCount.att++;
-      else if (/^aabt$/i.test(b)) bransCount.aabt++;
+      if (ashiBransAtt(b))       bransCount.att++;
+      else if (ashiBransAabt(b)) bransCount.aabt++;
       else if (/sürücü/i.test(b)) bransCount.surucu++;
       else                         bransCount.diger++;
     });
@@ -5790,11 +5790,26 @@ function renderTable() {
   renderPagination();
 }
 
+// Kadro branşı sınıflandırma: yazım farkları da tanınır ("Acil Tıp Teknisyeni", "ATT (Sözleşmeli)",
+// "Ambulans ve Acil Bakım Teknikeri", "AABT - 4/B" gibi). AABT önce denetlenir.
+function ashiBransKatla(b) {
+  return String(b || '').toLocaleUpperCase('tr-TR').replace(/Ç/g,'C').replace(/Ğ/g,'G').replace(/İ/g,'I').replace(/Ö/g,'O').replace(/Ş/g,'S').replace(/Ü/g,'U')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+}
+function ashiBransAabt(b) {
+  const f = ashiBransKatla(b);
+  return /(^|[^A-Z])AABT([^A-Z]|$)/.test(f) || /AMBULANS VE ACIL BAKIM/.test(f) || (/ACIL BAKIM/.test(f) && /TEKNIKER/.test(f));
+}
+function ashiBransAtt(b) {
+  if (ashiBransAabt(b)) return false;
+  const f = ashiBransKatla(b);
+  return /(^|[^A-Z])ATT([^A-Z]|$)/.test(f) || /ACIL TIP TEKNISYEN/.test(f);
+}
 function makeBransBadge(b) {
   if (!b) return '<span style="color:#94a3b8">—</span>';
   const bl = (b||'').trim().toLowerCase();
-  if (/^att$/.test(bl))  return `<span class="badge b-att">ATT</span>`;
-  if (/^aabt$/.test(bl)) return `<span class="badge b-aabt">AABT</span>`;
+  if (ashiBransAtt(bl))  return `<span class="badge b-att">ATT</span>`;
+  if (ashiBransAabt(bl)) return `<span class="badge b-aabt">AABT</span>`;
   if (/sürücü/i.test(b)) return `<span class="badge b-surucu">Sürücü</span>`;
   return `<span class="badge b-diger">${escapeHtml(b)}</span>`;
 }
@@ -7715,8 +7730,8 @@ function mkCell(v, opts={}) {
 // Branş rengi
 function bransColor(b) {
   const bl = (b||'').trim().toLowerCase();
-  if (/^att$/i.test(bl))       return { fg:PAL.cATT,  bg:PAL.bgATT  };
-  if (/^aabt$/i.test(bl))      return { fg:PAL.cAABT, bg:PAL.bgAABT };
+  if (ashiBransAtt(bl))       return { fg:PAL.cATT,  bg:PAL.bgATT  };
+  if (ashiBransAabt(bl))      return { fg:PAL.cAABT, bg:PAL.bgAABT };
   if (/sürücü/i.test(bl))      return { fg:PAL.cSur,  bg:PAL.bgSur  };
   return                               { fg:PAL.cDig,  bg:PAL.bgDig  };
 }
@@ -7754,8 +7769,8 @@ function buildSheet(rows, baslik, cokluList) {
   const brans   = {att:new Set(),aabt:new Set(),sur:new Set(),dig:new Set()};
   rows.forEach(r => {
     const b=(r.kadro_brans||'').trim().toLowerCase();
-    if(/^att$/i.test(b)) brans.att.add(r.tc);
-    else if(/^aabt$/i.test(b)) brans.aabt.add(r.tc);
+    if(ashiBransAtt(b)) brans.att.add(r.tc);
+    else if(ashiBransAabt(b)) brans.aabt.add(r.tc);
     else if(/sürücü/i.test(b)) brans.sur.add(r.tc);
     else brans.dig.add(r.tc);
   });
@@ -7973,7 +7988,7 @@ function buildIstasyonOzetSheet(gorev) {
       const bc2 = {att:0,aabt:0,sur:0,dig:0};
       ist.personeller.forEach(p => {
         const b=(p.kadro_brans||'').trim().toLowerCase();
-        if(/^att$/i.test(b)) bc2.att++; else if(/^aabt$/i.test(b)) bc2.aabt++;
+        if(ashiBransAtt(b)) bc2.att++; else if(ashiBransAabt(b)) bc2.aabt++;
         else if(/sürücü/i.test(b)) bc2.sur++; else bc2.dig++;
       });
       const bransStr = [
