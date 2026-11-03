@@ -6275,7 +6275,7 @@ async function ashiAsosIstemci(cfg) {
       if (!jq || !grid()) { S('Önce Raporlar › Rapor Görüntüleme Ekranı sayfasını açın, sonra yer imine tekrar tıklayın.'); return; }
       const sy = ay.m === 12 ? ay.y + 1 : ay.y, sa = ay.m === 12 ? 1 : ay.m + 1;
       const bas0 = '01.' + p2(ay.m) + '.' + ay.y, bit0 = '01.' + p2(sa) + '.' + sy;
-      const saat = { hareket: ['00:00', '00:00'], izin: ['00:00', '09:00'] };
+      const saat = { hareket: ['00:00', '09:00'], izin: ['00:00', '09:00'] };   // ayın 1'i 00:00 – sonraki ayın 1'i 09:00
       const ad = x => x.Name || x.TemplateName || x.OptionName || x.Text || '';
       const idOf = x => x.ID || x.Id;
       for (const [k, re, etiket] of defs) {
