@@ -1148,6 +1148,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#a16207;font-weight:700">→</span><strong>Koordinasyon Sorumlusu</strong> mesaisi <strong>K</strong> koduyla görünür ve nöbet süresine eklenir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#a16207;font-weight:700">→</span><strong>Komuta Kontrol</strong> ve <strong>Başhekimlik</strong> personeli de kendi birimleriyle döküme dahildir; refakatçi nöbetleri kişiye sayılır</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#a16207;font-weight:700">→</span>Kadro Süresi, Çalışma Süresi ve Fark sütunları Personel Özeti ile aynı kurallarla hesaplanır. Eğitim/koordinasyon kayıtları dosya yüklenirken okunur; eski arşiv aylarında görünmesi için o ayın nöbet dosyasını yeniden yükleyin</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#a16207;font-weight:700">→</span><span><strong>Ay sınırı:</strong> Döküm Cetveli, Kontrol Raporu ve Personel listesindeki süre sütunlarında nöbet/mesai <strong>başladığı aya</strong> yazılır: ayın 1’i 00:00’dan sonra başlayan o aya, sonraki ayın 1’i 00:00’dan sonra başlayan sonraki aya. Ayın son günü başlayıp ertesi ay 09:00’a uzanan nöbetin tamamı başladığı aya sayılır. Nöbet tablosu, istasyon özeti ve kapsama analizleri eskisi gibi 1’i 09:00 – sonraki ayın 1’i 09:00 penceresini kullanır. Rapor, ayın 1’i 00:00 – sonraki ayın 1’i 00:00 arası başlayan kayıtlarla indirilmelidir.</span></li>
             </ul>
           </div>
 
@@ -1258,9 +1259,9 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
             <th style="text-align:center">24 SAAT</th>
             <th style="text-align:center">DİĞER SÜRE</th>
             <th style="text-align:center">TOPLAM GÜN</th>
-            <th style="text-align:center" id="thPerGorevSaat" title="Bu listede açık olan nöbet branşında (Ekip Şefi / YSP / Sürücü) tutulan nöbet saati">BRANŞ ÇALIŞMA SAATİ</th>
+            <th style="text-align:center" id="thPerGorevSaat" title="Bu listede açık olan nöbet branşında (Ekip Şefi / YSP / Sürücü) bu istasyonda tutulan nöbet saati; nöbet başladığı aya yazılır (ayın 1'i 00:00 – sonraki ayın 1'i 00:00 arasında başlayanlar, tam süresiyle)">BRANŞ ÇALIŞMA SAATİ</th>
             <th style="text-align:center" title="Ayın mesai saati (memur 8, işçi 7,5 saat/gün; izin ve rapor günleri düşülmüş) — Personel Özeti ile aynı hesap">KADRO SÜRESİ</th>
-            <th style="text-align:center" title="Kişinin bu ay tüm nöbet branşlarında ve istasyonlarda tuttuğu toplam nöbet saati">ÇALIŞMA SÜRESİ</th>
+            <th style="text-align:center" title="Kontrol raporu / Döküm cetveli ile aynı: kişinin bu ay başlayan bütün nöbet ve mesaileri (nöbet başladığı aya yazılır)">ÇALIŞMA SÜRESİ</th>
             <th style="text-align:center" title="Çalışma süresi − kadro süresi">FARK</th>
           </tr></thead>
           <tbody id="tbodyPersonelDetay"></tbody>
@@ -3540,6 +3541,7 @@ function processFile(file) {
       };
       try { specialDutyLists.mesai = ashiBuildMesaiList(sourceRows, tcBransLookup); } catch (e) { console.warn('Eğitim/koordinasyon kayıtları okunamadı', e); specialDutyLists.mesai = []; }
       try { specialDutyLists.diger = ashiBuildDigerList(sourceRows.filter(r => isIstasyon(r) && isAmbulans(r) && isASHI(r)), tcBransLookup); } catch (e) { console.warn('Diğer görevli kayıtlar okunamadı', e); specialDutyLists.diger = []; }
+      try { specialDutyLists.ayBasi = ashiBuildAyBasiList([...valid, ...specialCandidates], tcBransLookup); } catch (e) { console.warn('Ay başı kayıtları okunamadı', e); specialDutyLists.ayBasi = []; }
       izinRaporRecords = [];
       izinRaporFileName = '';
       updateIzinRaporButton();
@@ -5571,8 +5573,24 @@ function renderPersonelDetay() {
   // Sağdaki süre sütunları: açık nöbet branşındaki saat, kadro süresi, tüm branşlardaki toplam çalışma ve fark (Personel Özeti ile aynı hesap)
   const thG = document.getElementById('thPerGorevSaat');
   if (thG) thG.textContent = ((ISTASYON_PERSONEL_ROLE_LABELS[activeGorev] || 'Branş') + ' çalışma saati').toLocaleUpperCase('tr-TR');
-  const sureMap = new Map();
-  getIstasyonPersonelRows().forEach(r => sureMap.set(String(r.personKey), {kadro: ashiKadroSaati(r.tc, r.istihdam), calis: r.duties.reduce((t, n) => t + (Number(n.hours) || 0), 0)}));
+  // Kadro süresi ve çalışma süresi Kontrol raporu / Döküm cetveli ile aynı hesaptır (nöbet başladığı aya yazılır)
+  const sureMap = new Map(), info = reportMonthInfo;
+  const tcKey = v => { const t = String(v || '').trim(); return t ? 'tc:' + t : ''; };
+  try {
+    ashiDokumTopla(info).forEach(x => {
+      const sx = ashiDokumSatirHesapla(x, info), v = {kadro: sx.kadro, calis: sx.calis};
+      if (x.tc) sureMap.set('tc:' + x.tc, v); else sureMap.set('n:' + `${x.ad || ''}|${x.soyad || ''}`.trim().toLocaleUpperCase('tr-TR'), v);
+    });
+  } catch (e) { console.warn('Personel listesi süreleri', e); }
+  // Açık branştaki çalışma saati (istasyon satırı başına): o branşta (görevde) bu ay başlayan nöbetlerin tam saati
+  const bransSaat = new Map(), ekle = (k, h) => bransSaat.set(k, (bransSaat.get(k) || 0) + h);
+  (allData[activeGorev] || []).forEach(p => {
+    const k = tcKey(p.tc) || 'n:' + `${p.ad || ''}|${p.soyad || ''}`.trim().toLocaleUpperCase('tr-TR');
+    (p.nobetler || []).forEach(n => { if (n.ist && !n.refakat && ashiAyIcindeBasladi(n.startMs, info)) ekle(k + '|' + n.ist, Number(n.saat) || 0); });
+  });
+  ((specialDutyLists || {}).ayBasi || []).filter(n => n.g === activeGorev && n.ist && Number(n.saat) > 0).forEach(n => {
+    ekle((tcKey(n.tc) || 'n:' + `${n.ad || ''}|${n.soyad || ''}`.trim().toLocaleUpperCase('tr-TR')) + '|' + n.ist, Number(n.saat));
+  });
   const r2p = v => Math.round(v * 100) / 100, sfmt = v => r2p(v).toLocaleString('tr-TR');
   let html = '';
   istGroups.forEach(ist => {
@@ -5602,8 +5620,8 @@ function renderPersonelDetay() {
           ${p.sDiger>0?`<span style="background:#f3e8ff;color:#7e22ce;border-radius:99px;padding:2px 10px;font-size:12px;font-weight:700">${p.sDiger}</span>`:'<span style="color:#cbd5e1">0</span>'}
         </td>
         <td style="text-align:center;font-weight:700;font-size:13px;padding:9px 16px">${gun}</td>
-        ${(() => { const sr = sureMap.get(String(p.personKey)) || (p.tc ? sureMap.get(String(p.tc)) : null); const k = sr ? sr.kadro : null, c = sr ? sr.calis : null, f = k == null ? null : c - k;
-          return `<td style="text-align:center;font-weight:700;padding:9px 12px;color:#0f766e">${sfmt(p.toplamSaat)}</td>
+        ${(() => { const pk = tcKey(p.tc) || 'n:' + `${p.ad || ''}|${p.soyad || ''}`.trim().toLocaleUpperCase('tr-TR'); const sr = sureMap.get(pk); const k = sr ? sr.kadro : null, c = sr ? sr.calis : null, f = k == null ? null : c - k;
+          return `<td style="text-align:center;font-weight:700;padding:9px 12px;color:#0f766e">${sfmt(bransSaat.get(pk + '|' + ist.ist) || 0)}</td>
         <td style="text-align:center;padding:9px 12px">${k == null ? '—' : sfmt(k)}</td>
         <td style="text-align:center;font-weight:600;padding:9px 12px">${c == null ? '—' : sfmt(c)}</td>
         <td style="text-align:center;font-weight:700;padding:9px 12px;color:${f == null ? '#94a3b8' : f > 0.005 ? '#b91c1c' : f < -0.005 ? '#1d4ed8' : '#166534'}">${f == null ? '—' : (f > 0.005 ? '+' : '') + sfmt(f)}</td>`; })()}
@@ -5994,6 +6012,35 @@ function ashiBuildMesaiList(rows, bransLookup) {
   return out;
 }
 // "Diğer" görevli kayıtlar (süresi yazılı ya da "Mesai"): nöbet sayılmaz, yalnızca bilgi olarak listelenir.
+// Ay sınırı (Kontrol raporu, Döküm cetveli, Personel listesi süreleri): nöbet/mesai BAŞLADIĞI aya yazılır.
+// Ayın 1'i 00:00'dan sonra başlayan kayıt o ayın, sonraki ayın 1'i 00:00'dan sonra başlayan kayıt sonraki ayındır;
+// ayın son günü başlayıp ertesi ay 09:00'a uzanan nöbetin tamamı başladığı aya sayılır.
+// Diğer ekranlar (nöbet tablosu, istasyon özeti, kapsama analizleri) eskisi gibi 1'i 09:00 – sonraki 1'i 09:00 penceresini kullanır;
+// bu yüzden 1'i 00:00–09:00 arasında başlayıp 09:00'dan önce biten kayıtlar ana listeye girmez, burada ayrıca tutulur.
+function ashiAyIcindeBasladi(startMs, info) {
+  if (!Number.isFinite(startMs) || !info) return false;
+  const d = new Date(startMs);
+  return d.getUTCFullYear() === info.year && d.getUTCMonth() + 1 === info.month;
+}
+function ashiBuildAyBasiList(rows, bransLookup) {
+  const out = [], seen = new Set();
+  if (!reportMonthInfo) return out;
+  (rows || []).forEach(r => {
+    const iv = getRowDutyInterval(r);
+    if (!Number.isFinite(iv.startMs) || !ashiAyIcindeBasladi(iv.startMs, reportMonthInfo)) return;
+    const endMs = Number.isFinite(iv.endMs) ? iv.endMs : iv.startMs;
+    if (clipIntervalToReportMonth(iv.startMs, endMs, reportMonthInfo) > ANALIZ_EPSILON) return;   // ana listede zaten var
+    const g = GOREV_MAP.ef(r) ? 'ef' : GOREV_MAP.ysp(r) ? 'ysp' : GOREV_MAP.sur(r) ? 'sur' : 'diger';
+    if (/refakat|koordinasyon|e[ğg]itim/i.test(String(getGorev(r) || '')) && g !== 'ysp') return;
+    const tc = getTCKN(r);
+    const k = `${tc || getAd(r) + getSoyad(r)}|${getIstasyon(r)}|${iv.startMs}|${getSure(r)}`;
+    if (seen.has(k)) return; seen.add(k);
+    const saat = parseSure(getSure(r));
+    out.push({tc, ad:getAd(r), soyad:getSoyad(r), ist:getIstasyon(r), g, brans:getKadroBrans(r) || (bransLookup && bransLookup[tc]) || '', saat: saat > 0 ? saat : null, sure_raw:String(getSure(r) || ''), startMs:iv.startMs, endMs,
+      istihdam:getRowExtra(r,'istihdam'), unvan:getRowExtra(r,'unvan'), il:getRowExtra(r,'il'), ofBrans:getRowExtra(r,'ofBrans')});
+  });
+  return out;
+}
 function ashiBuildDigerList(rows, bransLookup) {
   const out = [], seen = new Set();
   (rows || []).forEach(r => {
@@ -6228,7 +6275,7 @@ async function ashiAsosIstemci(cfg) {
       if (!jq || !grid()) { S('Önce Raporlar › Rapor Görüntüleme Ekranı sayfasını açın, sonra yer imine tekrar tıklayın.'); return; }
       const sy = ay.m === 12 ? ay.y + 1 : ay.y, sa = ay.m === 12 ? 1 : ay.m + 1;
       const bas0 = '01.' + p2(ay.m) + '.' + ay.y, bit0 = '01.' + p2(sa) + '.' + sy;
-      const saat = { hareket: ['00:00', '00:00'], izin: ['09:00', '09:00'] };
+      const saat = { hareket: ['00:00', '00:00'], izin: ['00:00', '09:00'] };
       const ad = x => x.Name || x.TemplateName || x.OptionName || x.Text || '';
       const idOf = x => x.ID || x.Id;
       for (const [k, re, etiket] of defs) {
@@ -6268,9 +6315,9 @@ async function ashiAsosIstemci(cfg) {
         for (let i = 0; i < 30 && !jq('#StartDate').length; i++) await bekle(500);
         await bekle(1000);
         const tarih = (id, d) => { const kw = jq('#' + id).data('kendoDateTimePicker'); if (kw) { kw.value(d); kw.trigger('change'); } else { jq('#' + id).val(p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes())).trigger('change'); } };
-        const sH = +saat[k][0].slice(0, 2);
+        const sH = +saat[k][0].slice(0, 2), eH = +saat[k][1].slice(0, 2);
         tarih('StartDate', new Date(ay.y, ay.m - 1, 1, sH, 0));
-        tarih('EndDate', new Date(sy, sa - 1, 1, sH, 0));
+        tarih('EndDate', new Date(sy, sa - 1, 1, eH, 0));
         const kay = [...document.querySelectorAll('button.btn-save,button')].find(b => b.offsetParent && /Oluştur/.test(b.textContent)); if (!kay) throw new Error('“Oluştur” düğmesi bulunamadı'); kay.click();
         let yeni = null, kapanis = 0;
         for (let i = 0; i < 60 && !yeni; i++) {
@@ -6523,6 +6570,11 @@ function ashiDokumTopla(info) {
     x[flag] = true;
     add(x, {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) > 0 ? Number(n.saat) : 0, mesai:!(Number(n.saat) > 0), ist:n.ist});
   })));
+  // Ay başı: 1'i 00:00–09:00 arasında başlayıp 09:00'dan önce biten kayıtlar (ana listede yok)
+  ((specialDutyLists || {}).ayBasi || []).forEach(n => {
+    if (!n.ist) return;
+    add(get({tc:n.tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans}), {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) > 0 ? Number(n.saat) : 0, mesai:!(Number(n.saat) > 0), ist:n.ist});
+  });
   ((specialDutyLists || {}).diger || []).forEach(n => {
     if (!n.ist) return;
     add(get({tc:n.tc, ad:n.ad, soyad:n.soyad, il:n.il, unvan:n.unvan, ofBrans:n.ofBrans, istihdam:n.istihdam, brans:n.brans}), {startMs:n.startMs, endMs:n.endMs, hours:Number(n.saat) > 0 ? Number(n.saat) : 0, mesai:!(Number(n.saat) > 0), ist:n.ist});
