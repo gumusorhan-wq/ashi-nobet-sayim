@@ -5493,7 +5493,7 @@ function buildIstasyonData(gorev) {
   govrevler.forEach(g => {
     (allData[g] || []).forEach(p => {
       (p.nobetler || []).forEach(n => {
-        if (!n.ist || n.saat == null || n.refakat) return;
+        if (!n.ist || n.saat == null || n.refakat || !ashiKapsamIci(n.ist)) return;
         const startMs = n.startMs;
         const endMs = n.endMs != null ? n.endMs : (startMs != null && n.saat != null ? startMs + n.saat * EXCEL_HOUR_MS : null);
         const effectiveHours = clipIntervalToReportMonth(startMs, endMs, monthInfo);
@@ -6118,7 +6118,7 @@ function getIstasyonPersonelRows() {
   Object.entries(ISTASYON_PERSONEL_ROLE_LABELS).forEach(([gKey, roleLabel]) => {
     (allData[gKey] || []).forEach(p => (p.nobetler || []).forEach(n => {
       const station = String(n.ist || '').trim();
-      if (!station) return;
+      if (!station || !ashiKapsamIci(station)) return;
       const personKey = String(p.personKey || p.tc || `${p.ad}|${p.soyad}`);
       const dutyKey = `${personKey}|${station}|${n.startMs ?? n.basRaw}|${n.sure_raw ?? n.saat}`;
       if (!people[personKey]) people[personKey] = {personKey,tc:p.tc||'',ad:p.ad||'',soyad:p.soyad||'',brans:p.kadro_brans||'',istihdam:p.istihdam||'',asilIst:p.asilIst||'',duties:{}};
@@ -7138,10 +7138,26 @@ function getAnalizMonthInfo() {
   return { year:now.getUTCFullYear(), month:now.getUTCMonth()+1, days:new Date(now.getUTCFullYear(), now.getUTCMonth()+1, 0).getDate() };
 }
 
+// Stok Takip 12.32: istasyona bağlı kullanıcı (sunucu paketi süzer) — istasyon bazlı analizlerde yalnız kendi istasyonu.
+// Kendi personelinin başka istasyonda tuttuğu nöbetler kişi toplamlarında kalır ama o istasyonlar listelenmez.
+function ashiIstAnahtar(v) {
+  let t = String(v || '').toLocaleUpperCase('tr-TR').replace(/[ÇĞİÖŞÜÂÎÛ]/g, c => ({Ç:'C',Ğ:'G',İ:'I',Ö:'O',Ş:'S',Ü:'U',Â:'A',Î:'I',Û:'U'})[c] || c);
+  t = t.replace(/\(\s*\d{3,6}\s*\)\s*$/, '').replace(/[^A-Z0-9]+/g, ' ').replace(/\s+/g, ' ').trim();
+  t = t.replace(/\bACIL SAGLIK HIZMETLERI ISTASYONU\b/, 'ASHI');
+  const m = t.match(/([A-Z]+) (\d+) NOLU\b/);
+  return m ? `${m[1]} ${m[2]}` : t;
+}
+function ashiKapsamIst() { const E = window.ASHI_ENTEG; return E && E.aktif && E.istasyon ? E.istasyon : null; }
+function ashiKapsamIci(ist) {
+  const k = ashiKapsamIst();
+  if (!k) return true;
+  const a = ashiIstAnahtar(k), b = ashiIstAnahtar(ist);
+  return !!a && !!b && (a === b || b.endsWith(' ' + a) || a.endsWith(' ' + b));
+}
 function getAllAnalizStations() {
   return [...new Set(['ef','ysp','sur'].flatMap(g =>
     (allData[g] || []).flatMap(p => (p.nobetler || []).map(n => String(n.ist || '').trim()).filter(Boolean))
-  ))].sort((a,b) => trColl.compare(a,b));
+  ))].filter(ashiKapsamIci).sort((a,b) => trColl.compare(a,b));
 }
 
 function buildAnalizData(force=false) {
@@ -7158,7 +7174,7 @@ function buildAnalizData(force=false) {
     (allData[gKey] || []).forEach(p => {
       (p.nobetler || []).forEach(n => {
         const station = String(n.ist || '').trim();
-        if (!station || n.saat == null || n.refakat) return;
+        if (!station || n.saat == null || n.refakat || !ashiKapsamIci(station)) return;
         const startMs = n.startMs;
         const endMs = n.endMs != null ? n.endMs : (startMs != null ? startMs + Number(n.saat) * EXCEL_HOUR_MS : null);
         distributeDutyInterval(startMs, endMs, (windowStartMs, hours, overlapStartMs, overlapEndMs) => {
