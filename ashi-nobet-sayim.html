@@ -2780,6 +2780,7 @@ const entegLs = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
 };
+let entegIlkEsitleme = true;
 async function entegSync(silent, keys) {
   if (driveBusy) return;
   const E = window.ASHI_ENTEG, il = ashiAktifIl();
@@ -2816,7 +2817,10 @@ async function entegSync(silent, keys) {
       const yeni = await ashiEnSonAyAnahtar();
       if (yeni && yeni !== archiveActiveKey) { await loadArchivedMonth(yeni); if (archiveActiveKey === yeni) ashiOtoKey = yeni; }
     }
+    // İlk girişte ay, açılıştaki otomatik açmadan (900 ms) sonra iner: ilk eşitleme bitince açık ay yoksa en yeni ayı aç
+    if (entegIlkEsitleme) { entegIlkEsitleme = false; if (!archiveActiveKey) await ashiSonAyiAc(); }
   } catch (err) {
+    entegIlkEsitleme = false;
     console.warn('[ortak arşiv]', err);
     driveSetMsg('Ortak arşiv eşitlenemedi: ' + (err.message || err), 'err');
     renderArchivePanel();
