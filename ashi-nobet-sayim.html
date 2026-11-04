@@ -5493,7 +5493,7 @@ function buildIstasyonData(gorev) {
   govrevler.forEach(g => {
     (allData[g] || []).forEach(p => {
       (p.nobetler || []).forEach(n => {
-        if (!n.ist || n.saat == null || n.refakat || !ashiKapsamIci(n.ist)) return;
+        if (!n.ist || n.saat == null || n.refakat) return;
         const startMs = n.startMs;
         const endMs = n.endMs != null ? n.endMs : (startMs != null && n.saat != null ? startMs + n.saat * EXCEL_HOUR_MS : null);
         const effectiveHours = clipIntervalToReportMonth(startMs, endMs, monthInfo);
