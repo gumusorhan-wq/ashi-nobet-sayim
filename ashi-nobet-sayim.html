@@ -1781,8 +1781,19 @@ function archiveRequest(mode, action) {
 }
 function archiveGetAll() { return archiveRequest('readonly', store => store.getAll()).then(list => (list || []).map(archiveUpgrade)); }
 function archiveGet(key) { return archiveRequest('readonly', store => store.get(String(key))).then(archiveUpgrade); }
-function archivePut(snapshot) { return archiveRequest('readwrite', store => store.put(snapshot)); }
-function archiveDelete(key) { return archiveRequest('readwrite', store => store.delete(String(key))); }
+// Gömülü modda arşiv yalnız bu oturumun belleğindedir (ana uygulama IndexedDB'yi belleğe yönlendirir; sayfa kapanınca silinir).
+// Kurum arşivine yüklenmemiş, bu oturumda işlenmiş aylar izlenir; sayfa kapatılırken uyarı verilir.
+const entegKirli = new Set(); let entegEsitleniyor = false;
+function archivePut(snapshot) {
+  if (ashiEnteg() && !entegEsitleniyor && snapshot && snapshot.key) entegKirli.add(String(snapshot.key));
+  return archiveRequest('readwrite', store => store.put(snapshot));
+}
+window.addEventListener('beforeunload', e => {
+  if (!ashiEnteg() || !entegKirli.size) return;
+  e.preventDefault(); e.returnValue = 'Kurum arşivine yüklenmemiş ay var; sayfa kapanınca silinir.';
+  return e.returnValue;
+});
+function archiveDelete(key) { entegKirli.delete(String(key)); return archiveRequest('readwrite', store => store.delete(String(key))); }
 const ASHI_SLOT_LABELS = {basi:'Ay Başı', sonu:'Ay Sonu'};
 let archiveYearFilter = 'all';
 let archiveActiveSlot = null;
@@ -2791,7 +2802,8 @@ async function entegSync(silent, keys) {
       driveSetMsg(`⬇ ${f.ym} indiriliyor (${i + 1}/${is.length})…`, '');
       const pk = await E.api.indir(il, f.ym);
       if (!pk || pk.key !== f.ym || !pk.slots) throw new Error(f.ym + ': paket içeriği geçersiz');
-      await archivePut(ashiDrive.birlestir(await archiveGet(f.ym), pk, Array.isArray(keys)));
+      entegEsitleniyor = true;
+      try { await archivePut(ashiDrive.birlestir(await archiveGet(f.ym), pk, Array.isArray(keys))); } finally { entegEsitleniyor = false; }
       sync[f.ym] = f.mod || ''; alinan.push(f.ym); driveSel.delete(f.ym);
     }
     entegLs.set(sKey, sync);
@@ -2829,6 +2841,7 @@ async function entegPublish(onlyKeys) {
       driveSetMsg(`⬆ ${recs[i].key} hazırlanıyor ve yükleniyor (${i + 1}/${recs.length})…`, '');
       await E.api.yukle(il, recs[i].key, await ashiDrive.entegPaket(recs[i]));
       pub[recs[i].key] = ashiDrive.imza(recs[i]);
+      entegKirli.delete(String(recs[i].key));
     }
     entegLs.set('ashi_enteg_pub_' + il, pub);
     try {
