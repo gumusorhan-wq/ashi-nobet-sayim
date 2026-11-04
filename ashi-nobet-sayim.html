@@ -8382,6 +8382,8 @@ async function ashiGeriDon() {
 }
 function resetPage() {
   ashiOncekiAy = archiveActiveKey ? { key: archiveActiveKey, slot: (typeof archiveActiveSlot !== 'undefined' ? archiveActiveSlot : undefined) } : null;
+  // Açık analiz pencereleri (sürücü/personel analizi vb.) yükleme ekranının üstünde boş kalmasın
+  try { if (typeof anKapatAnaliz === 'function') anKapatAnaliz(); } catch (e) {}
   if (typeof entegIlkEsitleme !== 'undefined') entegIlkEsitleme = false; // kullanıcı yükleme ekranına geçti: ilk eşitleme ayı açmasın
   allData={ef:[],ysp:[],sur:[]}; allCoklu={ef:[],ysp:[],sur:[]}; specialDutyLists={komuta:[],bashekimlik:[]};
   mergedPersonelAllGorevCache=null; mergedPersonelAllGorevWithBoundaryCache=null; cokluTumPersonelDataCache=null; cokluTumPersonelRoleFilter=''; uygunPersonelResultsCache=null;
