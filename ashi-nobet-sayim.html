@@ -2087,13 +2087,13 @@ function archiveViewHtml(records) {
   return `<div class="arc-card">
     <div class="arc-head">
       <div><div class="arc-title">🗂️ Arşiv</div><div class="arc-sub">Tarayıcıda yerel kayıt · ${records.length} ay saklı · ${archiveIlSecici()}</div></div>
-      <div class="arc-tools"><button type="button" onclick="ashiAsosAc()" title="ASOS'taki hazır Nöbet İçi Hareket ve İzin-Muafiyet raporlarını al">🔗 ASOS'tan al</button><button type="button" onclick="archiveExportBackup()">⬇ Yedek Al (JSON)</button><button type="button" onclick="document.getElementById('archiveBackupInput').click()">⬆ Yedeği Yükle</button></div>
+      <div class="arc-tools"><button type="button" onclick="ashiAsosAc()" title="ASOS'taki hazır Nöbet İçi Hareket ve İzin-Muafiyet raporlarını al">🔗 ASOS'tan al</button>${ashiEnteg() ? '' : `<button type="button" onclick="archiveExportBackup()">⬇ Yedek Al (JSON)</button><button type="button" onclick="document.getElementById('archiveBackupInput').click()">⬆ Yedeği Yükle</button>`}</div>
     </div>
     ${driveHtml(records)}
     ${records.length ? `<div class="arc-years">${chip('all','Tümü')}${years.map(y => chip(y, y)).join('')}</div>
     <div class="arc-wrap"><table class="arc-table"><thead><tr><th>Ay</th><th>Ay Başı</th><th>Ay Sonu</th><th>İzin Ay Başı</th><th>İzin Ay Sonu</th><th>Son Kayıt</th><th>Durum</th>${ashiDrive.sahip() ? '<th>Drive</th>' : ''}<th></th></tr></thead><tbody>${rows || '<tr><td colspan="${ashiDrive.sahip() ? 9 : 8}" class="arc-empty-row">Bu yılda kayıt yok.</td></tr>'}</tbody></table></div>`
     : '<div class="arc-empty">Henüz kayıtlı rapor ayı yok. Bir nöbet Excel\'i yüklediğinizde Ay Başı veya Ay Sonu olarak buraya kaydedilir.</div>'}
-    <div class="arc-note">⚠️ Kayıtlar yalnızca bu tarayıcıda tutulur; tarayıcı site verileri temizlenirse silinir. Düzenli olarak <strong>Yedek Al</strong> yapın. Her ay için bir <strong>Ay Başı</strong> ve bir <strong>Ay Sonu</strong> Excel'i ile bir izin/muafiyet dosyası saklanır; bir satıra tıklayınca Ay Sonu (yoksa Ay Başı) açılır. Önceki/sonraki ay sınır verisi buradan otomatik alınır.</div>
+    <div class="arc-note">${ashiEnteg() ? 'ℹ️ Aylar kurum arşivinde (sunucuda) saklanır; bu cihazdaki kopya oturum kapanınca silinir. ' : '⚠️ Kayıtlar yalnızca bu tarayıcıda tutulur; tarayıcı site verileri temizlenirse silinir. Düzenli olarak <strong>Yedek Al</strong> yapın. '}Her ay için bir <strong>Ay Başı</strong> ve bir <strong>Ay Sonu</strong> Excel'i ile bir izin/muafiyet dosyası saklanır; bir satıra tıklayınca Ay Sonu (yoksa Ay Başı) açılır. Önceki/sonraki ay sınır verisi buradan otomatik alınır.</div>
   </div>`;
 }
 async function renderArchivePanel() {
