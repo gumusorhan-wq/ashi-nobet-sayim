@@ -8320,6 +8320,7 @@ function showLoading(v) { document.getElementById('loadingBox').style.display = 
 function showError(m) { const b=document.getElementById('errorBox'); b.textContent=m; b.style.display='block'; }
 function hideError() { document.getElementById('errorBox').style.display='none'; }
 function resetPage() {
+  if (typeof entegIlkEsitleme !== 'undefined') entegIlkEsitleme = false; // kullanıcı yükleme ekranına geçti: ilk eşitleme ayı açmasın
   allData={ef:[],ysp:[],sur:[]}; allCoklu={ef:[],ysp:[],sur:[]}; specialDutyLists={komuta:[],bashekimlik:[]};
   mergedPersonelAllGorevCache=null; mergedPersonelAllGorevWithBoundaryCache=null; cokluTumPersonelDataCache=null; cokluTumPersonelRoleFilter=''; uygunPersonelResultsCache=null;
   izinRaporRecords=[]; izinRaporFileName=''; updateIzinRaporButton();
