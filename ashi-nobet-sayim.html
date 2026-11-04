@@ -6118,7 +6118,7 @@ function getIstasyonPersonelRows() {
   Object.entries(ISTASYON_PERSONEL_ROLE_LABELS).forEach(([gKey, roleLabel]) => {
     (allData[gKey] || []).forEach(p => (p.nobetler || []).forEach(n => {
       const station = String(n.ist || '').trim();
-      if (!station || !ashiKapsamIci(station)) return;
+      if (!station) return;
       const personKey = String(p.personKey || p.tc || `${p.ad}|${p.soyad}`);
       const dutyKey = `${personKey}|${station}|${n.startMs ?? n.basRaw}|${n.sure_raw ?? n.saat}`;
       if (!people[personKey]) people[personKey] = {personKey,tc:p.tc||'',ad:p.ad||'',soyad:p.soyad||'',brans:p.kadro_brans||'',istihdam:p.istihdam||'',asilIst:p.asilIst||'',duties:{}};
