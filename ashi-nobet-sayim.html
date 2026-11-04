@@ -1788,6 +1788,7 @@ function archivePut(snapshot) {
   if (ashiEnteg() && !entegEsitleniyor && snapshot && snapshot.key) entegKirli.add(String(snapshot.key));
   return archiveRequest('readwrite', store => store.put(snapshot));
 }
+window.__OTURUM_BEKLEYEN = () => ashiEnteg() && entegKirli.size > 0;   // ana uygulama (modülden çıkarken) sorar
 window.addEventListener('beforeunload', e => {
   if (!ashiEnteg() || !entegKirli.size) return;
   e.preventDefault(); e.returnValue = 'Kurum arşivine yüklenmemiş ay var; sayfa kapanınca silinir.';
