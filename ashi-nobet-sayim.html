@@ -6657,12 +6657,66 @@ function ashiDokumSatirHesapla(x, info) {
   const rows = cells.map((c, i) => c.concat(izinCells[i]).join('\n'));
   return {rows, kadro, nobet, dis, night, egHi, egHs, post, postBayram, counts:izg.counts, calis:nobet + dis};
 }
+// Sürüm 12.39 (gömülü mod): Planlama'daki (EKİP listesi) çalıştığı birim — 'Geçici Görevli Olduğu Birim' için.
+// Ay (il + YYYY-AA) başına bir kez sunucudan alınır; gelince Döküm Cetveli ekranı açıksa yeniden çizilir.
+const ashiEkipBirim = {anahtar:'', durum:'', birimler:{}, ay:null, bekleyen:[]};
+function ashiEkipBirimAnahtar(info) {
+  const E = window.ASHI_ENTEG;
+  if (!ashiEnteg() || !E.api || typeof E.api.ekipBirim !== 'function' || !info || !info.year || !info.month) return '';
+  return `${ashiAktifIl()}|${info.year}-${String(info.month).padStart(2, '0')}`;
+}
+// Hazırsa true; değilse isteği başlatır (sonra: veri gelince çalışacak işlev) ve false döner
+function ashiEkipBirimIste(info, sonra) {
+  const a = ashiEkipBirimAnahtar(info), S = ashiEkipBirim;
+  if (!a) return true;
+  if (S.anahtar === a && S.durum === 'tamam') return true;
+  if (sonra) S.bekleyen.push(sonra);
+  if (S.anahtar === a && S.durum === 'yukleniyor') return false;
+  S.anahtar = a; S.durum = 'yukleniyor'; S.birimler = {}; S.ay = null;
+  const i = a.lastIndexOf('|');
+  Promise.resolve().then(() => window.ASHI_ENTEG.api.ekipBirim(a.slice(0, i), a.slice(i + 1)))
+    .then(r => { if (S.anahtar !== a) return; S.birimler = (r && r.birimler) || {}; S.ay = (r && r.ay) || null; })
+    .catch(err => { if (S.anahtar === a) { S.birimler = {}; S.ay = null; } console.warn('Planlama (EKİP) birimleri alınamadı:', err && err.message || err); })
+    .finally(() => {
+      if (S.anahtar !== a) return;
+      S.durum = 'tamam';
+      S.bekleyen.splice(0).forEach(f => { try { f(); } catch (e) { console.warn(e); } });
+      if (document.getElementById('istasyonPersonelDokum')?.style.display === 'block') ashiDokumEkranCiz();
+    });
+  return false;
+}
+function ashiEkipBirimi(info, tc) {
+  const S = ashiEkipBirim, a = ashiEkipBirimAnahtar(info);
+  if (!a || S.anahtar !== a || S.durum !== 'tamam') return '';
+  return S.birimler[String(tc || '').replace(/\D/g, '')] || '';
+}
+// Birim karşılaştırma anahtarı (Planlama'nın istAnahtar mantığı): 'MANİSA AHMETLİ 1 NOLU ACİL SAĞLIK HİZMETLERİ İSTASYONU 10921'
+// ve 'AHMETLİ 1 NOLU ASHİ (4450)' → 'AHMETLI 1'; Komuta Kontrol → 'KKM', Başhekimlik → 'BH'; diğerleri sade ad
+function ashiBirimAnahtar(t) {
+  const u = String(t || '').toLocaleUpperCase('tr-TR').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s*\(?\d{4,7}\)?\s*$/, '').replace(/\s+/g, ' ').trim();
+  if (!u) return '';
+  if (/KOMUTA KONTROL/.test(u)) return 'KKM';
+  if (/BASHEKIM/.test(u)) return 'BH';
+  if (/AILE HEK|HASTANE|SAGLIK MUDURLUGU|SAGLIK OCAGI/.test(u)) return u;
+  const m = u.replace(/\bNOLU\b|\bNO\b|\bASHI\b|\bACIL SAGLIK HIZMETLERI ISTASYONU\b|\bISTASYONU\b|\bMANISA\b/g, ' ').replace(/\s+/g, ' ').trim().match(/([A-Z]+)\s+(\d+)/);
+  return m ? `${m[1]} ${m[2]}` : u;
+}
+// Planlama birim adı → İK'daki birim yazımı (birim kodu listesinden; önce aktif ilin birimleri, sonra bu aydaki birimler)
+function ashiPlanBirimIk(b, adaylar) {
+  const k = ashiBirimAnahtar(b);
+  if (k === 'KKM') return ASHI_KOMUTA_BIRIM;
+  if (k === 'BH') return ASHI_BASHEK_BIRIM;
+  const il = ashiAktifIl(), uy = n => ashiBirimAnahtar(n) === k;
+  const kod = Object.keys(ASHI_BIRIM_KOD).filter(uy);
+  return kod.find(n => n.startsWith(il + ' ')) || (adaylar || []).find(uy) || kod[0] || String(b || '').trim();
+}
 function buildDokumCetveliAoa() {
   const info = reportMonthInfo || getAnalizMonthInfo();
   const year = info.year, month = info.month, days = new Date(Date.UTC(year, month, 0)).getUTCDate();
   const stationQ = ashiIstSecimLC('istasyonPersonelStation');
   const personQ = String(document.getElementById('istasyonPersonelPerson')?.value || '').trim().toLocaleLowerCase('tr-TR');
   const r2 = v => Math.round(v * 100) / 100;
+  ashiEkipBirimIste(info);
   const list = [...ashiDokumTopla(info).values()].map(x => {
     const own = x.asilIst || Object.keys(x.istCount).sort((a, b) => x.istCount[b] - x.istCount[a])[0] || x.izinBirim || '';
     const kadroBirim = own || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
@@ -6685,8 +6739,12 @@ function buildDokumCetveliAoa() {
   };
   const hesap = list.map(x => [x, ashiDokumSatirHesapla(x, info)]).filter(([x, s]) => uyar(x, s));
   list.length = 0; hesap.forEach(([x]) => list.push(x));
+  const asilAdlar = [...new Set(list.map(x => x.asil))];
   hesap.forEach(([x, s], i) => {
-    const gecici = x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : '');
+    // Planlama'da (EKİP) çalıştığı birim varsa: kadro birimiyle aynı istasyonsa boş, değilse o birim; yoksa eski Komuta / Başhekimlik kuralı
+    const pb = ashiEkipBirimi(info, x.tc);
+    let gecici = x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : '');
+    if (pb) gecici = ashiBirimAnahtar(pb) === ashiBirimAnahtar(x.asil) ? '' : ashiPlanBirimIk(pb, asilAdlar);
     const tip = x.komuta ? 'İASB Komuta Birimi' : (x.bashek ? 'İASB Başhekimlik' : 'İASB İstasyon');
     const row = [i + 1, x.tc, `${x.ad} ${x.soyad}`.trim(), x.il || 'MANİSA', ashiBirimKodlu(x.asil), gecici && gecici !== x.asil ? ashiBirimKodlu(gecici) : '', tip, x.istihdam, x.unvan, x.ofBrans || x.brans];
     s.rows.forEach(c => row.push(c));
@@ -6761,6 +6819,7 @@ function buildDokumCetveliSheet() {
 }
 function exportIstasyonPersonelExcel(sayfa){
   if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
+  try { if(!ashiEkipBirimIste(reportMonthInfo||getAnalizMonthInfo(),()=>exportIstasyonPersonelExcel(sayfa))) return; } catch(e) {}
   const people=getFilteredIstasyonPersonelRows();
   const summaryRows=[], detailRows=[];
   const stationQx=ashiIstSecimLC('istasyonPersonelStation');
@@ -6979,6 +7038,7 @@ function exportKontrolRaporuExcel() {
 }
 function exportDokumCetveliExcel(){
   if(typeof XLSX==='undefined'){ alert('Excel dışa aktarma kütüphanesi yüklenemedi.'); return; }
+  try { if(!ashiEkipBirimIste(reportMonthInfo||getAnalizMonthInfo(),()=>exportDokumCetveliExcel())) return; } catch(e) {}
   try {
     const wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,buildDokumCetveliSheet(),'Nöbet Listesi Döküm Cetveli');
