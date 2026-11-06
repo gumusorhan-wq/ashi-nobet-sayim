@@ -8858,5 +8858,37 @@ function ashiNavSenk() {
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',kur); else kur();
 })();
 </script>
+<script>
+/* HUSER 12.48 — Ortak tarih düzeni: gün seçimleri (input type=date) aynı görünümde gün takvimiyle seçilir.
+   Asıl input gizli kalır; seçim input.value'ya yazılır ve 'input' + 'change' olayları tetiklenir (mevcut kod aynen çalışır). */
+(function tsGunSecici(){
+  var AY=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var css=document.createElement('style');css.textContent='.ts-btn{height:36px;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.ts-btn:hover{border-color:#0e7490}.ts-pop{position:fixed;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 40px rgba(15,23,42,.18);padding:12px;width:300px;font-family:inherit}.ts-pop h4{margin:0 0 6px;font-size:13px;color:#0e7490;letter-spacing:.04em}.ts-row{display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px}.ts-row b{font-size:14px}.ts-nav{border:1px solid #cbd5e1;background:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer}.ts-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.ts-grid span{font-size:11px;color:#64748b}.ts-gun{padding:6px 0;border:1px solid #cbd5e1;border-radius:6px;background:#fff;font-weight:700;font-size:12px;cursor:pointer;color:#1e293b}.ts-gun.hs{color:#b91c1c}.ts-gun.sec{background:#0e7490;border-color:#0e7490;color:#fff}.ts-gun:hover{border-color:#0e7490}.ts-alt{display:flex;justify-content:space-between;margin-top:8px}.ts-alt button{border:0;background:none;font-weight:600;color:#475569;cursor:pointer;font-size:12px}';
+  document.head.appendChild(css);
+  var pop=null;function kapat(){if(pop){pop.remove();pop=null;}}
+  function pad(n){return (n<10?'0':'')+n}
+  function tr(v){return v?v.slice(8,10)+'.'+v.slice(5,7)+'.'+v.slice(0,4):''}
+  function ac(inp,btn){kapat();var v=inp.value,gy,gm;if(v){gy=+v.slice(0,4);gm=+v.slice(5,7);}else{var d=new Date();gy=d.getFullYear();gm=d.getMonth()+1;}
+    pop=document.createElement('div');pop.className='ts-pop';document.body.appendChild(pop);
+    function ciz(){var N=new Date(gy,gm,0).getDate(),ilk=(new Date(gy,gm-1,1).getDay()+6)%7,h='<h4>GÜN SEÇ</h4><div class="ts-row"><button class="ts-nav" data-g="-1">‹</button><b>'+AY[gm-1]+' '+gy+'</b><button class="ts-nav" data-g="1">›</button></div><div class="ts-grid">';
+      ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'].forEach(function(x){h+='<span>'+x+'</span>'});for(var i=0;i<ilk;i++)h+='<i></i>';
+      for(var d=1;d<=N;d++){var iso=gy+'-'+pad(gm)+'-'+pad(d),hs=((ilk+d-1)%7)>=5;h+='<button class="ts-gun'+(hs?' hs':'')+(iso===inp.value?' sec':'')+'" data-d="'+iso+'">'+d+'</button>';}
+      h+='</div><div class="ts-alt"><button data-t="1">Temizle</button><button data-k="1">Kapat ✕</button></div>';pop.innerHTML=h;
+      var r=btn.getBoundingClientRect();pop.style.top=Math.min(r.bottom+4,window.innerHeight-pop.offsetHeight-8)+'px';pop.style.left=Math.max(8,Math.min(r.left,window.innerWidth-308))+'px';}
+    ciz();
+    pop.addEventListener('click',function(e){var t=e.target.closest('button');if(!t)return;e.stopPropagation();
+      if(t.dataset.g){gm+=+t.dataset.g;if(gm<1){gm=12;gy--;}if(gm>12){gm=1;gy++;}ciz();return;}
+      if(t.dataset.k){kapat();return;}
+      var yeni=t.dataset.t?'':t.dataset.d;inp.value=yeni;btn.textContent='📅 '+(yeni?tr(yeni):'Gün seç')+' ▾';inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}));kapat();});
+  }
+  function sar(inp){if(inp.dataset.tsSarili)return;inp.dataset.tsSarili='1';var b=document.createElement('button');b.type='button';b.className='ts-btn';b.textContent='📅 '+(inp.value?tr(inp.value):'Gün seç')+' ▾';inp.style.display='none';inp.parentNode.insertBefore(b,inp.nextSibling);
+    b.addEventListener('click',function(e){e.stopPropagation();if(pop)kapat();else ac(inp,b);});
+    inp.addEventListener('change',function(){b.textContent='📅 '+(inp.value?tr(inp.value):'Gün seç')+' ▾';});}
+  function tara(){document.querySelectorAll('input[type=date]').forEach(sar);}
+  document.addEventListener('click',function(e){if(pop&&!pop.contains(e.target))kapat();});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tara);else tara();
+  new MutationObserver(function(){tara();}).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
 </body>
 </html>
