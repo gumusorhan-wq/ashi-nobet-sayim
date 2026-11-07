@@ -1968,13 +1968,28 @@ async function loadArchivedMonth(key, slot) {
   }
 }
 // slot verilirse yalnızca o Excel, 'izin' verilirse yalnızca izin/muafiyet dosyası, verilmezse tüm ay silinir.
+// Ortak onay penceresi — tarayıcının confirm() kutusu yerine HUSER düzeninde onay (sil / kaldır / sıfırla / geri alınamaz → kırmızı; Enter = evet, tehlikelide değil; Esc = vazgeç)
+function ashiOnay(metin){
+  var tehlikeli=/sil|kaldır|sıfırla|geri alınamaz|SİL|KALDIR|SIFIRLA/.test(String(metin||''));
+  if(!document.getElementById('ashi-onay-css')){var c=document.createElement('style');c.id='ashi-onay-css';c.textContent='.ashi-onay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px}.ashi-onay>div{background:#fff;max-width:460px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3);font:14px/1.5 inherit;color:#334155}.ashi-onay h3{margin:0;padding:12px 18px;background:#0055A4;color:#fff;font-size:15px;font-weight:700}.ashi-onay h3.t{background:#dc2626}.ashi-onay p{margin:0;padding:16px 18px;white-space:pre-line}.ashi-onay .a{display:flex;justify-content:flex-end;gap:8px;padding:10px 18px;background:#f8fafc;border-top:1px solid #e2e8f0}.ashi-onay button{padding:6px 12px;font:600 12px inherit;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer}.ashi-onay button.e{background:#0055A4;border-color:#0055A4;color:#fff}.ashi-onay button.e.t{background:#dc2626;border-color:#dc2626}';document.head.appendChild(c);}
+  return new Promise(function(coz){
+    var d=document.createElement('div');d.className='ashi-onay';
+    d.innerHTML='<div role="alertdialog" aria-modal="true"><h3 class="'+(tehlikeli?'t':'')+'">'+(tehlikeli?'Dikkat':'Onay')+'</h3><p></p><div class="a"><button data-o="0">Vazgeç</button><button class="e'+(tehlikeli?' t':'')+'" data-o="1">'+(tehlikeli?'Evet, devam et':'Evet')+'</button></div></div>';
+    d.querySelector('p').textContent=String(metin||'');
+    function tus(e){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();bit(false);}else if(e.key==='Enter'&&!tehlikeli){e.preventDefault();e.stopPropagation();bit(true);}}
+    function bit(v){document.removeEventListener('keydown',tus,true);d.remove();coz(v);}
+    d.addEventListener('click',function(e){var b=e.target.closest('[data-o]');if(b)bit(b.getAttribute('data-o')==='1');else if(e.target===d)bit(false);});
+    document.addEventListener('keydown',tus,true);document.body.appendChild(d);
+    d.querySelector(tehlikeli?'[data-o="0"]':'[data-o="1"]').focus();
+  });
+}
 async function deleteArchivedMonth(key, part) {
   try {
     const rec = await archiveGet(key);
     if (!rec) { renderArchivePanel(); return; }
     const label = archiveMonthLabel(rec.reportMonthInfo);
     const what = part === 'izin' ? 'Ay Sonu izin/muafiyet dosyasını' : part === 'izinBasi' ? 'Ay Başı izin/muafiyet dosyasını' : (part ? `${ASHI_SLOT_LABELS[part]} Excel kaydını` : 'tüm arşiv kaydını (Ay Başı, Ay Sonu ve izin dosyası)');
-    if (!window.confirm(`${label} için ${what} silmek istediğinizden emin misiniz?\n\nBu işlem yalnızca yerel arşiv kaydını kaldırır ve geri alınamaz.`)) return;
+    if (!(await ashiOnay(`${label} için ${what} silmek istediğinizden emin misiniz?\n\nBu işlem yalnızca yerel arşiv kaydını kaldırır ve geri alınamaz.`))) return;
     if (part === 'izin') rec.izin = null;
     else if (part === 'izinBasi') rec.izinBasi = null;
     else if (part) delete rec.slots[part];
@@ -2021,7 +2036,7 @@ function archiveImportBackup(file) {
       const data = JSON.parse(event.target.result);
       const incoming = (Array.isArray(data) ? data : data.records || []).map(archiveUpgrade).filter(r => r && r.key && r.reportMonthInfo);
       if (!incoming.length) throw new Error('Dosyada geçerli arşiv kaydı bulunamadı.');
-      if (!window.confirm(`${incoming.length} aylık yedek bulundu.\n\nAynı aya ait Ay Başı / Ay Sonu / izin kayıtları yedekteki ile değiştirilir; yedekte olmayanlar korunur. Devam edilsin mi?`)) return;
+      if (!(await ashiOnay(`${incoming.length} aylık yedek bulundu.\n\nAynı aya ait Ay Başı / Ay Sonu / izin kayıtları yedekteki ile değiştirilir; yedekte olmayanlar korunur. Devam edilsin mi?`))) return;
       for (const r of incoming) {
         const cur = await archiveGet(r.key);
         if (cur) {
@@ -2588,13 +2603,13 @@ async function driveChangePw() {
   ashiDrive.izinHatalari.length = 0;
   try {
     if (eski) {
-      if (!window.confirm('Drive’daki tüm aylar yeni parolayla yeniden şifrelenecek. Diğer cihazlar yeni parolayı bir kez girmek zorunda kalacak. Devam edilsin mi?')) return;
+      if (!(await ashiOnay('Drive’daki tüm aylar yeni parolayla yeniden şifrelenecek. Diğer cihazlar yeni parolayı bir kez girmek zorunda kalacak. Devam edilsin mi?'))) return;
       const r = await ashiDrive.parolaDegistir({eski, yeni, kimEski, kimYeni}, m => driveSetMsg('🔑 ' + m, ''));
       driveSetMsg(`Parola değiştirildi: ${r.n} ay yeniden şifrelendi${r.atlanan ? `, ${r.atlanan} paket açılamadığı için atlandı` : ''}${r.kimSilinen ? `, ${r.kimSilinen} pakette eski kimlik parolası bilinmediği için kimlik tablosu silindi (↻ Hepsini yeniden yayınla ile eklenir)` : ''}. Diğer cihazlar yeni parolayı girmeli.`, 'ok');
     } else {
       const all = (await archiveGetAll()).filter(x => (x.slots?.basi && !x.slots.basi.anon) || (x.slots?.sonu && !x.slots.sonu.anon) || (x.izin && !x.izin.anon) || (x.izinBasi && !x.izinBasi.anon));
       if (!all.length) { driveSetMsg('Eski parola bilinmiyorsa bu cihazda ham verisi olan (kendi yüklediğiniz) ay bulunmalı; hiçbiri yok. Eski parolayı girin veya önce ayları bu cihaza yükleyin.', 'err'); return; }
-      if (!window.confirm(`Eski parola kullanılmadan sıfırlanacak. Bu cihazdaki ${all.length} ay yeni parolayla Drive’a yeniden yayınlanacak; bu cihazda ham verisi olmayan aylar eski parolayla kalıp okunamayacak. Devam edilsin mi?`)) return;
+      if (!(await ashiOnay(`Eski parola kullanılmadan sıfırlanacak. Bu cihazdaki ${all.length} ay yeni parolayla Drive’a yeniden yayınlanacak; bu cihazda ham verisi olmayan aylar eski parolayla kalıp okunamayacak. Devam edilsin mi?`))) return;
       const r = await ashiDrive.parolaSifirla({yeni, kimYeni}, all, m => driveSetMsg('🔑 ' + m, ''));
       driveSetMsg(`Parola sıfırlandı: ${r.n} ay yeni parolayla yayınlandı.${r.kalan.length ? ` Okunamayan aylar (eski parolayla): ${r.kalan.join(', ')} — bunları ham verisi olan cihazdan yeniden yayınlayın.` : ''} Diğer cihazlar yeni parolayı girmeli.`, 'ok');
     }
@@ -2938,7 +2953,7 @@ async function entegListeYenile() {
 async function entegSil(ym) {
   const E = window.ASHI_ENTEG, il = ashiAktifIl();
   if (!ashiYuklemeYetkisi(il) || !E.api.sil) return;
-  if (!confirm(`${entegAyAd(ym)} ${il} kurum arşivinden silinsin mi? Bu cihazdaki kayıt silinmez; diğer kullanıcılar bir sonraki eşitlemede bu ayı artık görmez.`)) return;
+  if (!(await ashiOnay(`${entegAyAd(ym)} ${il} kurum arşivinden silinsin mi? Bu cihazdaki kayıt silinmez; diğer kullanıcılar bir sonraki eşitlemede bu ayı artık görmez.`))) return;
   try {
     await E.api.sil(il, ym);
     const sKey = 'ashi_enteg_sync_' + il, sync = entegLs.get(sKey, {}); delete sync[ym]; entegLs.set(sKey, sync);
