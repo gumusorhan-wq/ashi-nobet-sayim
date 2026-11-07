@@ -156,7 +156,9 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   /* HUSER 13.28: Ana Sayfa */
   body.ana-acik #uploadSection,body.ana-acik #reportSection{display:none!important}
   .ashi-ana{padding:24px 28px}.ashi-ana-bas{margin:0;font-size:22px;font-weight:700;color:#0f172a}.ashi-ana-alt{margin:4px 0 20px;color:#64748b;font-size:14px}
-  .ashi-ana-kartlar{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:20px}
+  .ashi-ana-kartlar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:20px}
+  @media (max-width:1100px){.ashi-ana-kartlar{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
+  .ashi-ana-kartlar .ashi-ana-kart{padding:16px;min-width:0}.ashi-ana-kartlar .ashi-ana-kart span,.ashi-ana-kartlar .ashi-ana-kart b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ashi-ana-kartlar .ashi-ana-kart b{font-size:24px}
   .ashi-ana-kart{background:#fff;border:1px solid #e2e8f0;padding:20px;display:flex;flex-direction:column;gap:8px}
   .ashi-ana-kart span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b}.ashi-ana-kart b{font-size:28px;font-weight:700;color:#0f172a;line-height:1.1}
   .ashi-ana-kart small{font-size:12px;color:#64748b}.ashi-ana-kart small a{color:#0055a4;font-weight:600}
@@ -9025,9 +9027,9 @@ function anAnaKapat() { if (!document.body.classList.contains('ana-acik')) retur
 function anAnaSayfa() {
   if (typeof anKapatAnaliz === 'function') { try { anKapatAnaliz(); } catch (e) {} }
   const a = document.getElementById('ashiAna'); if (!a) return;
-  const rap = ashiNavRaporVar(), gr = [['ef', 'Ekip Şefi'], ['ysp', 'Yardımcı Sağlık Personeli'], ['sur', 'Sürücü']];
-  const kisi = new Set(), ist = new Set(); let gun = {ef: 0, ysp: 0, sur: 0}, coklu = 0;
-  gr.forEach(([g]) => (allData[g] || []).forEach(r => { kisi.add(r.personKey || r.tc); if (r.asilIst) ist.add(r.asilIst); gun[g] += Number(r.toplam) || 0; if (r.coklu) coklu++; }));
+  const rap = ashiNavRaporVar(), gr = [['ef', 'Ekip Şefi'], ['ysp', 'YSP'], ['sur', 'Sürücü']];
+  const kisi = new Set(), ist = new Set(); let gun = {ef: 0, ysp: 0, sur: 0}, say = {ef: new Set(), ysp: new Set(), sur: new Set()}, coklu = 0;
+  gr.forEach(([g]) => (allData[g] || []).forEach(r => { kisi.add(r.personKey || r.tc); if (r.asilIst) ist.add(r.asilIst); gun[g] += Number(r.toplam) || 0; if ((Number(r.toplam) || 0) > 0) say[g].add(r.personKey || r.tc); if (r.coklu) coklu++; }));
   const f = v => (Math.round(v * 10) / 10).toLocaleString('tr-TR', {maximumFractionDigits: 1});
   const kart = (b, d, alt, git) => `<div class="ashi-ana-kart"><span>${b}</span><b>${d}</b><small>${alt}${git ? ` <a href="#" onclick="${git};return false">ayrıntı</a>` : ''}</small></div>`;
   const tikla = sel => `(function(){var e=document.querySelector('${sel}');if(e&&!e.disabled)e.click()})()`;
@@ -9037,10 +9039,9 @@ function anAnaSayfa() {
   const ic = k => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${AN_ICONS[k] || ''}</svg>`;
   a.innerHTML = `<h2 class="ashi-ana-bas">Ana Sayfa</h2><p class="ashi-ana-alt">${rap && reportMonthInfo ? 'Rapor dönemi: ' + escapeHtml(archiveMonthLabel(reportMonthInfo)) : 'Henüz rapor yüklenmedi'}</p>
     ${rap ? `<div class="ashi-ana-kartlar">
-      ${kart('Rapor dönemi', reportMonthInfo ? escapeHtml(archiveMonthLabel(reportMonthInfo)) : '—', 'yüklü nöbet raporu', '')}
       ${kart('Personel', kisi.size, 'raporda nöbeti olan kişi', tikla('#asideNav [data-g=istasyon]'))}
       ${kart('İstasyon', ist.size, 'asıl istasyon sayısı', tikla('#asideNav [data-g=istasyon]'))}
-      ${gr.map(([g, ad]) => kart(ad, f(gun[g]) + ' gün', 'toplam nöbet', tikla(`#asideNav [data-g=${g}][data-v=liste]`))).join('')}
+      ${gr.map(([g, ad]) => kart(ad, say[g].size, 'nöbet tutan kişi · ' + f(gun[g]) + ' gün', tikla(`#asideNav [data-g=${g}][data-v=liste]`))).join('')}
       ${kart('Çoklu istasyon', coklu, 'başka istasyonda da nöbet tutan', tikla('#asideNav [data-ov=cokluTumPersonelModal]'))}
     </div>` : `<div class="ashi-ana-bos"><b>Nöbet raporu yüklenmedi</b><span>ASOS'tan indirdiğiniz Nöbet İçi Hareket Raporu'nu yükleyin ya da Arşiv'den kayıtlı bir ayı açın.</span>
       <div><button type="button" class="pri" onclick="anAnaKapat()">Rapor yükle</button> <button type="button" class="btn-sec" onclick="${tikla('#anArsiv')}">Arşiv</button></div></div>`}
