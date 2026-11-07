@@ -1549,12 +1549,12 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div style="padding:16px 20px">
       <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
         <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#334155">Tarih<input type="date" id="ozelGunTarih" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px"></label>
-        <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#334155">Tür<select id="ozelGunTur" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px"><option value="idari">İdari Tatil</option><option value="yarim">Yarım Gün (5 saat)</option><option value="resmi">Resmî Tatil</option><option value="bayram">Bayram Günü</option></select></label>
+        <div style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#334155">Tür<span id="ozelGunTur" data-v="idari" style="display:inline-flex;flex-wrap:wrap;border:1px solid #cbd5e1"><button type="button" data-tur="bayram" onclick="ozelGunTurSec('bayram')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">Bayram</button><button type="button" data-tur="resmi" onclick="ozelGunTurSec('resmi')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">Resmî tatil</button><button type="button" data-tur="idari" onclick="ozelGunTurSec('idari')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">İdari tatil</button><button type="button" data-tur="yarim" onclick="ozelGunTurSec('yarim')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">Yarım gün</button></span></div>
         <button type="button" class="btn-sec" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important;height:36px" onclick="ozelGunEkle()">Günü Ekle</button>
       </div>
       <div id="ozelGunOnizleme" style="margin-top:12px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534;font-weight:700"></div>
       <div id="ozelGunListe" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto"></div>
-      <div style="margin-top:10px;font-size:11px;color:#64748b;line-height:1.5">Hafta sonları zaten sayılmaz. Tatil türleri o günü 0 saat, yarım gün 5 saat sayar. Resmî tatiller ve dini bayramlar hazır tabloda mevcuttur; buraya yalnızca ek günleri (idari tatil gibi) eklemeniz yeterlidir. Tanımlar bu tarayıcıda saklanır.</div>
+      <div style="margin-top:10px;font-size:11px;color:#64748b;line-height:1.5">Hafta sonları zaten sayılmaz. Tatil türleri o günü 0 saat, yarım gün 5 saat sayar. Resmî tatiller ve dini bayramlar hazır tabloda mevcuttur; buraya yalnızca ek günleri (idari tatil gibi) eklemeniz yeterlidir. <span id="ozelGunSaklama">Tanımlar bu tarayıcıda saklanır.</span></div>
     </div>
   </div>
 </div>
@@ -6203,22 +6203,50 @@ function ozelGunAyBilgi(){ return reportMonthInfo || (typeof getAnalizMonthInfo 
 function showOzelGunModal(){
   const info = ozelGunAyBilgi(), inp = document.getElementById('ozelGunTarih');
   if (inp) { if (info) { const mm = String(info.month).padStart(2, '0'), last = new Date(Date.UTC(info.year, info.month, 0)).getUTCDate(); inp.min = `${info.year}-${mm}-01`; inp.max = `${info.year}-${mm}-${String(last).padStart(2, '0')}`; if (!inp.value || inp.value < inp.min || inp.value > inp.max) inp.value = inp.min; } }
-  ozelGunRender();
+  ozelGunRender(); ashiOzelGunYukle();
   const m = document.getElementById('ozelGunModal'); if (m) m.style.display = 'block';
 }
+window.addEventListener('load', () => { ashiOzelGunYukle(); });
 function closeOzelGunModal(){ const m = document.getElementById('ozelGunModal'); if (m) m.style.display = 'none'; }
 function ozelGunYenile(){ ozelGunRender(); try { if (typeof renderIstasyonPersonelList === 'function') renderIstasyonPersonelList(); } catch (e) { console.warn(e); } }
-function ozelGunEkle(){
-  const d = document.getElementById('ozelGunTarih')?.value, tur = document.getElementById('ozelGunTur')?.value;
+// Sürüm 13.6 (HUSER): özel günler Planlama ile ortak, sunucuda il bazında (ASHI_ENTEG.api.ozelGun). Tarayıcıdaki eski liste bir kez taşınır.
+let ashiOzelOrtak = false, ashiOzelYaz = false;
+function ashiOzelApi(){ return ashiEnteg() && window.ASHI_ENTEG.api && window.ASHI_ENTEG.api.ozelGun ? window.ASHI_ENTEG.api.ozelGun : null; }
+async function ashiOzelGunYukle(){
+  const A = ashiOzelApi(); if (!A) return;
+  const il = ashiAktifIl();
+  try {
+    const anahtar = 'ashiOzelGunAktarildi|' + il;
+    if (Object.keys(ashiOzelGunler).length && !localStorage.getItem(anahtar)) { try { await A.aktar(il, ashiOzelGunler); localStorage.setItem(anahtar, '1'); } catch (e) {} }
+    const d = await A.liste(il);
+    const g = {}; Object.entries((d && d.gunler) || {}).forEach(([t, v]) => { g[t] = {tur: v.tur, ekleyen: v.ekleyen || ''}; });
+    ashiOzelGunler = g; ashiOzelOrtak = true; ashiOzelYaz = !!(d && d.yazabilir);
+    ozelGunYenile();
+  } catch (e) { console.warn('ortak özel günler', e); }
+}
+function ozelGunTurSec(k){ const s = document.getElementById('ozelGunTur'); if (!s) return; s.dataset.v = k; s.querySelectorAll('button').forEach(b => { const on = b.dataset.tur === k; b.style.background = on ? '#0055A4' : '#fff'; b.style.color = on ? '#fff' : '#334155'; }); }
+async function ozelGunEkle(){
+  const d = document.getElementById('ozelGunTarih')?.value, tur = document.getElementById('ozelGunTur')?.dataset.v;
   if (!d) { alert('Lütfen bir tarih seçin.'); return; }
   if (!ASHI_OZEL_GUN_TUR[tur]) return;
+  const A = ashiOzelApi();
+  if (A && ashiOzelOrtak) { try { await A.ekle(ashiAktifIl(), d, tur); } catch (e) { alert('Özel gün eklenemedi: ' + e.message); return; } await ashiOzelGunYukle(); return; }
   ashiOzelGunler[d] = {tur}; ashiOzelGunKaydet(); ozelGunYenile();
 }
-function ozelGunSil(d){ delete ashiOzelGunler[d]; ashiOzelGunKaydet(); ozelGunYenile(); }
+async function ozelGunSil(d){
+  const A = ashiOzelApi();
+  if (A && ashiOzelOrtak) {
+    if (!(await ashiOnay(`${d.split('-').reverse().join('.')} özel günü ortak listeden silinsin mi? Planlama modülünden de kalkar.`))) return;
+    try { await A.sil(ashiAktifIl(), d); } catch (e) { alert('Özel gün silinemedi: ' + e.message); return; } await ashiOzelGunYukle(); return;
+  }
+  delete ashiOzelGunler[d]; ashiOzelGunKaydet(); ozelGunYenile();
+}
 function ozelGunRender(){
   const list = document.getElementById('ozelGunListe'), onz = document.getElementById('ozelGunOnizleme'); if (!list) return;
   const items = Object.entries(ashiOzelGunler).sort((a, b) => a[0].localeCompare(b[0]));
-  list.innerHTML = items.length ? items.map(([d, o]) => { const [y, m, g] = d.split('-'); const renk = o.tur === 'yarim' ? '#92400e;background:#fef3c7' : (o.tur === 'idari' ? '#1d4ed8;background:#dbeafe' : '#166534;background:#dcfce7'); return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px"><span><strong>${g}.${m}.${y}</strong> — <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;color:${renk}">${ASHI_OZEL_GUN_TUR[o.tur]}</span></span><button type="button" class="btn-sec" style="padding:3px 10px" onclick="ozelGunSil('${d}')">Sil</button></div>`; }).join('') : '<div style="color:#64748b;font-size:12px;padding:6px">Henüz özel gün eklenmedi.</div>';
+  list.innerHTML = items.length ? items.map(([d, o]) => { const [y, m, g] = d.split('-'); const renk = o.tur === 'yarim' ? '#92400e;background:#fef3c7' : (o.tur === 'idari' ? '#1d4ed8;background:#dbeafe' : '#166534;background:#dcfce7'); return `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px"><span><strong>${g}.${m}.${y}</strong> — <span style="padding:2px 8px;border-radius:999px;font-size:11px;font-weight:800;color:${renk}">${ASHI_OZEL_GUN_TUR[o.tur]}</span>${o.ekleyen ? ` <span style="color:#64748b;font-size:11px">· ${escapeHtml(o.ekleyen)}</span>` : ''}</span>${ashiOzelOrtak && !ashiOzelYaz ? '' : `<button type="button" class="btn-sec" style="padding:3px 10px" onclick="ozelGunSil('${d}')">Sil</button>`}</div>`; }).join('') : '<div style="color:#64748b;font-size:12px;padding:6px">Henüz özel gün eklenmedi.</div>';
+  const sk = document.getElementById('ozelGunSaklama'); if (sk) sk.textContent = ashiOzelOrtak ? 'Tanımlar Planlama modülüyle ortaktır; sunucuda saklanır.' + (ashiOzelYaz ? '' : ' Ekleme / silme için yükleme yetkisi gerekir.') : 'Tanımlar bu tarayıcıda saklanır.';
+  ozelGunTurSec(document.getElementById('ozelGunTur')?.dataset.v || 'idari');
   const info = ozelGunAyBilgi();
   if (onz) onz.innerHTML = info ? `Bu ay kadro süresi: <strong>Memur ${ashiKadroSaati('', '', info)} saat</strong> · <strong>Sürekli işçi ${ashiKadroSaati('', 'Sürekli İşçi', info)} saat</strong> (izinsiz kişi için)` : 'Kadro süresi önizlemesi için önce nöbet listesi yükleyin.';
 }
