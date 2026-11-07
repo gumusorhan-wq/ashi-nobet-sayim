@@ -1969,9 +1969,12 @@ async function loadArchivedMonth(key, slot) {
 }
 // slot verilirse yalnızca o Excel, 'izin' verilirse yalnızca izin/muafiyet dosyası, verilmezse tüm ay silinir.
 // Ortak onay penceresi — tarayıcının confirm() kutusu yerine HUSER düzeninde onay (sil / kaldır / sıfırla / geri alınamaz → kırmızı; Enter = evet, tehlikelide değil; Esc = vazgeç)
+function ashiOnayCss(){
+  if(!document.getElementById('ashi-onay-css')){var c=document.createElement('style');c.id='ashi-onay-css';c.textContent='.ashi-onay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px}.ashi-onay>div{background:#fff;max-width:460px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3);font:14px/1.5 inherit;color:#334155}.ashi-onay h3{margin:0;padding:12px 18px;background:#0055A4;color:#fff;font-size:15px;font-weight:700}.ashi-onay h3.t{background:#dc2626}.ashi-onay p{margin:0;padding:16px 18px;white-space:pre-line}.ashi-onay .a{display:flex;justify-content:flex-end;gap:8px;padding:10px 18px;background:#f8fafc;border-top:1px solid #e2e8f0}.ashi-onay button{padding:6px 12px;font:600 12px inherit;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer}.ashi-onay button.e{background:#0055A4;border-color:#0055A4;color:#fff}.ashi-onay button.e.t{background:#dc2626;border-color:#dc2626}';document.head.appendChild(c);}
+}
 function ashiOnay(metin){
   var tehlikeli=/sil|kaldır|sıfırla|geri alınamaz|SİL|KALDIR|SIFIRLA/.test(String(metin||''));
-  if(!document.getElementById('ashi-onay-css')){var c=document.createElement('style');c.id='ashi-onay-css';c.textContent='.ashi-onay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px}.ashi-onay>div{background:#fff;max-width:460px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.3);font:14px/1.5 inherit;color:#334155}.ashi-onay h3{margin:0;padding:12px 18px;background:#0055A4;color:#fff;font-size:15px;font-weight:700}.ashi-onay h3.t{background:#dc2626}.ashi-onay p{margin:0;padding:16px 18px;white-space:pre-line}.ashi-onay .a{display:flex;justify-content:flex-end;gap:8px;padding:10px 18px;background:#f8fafc;border-top:1px solid #e2e8f0}.ashi-onay button{padding:6px 12px;font:600 12px inherit;border:1px solid #cbd5e1;background:#fff;color:#334155;cursor:pointer}.ashi-onay button.e{background:#0055A4;border-color:#0055A4;color:#fff}.ashi-onay button.e.t{background:#dc2626;border-color:#dc2626}';document.head.appendChild(c);}
+  ashiOnayCss();
   return new Promise(function(coz){
     var d=document.createElement('div');d.className='ashi-onay';
     d.innerHTML='<div role="alertdialog" aria-modal="true"><h3 class="'+(tehlikeli?'t':'')+'">'+(tehlikeli?'Dikkat':'Onay')+'</h3><p></p><div class="a"><button data-o="0">Vazgeç</button><button class="e'+(tehlikeli?' t':'')+'" data-o="1">'+(tehlikeli?'Evet, devam et':'Evet')+'</button></div></div>';
@@ -1981,6 +1984,33 @@ function ashiOnay(metin){
     d.addEventListener('click',function(e){var b=e.target.closest('[data-o]');if(b)bit(b.getAttribute('data-o')==='1');else if(e.target===d)bit(false);});
     document.addEventListener('keydown',tus,true);document.body.appendChild(d);
     d.querySelector(tehlikeli?'[data-o="0"]':'[data-o="1"]').focus();
+  });
+}
+// Ortak bilgi penceresi — alert() yerine (tek 'Tamam'); bu modülde window.alert da buna yönlenir
+function ashiBildir(metin){
+  ashiOnayCss();
+  return new Promise(function(coz){
+    var d=document.createElement('div');d.className='ashi-onay';
+    d.innerHTML='<div role="alertdialog" aria-modal="true"><h3>Bilgi</h3><p></p><div class="a"><button class="e" data-o="1">Tamam</button></div></div>';
+    d.querySelector('p').textContent=String(metin==null?'':metin);
+    function tus(e){if(e.key==='Escape'||e.key==='Enter'){e.preventDefault();e.stopPropagation();bit();}}
+    function bit(){document.removeEventListener('keydown',tus,true);d.remove();coz();}
+    d.addEventListener('click',function(e){if(e.target.closest('[data-o]'))bit();});
+    document.addEventListener('keydown',tus,true);document.body.appendChild(d);d.querySelector('[data-o]').focus();
+  });
+}
+try { window.alert = function(m){ ashiBildir(m); }; } catch(e) {}
+// Ortak yazı sorusu — prompt() yerine; Tamam → metin, Vazgeç/Esc → null
+function ashiSor(metin, vars){
+  ashiOnayCss();
+  return new Promise(function(coz){
+    var d=document.createElement('div');d.className='ashi-onay';
+    d.innerHTML='<div role="dialog" aria-modal="true"><h3>Bilgi girin</h3><p></p><div style="padding:0 18px 14px"><input style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #cbd5e1;font:inherit"></div><div class="a"><button data-o="0">Vazgeç</button><button class="e" data-o="1">Tamam</button></div></div>';
+    d.querySelector('p').textContent=String(metin||'');var inp=d.querySelector('input');inp.value=vars||'';
+    function tus(e){if(e.key==='Escape'){e.preventDefault();e.stopPropagation();bit(null);}else if(e.key==='Enter'){e.preventDefault();e.stopPropagation();bit(inp.value);}}
+    function bit(v){document.removeEventListener('keydown',tus,true);d.remove();coz(v);}
+    d.addEventListener('click',function(e){var b=e.target.closest('[data-o]');if(b)bit(b.getAttribute('data-o')==='1'?inp.value:null);else if(e.target===d)bit(null);});
+    document.addEventListener('keydown',tus,true);document.body.appendChild(d);inp.focus();inp.select();
   });
 }
 async function deleteArchivedMonth(key, part) {
@@ -2644,8 +2674,8 @@ async function driveSyncYear(y) {
 }
 function driveDownloadSelected() { return driveSel.size ? driveSync(false, [...driveSel]) : undefined; }
 function driveForgetPw() { ashiDrive.parolaAyarla(null, false); drivePwDraft = null; driveSetMsg('Parola bu cihazdan silindi.', 'ok'); renderArchivePanel(); }
-function driveChangeFolder() {
-  const v = window.prompt('Ortak arşiv Drive klasörünün bağlantısını (veya klasör kimliğini) girin.\nBoş bırakırsanız varsayılan klasör kullanılır.', '');
+async function driveChangeFolder() {
+  const v = await ashiSor('Ortak arşiv Drive klasörünün bağlantısını (veya klasör kimliğini) girin.\nBoş bırakırsanız varsayılan klasör kullanılır.', '');
   if (v === null) return;
   const id = ashiDrive.klasorAyikla(v);
   if (v.trim() && !id) { driveSetMsg('Klasör bağlantısı anlaşılamadı.', 'err'); return; }
