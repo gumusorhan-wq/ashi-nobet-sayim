@@ -152,6 +152,20 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .ss-liste button i{width:13px;height:13px;border-radius:50%!important;border:1px solid #94a3b8;flex:none}.ss-liste button.sec{font-weight:700;color:#0055a4;background:#eff6ff}.ss-liste button.sec i{background:#0055a4;border-color:#0055a4;box-shadow:inset 0 0 0 2px #fff}
   input[type="search"]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:10px center!important;background-size:14px!important;padding-left:32px!important}
   input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-left:6px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center/12px no-repeat;cursor:pointer}
+
+  /* HUSER 13.28: Ana Sayfa */
+  body.ana-acik #uploadSection,body.ana-acik #reportSection{display:none!important}
+  .ashi-ana{padding:24px 28px}.ashi-ana-bas{margin:0;font-size:22px;font-weight:700;color:#0f172a}.ashi-ana-alt{margin:4px 0 20px;color:#64748b;font-size:14px}
+  .ashi-ana-kartlar{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:20px}
+  .ashi-ana-kart{background:#fff;border:1px solid #e2e8f0;padding:20px;display:flex;flex-direction:column;gap:8px}
+  .ashi-ana-kart span{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#64748b}.ashi-ana-kart b{font-size:28px;font-weight:700;color:#0f172a;line-height:1.1}
+  .ashi-ana-kart small{font-size:12px;color:#64748b}.ashi-ana-kart small a{color:#0055a4;font-weight:600}
+  .ashi-ana-bos{background:#fff;border:1px solid #e2e8f0;padding:24px;margin-bottom:20px;display:flex;flex-direction:column;gap:8px}.ashi-ana-bos b{font-size:16px}.ashi-ana-bos span{color:#64748b;font-size:13px}
+  .ashi-ana-bos button{padding:8px 16px;font:inherit;font-size:13px;font-weight:600;cursor:pointer;border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:0}.ashi-ana-bos button.pri{background:#0055a4;border-color:#0055a4;color:#fff}
+  .ashi-ana-hizli{background:#fff;border:1px solid #e2e8f0;padding:20px}.ashi-ana-hizli h3{margin:0 0 14px;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:#0f172a}
+  .ashi-ana-git-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+  .ashi-ana-git{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #e2e8f0;background:#fff;color:#0f172a;font:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:left}
+  .ashi-ana-git svg{width:16px;height:16px;color:#64748b;flex:none}.ashi-ana-git:hover:not([disabled]){border-color:#0055a4;color:#0055a4}.ashi-ana-git[disabled]{opacity:.45;cursor:not-allowed}
   .ist-pk{position:relative;display:inline-block;min-width:170px}
 
   .kr-table{border-collapse:collapse;font-size:11px;width:100%;table-layout:auto}
@@ -908,7 +922,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <nav id="asideNav" aria-label="Ana menü">
   <div class="an-brand"><div class="an-logo"><img id="anLogo" alt="Logo"></div><div class="an-bt"><b>ASHİ Nöbet Sayım</b><small id="anPeriod">Rapor yüklenmedi</small></div></div>
   <button type="button" class="an-min-btn" id="anMinBtn" onclick="anMinToggle()" title="Menüyü daralt / genişlet" aria-label="Menüyü daralt / genişlet"></button>
-  <button type="button" class="an-it" data-ic="home" data-g="istasyon" id="anAnaSayfa" title="Özet kartlar ve istasyon listesi; rapor yüklenmemişse yükleme ekranı"><span class="an-ic"></span><span class="an-tx">Ana Sayfa</span></button>
+  <button type="button" class="an-it" data-ic="ana" id="anAna" onclick="anAnaSayfa()" title="Ön bilgiler ve hızlı erişim"><span class="an-ic"></span><span class="an-tx">Ana Sayfa</span></button>
+  <button type="button" class="an-it" data-ic="home" data-g="istasyon" data-need="rep"><span class="an-ic"></span><span class="an-tx">İstasyon listesi</span></button>
   <button type="button" class="an-it" data-ic="doc" id="anKontrol" data-need="rep" onclick="anKontrolAc()"><span class="an-ic"></span><span class="an-tx">Kontrol raporu</span></button>
   <button type="button" class="an-it" data-ic="grid" data-need="rep" onclick="anNav(function(){anGorevIstasyon();exportDokumCetveliExcel()})"><span class="an-ic"></span><span class="an-tx">Döküm cetveli (Excel)</span></button>
   <div class="an-sec">LİSTELER</div>
@@ -960,6 +975,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 </div>
 
 <!-- UPLOAD -->
+<div id="ashiAna" class="ashi-ana" style="display:none"></div>
 <div id="uploadSection" class="upload-section">
   <div class="upload-card">
     <div class="upload-header" style="display:flex;align-items:center;gap:12px">
@@ -5550,7 +5566,7 @@ function renderStats(data) {
     `<div class="stat-box" style="background:${s.bg};border-color:${s.bg};${s.click?'cursor:pointer':''}"
       ${s.click?`onclick="${s.click}"`:''}">
       <div class="stat-num" style="color:${s.color};font-size:${String(s.val).length>6?'18px':'26px'}">${fmt(s.val)}</div>
-      <div class="stat-lbl">${s.lbl}</div>${s.click ? '<div class="stat-ayr">Ayrıntı ›</div>' : ''}
+      <div class="stat-lbl">${s.lbl}</div>
     </div>`
   ).join('');
 }
@@ -6414,7 +6430,7 @@ function ashiOzetPanel(stations){
   const tcSet = new Set(rows.map(x => x.tc || x.name));
   const top = rows.reduce((b, x) => { const f = farkli(x); return f != null && (!b || f > b.f) ? {f, name: x.name} : b; }, null);
   const uy = rows.filter(x => { const f = farkli(x); return f != null && Math.abs(f) > ASHI_UYARI_FARK; }).length;
-  const kart = (lbl, val, sub, bg, fg) => `<div class="ozet-kart" style="flex:1 1 150px;background:${bg};border-radius:10px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:${fg};opacity:.85">${lbl}</div><div style="font-size:20px;font-weight:800;color:${fg}">${val}</div><div style="font-size:11px;color:${fg};opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div></div>`;
+  const kart = (lbl, val, sub, bg, fg) => `<div style="flex:1 1 150px;background:${bg};border-radius:10px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:${fg};opacity:.85">${lbl}</div><div style="font-size:20px;font-weight:800;color:${fg}">${val}</div><div style="font-size:11px;color:${fg};opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div></div>`;
   const chip = (k, t, tip) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" title="${tip}" style="padding:5px 11px;border-radius:999px;border:1px solid ${ashiOzetFiltre[k] ? '#0055a4' : '#cbd5e1'};background:${ashiOzetFiltre[k] ? '#0055a4' : '#fff'};color:${ashiOzetFiltre[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
   return `<div style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">
     ${kart('PERSONEL', tcSet.size, 'görünen kişi', '#dbeafe', '#1e3a5f')}
@@ -8854,6 +8870,7 @@ async function ashiSonAyiAc() {
 // ===== Yeni görünüm (sol menü) aç/kapat — tercih bu tarayıcıda saklanır; klasik görünüm varsayılan =====
 const AN_OVERLAYS = ['nobelAnaliziModal','cokluModal','boslukModal','surucuDuzenModal','tumPersonelDuzenModal','cokluTumPersonelModal','uygunPersonelModal'];
 const AN_ICONS = {
+  ana:'<path d="M2 7.5L8 2.5l6 5"/><path d="M3.5 6.5V14h3.5v-4h2v4h3.5V6.5"/>',
   home:'<path d="M2 14V6l6-4 6 4v8z"/><path d="M6.5 14v-4h3v4"/>', doc:'<path d="M3 2h7l3 3v9H3z"/><path d="M5.5 8h5M5.5 11h5"/>', grid:'<rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 7h12M6 3v10"/>',
   user:'<circle cx="8" cy="5.5" r="2.5"/><path d="M3 14c.5-3 2.5-4 5-4s4.5 1 5 4"/>', build:'<rect x="3" y="2" width="10" height="12" rx="1"/><path d="M6 5h1M9 5h1M6 8h1M9 8h1M7 14v-3h2v3"/>', list:'<path d="M5 4h9M5 8h9M5 12h9M2 4h1M2 8h1M2 12h1"/>',
   radio:'<circle cx="8" cy="8" r="1.5"/><path d="M4.5 4.5a5 5 0 000 7M11.5 4.5a5 5 0 010 7"/>', cross:'<path d="M6 2h4v4h4v4h-4v4H6v-4H2V6h4z"/>', chart:'<path d="M2 13V9M6 13V4M10 13V7M14 13V2"/>',
@@ -8995,9 +9012,42 @@ function ashiNavSenk() {
     el.classList.toggle('on', on);
   });
   document.getElementById('anKontrol')?.classList.toggle('on', !!kontrolAcik && !acikOv.length);
+  { const anaAcik = document.body.classList.contains('ana-acik'); if (anaAcik) nav.querySelectorAll('button.an-it').forEach(e => e.classList.remove('on')); document.getElementById('anAna')?.classList.toggle('on', anaAcik); document.getElementById('anKontrol')?.classList.toggle('on', !anaAcik && !!kontrolAcik && !acikOv.length); }
   nav.querySelectorAll('details').forEach(d => { const k = !!d.querySelector('.an-sub .on'); d.querySelector('summary')?.classList.toggle('has-on', k); if (k) d.open = true; });
   const p = document.getElementById('anPeriod'); if (p) p.textContent = (typeof reportMonthInfo !== 'undefined' && reportMonthInfo) ? archiveMonthLabel(reportMonthInfo) : 'Rapor yüklenmedi';
 }
+
+// ═══════════════════════════════════════════════════════════
+// HUSER 13.28 — Ana Sayfa (Depo / Teknik ana sayfası gibi): ön bilgi kartları + hızlı erişim.
+// Öteki sayfalar değişmez; Ana Sayfa açıkken yükleme / rapor bölümleri gizlenir (body.ana-acik), başka menü öğesine basınca kapanır.
+// ═══════════════════════════════════════════════════════════
+function anAnaKapat() { if (!document.body.classList.contains('ana-acik')) return; document.body.classList.remove('ana-acik'); const a = document.getElementById('ashiAna'); if (a) a.style.display = 'none'; setTimeout(ashiNavSenk, 30); }
+function anAnaSayfa() {
+  if (typeof anKapatAnaliz === 'function') { try { anKapatAnaliz(); } catch (e) {} }
+  const a = document.getElementById('ashiAna'); if (!a) return;
+  const rap = ashiNavRaporVar(), gr = [['ef', 'Ekip Şefi'], ['ysp', 'Yardımcı Sağlık Personeli'], ['sur', 'Sürücü']];
+  const kisi = new Set(), ist = new Set(); let gun = {ef: 0, ysp: 0, sur: 0}, coklu = 0;
+  gr.forEach(([g]) => (allData[g] || []).forEach(r => { kisi.add(r.personKey || r.tc); if (r.asilIst) ist.add(r.asilIst); gun[g] += Number(r.toplam) || 0; if (r.coklu) coklu++; }));
+  const f = v => (Math.round(v * 10) / 10).toLocaleString('tr-TR', {maximumFractionDigits: 1});
+  const kart = (b, d, alt, git) => `<div class="ashi-ana-kart"><span>${b}</span><b>${d}</b><small>${alt}${git ? ` <a href="#" onclick="${git};return false">ayrıntı</a>` : ''}</small></div>`;
+  const tikla = sel => `(function(){var e=document.querySelector('${sel}');if(e&&!e.disabled)e.click()})()`;
+  const hizli = [['İstasyon listesi', '#asideNav [data-g=istasyon]', 'home'], ['Kontrol raporu', '#anKontrol', 'doc'], ['Personel listesi (Ekip Şefi)', '#asideNav [data-g=ef][data-v=personel]', 'user'],
+    ['Nöbet tablosu (Sürücü)', '#asideNav [data-g=sur][data-v=liste]', 'list'], ['5+ gün boşluk', '#asideNav [data-ov=boslukModal]', 'gap'], ['Sürücü nöbet analizi', '#asideNav [data-ov=surucuDuzenModal]', 'car'],
+    ['Nöbete uygun personel', '#asideNav [data-ov=uygunPersonelModal]', 'ucheck'], ['Arşiv', '#anArsiv', 'box'], ['Özel günler', '#asideNav [data-ic=cal]', 'cal']];
+  const ic = k => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${AN_ICONS[k] || ''}</svg>`;
+  a.innerHTML = `<h2 class="ashi-ana-bas">Ana Sayfa</h2><p class="ashi-ana-alt">${rap && reportMonthInfo ? 'Rapor dönemi: ' + escapeHtml(archiveMonthLabel(reportMonthInfo)) : 'Henüz rapor yüklenmedi'}</p>
+    ${rap ? `<div class="ashi-ana-kartlar">
+      ${kart('Rapor dönemi', reportMonthInfo ? escapeHtml(archiveMonthLabel(reportMonthInfo)) : '—', 'yüklü nöbet raporu', '')}
+      ${kart('Personel', kisi.size, 'raporda nöbeti olan kişi', tikla('#asideNav [data-g=istasyon]'))}
+      ${kart('İstasyon', ist.size, 'asıl istasyon sayısı', tikla('#asideNav [data-g=istasyon]'))}
+      ${gr.map(([g, ad]) => kart(ad, f(gun[g]) + ' gün', 'toplam nöbet', tikla(`#asideNav [data-g=${g}][data-v=liste]`))).join('')}
+      ${kart('Çoklu istasyon', coklu, 'başka istasyonda da nöbet tutan', tikla('#asideNav [data-ov=cokluTumPersonelModal]'))}
+    </div>` : `<div class="ashi-ana-bos"><b>Nöbet raporu yüklenmedi</b><span>ASOS'tan indirdiğiniz Nöbet İçi Hareket Raporu'nu yükleyin ya da Arşiv'den kayıtlı bir ayı açın.</span>
+      <div><button type="button" class="pri" onclick="anAnaKapat()">Rapor yükle</button> <button type="button" class="btn-sec" onclick="${tikla('#anArsiv')}">Arşiv</button></div></div>`}
+    <div class="ashi-ana-hizli"><h3>Hızlı erişim</h3><div class="ashi-ana-git-l">${hizli.map(([t, sel, k]) => { const e = document.querySelector(sel); const kapali = !e || e.disabled; return `<button type="button" class="ashi-ana-git" ${kapali ? 'disabled' : ''} onclick="${tikla(sel)}">${ic(k)}<span>${t}</span></button>`; }).join('')}</div></div>`;
+  document.body.classList.add('ana-acik'); a.style.display = 'block'; window.scrollTo(0, 0); ashiNavSenk();
+}
+document.addEventListener('click', e => { const it = e.target.closest && e.target.closest('#asideNav .an-it'); if (it && it.id !== 'anAna' && it.tagName !== 'SUMMARY') anAnaKapat(); }, true);
 (function ashiNavKur() {
   const nav = document.getElementById('asideNav'); if (!nav) return;
   const topLogo = document.querySelector('.topbar img'), anLogo = document.getElementById('anLogo');
@@ -9008,7 +9058,7 @@ function ashiNavSenk() {
     const g = b.dataset.g, v = b.dataset.v;
     anKapatAnaliz();
     if (g === 'arsiv' && !ashiNavRaporVar()) { document.getElementById('archiveHost')?.scrollIntoView({behavior:'smooth'}); return; }
-    if (g === 'istasyon') { if (!ashiNavRaporVar()) { window.scrollTo({top: 0, behavior: 'smooth'}); return; } switchGorev('istasyon'); return; }
+    if (g === 'istasyon') { switchGorev('istasyon'); return; }
     if (g && v) { switchGorev(g); switchView(v); return; }
     if (g) { switchGorev(g); return; }
     if (v) { anGorevListe(); switchView(v); }
