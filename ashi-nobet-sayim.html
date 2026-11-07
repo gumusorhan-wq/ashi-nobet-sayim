@@ -155,7 +155,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 
   /* HUSER 13.28: Ana Sayfa */
   body.ana-acik #uploadSection,body.ana-acik #reportSection{display:none!important}
-  .ashi-ana{padding:24px 28px}.ashi-ana-bas{margin:0;font-size:22px;font-weight:700;color:#0f172a}.ashi-ana-alt{margin:4px 0 20px;color:#64748b;font-size:14px}
+  .ashi-ana{padding:24px 28px}.ashi-ana-ust{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}.ashi-ana-uygun{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;background:#0055a4;border:1px solid #0055a4;color:#fff;font:inherit;font-size:13px;font-weight:600;cursor:pointer;border-radius:0}.ashi-ana-uygun svg{width:16px;height:16px}.ashi-ana-uygun:hover:not([disabled]){background:#00468a}.ashi-ana-uygun[disabled]{opacity:.45;cursor:not-allowed}.ashi-ana-bas{margin:0;font-size:22px;font-weight:700;color:#0f172a}.ashi-ana-alt{margin:4px 0 20px;color:#64748b;font-size:14px}
   .ashi-ana-kartlar{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-bottom:20px}
   @media (max-width:1100px){.ashi-ana-kartlar{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
   .ashi-ana-kartlar .ashi-ana-kart{padding:16px;min-width:0}.ashi-ana-kartlar .ashi-ana-kart span,.ashi-ana-kartlar .ashi-ana-kart b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ashi-ana-kartlar .ashi-ana-kart b{font-size:24px}
@@ -9035,9 +9035,11 @@ function anAnaSayfa() {
   const tikla = sel => `(function(){var e=document.querySelector('${sel}');if(e&&!e.disabled)e.click()})()`;
   const hizli = [['İstasyon listesi', '#asideNav [data-g=istasyon]', 'home'], ['Kontrol raporu', '#anKontrol', 'doc'], ['Personel listesi (Ekip Şefi)', '#asideNav [data-g=ef][data-v=personel]', 'user'],
     ['Nöbet tablosu (Sürücü)', '#asideNav [data-g=sur][data-v=liste]', 'list'], ['5+ gün boşluk', '#asideNav [data-ov=boslukModal]', 'gap'], ['Sürücü nöbet analizi', '#asideNav [data-ov=surucuDuzenModal]', 'car'],
-    ['Nöbete uygun personel', '#asideNav [data-ov=uygunPersonelModal]', 'ucheck'], ['Arşiv', '#anArsiv', 'box'], ['Özel günler', '#asideNav [data-ic=cal]', 'cal']];
+    ['Arşiv', '#anArsiv', 'box'], ['Özel günler', '#asideNav [data-ic=cal]', 'cal']];
   const ic = k => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${AN_ICONS[k] || ''}</svg>`;
-  a.innerHTML = `<h2 class="ashi-ana-bas">Ana Sayfa</h2><p class="ashi-ana-alt">${rap && reportMonthInfo ? 'Rapor dönemi: ' + escapeHtml(archiveMonthLabel(reportMonthInfo)) : 'Henüz rapor yüklenmedi'}</p>
+  const uyg = document.querySelector('#asideNav [data-ov=uygunPersonelModal]'), uygKapali = !rap || !uyg || uyg.disabled;
+  a.innerHTML = `<div class="ashi-ana-ust"><div><h2 class="ashi-ana-bas">Ana Sayfa</h2><p class="ashi-ana-alt">${rap && reportMonthInfo ? 'Rapor dönemi: ' + escapeHtml(archiveMonthLabel(reportMonthInfo)) : 'Henüz rapor yüklenmedi'}</p></div>
+    <button type="button" class="ashi-ana-uygun" id="anaUygunBul" ${uygKapali ? 'disabled title="Önce nöbet raporu yükleyin"' : ''} onclick="${tikla('#asideNav [data-ov=uygunPersonelModal]')}">${ic('ucheck')}<span>Nöbete uygun personel bul</span></button></div>
     ${rap ? `<div class="ashi-ana-kartlar">
       ${kart('Personel', kisi.size, 'raporda nöbeti olan kişi', tikla('#asideNav [data-g=istasyon]'))}
       ${kart('İstasyon', ist.size, 'asıl istasyon sayısı', tikla('#asideNav [data-g=istasyon]'))}
