@@ -9048,6 +9048,15 @@ function anAnaSayfa() {
   document.body.classList.add('ana-acik'); a.style.display = 'block'; window.scrollTo(0, 0); ashiNavSenk();
 }
 document.addEventListener('click', e => { const it = e.target.closest && e.target.closest('#asideNav .an-it'); if (it && it.id !== 'anAna' && it.tagName !== 'SUMMARY') anAnaKapat(); }, true);
+// 13.28 düzeltme: modül Ana Sayfa ile açılır (Depo / Planlama gibi). Açılışta otomatik açılan ay (arşiv / kurum arşivi) Ana Sayfa'yı kapatmaz,
+// yalnızca kartları tazeler; kullanıcı başka bir menü öğesine basınca Ana Sayfa kapanır.
+let anAnaTazeZ = null;
+function anAnaTazele() { if (!document.body.classList.contains('ana-acik')) return; clearTimeout(anAnaTazeZ); anAnaTazeZ = setTimeout(() => { if (document.body.classList.contains('ana-acik')) anAnaSayfa(); }, 120); }
+(function anAnaAcilis() {
+  const ac = () => { try { anAnaSayfa(); } catch (e) { console.warn('Ana Sayfa açılamadı', e); } };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ac); else setTimeout(ac, 0);
+  if (window.MutationObserver) { const rs = document.getElementById('reportSection'); if (rs) new MutationObserver(anAnaTazele).observe(rs, {attributes:true, attributeFilter:['style']}); }
+})();
 (function ashiNavKur() {
   const nav = document.getElementById('asideNav'); if (!nav) return;
   const topLogo = document.querySelector('.topbar img'), anLogo = document.getElementById('anLogo');
