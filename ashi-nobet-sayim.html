@@ -908,7 +908,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <nav id="asideNav" aria-label="Ana menü">
   <div class="an-brand"><div class="an-logo"><img id="anLogo" alt="Logo"></div><div class="an-bt"><b>ASHİ Nöbet Sayım</b><small id="anPeriod">Rapor yüklenmedi</small></div></div>
   <button type="button" class="an-min-btn" id="anMinBtn" onclick="anMinToggle()" title="Menüyü daralt / genişlet" aria-label="Menüyü daralt / genişlet"></button>
-  <button type="button" class="an-it" data-ic="home" data-g="istasyon" data-need="rep"><span class="an-ic"></span><span class="an-tx">İstasyon listesi</span></button>
+  <button type="button" class="an-it" data-ic="home" data-g="istasyon" id="anAnaSayfa" title="Özet kartlar ve istasyon listesi; rapor yüklenmemişse yükleme ekranı"><span class="an-ic"></span><span class="an-tx">Ana Sayfa</span></button>
   <button type="button" class="an-it" data-ic="doc" id="anKontrol" data-need="rep" onclick="anKontrolAc()"><span class="an-ic"></span><span class="an-tx">Kontrol raporu</span></button>
   <button type="button" class="an-it" data-ic="grid" data-need="rep" onclick="anNav(function(){anGorevIstasyon();exportDokumCetveliExcel()})"><span class="an-ic"></span><span class="an-tx">Döküm cetveli (Excel)</span></button>
   <div class="an-sec">LİSTELER</div>
@@ -9008,7 +9008,7 @@ function ashiNavSenk() {
     const g = b.dataset.g, v = b.dataset.v;
     anKapatAnaliz();
     if (g === 'arsiv' && !ashiNavRaporVar()) { document.getElementById('archiveHost')?.scrollIntoView({behavior:'smooth'}); return; }
-    if (g === 'istasyon') { switchGorev('istasyon'); return; }
+    if (g === 'istasyon') { if (!ashiNavRaporVar()) { window.scrollTo({top: 0, behavior: 'smooth'}); return; } switchGorev('istasyon'); return; }
     if (g && v) { switchGorev(g); switchView(v); return; }
     if (g) { switchGorev(g); return; }
     if (v) { anGorevListe(); switchView(v); }
