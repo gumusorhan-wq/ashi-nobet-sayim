@@ -9033,9 +9033,10 @@ function anAnaSayfa() {
   const f = v => (Math.round(v * 10) / 10).toLocaleString('tr-TR', {maximumFractionDigits: 1});
   const kart = (b, d, alt, git) => `<div class="ashi-ana-kart"><span>${b}</span><b>${d}</b><small>${alt}${git ? ` <a href="#" onclick="${git};return false">ayrıntı</a>` : ''}</small></div>`;
   const tikla = sel => `(function(){var e=document.querySelector('${sel}');if(e&&!e.disabled)e.click()})()`;
-  const hizli = [['İstasyon listesi', '#asideNav [data-g=istasyon]', 'home'], ['Kontrol raporu', '#anKontrol', 'doc'], ['Personel listesi (Ekip Şefi)', '#asideNav [data-g=ef][data-v=personel]', 'user'],
-    ['Nöbet tablosu (Sürücü)', '#asideNav [data-g=sur][data-v=liste]', 'list'], ['5+ gün boşluk', '#asideNav [data-ov=boslukModal]', 'gap'], ['Sürücü nöbet analizi', '#asideNav [data-ov=surucuDuzenModal]', 'car'],
-    ['Arşiv', '#anArsiv', 'box'], ['Özel günler', '#asideNav [data-ic=cal]', 'cal']];
+  const hizli = [['İstasyon listesi', '#asideNav [data-g=istasyon]', 'home'], ['Kontrol raporu', '#anKontrol', 'doc'], ['Personel listesi (Sürücü)', '#asideNav [data-g=sur][data-v=personel]', 'user'],
+    ['5+ gün boşluk', '#asideNav [data-ov=boslukModal]', 'gap'], ['Sürücü nöbet analizi', '#asideNav [data-ov=surucuDuzenModal]', 'car'],
+    ['Ekip Şefi analizi', '#asideNav [data-ag=ef]', 'shield'], ['YSP analizi', '#asideNav [data-ag=ysp]', 'heart'], ['Sürücü analizi', '#asideNav [data-ag=sur]', 'wheel'],
+    ['Arşiv', '#anArsiv', 'box']];
   const ic = k => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${AN_ICONS[k] || ''}</svg>`;
   const uyg = document.querySelector('#asideNav [data-ov=uygunPersonelModal]'), uygKapali = !rap || !uyg || uyg.disabled;
   a.innerHTML = `<div class="ashi-ana-ust"><div><h2 class="ashi-ana-bas">Ana Sayfa</h2><p class="ashi-ana-alt">${rap && reportMonthInfo ? 'Rapor dönemi: ' + escapeHtml(archiveMonthLabel(reportMonthInfo)) : 'Henüz rapor yüklenmedi'}</p></div>
