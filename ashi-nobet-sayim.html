@@ -851,6 +851,35 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side table.ashi-kart td.ashi-blok *{white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;max-width:100%}
     body.ui-side table.ashi-kart td.ashi-blok::before{display:block;flex:none;max-width:none;margin-bottom:2px}
   }
+
+/* HUSER 13.15 — TEK DİL: istasyon (ist-pk), tek seçim (ss) ve branş (lf-ms) kutuları ve panelleri 112 ortak seçim paneliyle aynı */
+.ist-pk-btn,.ss-btn,.lf-ms>summary{display:flex!important;align-items:center!important;gap:6px!important;width:100%;height:36px!important;padding:0 10px!important;border:1px solid #cbd5e1!important;border-radius:0!important;background:#fff!important;color:#334155!important;font:inherit!important;font-size:13px!important;font-weight:600!important;text-align:left!important;cursor:pointer;box-shadow:none!important;white-space:nowrap;overflow:hidden}
+.ist-pk-btn .pk-yz,.ss-btn .ss-yazi{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}.lf-ms>summary{justify-content:space-between!important}
+.ist-pk-btn>i,.ss-btn>i{font-style:normal;font-size:10px!important;color:#64748b!important;flex:none;opacity:1!important}.lf-ms>summary::after{content:'▾'!important;font-size:10px!important;color:#64748b!important}
+.ist-pk-btn:hover,.ss-btn:hover:not([disabled]),.lf-ms>summary:hover{border-color:#0055a4!important}
+.ist-pk-btn.on,.ss-btn.on,.lf-ms.on>summary{border-color:#0055a4!important;color:#0055a4!important;background:#eff6ff!important}
+.ist-pk.open .ist-pk-btn,.ss-btn.open,.lf-ms[open]>summary{border-color:#0055a4!important;box-shadow:0 0 0 2px rgba(0,85,164,.25)!important}
+.ist-pk{min-width:170px}.lf-ms{min-width:170px}
+.ist-pk-pop,.ss-pop,.lf-ms-p{background:#fff!important;border:1px solid #e2e8f0!important;border-radius:12px!important;box-shadow:0 20px 40px rgba(15,23,42,.18)!important;padding:12px!important;gap:10px!important}
+.lf-ms-p{min-width:280px!important;display:flex!important;flex-direction:column}
+.ist-pk-head,.lf-ms-bas{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px;font-size:14px!important;color:#0f172a!important;text-transform:none!important;letter-spacing:0!important}
+.ist-pk-head b,.lf-ms-bas b{font-weight:700;font-size:14px}
+.ist-pk-head button,.lf-ms-bas button{border:0!important;background:transparent!important;padding:3px 6px!important;margin:0 0 0 4px!important;font:inherit!important;font-size:13px!important;font-weight:600!important;color:#475569!important;cursor:pointer;border-radius:0!important}
+.ist-pk-head button:hover{color:#0055a4!important}.ist-pk-head button[data-act=clear]:hover,.lf-ms-bas button:hover{color:#b91c1c!important}
+.ist-pk-q,.ss-ara{height:34px!important;padding:0 10px 0 32px!important;border:1px solid #cbd5e1!important;border-radius:0!important;font-size:13px!important}
+.ist-pk-q:focus,.ss-ara:focus{border-color:#0055a4!important;box-shadow:0 0 0 2px rgba(0,85,164,.25)!important}
+.ist-pk-chips{gap:6px!important;padding:0!important}
+.ist-pk-chip{border-radius:4px!important;border:1px solid #e2e8f0!important;background:#fff!important;color:#1e293b!important;padding:4px 10px!important;font-size:12px!important}
+.ist-pk-chip:hover{border-color:#0055a4!important}.ist-pk-chip.part{border-color:#0055a4!important;background:#eff6ff!important;color:#0055a4!important}.ist-pk-chip.full{border-color:#0055a4!important;background:#0055a4!important;color:#fff!important}
+.ist-pk-pop .ist-pk-list,.ss-liste,.lf-ms-lis{border:1px solid #e2e8f0!important;padding:0!important}
+.ist-pk-pop .ist-pk-row,.ss-liste button,.lf-ms-p .lf-ms-lis label{padding:6px 12px!important;border-bottom:1px solid #f1f5f9!important;border-radius:0!important;font-size:13px!important;font-weight:500!important;color:#1e293b!important;line-height:1.3!important;gap:10px!important;margin:0!important;background:#fff}
+.ist-pk-pop .ist-pk-row:last-child,.ss-liste button:last-child,.lf-ms-p .lf-ms-lis label:last-child{border-bottom:0!important}
+.ist-pk-pop .ist-pk-row:hover,.ss-liste button:hover,.ss-liste button:focus,.lf-ms-p .lf-ms-lis label:hover{background:#f8fafc!important}
+.ist-pk-pop .ist-pk-row:has(input:checked),.ss-liste button.sec,.lf-ms-p .lf-ms-lis label:has(input:checked){background:#eff6ff!important;color:#0055a4!important;font-weight:700!important}
+.lf-ms-p .lf-ms-tum{font-weight:600!important}
+.ist-pk-head button.pk-uygula,.lf-ms-bas button.pk-uygula{background:#0055a4!important;color:#fff!important;font-weight:700!important;padding:6px 16px!important;margin-left:8px!important}.ist-pk-head button.pk-uygula:hover,.lf-ms-bas button.pk-uygula:hover{background:#004080!important;color:#fff!important}.lf-ms-bas button.pk-uygula:disabled,.ist-pk-head button.pk-uygula:disabled{opacity:.4;cursor:default}
+.ist-pk-gs{display:flex;justify-content:space-between;font-size:12px}.ist-pk-gs button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:600;color:#475569;cursor:pointer}.ist-pk-gs button:hover{color:#0055a4}
+.ist-pk-chips{max-height:150px!important;overflow:auto}
 </style>
 </head>
 <body>
@@ -3329,49 +3358,60 @@ function ashiIstUyarLC(q, text) {
       if (state.set.size === 1) return ashiIstKisa([...state.set][0]);
       return state.set.size + ' istasyon seçili';
     }
+    // HUSER 13.15: 112 ortak istasyon paneliyle aynı düzen — başlık + Temizle + Uygula, ara, ilçe düğmeleri,
+    // 'Görünenleri seç / hepsi', çerçeveli liste. Seçim taslakta tutulur; Uygula'ya basınca geçerli olur (dışarı tıklama / Esc vazgeçer).
     function renderPop() {
-      const all = names();
+      const all = names(), T = state.taslak || (state.taslak = new Set(state.set));
       const groups = {};
       all.forEach(n => { (groups[ashiIstIlce(n)] = groups[ashiIstIlce(n)] || []).push(n); });
       const ilceler = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'tr'));
       const q = state.q.trim().toLocaleLowerCase('tr-TR');
-      const chips = ilceler.map(il => {
-        const g = groups[il], sc = g.filter(n => state.set.has(n)).length;
+      const uyar = n => !q || n.toLocaleLowerCase('tr-TR').includes(q) || ashiIstIlce(n).toLocaleLowerCase('tr-TR').includes(q);
+      const gor = all.filter(uyar);
+      const chips = ilceler.filter(il => !q || il.toLocaleLowerCase('tr-TR').includes(q) || groups[il].some(uyar)).map(il => {
+        const g = groups[il], sc = g.filter(n => T.has(n)).length;
         const cls = sc === g.length ? 'full' : (sc ? 'part' : '');
         return `<span class="ist-pk-chip ${cls}" data-il="${escapeHtml(il)}">${escapeHtml(il)} (${g.length})</span>`;
       }).join('');
-      const rows = all.filter(n => !q || n.toLocaleLowerCase('tr-TR').includes(q) || ashiIstIlce(n).toLocaleLowerCase('tr-TR').includes(q))
-        .map(n => `<label class="ist-pk-row" title="${escapeHtml(n)}"><input type="checkbox" data-n="${escapeHtml(n)}" ${state.set.has(n) ? 'checked' : ''}><span>${escapeHtml(ashiIstKisa(n))}</span></label>`).join('');
-      pop.innerHTML = `<div class="ist-pk-head"><b>İstasyon (${state.set.size}/${all.length})</b><span><button type="button" data-act="all">Tümü</button><button type="button" data-act="clear">Temizle</button></span></div>
+      const rows = gor.map(n => `<label class="ist-pk-row" title="${escapeHtml(n)}"><input type="checkbox" data-n="${escapeHtml(n)}" ${T.has(n) ? 'checked' : ''}><span>${escapeHtml(ashiIstKisa(n))}</span></label>`).join('');
+      const degisti = T.size !== state.set.size || [...T].some(n => !state.set.has(n));
+      pop.innerHTML = `<div class="ist-pk-head"><b>${T.size && T.size < all.length ? T.size + '/' + all.length + ' istasyon' : 'Tüm istasyonlar'}</b><span><button type="button" data-act="clear">Temizle</button><button type="button" class="pk-uygula" data-act="uygula" ${degisti ? '' : 'disabled'}>Uygula</button></span></div>
         <input class="ist-pk-q" type="search" placeholder="İlçe veya istasyon ara…" value="${escapeHtml(state.q)}">
         <div class="ist-pk-chips">${chips}</div>
-        <div class="ist-pk-list">${rows || '<div style="padding:10px;color:#94a3b8;font-size:12px">Eşleşen istasyon yok</div>'}</div>`;
+        <div class="ist-pk-gs"><button type="button" data-act="gorunen">Görünenleri seç</button><button type="button" data-act="all">hepsi</button></div>
+        <div class="ist-pk-list">${rows || '<div style="padding:10px 12px;color:#94a3b8;font-size:12px">Eşleşen istasyon bulunamadı.</div>'}</div>`;
+      const yeniden = () => { const l = pop.querySelector('.ist-pk-list'), st = l ? l.scrollTop : 0; renderPop(); const nl = pop.querySelector('.ist-pk-list'); if (nl) nl.scrollTop = st; };
       const qi = pop.querySelector('.ist-pk-q');
       qi.oninput = () => { state.q = qi.value; const pos = qi.selectionStart; renderPop(); const n = pop.querySelector('.ist-pk-q'); n.focus(); try { n.setSelectionRange(pos, pos); } catch (e) {} };
+      qi.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); const b = pop.querySelector('[data-act=uygula]'); if (b && !b.disabled) b.click(); } };
       pop.querySelectorAll('.ist-pk-chip').forEach(c => c.onclick = () => {
         const g = groups[c.dataset.il] || [];
-        if (g.every(n => state.set.has(n))) g.forEach(n => state.set.delete(n)); else g.forEach(n => state.set.add(n));
-        paint(); emit();
+        if (g.every(n => T.has(n))) g.forEach(n => T.delete(n)); else g.forEach(n => T.add(n));
+        yeniden();
       });
-      pop.querySelectorAll('input[type=checkbox]').forEach(cb => cb.onchange = () => { if (cb.checked) state.set.add(cb.dataset.n); else state.set.delete(cb.dataset.n); paint(); emit(); });
-      pop.querySelector('[data-act=all]').onclick = () => { names().forEach(n => state.set.add(n)); paint(); emit(); };
-      pop.querySelector('[data-act=clear]').onclick = () => { state.set.clear(); paint(); emit(); };
+      pop.querySelectorAll('input[type=checkbox]').forEach(cb => cb.onchange = () => { if (cb.checked) T.add(cb.dataset.n); else T.delete(cb.dataset.n); yeniden(); });
+      pop.querySelector('[data-act=clear]').onclick = () => { T.clear(); yeniden(); };
+      pop.querySelector('[data-act=all]').onclick = () => { all.forEach(n => T.add(n)); yeniden(); };
+      pop.querySelector('[data-act=gorunen]').onclick = () => { gor.forEach(n => T.add(n)); yeniden(); };
+      pop.querySelector('[data-act=uygula]').onclick = () => {
+        const yeni = T.size >= all.length ? [] : [...T]; state.set.clear(); yeni.forEach(n => state.set.add(n)); state.taslak = null; closeAll(); paint(); emit();
+      };
     }
     function paint() {
-      btn.textContent = '🚑 ' + label() + ' ▾';
+      btn.innerHTML = '<span class="pk-ik">🚑</span><span class="pk-yz">' + escapeHtml(label()) + '</span><i>▾</i>'; btn.title = label();
       btn.classList.toggle('on', state.set.size > 0 && state.set.size < names().length);
-      if (openPop && openPop.wrap === wrap) { const top = pop.querySelector('.ist-pk-list'); const st = top ? top.scrollTop : 0; renderPop(); const nl = pop.querySelector('.ist-pk-list'); if (nl) nl.scrollTop = st; }
+      if (openPop && openPop.wrap === wrap) { state.taslak = null; const top = pop.querySelector('.ist-pk-list'); const st = top ? top.scrollTop : 0; renderPop(); const nl = pop.querySelector('.ist-pk-list'); if (nl) nl.scrollTop = st; }
     }
     btn.onclick = () => {
       if (openPop && openPop.wrap === wrap) { closeAll(); return; }
       closeAll();
-      state.q = '';
+      state.q = ''; state.taslak = null;
       openPop = { wrap, pop };
       wrap.classList.add('open');
       renderPop();
       const r = btn.getBoundingClientRect();
       pop.style.display = 'flex';
-      const w = Math.min(380, window.innerWidth - 16);
+      const w = Math.min(480, window.innerWidth - 16);
       pop.style.width = w + 'px';
       pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
       const alt = window.innerHeight - r.bottom - 16, ust = r.top - 16;
@@ -5874,11 +5914,13 @@ function lfSecenek(v){
 function lfIsaret(){ document.querySelectorAll('select.lf-sel').forEach(e=>e.classList.toggle('on',!!e.value)); document.querySelectorAll('.lf-ms').forEach(e=>e.classList.toggle('on',lfMs(e.id).size>0)); }
 // Çoklu branş seçimi: işaretli branşlar (boş küme = tüm branşlar)
 function lfMs(id){ const e=lfEl(id); return new Set(e?[...e.querySelectorAll('input[data-v]:checked')].map(x=>x.dataset.v):[]); }
-function lfMsYazi(id){ const e=lfEl(id); if(!e) return; const s=[...lfMs(id)]; e.querySelector('summary').textContent=!s.length?'Tüm branşlar':s.length<=2?s.join(', '):s.length+' branş seçili'; const t=e.querySelector('input[data-tum]'); if(t) t.checked=!s.length; const n=e.querySelector('.lf-ms-say'); if(n) n.textContent='Branş ('+(s.length||'tümü')+(s.length?' / '+e.querySelectorAll('input[data-v]').length:'')+')'; }
+function lfMsYazi(id){ const e=lfEl(id); if(!e) return; const s=[...lfMs(id)]; e.querySelector('summary').textContent=!s.length?'Tüm branşlar':s.length<=2?s.join(', '):s.length+' branş seçili'; const t=e.querySelector('input[data-tum]'); if(t) t.checked=!s.length; lfMsBas(e); }
+// HUSER 13.15: panel başlığı ve Uygula düğmesi taslağa (işaretli kutulara) göre; seçim Uygula ile geçerli olur, kapatınca taslak geri alınır
+function lfMsBas(e){ const s=[...e.querySelectorAll('input[data-v]:checked')].map(x=>x.dataset.v), n=e.querySelector('.lf-ms-say'), N=e.querySelectorAll('input[data-v]').length; if(n) n.textContent=s.length&&s.length<N?s.length+'/'+N+' branş':'Tüm branşlar'; const t=e.querySelector('input[data-tum]'); if(t) t.checked=!s.length; const u=e.querySelector('[data-ms-uygula]'); if(u){ const o=e.__snap||[]; u.disabled=s.length===o.length&&s.every(x=>o.includes(x)); } }
 function lfMsDoldur(id, vals){
   const e=lfEl(id); if(!e) return; const sec=lfMs(id);
   // HUSER 13.13: istasyon paneliyle aynı düzen — başlık (seçili/toplam) + Temizle, altında çerçeveli liste
-  e.querySelector('.lf-ms-p').innerHTML='<div class="lf-ms-bas"><b class="lf-ms-say"></b><button type="button" data-ms-temizle="1">Temizle</button></div>'
+  e.querySelector('.lf-ms-p').innerHTML='<div class="lf-ms-bas"><b class="lf-ms-say"></b><span><button type="button" data-ms-temizle="1">Temizle</button><button type="button" class="pk-uygula" data-ms-uygula="1" disabled>Uygula</button></span></div>'
     +'<div class="lf-ms-lis"><label class="lf-ms-tum"><input type="checkbox" data-tum="1"> Tüm branşlar</label>'+vals.map(v=>'<label><input type="checkbox" data-v="'+escapeHtml(v)+'"'+(sec.has(v)?' checked':'')+'> '+escapeHtml(v)+'</label>').join('')+'</div>';
   lfMsYazi(id);
 }
@@ -5886,10 +5928,15 @@ function lfMsTemizle(id){ const e=lfEl(id); if(!e) return; e.querySelectorAll('i
 document.addEventListener('change', ev=>{
   const ms=ev.target.closest&&ev.target.closest('.lf-ms'); if(!ms) return;
   if(ev.target.dataset.tum) ms.querySelectorAll('input[data-v]').forEach(x=>{x.checked=false;});
-  lfMsYazi(ms.id); const fn=window[ms.dataset.on]; if(typeof fn==='function') fn();
+  lfMsBas(ms);
 });
-document.addEventListener('click', ev=>{ const tb=ev.target.closest&&ev.target.closest('[data-ms-temizle]'); if(tb){ ev.preventDefault(); const ms=tb.closest('.lf-ms'); lfMsTemizle(ms.id); const fn=window[ms.dataset.on]; if(typeof fn==='function') fn(); } });
+document.addEventListener('click', ev=>{ const tb=ev.target.closest&&ev.target.closest('[data-ms-temizle]'); if(tb){ ev.preventDefault(); const ms=tb.closest('.lf-ms'); ms.querySelectorAll('input[data-v]').forEach(x=>{x.checked=false;}); lfMsBas(ms); }
+  const ub=ev.target.closest&&ev.target.closest('[data-ms-uygula]'); if(ub){ ev.preventDefault(); const ms=ub.closest('.lf-ms'); ms.__uyg=true; ms.removeAttribute('open'); lfMsYazi(ms.id); const fn=window[ms.dataset.on]; if(typeof fn==='function') fn(); } });
 document.addEventListener('click', ev=>{ document.querySelectorAll('.lf-ms[open]').forEach(d=>{ if(!d.contains(ev.target)) d.removeAttribute('open'); }); });
+document.addEventListener('toggle', ev=>{ const ms=ev.target; if(!ms.classList||!ms.classList.contains('lf-ms')) return;
+  if(ms.open){ ms.__snap=[...lfMs(ms.id)]; ms.__uyg=false; lfMsBas(ms); }
+  else { if(!ms.__uyg&&ms.__snap){ ms.querySelectorAll('input[data-v]').forEach(x=>{x.checked=ms.__snap.includes(x.dataset.v);}); lfMsYazi(ms.id); } ms.__uyg=false; }
+}, true);
 let _lfT=null;
 function lfGec(v){ clearTimeout(_lfT); _lfT=setTimeout(()=>{ if(v==='personel') renderPersonelDetay(); else renderIstasyonOzet(); },150); }
 function lfTemizle(v){
