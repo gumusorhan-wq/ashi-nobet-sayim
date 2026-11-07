@@ -457,6 +457,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .lf-ms>summary{list-style:none;cursor:pointer;min-width:150px;user-select:none}
   .lf-ms>summary::-webkit-details-marker{display:none}
   .lf-ms>summary::after{content:' ▾';color:#94a3b8}
+.lf-ms-p{padding:10px!important;min-width:260px!important;display:flex;flex-direction:column;gap:8px}.lf-ms-bas{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#334155;text-transform:uppercase;letter-spacing:.04em}.lf-ms-bas button{border:1px solid #cbd5e1;background:#fff;padding:3px 10px;font:inherit;font-size:12px;font-weight:600;text-transform:none;letter-spacing:0;color:#334155;cursor:pointer;border-radius:0}.lf-ms-bas button:hover{color:#b91c1c;border-color:#fca5a5}.lf-ms-lis{border:1px solid #e2e8f0;max-height:260px;overflow:auto}.lf-ms-p .lf-ms-lis label{border-radius:0!important;padding:7px 10px!important;border-bottom:1px solid #e2e8f0;margin:0!important;font-size:12.5px!important}.lf-ms-p .lf-ms-lis label:last-child{border-bottom:0}.lf-ms-p .lf-ms-lis label:has(input:checked){background:#eff6ff;color:#0055a4;font-weight:700}.lf-ms-p .lf-ms-tum{font-weight:700}
 .lf-ms>summary{border-radius:0!important;font-weight:600;color:#334155;display:flex;align-items:center;justify-content:space-between;gap:8px}.lf-ms>summary::after{font-size:10px;color:#64748b}.lf-ms[open]>summary{border-color:#0055a4;box-shadow:0 0 0 2px rgba(0,85,164,.2)}.lf-ms-p{border-radius:12px!important;border-color:#cbd5e1!important;box-shadow:0 12px 32px rgba(15,23,42,.22)!important}.ist-pk-btn,.ss-btn{border-radius:0!important}
   .lf-ms.on>summary{border-color:#0055a4;box-shadow:0 0 0 2px rgba(0,85,164,.15);color:#0055a4;font-weight:600}
   .lf-ms-p{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:220px;max-height:320px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.15);padding:6px}
@@ -5873,10 +5874,12 @@ function lfSecenek(v){
 function lfIsaret(){ document.querySelectorAll('select.lf-sel').forEach(e=>e.classList.toggle('on',!!e.value)); document.querySelectorAll('.lf-ms').forEach(e=>e.classList.toggle('on',lfMs(e.id).size>0)); }
 // Çoklu branş seçimi: işaretli branşlar (boş küme = tüm branşlar)
 function lfMs(id){ const e=lfEl(id); return new Set(e?[...e.querySelectorAll('input[data-v]:checked')].map(x=>x.dataset.v):[]); }
-function lfMsYazi(id){ const e=lfEl(id); if(!e) return; const s=[...lfMs(id)]; e.querySelector('summary').textContent=!s.length?'Tüm branşlar':s.length<=2?s.join(', '):s.length+' branş seçili'; const t=e.querySelector('input[data-tum]'); if(t) t.checked=!s.length; }
+function lfMsYazi(id){ const e=lfEl(id); if(!e) return; const s=[...lfMs(id)]; e.querySelector('summary').textContent=!s.length?'Tüm branşlar':s.length<=2?s.join(', '):s.length+' branş seçili'; const t=e.querySelector('input[data-tum]'); if(t) t.checked=!s.length; const n=e.querySelector('.lf-ms-say'); if(n) n.textContent='Branş ('+(s.length||'tümü')+(s.length?' / '+e.querySelectorAll('input[data-v]').length:'')+')'; }
 function lfMsDoldur(id, vals){
   const e=lfEl(id); if(!e) return; const sec=lfMs(id);
-  e.querySelector('.lf-ms-p').innerHTML='<label class="lf-ms-tum"><input type="checkbox" data-tum="1"> Tüm branşlar</label>'+vals.map(v=>'<label><input type="checkbox" data-v="'+escapeHtml(v)+'"'+(sec.has(v)?' checked':'')+'> '+escapeHtml(v)+'</label>').join('');
+  // HUSER 13.13: istasyon paneliyle aynı düzen — başlık (seçili/toplam) + Temizle, altında çerçeveli liste
+  e.querySelector('.lf-ms-p').innerHTML='<div class="lf-ms-bas"><b class="lf-ms-say"></b><button type="button" data-ms-temizle="1">Temizle</button></div>'
+    +'<div class="lf-ms-lis"><label class="lf-ms-tum"><input type="checkbox" data-tum="1"> Tüm branşlar</label>'+vals.map(v=>'<label><input type="checkbox" data-v="'+escapeHtml(v)+'"'+(sec.has(v)?' checked':'')+'> '+escapeHtml(v)+'</label>').join('')+'</div>';
   lfMsYazi(id);
 }
 function lfMsTemizle(id){ const e=lfEl(id); if(!e) return; e.querySelectorAll('input[data-v]').forEach(x=>{x.checked=false;}); lfMsYazi(id); }
@@ -5885,6 +5888,7 @@ document.addEventListener('change', ev=>{
   if(ev.target.dataset.tum) ms.querySelectorAll('input[data-v]').forEach(x=>{x.checked=false;});
   lfMsYazi(ms.id); const fn=window[ms.dataset.on]; if(typeof fn==='function') fn();
 });
+document.addEventListener('click', ev=>{ const tb=ev.target.closest&&ev.target.closest('[data-ms-temizle]'); if(tb){ ev.preventDefault(); const ms=tb.closest('.lf-ms'); lfMsTemizle(ms.id); const fn=window[ms.dataset.on]; if(typeof fn==='function') fn(); } });
 document.addEventListener('click', ev=>{ document.querySelectorAll('.lf-ms[open]').forEach(d=>{ if(!d.contains(ev.target)) d.removeAttribute('open'); }); });
 let _lfT=null;
 function lfGec(v){ clearTimeout(_lfT); _lfT=setTimeout(()=>{ if(v==='personel') renderPersonelDetay(); else renderIstasyonOzet(); },150); }
