@@ -5550,7 +5550,7 @@ function renderStats(data) {
     `<div class="stat-box" style="background:${s.bg};border-color:${s.bg};${s.click?'cursor:pointer':''}"
       ${s.click?`onclick="${s.click}"`:''}">
       <div class="stat-num" style="color:${s.color};font-size:${String(s.val).length>6?'18px':'26px'}">${fmt(s.val)}</div>
-      <div class="stat-lbl">${s.lbl}</div>
+      <div class="stat-lbl">${s.lbl}</div>${s.click ? '<div class="stat-ayr">Ayrıntı ›</div>' : ''}
     </div>`
   ).join('');
 }
@@ -6414,7 +6414,7 @@ function ashiOzetPanel(stations){
   const tcSet = new Set(rows.map(x => x.tc || x.name));
   const top = rows.reduce((b, x) => { const f = farkli(x); return f != null && (!b || f > b.f) ? {f, name: x.name} : b; }, null);
   const uy = rows.filter(x => { const f = farkli(x); return f != null && Math.abs(f) > ASHI_UYARI_FARK; }).length;
-  const kart = (lbl, val, sub, bg, fg) => `<div style="flex:1 1 150px;background:${bg};border-radius:10px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:${fg};opacity:.85">${lbl}</div><div style="font-size:20px;font-weight:800;color:${fg}">${val}</div><div style="font-size:11px;color:${fg};opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div></div>`;
+  const kart = (lbl, val, sub, bg, fg) => `<div class="ozet-kart" style="flex:1 1 150px;background:${bg};border-radius:10px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:${fg};opacity:.85">${lbl}</div><div style="font-size:20px;font-weight:800;color:${fg}">${val}</div><div style="font-size:11px;color:${fg};opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div></div>`;
   const chip = (k, t, tip) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" title="${tip}" style="padding:5px 11px;border-radius:999px;border:1px solid ${ashiOzetFiltre[k] ? '#0055a4' : '#cbd5e1'};background:${ashiOzetFiltre[k] ? '#0055a4' : '#fff'};color:${ashiOzetFiltre[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
   return `<div style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">
     ${kart('PERSONEL', tcSet.size, 'görünen kişi', '#dbeafe', '#1e3a5f')}
