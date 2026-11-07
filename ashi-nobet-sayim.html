@@ -1289,7 +1289,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
       <div class="lf-bar">
         <input class="search-input" id="lfOzQ" type="search" placeholder="İstasyon ara…" oninput="lfGec('ozet')">
         <details class="lf-ms" id="lfOzBrans" data-on="renderIstasyonOzet"><summary class="lf-sel">Tüm branşlar</summary><div class="lf-ms-p"></div></details>
-        <select class="lf-sel" id="lfOzKap" onchange="renderIstasyonOzet()"><option value="">Tüm istasyonlar</option><option value="tam">Ay tam kapsanan</option><option value="eksik">Ay tam kapsanmayan</option></select>
+        <select class="lf-sel" id="lfOzKap" title="Ay kapsamı: istasyonun ayın bütün günlerinde nöbeti tam mı" onchange="renderIstasyonOzet()"><option value="">Kapsam: tümü</option><option value="tam">Ay tam kapsanan</option><option value="eksik">Ay tam kapsanmayan</option></select>
         <button type="button" class="lf-clr" onclick="lfTemizle('ozet')">Temizle</button>
         <span class="lf-cnt" id="lfOzCnt"></span>
       </div>
