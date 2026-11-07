@@ -140,6 +140,18 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   /* BOŞLUK ANALİZİ */
   .bosluk-toolbar{padding:14px 20px;background:#f8fafc;border-bottom:1px solid #e2e8f0}
   .bosluk-filter-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+  /* HUSER 13.11 — tek seçim paneli (düz select yerine) ve ortak arama kutusu görünümü */
+  .ss-btn{display:inline-flex;align-items:center;justify-content:space-between;gap:8px;min-width:150px;max-width:100%;height:36px;padding:0 10px;border:1px solid #cbd5e1;background:#fff;color:#334155;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer;text-align:left;vertical-align:middle}
+  .ss-btn .ss-yazi{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.ss-btn>i{font-style:normal;font-size:10px;color:#64748b;flex:none}
+  .ss-btn:hover:not([disabled]),.ss-btn.open{border-color:#0055a4}.ss-btn.open{box-shadow:0 0 0 2px rgba(0,85,164,.2)}.ss-btn.on{color:#0055a4;border-color:#0055a4}.ss-btn[disabled]{opacity:.6;cursor:not-allowed}
+  .bosluk-filter .ss-btn,.istasyon-personel-filters .ss-btn{width:100%;min-width:0}
+  .ss-pop{position:fixed;z-index:100000;background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.22);padding:8px;display:flex;flex-direction:column;gap:6px;overflow:auto;font-size:13px}
+  .ss-ara{width:100%;box-sizing:border-box;height:34px;padding:0 10px;border:1px solid #cbd5e1;font:inherit;font-size:13px;outline:none}.ss-ara:focus{border-color:#0055a4}
+  .ss-liste{border:1px solid #e2e8f0}.ss-liste button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;padding:7px 10px;border:0;border-bottom:1px solid #e2e8f0;background:#fff;color:#1e293b;font:inherit;font-size:12.5px;cursor:pointer;line-height:1.3}
+  .ss-liste button:last-child{border-bottom:0}.ss-liste button:hover,.ss-liste button:focus{background:#f1f5f9;outline:none}.ss-liste button[disabled]{opacity:.45;cursor:not-allowed}
+  .ss-liste button i{width:13px;height:13px;border-radius:50%!important;border:1px solid #94a3b8;flex:none}.ss-liste button.sec{font-weight:700;color:#0055a4;background:#eff6ff}.ss-liste button.sec i{background:#0055a4;border-color:#0055a4;box-shadow:inset 0 0 0 2px #fff}
+  input[type="search"]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:10px center!important;background-size:14px!important;padding-left:32px!important}
+  input[type="search"]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;width:16px;height:16px;margin-left:6px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E") center/12px no-repeat;cursor:pointer}
   .ist-pk{position:relative;display:inline-block;min-width:170px}
 
   .kr-table{border-collapse:collapse;font-size:11px;width:100%;table-layout:auto}
@@ -152,14 +164,14 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .kr-table tbody tr:hover{background:#fffbeb}
   .kr-warn{margin-top:6px;padding:6px 10px;border-radius:8px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e;font-size:12px}
   #krPop{display:none;position:absolute;left:0;top:44px;z-index:50;width:330px;max-height:min(420px,calc(100vh - 150px));overflow:auto;background:#fff;border:1px solid #cbd5e1;border-radius:14px;box-shadow:0 14px 36px rgba(15,23,42,.25);padding:12px}
-  .kr-pop-head{display:flex;justify-content:space-between;font-size:12px;color:#0f766e;margin-bottom:8px}.kr-pop-head span{color:#334155;font-weight:700}
+  .kr-pop-head{display:flex;justify-content:space-between;font-size:12px;color:#0055a4;margin-bottom:8px}.kr-pop-head span{color:#334155;font-weight:700}
   .kr-yil{border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;padding:8px;margin-bottom:8px}
   .kr-yil-head{display:flex;align-items:center;justify-content:space-between}.kr-yil-t{cursor:pointer;font-size:14px}.kr-yil-t small{color:#64748b;margin-left:4px}
   .kr-yil-head button{border:1px solid #cbd5e1;background:#fff;border-radius:8px;font:inherit;font-size:12px;font-weight:700;padding:3px 9px;cursor:pointer}
   .kr-aylar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
   .kr-ay{border:1px solid #cbd5e1;border-radius:9px;background:#fff;font:inherit;font-size:13px;font-weight:700;padding:8px 0;cursor:pointer;color:#0f172a}
-  .kr-ay.off{opacity:.35;text-align:center;cursor:default}.kr-ay.cur{border-color:#0f766e;color:#0f766e}.kr-ay.sel{background:#0f766e;border-color:#0f766e;color:#fff}
-  .kr-legend{font-size:11.5px;color:#475569;margin:6px 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.kr-lg{display:inline-block;width:10px;height:10px;border-radius:3px;border:1px solid #0f766e}.kr-lg.sel{background:#0f766e}
+  .kr-ay.off{opacity:.35;text-align:center;cursor:default}.kr-ay.cur{border-color:#0055a4;color:#0055a4}.kr-ay.sel{background:#0055a4;border-color:#0055a4;color:#fff}
+  .kr-legend{font-size:11.5px;color:#475569;margin:6px 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap}.kr-lg{display:inline-block;width:10px;height:10px;border-radius:3px;border:1px solid #0055a4}.kr-lg.sel{background:#0055a4}
   .kr-tab{border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;padding:5px 14px;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;color:#334155}.kr-tab.on{background:#b45309;border-color:#b45309;color:#fff}
   .kr-kapat{border:0;background:none;font:inherit;font-weight:700;color:#334155;cursor:pointer}
 
@@ -183,7 +195,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side #raporContent .tbl thead th{position:sticky;top:114px;z-index:20}
     body.ui-side .report-header{position:fixed;top:8px;left:calc(var(--an-w) + 18px);right:18px;width:auto;z-index:850;margin:0}
     body.ui-side #nobelAnaliziModal,body.ui-side #cokluModal,body.ui-side #boslukModal,body.ui-side #surucuDuzenModal,body.ui-side #tumPersonelDuzenModal,body.ui-side #cokluTumPersonelModal,body.ui-side #uygunPersonelModal{top:62px}
-    body.ui-side .an-dl{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex:none;border:0;border-radius:9px;background:#0f4c35;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:8px 16px;cursor:pointer;white-space:nowrap}
+    body.ui-side .an-dl{display:inline-flex;align-items:center;gap:6px;margin-left:auto;flex:none;border:0;border-radius:9px;background:#0055a4;color:#fff;font:inherit;font-size:13px;font-weight:700;padding:8px 16px;cursor:pointer;white-space:nowrap}
     body.ui-side .an-dl:hover{background:#166534}
     body.ui-side .upload-section{margin-top:24px}
     /* üst beyaz başlık: tek satır */
@@ -313,7 +325,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     body.ui-side .modal-overlay .bosluk-filter .ist-pk-btn{height:36px;padding:0 10px}
     body.ui-side .modal-overlay .bosluk-filter-summary .btn-sec{padding:4px 10px;font-size:12px}
     body.ui-side .analiz-table{overflow:visible!important}
-    body.ui-side .analiz-table thead th{background:#1e3a5f;color:#fff}
+    body.ui-side .analiz-table thead th{background:#0055a4;color:#fff}
     body.ui-side .an-statbar #analizOzetKart{gap:8px!important}
     body.ui-side .an-statbar #analizOzetKart>div{padding:5px 14px!important;display:flex;align-items:baseline;gap:8px;text-align:left!important}
     body.ui-side .an-statbar #analizOzetKart>div>div:first-child{font-size:17px!important}
@@ -437,7 +449,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .lf-bar .search-input{flex:1 1 240px;min-width:200px}
   .search-row{flex-wrap:wrap}
   .lf-sel{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;background:#fff;color:#334155;max-width:230px}
-  .lf-sel.on{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e;font-weight:600}
+  .lf-sel.on{border-color:#0055a4;box-shadow:0 0 0 2px rgba(0,85,164,.15);color:#0055a4;font-weight:600}
   .lf-clr{padding:8px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;font:inherit;font-size:12.5px;font-weight:700;color:#334155;cursor:pointer}
   .lf-cnt{font-size:12px;color:var(--muted)}
   /* Çoklu branş seçimi (birden çok branş işaretlenebilir; hiçbiri işaretli değilse tümü) */
@@ -445,21 +457,21 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .lf-ms>summary{list-style:none;cursor:pointer;min-width:150px;user-select:none}
   .lf-ms>summary::-webkit-details-marker{display:none}
   .lf-ms>summary::after{content:' ▾';color:#94a3b8}
-  .lf-ms.on>summary{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e;font-weight:600}
+  .lf-ms.on>summary{border-color:#0055a4;box-shadow:0 0 0 2px rgba(0,85,164,.15);color:#0055a4;font-weight:600}
   .lf-ms-p{position:absolute;z-index:60;top:calc(100% + 4px);left:0;min-width:220px;max-height:320px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.15);padding:6px}
   .lf-ms-p label{display:flex;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;font-size:13px;cursor:pointer;white-space:nowrap}
   .lf-ms-p label:hover{background:#f1f5f9}
   .lf-ms-p .lf-ms-tum{border-bottom:1px solid var(--line);margin-bottom:4px;font-weight:700}
   .ist-pk-btn{width:100%;text-align:left;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-size:13px;font-weight:600;color:#334155;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ist-pk-btn.on,.ist-pk.open .ist-pk-btn{border-color:#0f766e;box-shadow:0 0 0 2px rgba(15,118,110,.15);color:#0f766e}
+  .ist-pk-btn.on,.ist-pk.open .ist-pk-btn{border-color:#0055a4;box-shadow:0 0 0 2px rgba(0,85,164,.15);color:#0055a4}
   .ist-pk-pop{position:fixed;z-index:100000;background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 12px 32px rgba(15,23,42,.22);padding:10px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
   .ist-pk-head{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:#334155}
   .ist-pk-head button{margin-left:6px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:7px;padding:3px 9px;font-size:12px;font-weight:700;cursor:pointer;color:#334155}
-  .ist-pk-q{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #99d3cd;border-radius:9px;font-size:13px;outline:none}
+  .ist-pk-q{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #93c5fd;border-radius:9px;font-size:13px;outline:none}
   .ist-pk-chips{display:flex;flex-wrap:wrap;gap:4px;max-height:96px;overflow:auto;padding:2px}
   .ist-pk-chip{cursor:pointer;background:#f1f5f9;color:#334155;border:1px solid transparent;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;user-select:none}
-  .ist-pk-chip.part{border-color:#0f766e;background:#f0fdfa}
-  .ist-pk-chip.full{background:#0f766e;color:#fff}
+  .ist-pk-chip.part{border-color:#0055a4;background:#eff6ff}
+  .ist-pk-chip.full{background:#0055a4;color:#fff}
   .ist-pk-list{overflow:auto;border-top:1px solid #e2e8f0;padding-top:2px;min-height:80px;flex:1 1 auto}
   .ist-pk-pop>*{flex-shrink:0}.ist-pk-pop>.ist-pk-list{flex-shrink:1;min-height:0}
   .ist-pk-row{display:flex;align-items:center;gap:6px;padding:1px 6px;margin:0;min-height:0;line-height:1.15;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:6px;text-transform:none;letter-spacing:0}
@@ -477,13 +489,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .bosluk-filter.wide{min-width:250px;flex:1}
   .bosluk-filter-label{font-size:10px;font-weight:800;letter-spacing:.06em;color:#64748b;text-transform:uppercase}
   .bosluk-filter input,.bosluk-filter select{height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#1e293b;font:inherit;font-size:12px;outline:none}
-  .bosluk-filter input:focus,.bosluk-filter select:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+  .bosluk-filter input:focus,.bosluk-filter select:focus{border-color:#0055a4;box-shadow:0 0 0 3px rgba(0,85,164,.12)}
   .bosluk-view-switch{display:flex;gap:4px;padding:4px;background:#e2e8f0;border-radius:9px;height:36px}
   .bosluk-view-btn{border:0;background:transparent;color:#475569;padding:0 11px;border-radius:6px;font:inherit;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
-  .bosluk-view-btn.active{background:#fff;color:#3730a3;box-shadow:0 1px 3px rgba(15,23,42,.12)}
+  .bosluk-view-btn.active{background:#fff;color:#0055a4;box-shadow:0 1px 3px rgba(15,23,42,.12)}
   .bosluk-clear{height:36px!important;background:#fff!important;color:#475569!important;border-color:#cbd5e1!important}
   .bosluk-filter-summary{margin-top:10px;color:#475569;font-size:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-  .bosluk-filter-summary strong{color:#3730a3}
+  .bosluk-filter-summary strong{color:#0055a4}
   .bosluk-station-group{border-top:1px solid #e2e8f0}
   .bosluk-station-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:#f8fafc;color:#1e3a5f;font-weight:800}
   .bosluk-station-head small{color:#64748b;font-weight:600}
@@ -498,7 +510,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .bosluk-table td{padding:9px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top;line-height:1.45}
   .bosluk-table td:nth-child(5){padding:9px 6px}
   .bosluk-gap{text-align:center;vertical-align:middle!important;padding:9px 8px!important}
-  .bosluk-gap-badge{display:inline-block;background:#eef2ff;color:#3730a3;font-weight:900;white-space:nowrap;padding:6px 10px;border-radius:6px;line-height:1.4}
+  .bosluk-gap-badge{display:inline-block;background:#eff6ff;color:#0055a4;font-weight:900;white-space:nowrap;padding:6px 10px;border-radius:6px;line-height:1.4}
   .izin-rapor-item{display:block;white-space:nowrap;line-height:1.55}
   .izin-rapor-cell{min-width:0;max-width:none;background:#fff7ed;color:#9a3412;font-size:10.5px;line-height:1.55;white-space:nowrap;overflow:visible}
 .surucu-duzen-table{min-width:1080px}
@@ -625,11 +637,11 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .arc-title{font-weight:900;color:#1e3a5f;font-size:18px}
   .arc-sub{margin-top:3px;color:#64748b;font-size:12px}
   .arc-tools{display:flex;gap:8px;flex-wrap:wrap}
-  .arc-tools button{border:1px solid #c7d2fe;border-radius:8px;background:#eef2ff;color:#3730a3;font:inherit;font-size:12px;font-weight:800;padding:7px 11px;cursor:pointer}
+  .arc-tools button{border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#0055a4;font:inherit;font-size:12px;font-weight:800;padding:7px 11px;cursor:pointer}
   .arc-tools button:hover{background:#e0e7ff}
   .arc-years{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 10px}
   .arc-year{border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#334155;font:inherit;font-size:12px;font-weight:800;padding:4px 13px;cursor:pointer}
-  .arc-year.on{background:#1e3a5f;border-color:#1e3a5f;color:#fff}
+  .arc-year.on{background:#0055a4;border-color:#0055a4;color:#fff}
   .arc-wrap{overflow-x:auto;border:1px solid #e2e8f0;border-radius:10px}
   .arc-table{width:100%;border-collapse:collapse;font-size:12px}
   .arc-table th{background:#f8fafc;color:#475569;font-size:11px;font-weight:900;text-align:left;padding:8px 7px;border-bottom:1px solid #e2e8f0;white-space:nowrap}
@@ -666,7 +678,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .arc-modal-sub{margin-top:4px;color:#64748b;font-size:12px;line-height:1.45}
   .arc-slot-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
   .arc-slot-choice{border:2px solid #cbd5e1;border-radius:12px;background:#f8fafc;padding:14px 8px;cursor:pointer;font:inherit;text-align:center}
-  .arc-slot-choice:hover{border-color:#1e3a5f;background:#eff6ff}
+  .arc-slot-choice:hover{border-color:#0055a4;background:#eff6ff}
   .arc-slot-choice b{display:block;font-size:15px;color:#1e3a5f}
   .arc-slot-note{margin-top:5px;font-size:10px;color:#64748b;line-height:1.35}
   .arc-slot-note.warn{color:#b45309;font-weight:800}
@@ -748,7 +760,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .istasyon-personel-role-duty{color:#475569;background:#f8fafc;border-radius:5px;padding:5px 7px}
   .istasyon-personel-view-tabs{display:flex;gap:6px;padding:10px 18px 0;background:#fff;border-bottom:1px solid #e2e8f0}
   .istasyon-personel-view-tabs button{border:1px solid #cbd5e1;border-bottom:0;border-radius:7px 7px 0 0;background:#f8fafc;color:#475569;font:inherit;font-size:11px;font-weight:800;padding:8px 12px;cursor:pointer}
-  .istasyon-personel-view-tabs button.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+  .istasyon-personel-view-tabs button.active{background:#0055a4;color:#fff;border-color:#0055a4}
   /* sekmeler solda, özet bilgiler sağda, tek satır */
   .istasyon-personel-main-box{display:flex;flex-wrap:wrap;align-items:flex-end}
   .istasyon-personel-main-box>.istasyon-personel-filters{flex:0 0 100%}
@@ -759,12 +771,12 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .ozet-not{font-size:9.5px;font-weight:600;color:#64748b;line-height:1.2;margin-top:2px}
   .istasyon-personel-summary-table-wrap{overflow:auto;border:1px solid #dbe4ee;border-radius:8px;background:#fff}
   .istasyon-personel-summary-table{width:100%;min-width:900px;border-collapse:collapse;font-size:11px}
-  .istasyon-personel-summary-table th{padding:9px 8px;background:#1e3a5f;color:#fff;text-align:center;white-space:nowrap}
+  .istasyon-personel-summary-table th{padding:9px 8px;background:#0055a4;color:#fff;text-align:center;white-space:nowrap}
   .istasyon-personel-summary-table th:first-child,.istasyon-personel-summary-table th:nth-child(2),.istasyon-personel-summary-table th:nth-child(3),.istasyon-personel-summary-table td:first-child,.istasyon-personel-summary-table td:nth-child(2),.istasyon-personel-summary-table td:nth-child(3){text-align:left}
   .istasyon-personel-summary-table td{padding:8px;border-bottom:1px solid #e2e8f0;text-align:center;white-space:nowrap;color:#334155}
   .istasyon-personel-summary-table tr.station-summary-row td{background:#eff6ff;color:#1e3a5f;font-weight:900;text-align:left;border-top:2px solid #bfdbfe}
 
-    .brans-dag.sec{background:#0f766e;border-color:#0f766e;color:#fff}.brans-dag:hover{border-color:#0f766e}.ist-baslik{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.brans-dag-kap{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}.brans-dag{cursor:pointer;font-family:inherit;background:#fff;border:1px solid #bfdbfe;color:#1e3a5f;border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:800;white-space:nowrap}
+    .brans-dag.sec{background:#0055a4;border-color:#0055a4;color:#fff}.brans-dag:hover{border-color:#0055a4}.ist-baslik{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.brans-dag-kap{display:flex;flex-wrap:wrap;gap:5px;justify-content:flex-end}.brans-dag{cursor:pointer;font-family:inherit;background:#fff;border:1px solid #bfdbfe;color:#1e3a5f;border-radius:999px;padding:1px 9px;font-size:11.5px;font-weight:800;white-space:nowrap}
 .uygun-tbl{table-layout:fixed;width:100%;min-width:1150px}.uygun-tbl th:nth-child(1){width:11%}.uygun-tbl th:nth-child(2){width:10%}.uygun-tbl th:nth-child(3){width:8%}.uygun-tbl th:nth-child(4){width:13%}.uygun-tbl th:nth-child(5){width:16%}.uygun-tbl th:nth-child(6){width:16%}.uygun-tbl th:nth-child(7){width:19%}.uygun-tbl th:nth-child(8){width:7%}.uygun-tbl td,.uygun-tbl th{overflow-wrap:anywhere}.uygun-tbl th:nth-child(8){font-size:10.5px}
 .ashi-fb-btn{display:none}
   @media screen and (min-width:641px) and (max-width:1100px){body.ui-side #raporContent .tbl td,body.ui-side #raporContent .tbl th{padding:5px 4px!important;font-size:11px!important}}
@@ -930,7 +942,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <input type="file" id="fileInput" name="ashiNobetRaporu" multiple accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onchange="ashiCokluDosya(this.files)">
         </label>
         <button type="button" class="btn-sec" style="margin-top:16px;background:#fff7ed;color:#9a3412;border-color:#fdba74" onclick="event.stopPropagation();openTopIzinPicker()" title="İzin/muafiyet/rapor Excel dosyasını yükler; ayı dosyadaki tarihlerden belirler ve arşive kaydeder">📄 İzin/Rapor Dosyası Yükle</button>
-        <button type="button" class="btn-sec" style="margin-top:16px;background:#eef2ff;color:#3730a3;border-color:#c7d2fe" onclick="event.stopPropagation();openGuide()">📖 Kılavuzu Aç</button>
+        <button type="button" class="btn-sec" style="margin-top:16px;background:#eff6ff;color:#0055a4;border-color:#bfdbfe" onclick="event.stopPropagation();openGuide()">📖 Kılavuzu Aç</button>
       </div>
       <div id="selectedFileName" class="dropzone-sub" style="display:none;margin-top:10px;color:#475569"></div>
     </div>
@@ -957,7 +969,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
         <div class="control-group">
           <div class="control-group-title">Analiz ve kontroller</div>
           <button class="btn-sec btn-orange row3" onclick="showCokluModal()"><span class="btn-icon">🔄</span><span class="btn-textcol"><span>Farklı İstasyon Nöbetleri</span><span class="btn-sub" id="btnCokluLbl"></span></span></button>
-          <button class="btn-sec row3" id="btnBosluk" onclick="showBoslukModal()" style="background:#eef2ff;color:#3730a3;border-color:#c7d2fe"><span class="btn-icon">⏱️</span><span class="btn-textcol"><span>5+ Gün Boşluk Analizi</span><span class="btn-sub" id="btnBoslukLbl"></span></span></button>
+          <button class="btn-sec row3" id="btnBosluk" onclick="showBoslukModal()" style="background:#eff6ff;color:#0055a4;border-color:#bfdbfe"><span class="btn-icon">⏱️</span><span class="btn-textcol"><span>5+ Gün Boşluk Analizi</span><span class="btn-sub" id="btnBoslukLbl"></span></span></button>
           <button class="btn-sec row3" id="btnSurucuDuzen" onclick="showSurucuDuzenModal()" style="background:#ecfdf5;color:#047857;border-color:#a7f3d0"><span class="btn-icon">🚘</span><span class="btn-textcol"><span>Sürücü Nöbet Analizi</span><span class="btn-sub" id="btnSurucuDuzenLbl"></span></span></button>
           <button class="btn-sec row2" id="btnTumPersonelDuzen" onclick="showTumPersonelDuzenModal()" style="background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe">👥 <span>Tüm Personel Nöbet Analizi</span></button>
         </div>
@@ -970,7 +982,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           </div>
           <div style="flex:1 1 100%;height:0;border-top:1px dashed #e3e8ee;margin:2px 0"></div>
           <button class="btn-sec row2" id="btnCokluTumPersonel" onclick="showCokluTumPersonelModal()" style="background:#fff7ed;color:#c2410c;border-color:#fdba74">🏥 <span>Çoklu İstasyon Analizi</span></button>
-          <button class="btn-sec row2" id="btnUygunPersonel" onclick="showUygunPersonelModal()" style="background:#f0fdfa;color:#0f766e;border-color:#99f6e4">🔍 <span>Nöbete Uygun Personel Bul</span></button>
+          <button class="btn-sec row2" id="btnUygunPersonel" onclick="showUygunPersonelModal()" style="background:#eff6ff;color:#0055a4;border-color:#bfdbfe">🔍 <span>Nöbete Uygun Personel Bul</span></button>
         </div>
         <div class="control-group">
           <div class="control-group-title">Görünüm ve dosya</div>
@@ -1050,7 +1062,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <div style="background:#f8fafc;border-radius:10px;padding:20px;border:1px solid #e2e8f0">
             <div style="font-weight:700;font-size:15px;color:#1e3a5f;margin-bottom:12px">👥 Görev Sekmeleri</div>
             <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
-              <li style="display:flex;gap:8px;font-size:13px"><span style="background:#1e3a5f;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">EŞ</span>Nöbet Görevi = <strong>Ekip Sorumlusu</strong></li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="background:#0055a4;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">EŞ</span>Nöbet Görevi = <strong>Ekip Sorumlusu</strong></li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="background:#166534;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">YSP</span>Nöbet Görevi = <strong>Yardımcı Sağlık Personeli</strong></li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="background:#92400e;color:#fff;border-radius:4px;padding:1px 6px;font-size:11px">SÜR</span>Nöbet Görevi = <strong>Sürücü</strong></li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#64748b;font-weight:700">ℹ</span><strong>Branş (Kadro)</strong> kişinin Excel’deki asıl kadro branşıdır; o günkü nöbet görevinden (Ekip Şefi/YSP/Sürücü) bağımsızdır</li>
@@ -1092,8 +1104,8 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
             </ul>
           </div>
 
-          <div style="background:#eef2ff;border-radius:10px;padding:20px;border:1px solid #c7d2fe">
-            <div style="font-weight:700;font-size:15px;color:#3730a3;margin-bottom:12px">⏱️ 5+ Gün Nöbet Boşluğu Analizi</div>
+          <div style="background:#eff6ff;border-radius:10px;padding:20px;border:1px solid #bfdbfe">
+            <div style="font-weight:700;font-size:15px;color:#0055a4;margin-bottom:12px">⏱️ 5+ Gün Nöbet Boşluğu Analizi</div>
             <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>Ekip Şefi, YSP ve Sürücü nöbetleri <strong>branş bağımsız</strong>, kişi bazında zaman sırasına göre birleştirilir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#4338ca;font-weight:700">→</span>İki ardışık nöbet arasındaki boşluk, girilen <strong>minimum gün</strong> eşiğini geçerse listelenir (varsayılan 5 gün)</li>
@@ -1123,7 +1135,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#1d4ed8;font-weight:700">→</span>Arama veya filtre uygulanmışsa yalnızca görünen kayıtlar indirilir</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#1d4ed8;font-weight:700">→</span><strong>Çoklu istasyon / ilçe seçici</strong>: Nöbete Uygun Personel, 5+ Gün Boşluk, Sürücü Düzeni, Tüm Personel Düzeni, Çoklu İstasyon, Analiz ve İstasyon Listesindeki “İstasyon” alanından birden fazla istasyon işaretlenebilir; ilçe çipine (örn. Akhisar) tıklamak o ilçenin tüm istasyonlarını seçer/kaldırır. “Tümü/Temizle” ve arama kutusu da vardır</li>
               <li style="display:flex;gap:8px;font-size:13px"><span style="color:#047857;font-weight:700">→</span><strong>Sürücü Düzeni</strong> ve <strong>Tüm Personel Düzeni</strong> çıktılarında nöbet bilgisi <strong>TARİH / GÖREV BRANŞI / SAAT</strong> olmak üzere 3 ayrı, satır satır hizalı sütuna bölünür; istasyon(lar) da alt alta yazılır</li>
-              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#3730a3;font-weight:700">→</span><strong>5+ Gün Boşluk Analizi</strong> ve <strong>Komuta/Başhekimlik</strong> listeleri kendi ekranlarındaki filtreye göre ayrı ayrı Excel’e aktarılabilir</li>
+              <li style="display:flex;gap:8px;font-size:13px"><span style="color:#0055a4;font-weight:700">→</span><strong>5+ Gün Boşluk Analizi</strong> ve <strong>Komuta/Başhekimlik</strong> listeleri kendi ekranlarındaki filtreye göre ayrı ayrı Excel’e aktarılabilir</li>
             </ul>
           </div>
 
@@ -1208,7 +1220,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 
     <!-- Search -->
     <div class="search-row">
-      <input class="search-input" id="searchInput" type="text" placeholder="İstasyon, ad, soyad, TC, branş ile ara..." oninput="filterTable()">
+      <input class="search-input" id="searchInput" type="search" placeholder="İstasyon, ad, soyad, TC, branş ile ara..." oninput="filterTable()">
       <select class="lf-sel" id="lfListeIst" data-ist-picker="1" onchange="filterTable()"><option value="">Tüm istasyonlar</option></select>
       <details class="lf-ms" id="lfListeBrans" data-on="filterTable"><summary class="lf-sel">Tüm branşlar</summary><div class="lf-ms-p"></div></details>
       <select class="lf-sel" id="lfListeDurum" onchange="filterTable()"><option value="">Tüm kayıtlar</option><option value="coklu">Farklı istasyonda nöbet tutan</option><option value="muaf">Muafiyetli</option><option value="nd">Mesai / diğer kaydı olan</option><option value="sifir">Nöbeti olmayan (0 gün)</option></select>
@@ -1316,7 +1328,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
               <select id="specialListBransFilter" onchange="filterSpecialList()"><option value="">Tüm branşlar</option></select>
             </div>
             <button id="specialListClearBtn" class="btn-sec bosluk-clear" type="button" onclick="clearSpecialListFilters()">Filtreleri temizle</button>
-            <button id="specialListExportBtn" class="btn-sec bosluk-clear" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportSpecialListExcel(activeSpecialKind)">📥 Excel'e Aktar</button>
+            <button id="specialListExportBtn" class="btn-sec bosluk-clear" type="button" style="background:#0055a4!important;color:#fff!important;border-color:#0055a4!important" onclick="exportSpecialListExcel(activeSpecialKind)">📥 Excel'e Aktar</button>
           </div>
           <div id="specialListFilterSummary" class="bosluk-filter-summary"></div>
         </div>
@@ -1335,10 +1347,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   <div class="istasyon-personel-main-box">
     <div class="istasyon-personel-filters">
       <label>İstasyon seç<select data-ist-picker="1" id="istasyonPersonelStation" onchange="renderIstasyonPersonelList()"><option value="">Tüm istasyonlar</option></select></label>
-      <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="text" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
+      <label>Personel adı ile ara<input id="istasyonPersonelPerson" type="search" placeholder="Ad veya soyad" oninput="renderIstasyonPersonelList()"></label>
       <button class="btn-sec" type="button" onclick="clearIstasyonPersonelFilters()">Temizle</button>
       <button class="btn-sec" type="button" onclick="showOzelGunModal()" title="İdari tatil, yarım gün gibi özel günleri tanımla; Çalışma Saati otomatik güncellenir">📅 Özel Günler</button>
-      <button class="btn-sec" type="button" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important" onclick="exportIstasyonPersonelExcel()">📥 Excel'e Aktar</button>
+      <button class="btn-sec" type="button" style="background:#0055a4!important;color:#fff!important;border-color:#0055a4!important" onclick="exportIstasyonPersonelExcel()">📥 Excel'e Aktar</button>
       <button class="btn-sec" type="button" style="background:#a16207!important;color:#fff!important;border-color:#a16207!important" onclick="exportDokumCetveliExcel()">📋 Döküm Cetveli</button>
       <button class="btn-sec" type="button" style="background:#b45309!important;color:#fff!important;border-color:#b45309!important" onclick="showKontrolRaporuModal()">📋 Kontrol Raporu</button>
     </div>
@@ -1359,7 +1371,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
           <div id="krPop"></div>
         </div>
         <button type="button" class="kr-tab on" data-t="ozet" onclick="krSekmeSec('ozet')">Kişi bazlı kontrol</button><button type="button" class="kr-tab" data-t="ayici" onclick="krSekmeSec('ayici')">Ay içinde alınan izin/rapor</button>
-        <button type="button" class="btn-sec" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important;height:36px;margin-left:auto" onclick="exportKontrolRaporuExcel()">📥 Excel’e Aktar</button>
+        <button type="button" class="btn-sec" style="background:#0055a4!important;color:#fff!important;border-color:#0055a4!important;height:36px;margin-left:auto" onclick="exportKontrolRaporuExcel()">📥 Excel’e Aktar</button>
       </div>
       <div id="krOzet" style="padding:4px 4px 8px;font-size:12.5px;color:#334155"></div>
       <div id="krTablo" style="overflow-x:auto"></div>
@@ -1392,7 +1404,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- ÇOKLU MODAL -->
 <div id="cokluModal" class="modal-overlay">
   <div class="modal-box">
-    <div class="modal-head" style="background:#ea580c">
+    <div class="modal-head" style="background:#0055a4">
       <span style="color:#fff;font-weight:700;font-size:15px">🔄 Birden Fazla İstasyonda Nöbet Tutan Personel</span>
       <button class="modal-close" onclick="document.getElementById('cokluModal').style.display='none'">✕</button>
     </div>
@@ -1403,16 +1415,16 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- 5+ GÜN BOŞLUK MODAL -->
 <div id="boslukModal" class="modal-overlay">
   <div class="modal-box" style="width:min(94vw,1280px);max-width:1280px">
-    <div class="modal-head" style="background:#3730a3">
+    <div class="modal-head" style="background:#0055a4">
       <div>
         <span style="color:#fff;font-weight:700;font-size:15px">⏱️ Branş Bağımsız 5 Gün ve Üzeri Nöbet Boşlukları</span>
         <div style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px">Ekip Şefi, YSP ve Sürücü nöbetleri birlikte sıralanır; aynı kişinin iki ardışık nöbeti arasındaki boşluk hesaplanır.</div>
       </div>
       <button class="modal-close" onclick="document.getElementById('boslukModal').style.display='none'">✕</button>
     </div>
-    <div style="padding:14px 20px;background:#eef2ff;border-bottom:1px solid #c7d2fe;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="padding:14px 20px;background:#eff6ff;border-bottom:1px solid #bfdbfe;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div id="boslukOzet" style="font-size:13px;color:#312e81;font-weight:800"></div>
-      <button id="exportBoslukExcelBtn" class="btn-sec" title="Görünen boşlukları Excel’e aktar" style="margin-left:auto;background:#fff;color:#3730a3;border-color:#a5b4fc">📥 Excel’e Aktar</button>
+      <button id="exportBoslukExcelBtn" class="btn-sec" title="Görünen boşlukları Excel’e aktar" style="margin-left:auto;background:#fff;color:#0055a4;border-color:#a5b4fc">📥 Excel’e Aktar</button>
     </div>
     <div id="boslukToolbar" class="bosluk-toolbar">
       <div class="bosluk-filter-row">
@@ -1452,7 +1464,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- SÜRÜCÜ NÖBET DÜZENİ MODAL -->
 <div id="surucuDuzenModal" class="modal-overlay">
   <div class="modal-box" style="max-width:1180px">
-    <div class="modal-head" style="background:#047857">
+    <div class="modal-head" style="background:#0055a4">
       <div>
         <span style="color:#fff;font-weight:700;font-size:15px">🚘 Sürücü Nöbet Düzeni Analizi</span>
         <div style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px">12 saatlik 21:00–09:00 gece nöbetlerinde 3 gece arka arkaya; 24 saatlik nöbetlerde 2 gün arayla oluşan (1, 3, 5 örneği) diziler gösterilir.</div>
@@ -1487,7 +1499,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- TÜM PERSONEL NÖBET DÜZENİ MODAL -->
 <div id="tumPersonelDuzenModal" class="modal-overlay">
   <div class="modal-box" style="width:min(98vw,1500px);max-width:1500px">
-    <div class="modal-head" style="background:#1d4ed8">
+    <div class="modal-head" style="background:#0055a4">
       <div><span style="color:#fff;font-weight:700;font-size:15px">👥 Tüm Personel Nöbet Düzeni</span><div style="color:rgba(255,255,255,.8);font-size:11px;margin-top:3px">Ekip Şefi, Yardımcı Sağlık Personeli ve Sürücü nöbetleri kişi bazında birlikte değerlendirilir.</div></div>
       <button class="modal-close" onclick="document.getElementById('tumPersonelDuzenModal').style.display='none'">✕</button>
     </div>
@@ -1505,7 +1517,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- ÇOKLU İSTASYON ANALİZİ (TÜM PERSONEL) MODAL -->
 <div id="cokluTumPersonelModal" class="modal-overlay">
   <div class="modal-box" style="width:min(98vw,1500px);max-width:1500px">
-    <div class="modal-head" style="background:#c2410c">
+    <div class="modal-head" style="background:#0055a4">
       <div><span style="color:#fff;font-weight:700;font-size:15px">🏥 Çoklu İstasyon Analizi (Tüm Personel)</span><div style="color:rgba(255,255,255,.8);font-size:11px;margin-top:3px">Ekip Şefi, Yardımcı Sağlık Personeli ve Sürücü nöbetleri birlikte değerlendirilir; birden fazla istasyonda nöbet tutan tüm personel branşı fark etmeksizin listelenir.</div></div>
       <button class="modal-close" onclick="document.getElementById('cokluTumPersonelModal').style.display='none'">✕</button>
     </div>
@@ -1523,15 +1535,15 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- NÖBETE UYGUN PERSONEL BULMA MODAL -->
 <div id="uygunPersonelModal" class="modal-overlay">
   <div class="modal-box" style="width:min(98vw,1500px);max-width:1500px">
-    <div class="modal-head" style="background:#0f766e">
+    <div class="modal-head" style="background:#0055a4">
       <div><span style="color:#fff;font-weight:700;font-size:15px">🔍 Nöbete Uygun Personel Bulma</span><div style="color:rgba(255,255,255,.8);font-size:11px;margin-top:3px">Girilen tarihten bir gün önce ve bir gün sonrasında nöbeti (ve varsa izin/raporu) olmayan Ekip Şefi/YSP personelini tarar. Kadro branşı Sürücü olan personel bu aramaya dahil edilmez; onlar nöbet değil mesai tamamlar. Ay başı/sonu tarihlerinde, önceki/sonraki ay yerel arşivde varsa o nöbetler de otomatik dikkate alınır.</div></div>
       <button class="modal-close" onclick="document.getElementById('uygunPersonelModal').style.display='none'">✕</button>
     </div>
-    <div style="padding:14px 20px;background:#f0fdfa;border-bottom:1px solid #99f6e4;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <div style="padding:14px 20px;background:#eff6ff;border-bottom:1px solid #bfdbfe;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
       <div class="bosluk-filter"><label class="bosluk-filter-label" for="uygunPersonelDate">Nöbet tarihi</label><input id="uygunPersonelDate" type="date"></div>
-      <button id="uygunPersonelSearchBtn" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="runUygunPersonelSearch()">🔍 Uygun Personeli Bul</button>
-      <div id="uygunPersonelOzet" style="font-size:13px;color:#115e59;font-weight:800;margin-left:8px"></div>
-      <button id="exportUygunPersonelExcelBtn" class="btn-sec" style="margin-left:auto;background:#fff;color:#0f766e;border-color:#99f6e4">📥 Excel'e Aktar</button>
+      <button id="uygunPersonelSearchBtn" class="btn-sec" style="background:#0055a4;color:#fff;border-color:#0055a4" onclick="runUygunPersonelSearch()">🔍 Uygun Personeli Bul</button>
+      <div id="uygunPersonelOzet" style="font-size:13px;color:#004080;font-weight:800;margin-left:8px"></div>
+      <button id="exportUygunPersonelExcelBtn" class="btn-sec" style="margin-left:auto;background:#fff;color:#0055a4;border-color:#bfdbfe">📥 Excel'e Aktar</button>
     </div>
     <div class="bosluk-toolbar"><div class="bosluk-filter-row">
       <div class="bosluk-filter wide"><label class="bosluk-filter-label" for="uygunPersonelSearch">Kişi veya TCKN</label><input id="uygunPersonelSearch" type="search" placeholder="Ad, soyad veya TCKN ara…"></div>
@@ -1545,12 +1557,12 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- BRANŞ KARTI PERSONEL LİSTESİ MODAL -->
 <div id="ozelGunModal" class="modal-overlay">
   <div class="modal-box" style="max-width:640px">
-    <div class="modal-head" style="background:#0f4c35"><div><span style="color:#fff;font-weight:700;font-size:15px">📅 Özel Günler</span><div style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px">Bayram, resmî tatil, idari tatil ve yarım gün tanımı · Çalışma Saati (kadro süresi) otomatik güncellenir</div></div><button class="modal-close" onclick="closeOzelGunModal()">✕</button></div>
+    <div class="modal-head" style="background:#0055a4"><div><span style="color:#fff;font-weight:700;font-size:15px">📅 Özel Günler</span><div style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px">Bayram, resmî tatil, idari tatil ve yarım gün tanımı · Çalışma Saati (kadro süresi) otomatik güncellenir</div></div><button class="modal-close" onclick="closeOzelGunModal()">✕</button></div>
     <div style="padding:16px 20px">
       <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end">
         <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#334155">Tarih<input type="date" id="ozelGunTarih" style="height:36px;padding:0 10px;border:1px solid #cbd5e1;border-radius:8px"></label>
         <div style="display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:700;color:#334155">Tür<span id="ozelGunTur" data-v="idari" style="display:inline-flex;flex-wrap:wrap;border:1px solid #cbd5e1"><button type="button" data-tur="bayram" onclick="ozelGunTurSec('bayram')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">Bayram</button><button type="button" data-tur="resmi" onclick="ozelGunTurSec('resmi')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">Resmî tatil</button><button type="button" data-tur="idari" onclick="ozelGunTurSec('idari')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">İdari tatil</button><button type="button" data-tur="yarim" onclick="ozelGunTurSec('yarim')" style="height:34px;padding:0 10px;border:0;border-left:1px solid #cbd5e1;font:600 12px inherit;cursor:pointer;background:#fff;color:#334155">Yarım gün</button></span></div>
-        <button type="button" class="btn-sec" style="background:#0f4c35!important;color:#fff!important;border-color:#0f4c35!important;height:36px" onclick="ozelGunEkle()">Günü Ekle</button>
+        <button type="button" class="btn-sec" style="background:#0055a4!important;color:#fff!important;border-color:#0055a4!important;height:36px" onclick="ozelGunEkle()">Günü Ekle</button>
       </div>
       <div id="ozelGunOnizleme" style="margin-top:12px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12px;color:#166534;font-weight:700"></div>
       <div id="ozelGunListe" style="margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:40vh;overflow:auto"></div>
@@ -1561,7 +1573,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 
 <div id="bransPersonelModal" class="modal-overlay">
   <div class="modal-box" style="max-width:900px">
-    <div class="modal-head" style="background:#1e3a5f"><div><span id="bransPersonelModalTitle" style="color:#fff;font-weight:700;font-size:15px">Branş Personel Listesi</span><div id="bransPersonelModalSummary" style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px"></div></div><button class="modal-close" onclick="closeBransPersonelModal()">✕</button></div>
+    <div class="modal-head" style="background:#0055a4"><div><span id="bransPersonelModalTitle" style="color:#fff;font-weight:700;font-size:15px">Branş Personel Listesi</span><div id="bransPersonelModalSummary" style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px"></div></div><button class="modal-close" onclick="closeBransPersonelModal()">✕</button></div>
     <div id="bransPersonelModalBody" style="padding:16px 20px;max-height:68vh;overflow:auto"></div>
   </div>
 </div>
@@ -3380,6 +3392,81 @@ function ashiIstUyarLC(q, text) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 
+// ═══════════════════════════════════════════════════════════
+// HUSER 13.11 — TEK SEÇİM PANELİ: düz <select> kutuları ortak seçim düğmesi + paneline dönüşür (kararlar madde 17).
+// İstasyon kutuları (data-ist-picker) yukarıdaki çoklu seçicide kalır. Asıl kutu gizli kalır; seçim ona yazılıp
+// 'change' tetiklenir — onchange="…" ve diğer işleyiciler aynen çalışır. Kodla değer / seçenek değişince düğme kendini günceller.
+// ═══════════════════════════════════════════════════════════
+(function () {
+  let acik = null;
+  const kapat = () => { if (acik) { acik.pop.remove(); acik.btn.classList.remove('open'); acik = null; } };
+  document.addEventListener('mousedown', e => { if (acik && !acik.pop.contains(e.target) && !acik.btn.contains(e.target)) kapat(); });
+  document.addEventListener('scroll', e => { if (acik && !acik.pop.contains(e.target)) kapat(); }, true);
+  window.addEventListener('resize', kapat);
+  const P = HTMLSelectElement.prototype, dV = Object.getOwnPropertyDescriptor(P, 'value'), dI = Object.getOwnPropertyDescriptor(P, 'selectedIndex');
+  const katla = v => String(v || '').toLocaleLowerCase('tr-TR');
+  function init(sel) {
+    if (sel.__ss || sel.__istPicker || sel.hasAttribute('data-ist-picker') || sel.multiple || sel.hasAttribute('data-duz')) return;
+    sel.__ss = true;
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = ((sel.className || '') + ' ss-btn').trim();
+    if (sel.style.width) btn.style.width = sel.style.width;
+    if (sel.style.minWidth) btn.style.minWidth = sel.style.minWidth;
+    sel.style.display = 'none'; sel.insertAdjacentElement('afterend', btn);
+    function paint() {
+      const o = sel.options[dI.get.call(sel)];
+      btn.innerHTML = `<span class="ss-yazi">${escapeHtml(o ? o.text : '—')}</span><i>▾</i>`;
+      btn.title = o ? o.text : ''; btn.disabled = sel.disabled;
+      btn.classList.toggle('on', !!(o && o.value && dI.get.call(sel) > 0));
+    }
+    function sec(i) {
+      kapat(); btn.focus();
+      if (i === dI.get.call(sel)) return;
+      dI.set.call(sel, i); paint();
+      sel.dispatchEvent(new Event('input', { bubbles: true })); sel.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    btn.addEventListener('click', () => {
+      if (acik && acik.btn === btn) { kapat(); return; }
+      kapat();
+      const ops = [...sel.options], cok = ops.length > 12, pop = document.createElement('div');
+      pop.className = 'ss-pop';
+      pop.innerHTML = (cok ? '<input class="ss-ara" type="search" placeholder="Ara…" autocomplete="off">' : '') + '<div class="ss-liste">' + ops.map((o, i) =>
+        `<button type="button" data-i="${i}" class="${i === dI.get.call(sel) ? 'sec' : ''}" ${o.disabled ? 'disabled' : ''} data-ara="${escapeHtml(katla(o.text))}"><i></i><span>${escapeHtml(o.text)}</span></button>`).join('') + '</div>';
+      document.body.appendChild(pop); acik = { pop, btn }; btn.classList.add('open');
+      const r = btn.getBoundingClientRect(), w = Math.min(Math.max(r.width, 220), 420, window.innerWidth - 16);
+      pop.style.width = w + 'px'; pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+      const alt = window.innerHeight - r.bottom - 12, ust = r.top - 12;
+      if (alt < 240 && ust > alt) { pop.style.bottom = (window.innerHeight - r.top + 4) + 'px'; pop.style.maxHeight = Math.min(420, ust) + 'px'; }
+      else { pop.style.top = (r.bottom + 4) + 'px'; pop.style.maxHeight = Math.min(420, Math.max(160, alt)) + 'px'; }
+      const liste = pop.querySelector('.ss-liste'), ara = pop.querySelector('.ss-ara');
+      pop.addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b && !b.disabled) sec(+b.dataset.i); });
+      pop.addEventListener('keydown', e => {
+        const g = [...liste.querySelectorAll('[data-i]')].filter(x => x.style.display !== 'none' && !x.disabled), k = g.indexOf(document.activeElement);
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); const n = g[Math.max(0, Math.min(g.length - 1, k + (e.key === 'ArrowDown' ? 1 : -1)))]; if (n) n.focus(); }
+        else if (e.key === 'Enter' && e.target === ara) { e.preventDefault(); if (g.length) sec(+g[0].dataset.i); }
+        else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); kapat(); btn.focus(); }
+      });
+      if (ara) { ara.addEventListener('input', () => { const q = katla(ara.value).trim(); liste.querySelectorAll('[data-i]').forEach(x => { x.style.display = !q || x.dataset.ara.includes(q) ? '' : 'none'; }); }); ara.focus(); }
+      else { const x = liste.querySelector('.sec') || liste.querySelector('[data-i]'); if (x) { x.focus(); x.scrollIntoView({ block: 'nearest' }); } }
+    });
+    Object.defineProperty(sel, 'value', { configurable: true, get() { return dV.get.call(sel); }, set(v) { dV.set.call(sel, v); paint(); } });
+    Object.defineProperty(sel, 'selectedIndex', { configurable: true, get() { return dI.get.call(sel); }, set(v) { dI.set.call(sel, v); paint(); } });
+    new MutationObserver(paint).observe(sel, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['disabled', 'selected'] });
+    paint();
+  }
+  function tara(kok) { (kok.querySelectorAll ? kok.querySelectorAll('select') : []).forEach(init); }
+  function basla() {
+    tara(document);
+    new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(n => { if (n.nodeType === 1) { if (n.tagName === 'SELECT') init(n); else tara(n); } }))).observe(document.body, { childList: true, subtree: true });
+  }
+  // istasyon seçicisi (data-ist-picker) önce kurulsun diye bir sonraki turda başlar
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => setTimeout(basla, 0)); else setTimeout(basla, 0);
+  // HUSER 13.11: arama kutularında Esc temizler (ortak arama kutusu gibi)
+  document.addEventListener('keydown', e => {
+    const t = e.target; if (e.key !== 'Escape' || !t || t.tagName !== 'INPUT' || t.type !== 'search' || !t.value || t.classList.contains('ss-ara')) return;
+    e.preventDefault(); e.stopPropagation(); t.value = ''; t.dispatchEvent(new Event('input', { bubbles: true })); t.dispatchEvent(new Event('change', { bubbles: true }));
+  }, true);
+})();
+
 function sureKategori(saat) {
   // null  → mesai (sayılmaz, toplama eklenmez)
   // 12    → s12
@@ -5092,11 +5179,11 @@ function renderUygunPersonelRows(rows){
   return (rows||[]).map(row=>`<tr>
     <td><strong>${escapeHtml(row.fullName)}</strong><br><span class="mono">${escapeHtml(row.tc||'—')}</span></td>
     <td><strong title="${escapeHtml(row.roleText||'')}">${escapeHtml((row.roles||[]).map(abbrRoleLabel).join(' / ')||'—')}</strong><br><span style="font-size:11px;color:#64748b">${escapeHtml(row.kadroBrans||'—')}</span></td>
-    <td style="white-space:nowrap">${row.tel?`<a href="tel:${escapeHtml(String(row.tel).replace(/[^\d+]/g,''))}" style="color:#0f766e;font-weight:700;text-decoration:none">${escapeHtml(row.tel)}</a>`:'—'}</td>
+    <td style="white-space:nowrap">${row.tel?`<a href="tel:${escapeHtml(String(row.tel).replace(/[^\d+]/g,''))}" style="color:#0055a4;font-weight:700;text-decoration:none">${escapeHtml(row.tel)}</a>`:'—'}</td>
     <td>${escapeHtml(row.asilIst||'—')}</td>
     <td>${renderUygunPersonelDutyCell(row.lastDuty)}</td>
     <td>${renderUygunPersonelDutyCell(row.nextDuty)}</td>
-    <td><div style="font-weight:700;color:${row.araIzinVar?'#b45309':'#0f766e'}">${escapeHtml(row.uyumNotu||'—')}</div>${row.hedefUyum?`<div style="font-size:11px;color:#64748b;margin-top:2px">${escapeHtml(row.hedefUyum)}</div>`:''}</td>
+    <td><div style="font-weight:700;color:${row.araIzinVar?'#b45309':'#0055a4'}">${escapeHtml(row.uyumNotu||'—')}</div>${row.hedefUyum?`<div style="font-size:11px;color:#64748b;margin-top:2px">${escapeHtml(row.hedefUyum)}</div>`:''}</td>
     <td>${(row.izinler && row.izinler.length) ? row.izinler.map(z=>`<span class="izin-rapor-item">${escapeHtml(uygunIzinMetni(z))}</span>`).join('') : '—'}</td>
   </tr>`).join('');
 }
@@ -5685,7 +5772,7 @@ function renderPersonelDetay() {
         </td>
         <td style="text-align:center;font-weight:700;font-size:13px;padding:9px 16px">${gun}</td>
         ${(() => { const pk = tcKey(p.tc) || 'n:' + `${p.ad || ''}|${p.soyad || ''}`.trim().toLocaleUpperCase('tr-TR'); const sr = sureMap.get(pk); const k = sr ? sr.kadro : null, c = sr ? sr.calis : null, f = k == null ? null : c - k;
-          return `<td style="text-align:center;font-weight:700;padding:9px 12px;color:#0f766e">${sfmt(bransSaat.get(pk + '|' + ist.ist) || 0)}</td>
+          return `<td style="text-align:center;font-weight:700;padding:9px 12px;color:#0055a4">${sfmt(bransSaat.get(pk + '|' + ist.ist) || 0)}</td>
         <td style="text-align:center;padding:9px 12px">${k == null ? '—' : sfmt(k)}</td>
         <td style="text-align:center;font-weight:600;padding:9px 12px">${c == null ? '—' : sfmt(c)}</td>
         <td style="text-align:center;font-weight:700;padding:9px 12px;color:${f == null ? '#94a3b8' : f > 0.005 ? '#b91c1c' : f < -0.005 ? '#1d4ed8' : '#166534'}">${f == null ? '—' : (f > 0.005 ? '+' : '') + sfmt(f)}</td>`; })()}
@@ -6271,7 +6358,7 @@ function ashiOzetPanel(stations){
   const top = rows.reduce((b, x) => { const f = farkli(x); return f != null && (!b || f > b.f) ? {f, name: x.name} : b; }, null);
   const uy = rows.filter(x => { const f = farkli(x); return f != null && Math.abs(f) > ASHI_UYARI_FARK; }).length;
   const kart = (lbl, val, sub, bg, fg) => `<div style="flex:1 1 150px;background:${bg};border-radius:10px;padding:10px 12px"><div style="font-size:11px;font-weight:800;color:${fg};opacity:.85">${lbl}</div><div style="font-size:20px;font-weight:800;color:${fg}">${val}</div><div style="font-size:11px;color:${fg};opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div></div>`;
-  const chip = (k, t, tip) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" title="${tip}" style="padding:5px 11px;border-radius:999px;border:1px solid ${ashiOzetFiltre[k] ? '#0f766e' : '#cbd5e1'};background:${ashiOzetFiltre[k] ? '#0f766e' : '#fff'};color:${ashiOzetFiltre[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
+  const chip = (k, t, tip) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" title="${tip}" style="padding:5px 11px;border-radius:999px;border:1px solid ${ashiOzetFiltre[k] ? '#0055a4' : '#cbd5e1'};background:${ashiOzetFiltre[k] ? '#0055a4' : '#fff'};color:${ashiOzetFiltre[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
   return `<div style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px">
     ${kart('PERSONEL', tcSet.size, 'görünen kişi', '#dbeafe', '#1e3a5f')}
     ${kart('TOPLAM ÇALIŞMA', fmt(rows.reduce((t, x) => t + x.total, 0)) + ' sa', 'nöbet saati', '#dcfce7', '#166534')}
@@ -6338,7 +6425,7 @@ let ashiAsosSecim = {hareket:'sonu', izin:'sonu'};
 // ASOS sayfasında çalışan istemci (yer imi/konsol). Tek başına çalışır; dışarıdan yalnızca cfg alır. Satır içi // yorum kullanmayın (tek satıra sıkıştırılır).
 async function ashiAsosIstemci(cfg) {
   const O = cfg.O, U = cfg.U;
-  const S = t => { let d = document.getElementById('__ashi'); if (!d) { d = document.createElement('div'); d.id = '__ashi'; d.style.cssText = 'position:fixed;top:10px;right:10px;z-index:2147483647;background:#0f766e;color:#fff;padding:12px 16px;border-radius:10px;font:700 14px sans-serif;max-width:380px;box-shadow:0 6px 20px rgba(0,0,0,.35)'; document.body.appendChild(d); } d.textContent = t; };
+  const S = t => { let d = document.getElementById('__ashi'); if (!d) { d = document.createElement('div'); d.id = '__ashi'; d.style.cssText = 'position:fixed;top:10px;right:10px;z-index:2147483647;background:#0055a4;color:#fff;padding:12px 16px;border-radius:10px;font:700 14px sans-serif;max-width:380px;box-shadow:0 6px 20px rgba(0,0,0,.35)'; document.body.appendChild(d); } d.textContent = t; };
   const bekle = ms => new Promise(r => setTimeout(r, ms));
   const p2 = n => String(n).padStart(2, '0');
   try {
@@ -6451,7 +6538,7 @@ async function ashiAsosIstemci(cfg) {
       d.style.cursor = 'default';
       const git = await new Promise(res => {
         const b = document.createElement('button'); b.textContent = 'ASHİ’ye aktar ›';
-        b.style.cssText = 'display:block;margin-top:8px;padding:8px 14px;border:0;border-radius:8px;background:#fff;color:#0f766e;font:800 14px sans-serif;cursor:pointer';
+        b.style.cssText = 'display:block;margin-top:8px;padding:8px 14px;border:0;border-radius:8px;background:#fff;color:#0055a4;font:800 14px sans-serif;cursor:pointer';
         b.onclick = () => res('ashi');
         const c = document.createElement('button'); c.textContent = 'Dosyaları bilgisayara indir';
         c.style.cssText = 'display:block;margin-top:6px;padding:4px 0;border:0;background:none;color:#d1fae5;font:600 12px sans-serif;cursor:pointer;text-decoration:underline';
@@ -6489,7 +6576,7 @@ function ashiAsosCiz() {
       <div style="font-weight:800;color:#0f172a">${adlar[it.k]} <span style="font-weight:600;color:#64748b;font-size:12px">· ${escapeHtml(it.name || 'dosya adı yok')} · ${Math.round(it.buf.byteLength / 1024)} KB</span></div>
       <div style="font-size:12px;color:#475569;margin:4px 0 8px">${escapeHtml((it.cells || []).filter(Boolean).join(' · '))}</div>
       <div>${slotSatir(it.k)}</div></div>`).join('')}
-      <button type="button" id="ashiAsosKaydetBtn" class="btn-sec" style="margin-top:12px;background:#0f766e;color:#fff;border-color:#0f766e;font-size:14px;padding:9px 18px" onclick="ashiAsosKaydet()">💾 Arşive kaydet</button>
+      <button type="button" id="ashiAsosKaydetBtn" class="btn-sec" style="margin-top:12px;background:#0055a4;color:#fff;border-color:#0055a4;font-size:14px;padding:9px 18px" onclick="ashiAsosKaydet()">💾 Arşive kaydet</button>
       <div style="font-size:12px;color:#64748b;margin-top:6px">Ay, nöbet dosyasından otomatik belirlenir. Önce nöbet listesi, ardından izin/muafiyet aynı aya kaydedilir. Ay sonunu alıyorsanız ikisinde de <b>Ay Sonu</b> kalsın.</div></div>` : '';
   const dbg = ashiAsosDbg.length ? `<div style="margin-top:10px;padding:8px 10px;border-radius:8px;background:#fef3c7;color:#92400e;font-size:12px"><b>Alınamayanlar:</b><br>${ashiAsosDbg.map(escapeHtml).join('<br>')}</div>` : '';
   m.innerHTML = `<div style="background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:92vh;overflow:auto;padding:18px 20px;box-shadow:0 20px 50px rgba(0,0,0,.3)">
@@ -6502,8 +6589,8 @@ function ashiAsosCiz() {
       <li>Ay sorulur (örn. <code>2026-10</code>). Raporlar kendiliğinden talep edilir; ASOS sekmesinde kalıp sağ üstteki yeşil kutuyu izleyin (1–2 dk).</li>
       <li>Kutuda <b>“ASHİ’ye aktar ›”</b> düğmesi çıkınca ona basın. ASHİ yeni sekmede açılır ve iki rapor burada listelenir.</li></ol>
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      <button type="button" class="btn-sec" style="background:#0f766e;color:#fff;border-color:#0f766e" onclick="ashiAsosPencere=window.open(ASHI_ASOS_URL,'ashiAsos')">ASOS’u aç</button>
-      <a href="${href.replace(/"/g, '&quot;')}" onclick="document.getElementById('ashiAsosIpucu').style.display='block';return false" draggable="true" style="padding:7px 12px;border:1px dashed #0f766e;border-radius:8px;color:#0f766e;font-weight:800;text-decoration:none;cursor:grab" title="Tıklamayın: yer imleri çubuğuna sürükleyin">⭐ ASHİ’ye aktar</a><span style="font-size:12px;color:#0f766e;font-weight:700">← tutup yer imi çubuğuna sürükleyin</span>
+      <button type="button" class="btn-sec" style="background:#0055a4;color:#fff;border-color:#0055a4" onclick="ashiAsosPencere=window.open(ASHI_ASOS_URL,'ashiAsos')">ASOS’u aç</button>
+      <a href="${href.replace(/"/g, '&quot;')}" onclick="document.getElementById('ashiAsosIpucu').style.display='block';return false" draggable="true" style="padding:7px 12px;border:1px dashed #0055a4;border-radius:8px;color:#0055a4;font-weight:800;text-decoration:none;cursor:grab" title="Tıklamayın: yer imleri çubuğuna sürükleyin">⭐ ASHİ’ye aktar</a><span style="font-size:12px;color:#0055a4;font-weight:700">← tutup yer imi çubuğuna sürükleyin</span>
       <button type="button" class="btn-sec" title="Yer imi adres alanına yapıştırmak için" onclick="navigator.clipboard&&navigator.clipboard.writeText('javascript:'+encodeURIComponent(ashiAsosYerImi())).then(()=>this.textContent='Kopyalandı ✓')">Yer imi kodunu kopyala</button>
       <button type="button" class="btn-sec" title="Yer imi kullanmadan: ASOS sayfasında Cmd/Ctrl+Option/Shift+J ile konsolu açıp yapıştırın" onclick="navigator.clipboard&&navigator.clipboard.writeText(ashiAsosYerImi()).then(()=>this.textContent='Konsol kodu kopyalandı ✓')">Konsol kodunu kopyala</button></div>
     <div style="font-size:12px;color:#475569;margin-top:6px"><b>Yer imi çalışmazsa:</b> ASOS rapor listesi açıkken Chrome’da <b>Cmd+Option+J</b> (Windows: Ctrl+Shift+J) ile konsolu açın, “Konsol kodunu kopyala” ile kopyaladığınız kodu yapıştırıp Enter’a basın (ilk seferde “allow pasting” yazmanız istenebilir).</div>
@@ -6512,7 +6599,7 @@ function ashiAsosCiz() {
     <details style="margin-top:14px;border-top:1px solid #e2e8f0;padding-top:10px">
       <summary style="cursor:pointer;font-weight:700;font-size:13px;color:#475569">Elle yükleme: ASOS’tan indirdiğiniz iki dosyayı birlikte bırakın</summary>
       <div style="font-size:12.5px;color:#475569;margin:8px 0">ASOS’ta iki raporun <b>İndir</b> düğmesine basın, inen dosyaları aşağıya birlikte bırakın.</div>
-    <div id="ashiAsosBirak" style="border:2px dashed #0f766e;border-radius:12px;padding:22px 14px;text-align:center;background:#f0fdfa;color:#0f766e;font-weight:800;cursor:pointer" onclick="ashiAsosKapat();document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.style.background='#ccfbf1'" ondragleave="this.style.background='#f0fdfa'" ondrop="event.preventDefault();this.style.background='#f0fdfa';ashiAsosKapat();ashiCokluDosya(event.dataTransfer.files)">
+    <div id="ashiAsosBirak" style="border:2px dashed #0055a4;border-radius:12px;padding:22px 14px;text-align:center;background:#eff6ff;color:#0055a4;font-weight:800;cursor:pointer" onclick="ashiAsosKapat();document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.style.background='#dbeafe'" ondragleave="this.style.background='#eff6ff'" ondrop="event.preventDefault();this.style.background='#eff6ff';ashiAsosKapat();ashiCokluDosya(event.dataTransfer.files)">
       📥 İki dosyayı buraya bırakın<div style="font-weight:600;font-size:12px;color:#475569;margin-top:4px">Nöbet İçi Hareket Raporu + Personel İzin-Muafiyet Raporu · veya tıklayıp seçin</div></div>
     <div style="font-size:11.5px;color:#64748b;margin-top:6px">Önce nöbet listesi işlenir (Ay Başı/Ay Sonu sorulur), ardından izin/muafiyet dosyası aynı aya kaydedilir. Ekim gibi ay sonunu alıyorsanız <b>Ay Sonu</b>’nu seçin.</div>
     </details>
@@ -6839,7 +6926,7 @@ function ashiDokumEkranCiz() {
   let d;
   try { d = buildDokumCetveliAoa(); } catch (err) { wrap.innerHTML = `<div style="padding:20px;color:#991b1b">Döküm Cetveli hazırlanamadı: ${escapeHtml(err && err.message || err)}</div>`; return; }
   const {rows, days, count, year, month} = d, H = rows[0];
-  const fz = ashiOzetFiltre || {}, chip = (k, t) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" style="padding:5px 11px;border-radius:999px;border:1px solid ${fz[k] ? '#0f766e' : '#cbd5e1'};background:${fz[k] ? '#0f766e' : '#fff'};color:${fz[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
+  const fz = ashiOzetFiltre || {}, chip = (k, t) => `<button type="button" onclick="ashiOzetFiltreToggle('${k}')" style="padding:5px 11px;border-radius:999px;border:1px solid ${fz[k] ? '#0055a4' : '#cbd5e1'};background:${fz[k] ? '#0055a4' : '#fff'};color:${fz[k] ? '#fff' : '#334155'};font-size:12px;font-weight:700;cursor:pointer">${t}</button>`;
   const hafsonu = c => { if (c < 10 || c >= 10 + days) return false; const w = new Date(Date.UTC(year, month - 1, c - 9)).getUTCDay(); return w === 0 || w === 6; };
   const th = (h, c) => {
     const dikey = c >= 10, gun = c >= 10 && c < 10 + days;
@@ -7601,7 +7688,7 @@ function renderFilteredAnalizTable() {
     </article>`;
   }).join('');
   wrap.innerHTML = `<div class="analiz-table-view"><table class="analiz-table" style="width:100%;min-width:0;table-layout:fixed;border-collapse:separate;border-spacing:0;font-size:12px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden">
-    <thead><tr style="background:#1e3a5f;color:#fff">
+    <thead><tr style="background:#0055a4;color:#fff">
       <th style="padding:10px 12px;text-align:left;position:sticky;top:0">İSTASYON / PERSONEL</th>
       <th style="padding:10px 12px;text-align:left;position:sticky;top:0">NÖBET GÜNÜ</th>
       <th style="padding:10px 12px;text-align:left;position:sticky;top:0">09:00 → ERTESİ GÜN 09:00</th>
@@ -8936,7 +9023,7 @@ function ashiNavSenk() {
    Asıl input gizli kalır; seçim input.value'ya yazılır ve 'input' + 'change' olayları tetiklenir (mevcut kod aynen çalışır). */
 (function tsGunSecici(){
   var AY=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-  var css=document.createElement('style');css.textContent='.ts-btn{height:36px;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.ts-btn:hover{border-color:#0e7490}.ts-pop{position:fixed;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 40px rgba(15,23,42,.18);padding:12px;width:300px;font-family:inherit}.ts-pop h4{margin:0 0 6px;font-size:13px;color:#0e7490;letter-spacing:.04em}.ts-row{display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px}.ts-row b{font-size:14px}.ts-nav{border:1px solid #cbd5e1;background:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer}.ts-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.ts-grid span{font-size:11px;color:#64748b}.ts-gun{padding:6px 0;border:1px solid #cbd5e1;border-radius:6px;background:#fff;font-weight:700;font-size:12px;cursor:pointer;color:#1e293b}.ts-gun.hs{color:#b91c1c}.ts-gun.sec{background:#0e7490;border-color:#0e7490;color:#fff}.ts-gun:hover{border-color:#0e7490}.ts-alt{display:flex;justify-content:space-between;margin-top:8px}.ts-alt button{border:0;background:none;font-weight:600;color:#475569;cursor:pointer;font-size:12px}';
+  var css=document.createElement('style');css.textContent='.ts-btn{height:36px;padding:0 12px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap}.ts-btn:hover{border-color:#0055a4}.ts-pop{position:fixed;z-index:9999;background:#fff;border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 20px 40px rgba(15,23,42,.18);padding:12px;width:300px;font-family:inherit}.ts-pop h4{margin:0 0 6px;font-size:13px;color:#0055a4;letter-spacing:.04em}.ts-row{display:flex;align-items:center;justify-content:space-between;margin:4px 0 8px}.ts-row b{font-size:14px}.ts-nav{border:1px solid #cbd5e1;background:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer}.ts-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}.ts-grid span{font-size:11px;color:#64748b}.ts-gun{padding:6px 0;border:1px solid #cbd5e1;border-radius:6px;background:#fff;font-weight:700;font-size:12px;cursor:pointer;color:#1e293b}.ts-gun.hs{color:#b91c1c}.ts-gun.sec{background:#0055a4;border-color:#0055a4;color:#fff}.ts-gun:hover{border-color:#0055a4}.ts-alt{display:flex;justify-content:space-between;margin-top:8px}.ts-alt button{border:0;background:none;font-weight:600;color:#475569;cursor:pointer;font-size:12px}';
   document.head.appendChild(css);
   var pop=null;function kapat(){if(pop){pop.remove();pop=null;}}
   function pad(n){return (n<10?'0':'')+n}
