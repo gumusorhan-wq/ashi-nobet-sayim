@@ -901,6 +901,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 .ist-pk-head button.pk-uygula,.lf-ms-bas button.pk-uygula{background:#0055a4!important;color:#fff!important;font-weight:700!important;padding:6px 16px!important;margin-left:8px!important}.ist-pk-head button.pk-uygula:hover,.lf-ms-bas button.pk-uygula:hover{background:#004080!important;color:#fff!important}.lf-ms-bas button.pk-uygula:disabled,.ist-pk-head button.pk-uygula:disabled{opacity:.4;cursor:default}
 .ist-pk-gs{display:flex;justify-content:space-between;font-size:12px}.ist-pk-gs button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;font-weight:600;color:#475569;cursor:pointer}.ist-pk-gs button:hover{color:#0055a4}
 .ist-pk-chips{max-height:150px!important;overflow:auto}
+/* HUSER 13.38: Nöbete uygun personel — 'Nöbet tarihi' etiketi seçicinin solunda, düğmeler aynı satırda */
+#uygunPersonelModal .bosluk-filter:has(#uygunPersonelDate){flex-direction:row!important;align-items:center;gap:8px}
+#uygunPersonelModal .bosluk-filter:has(#uygunPersonelDate) .bosluk-filter-label{margin:0!important;white-space:nowrap}
+#uygunPersonelModal .ts-btn{font-size:13px!important;font-weight:600!important;height:36px;padding:0 12px!important;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -1632,6 +1636,16 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   </div>
 </div>
 
+<script>
+// HUSER 13.38: açılır paneller (istasyon / seçim) yukarı açılırken sabit rapor başlığının (yan menü düzeni) altına sığdırılır;
+// pencere katmanı başlığın altında kaldığı için panelin üstü (Temizle / Uygula) başlığın arkasında kalıyordu (telefon).
+function ashiUstSinir() {
+  if (!document.body || !document.body.classList.contains('ui-side')) return 0;
+  const h = document.querySelector('.report-header'); if (!h) return 0;
+  const cs = getComputedStyle(h); if (cs.position !== 'fixed' || cs.display === 'none') return 0;
+  const b = h.getBoundingClientRect(); return b.height ? Math.max(0, b.bottom) : 0;
+}
+</script>
 <script>
 // ═══════════════════════════════════════════════════════════
 // LOGO (base64)
@@ -3437,7 +3451,7 @@ function ashiIstUyarLC(q, text) {
       const w = Math.min(480, window.innerWidth - 16);
       pop.style.width = w + 'px';
       pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
-      const alt = window.innerHeight - r.bottom - 16, ust = r.top - 16;
+      const alt = window.innerHeight - r.bottom - 16, ust = r.top - 16 - ashiUstSinir();   // HUSER 13.38: sabit rapor başlığının altında kalır
       if (alt < 260 && ust > alt) { pop.style.top = 'auto'; pop.style.bottom = (window.innerHeight - r.top + 4) + 'px'; pop.style.maxHeight = Math.max(160, ust) + 'px'; }
       else { pop.style.bottom = 'auto'; pop.style.top = (r.bottom + 4) + 'px'; pop.style.maxHeight = Math.max(160, alt) + 'px'; }
     };
@@ -3499,7 +3513,7 @@ function ashiIstUyarLC(q, text) {
       document.body.appendChild(pop); acik = { pop, btn }; btn.classList.add('open');
       const r = btn.getBoundingClientRect(), w = Math.min(Math.max(r.width, 220), 420, window.innerWidth - 16);
       pop.style.width = w + 'px'; pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
-      const alt = window.innerHeight - r.bottom - 12, ust = r.top - 12;
+      const alt = window.innerHeight - r.bottom - 12, ust = r.top - 12 - ashiUstSinir();
       if (alt < 240 && ust > alt) { pop.style.bottom = (window.innerHeight - r.top + 4) + 'px'; pop.style.maxHeight = Math.min(420, ust) + 'px'; }
       else { pop.style.top = (r.bottom + 4) + 'px'; pop.style.maxHeight = Math.min(420, Math.max(160, alt)) + 'px'; }
       const liste = pop.querySelector('.ss-liste'), ara = pop.querySelector('.ss-ara');
