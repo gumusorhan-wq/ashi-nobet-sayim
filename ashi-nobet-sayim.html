@@ -9034,7 +9034,7 @@ function anAnaSayfa() {
   const kart = (b, d, alt, git) => `<div class="ashi-ana-kart"><span>${b}</span><b>${d}</b><small>${alt}${git ? ` <a href="#" onclick="${git};return false">ayrıntı</a>` : ''}</small></div>`;
   const tikla = sel => `(function(){var e=document.querySelector('${sel}');if(e&&!e.disabled)e.click()})()`;
   const hizli = [['İstasyon listesi', '#asideNav [data-g=istasyon]', 'home'], ['Kontrol raporu', '#anKontrol', 'doc'], ['Personel listesi (Sürücü)', '#asideNav [data-g=sur][data-v=personel]', 'user'],
-    ['5+ gün boşluk', '#asideNav [data-ov=boslukModal]', 'gap'], ['Sürücü nöbet analizi', '#asideNav [data-ov=surucuDuzenModal]', 'car'],
+    ['5+ gün boşluk', '#asideNav [data-ov=boslukModal]', 'gap'], ['Sürücü nöbet analizi', '#asideNav [data-ov=surucuDuzenModal]', 'car'], ['Çoklu istasyon', '#asideNav [data-ov=cokluTumPersonelModal]', 'swap'],
     ['Ekip Şefi analizi', '#asideNav [data-ag=ef]', 'shield'], ['YSP analizi', '#asideNav [data-ag=ysp]', 'heart'], ['Sürücü analizi', '#asideNav [data-ag=sur]', 'wheel'],
     ['Arşiv', '#anArsiv', 'box']];
   const ic = k => `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${AN_ICONS[k] || ''}</svg>`;
