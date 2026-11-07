@@ -1209,7 +1209,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <!-- Search -->
     <div class="search-row">
       <input class="search-input" id="searchInput" type="text" placeholder="İstasyon, ad, soyad, TC, branş ile ara..." oninput="filterTable()">
-      <select class="lf-sel" id="lfListeIst" onchange="filterTable()"><option value="">Tüm istasyonlar</option></select>
+      <select class="lf-sel" id="lfListeIst" data-ist-picker="1" onchange="filterTable()"><option value="">Tüm istasyonlar</option></select>
       <details class="lf-ms" id="lfListeBrans" data-on="filterTable"><summary class="lf-sel">Tüm branşlar</summary><div class="lf-ms-p"></div></details>
       <select class="lf-sel" id="lfListeDurum" onchange="filterTable()"><option value="">Tüm kayıtlar</option><option value="coklu">Farklı istasyonda nöbet tutan</option><option value="muaf">Muafiyetli</option><option value="nd">Mesai / diğer kaydı olan</option><option value="sifir">Nöbeti olmayan (0 gün)</option></select>
       <button type="button" class="lf-clr" onclick="lfTemizle('liste')">Temizle</button>
@@ -1245,7 +1245,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
     <div id="viewPersonelDetay" style="display:none">
       <div class="lf-bar">
         <input class="search-input" id="lfPerQ" type="search" placeholder="Personel veya istasyon ara…" oninput="lfGec('personel')">
-        <select class="lf-sel" id="lfPerIst" onchange="renderPersonelDetay()"><option value="">Tüm istasyonlar</option></select>
+        <select class="lf-sel" id="lfPerIst" data-ist-picker="1" onchange="renderPersonelDetay()"><option value="">Tüm istasyonlar</option></select>
         <details class="lf-ms" id="lfPerBrans" data-on="renderPersonelDetay"><summary class="lf-sel">Tüm branşlar</summary><div class="lf-ms-p"></div></details>
         <button type="button" class="lf-clr" onclick="lfTemizle('personel')">Temizle</button>
         <span class="lf-cnt" id="lfPerCnt"></span>
@@ -3299,7 +3299,7 @@ function ashiIstUyarLC(q, text) {
       pop.querySelector('[data-act=clear]').onclick = () => { state.set.clear(); paint(); emit(); };
     }
     function paint() {
-      btn.textContent = label() + ' ▾';
+      btn.textContent = '🚑 ' + label() + ' ▾';
       btn.classList.toggle('on', state.set.size > 0 && state.set.size < names().length);
       if (openPop && openPop.wrap === wrap) { const top = pop.querySelector('.ist-pk-list'); const st = top ? top.scrollTop : 0; renderPop(); const nl = pop.querySelector('.ist-pk-list'); if (nl) nl.scrollTop = st; }
     }
@@ -5574,11 +5574,11 @@ function buildIstasyonData(gorev) {
 function renderPersonelDetay() {
   const ayGun = getAyGunSayisi();
   lfSecenek('personel');
-  const fq = lfNorm(lfEl('lfPerQ').value).trim(), fi = lfEl('lfPerIst').value, fbS = lfMs('lfPerBrans'), fb = fbS.size;
+  const fq = lfNorm(lfEl('lfPerQ').value).trim(), fi = ashiIstSecim('lfPerIst'), fbS = lfMs('lfPerBrans'), fb = fbS.size;
   const tumGrup = buildIstasyonData(activeGorev);
   let toplamP = 0, gorunenP = 0;
   tumGrup.forEach(i => toplamP += i.personeller.length);
-  const istGroups = tumGrup.filter(i => !fi || i.ist === fi).map(i => {
+  const istGroups = tumGrup.filter(i => !fi.length || fi.includes(i.ist)).map(i => {
     const istEsles = fq && lfNorm(i.ist).includes(fq);
     const pl = i.personeller.filter(p =>
       (!fb || fbS.has((p.kadro_brans||'').trim())) &&
@@ -5586,7 +5586,7 @@ function renderPersonelDetay() {
     return Object.assign({}, i, { personeller: pl });
   }).filter(i => i.personeller.length);
   istGroups.forEach(i => gorunenP += i.personeller.length);
-  lfEl('lfPerCnt').textContent = (fq||fi||fb) ? `${gorunenP} / ${toplamP} personel · ${istGroups.length} istasyon` : `${toplamP} personel`;
+  lfEl('lfPerCnt').textContent = (fq||fi.length||fb) ? `${gorunenP} / ${toplamP} personel · ${istGroups.length} istasyon` : `${toplamP} personel`;
   lfIsaret();
   const tbody = document.getElementById('tbodyPersonelDetay');
   // Sağdaki süre sütunları: açık nöbet branşındaki saat, kadro süresi, tüm branşlardaki toplam çalışma ve fark (Personel Özeti ile aynı hesap)
@@ -5717,7 +5717,7 @@ function renderIstasyonOzet() {
 
 function lfEl(id){return document.getElementById(id);}
 function lfOpts(id, vals, all){
-  const e=lfEl(id); if(!e) return; const cur=e.value;
+  const e=lfEl(id); if(!e) return; if(e.__istPicker){ e.innerHTML='<option value="">'+all+'</option>'+vals.map(v=>'<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>').join(''); return; } const cur=e.value;
   e.innerHTML='<option value="">'+all+'</option>'+vals.map(v=>'<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>').join('');
   e.value=vals.includes(cur)?cur:'';
 }
@@ -5764,11 +5764,11 @@ const lfNorm=t=>String(t||'').toLocaleLowerCase('tr');
 function filterTable() {
   lfSecenek('liste');
   const q = lfNorm(lfEl('searchInput').value).trim();
-  const ist = lfEl('lfListeIst').value, brS = lfMs('lfListeBrans'), br = brS.size, du = lfEl('lfListeDurum').value;
+  const ist = ashiIstSecim('lfListeIst'), brS = lfMs('lfListeBrans'), br = brS.size, du = lfEl('lfListeDurum').value;
   const data = allData[activeGorev];
   const nd = du==='muaf'||du==='nd' ? ashiNobetDisiOzet() : null;
   filteredRows = data.filter(r => {
-    if (ist && r.asilIst !== ist) return false;
+    if (ist.length && !ist.includes(r.asilIst)) return false;
     if (br && !brS.has((r.kadro_brans||'').trim())) return false;
     if (du==='coklu' && !r.coklu) return false;
     if (du==='sifir' && r.toplamSaat>0) return false;
@@ -5776,7 +5776,7 @@ function filterTable() {
     if (!q) return true;
     return lfNorm(r.asilIst).includes(q) || lfNorm(r.ad).includes(q) || lfNorm(r.soyad).includes(q) || String(r.tc).includes(q) || lfNorm(r.kadro_brans).includes(q);
   });
-  const aktif = q||ist||br||du;
+  const aktif = q||ist.length||br||du;
   lfEl('searchCount').textContent = aktif ? `${filteredRows.length} / ${data.length} sonuç` : `${data.length} kayıt`;
   lfIsaret();
   currentPage = 1;
