@@ -9037,6 +9037,29 @@ function ashiNavSenk() {
   { const anaAcik = document.body.classList.contains('ana-acik'); if (anaAcik) nav.querySelectorAll('button.an-it').forEach(e => e.classList.remove('on')); document.getElementById('anAna')?.classList.toggle('on', anaAcik); document.getElementById('anKontrol')?.classList.toggle('on', !anaAcik && !!kontrolAcik && !acikOv.length); }
   nav.querySelectorAll('details').forEach(d => { const k = !!d.querySelector('.an-sub .on'); d.querySelector('summary')?.classList.toggle('has-on', k); if (k) d.open = true; });
   const p = document.getElementById('anPeriod'); if (p) p.textContent = (typeof reportMonthInfo !== 'undefined' && reportMonthInfo) ? archiveMonthLabel(reportMonthInfo) : 'Rapor yüklenmedi';
+  ashiOturumDurumu(var_, acikOv, kontrolAcik);
+}
+// HUSER 13.56: başka modüle gidip dönünce son açık sayfa (liste / istasyon / analiz / ana sayfa) yeniden açılır. Oturum boyunca saklanır;
+// çıkışta ve yeni girişte ana uygulama siler (sessionStorage 'ashi_oturum_v1').
+function ashiOturumDurumu(raporVar, acikOv, kontrolAcik) {
+  try {
+    const temiz = v => String(v || '').replace(/[^a-zA-Z0-9_-]/g, '');
+    if (!window.__ashiGeri) {
+      if (!raporVar) return;
+      window.__ashiGeri = 1;
+      const o = JSON.parse(sessionStorage.getItem('ashi_oturum_v1') || 'null'); if (!o) return;
+      let sel = null;
+      if (o.ana) sel = '#anAna';
+      else if (o.ov) sel = `#asideNav [data-ov="${temiz(o.ov)}"]` + (o.ag ? `[data-ag="${temiz(o.ag)}"]` : '');
+      else if (o.kontrol) sel = '#anKontrol';
+      else if (o.g && o.v && ['ef', 'ysp', 'sur'].includes(o.g)) sel = `#asideNav [data-g="${temiz(o.g)}"][data-v="${temiz(o.v)}"]`;
+      else if (o.g) sel = `#asideNav [data-g="${temiz(o.g)}"]`;
+      const el = sel && document.querySelector(sel);
+      if (el && !el.disabled) setTimeout(() => el.click(), 0);
+      return;
+    }
+    sessionStorage.setItem('ashi_oturum_v1', JSON.stringify({g: typeof activeGorev !== 'undefined' ? activeGorev : '', v: typeof activeView !== 'undefined' ? activeView : '', ov: (acikOv || [])[0] || '', ag: window.__anG || '', ana: document.body.classList.contains('ana-acik'), kontrol: !!kontrolAcik}));
+  } catch (e) { /* yoksay */ }
 }
 
 // ═══════════════════════════════════════════════════════════
