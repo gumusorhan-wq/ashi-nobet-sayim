@@ -1639,6 +1639,10 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 </div>
 
 <script>
+// HUSER 13.45: hilalli ambulans simgesi (artı yerine ay; 112 ortak simgesiyle aynı çizim)
+const HUSER_AMB_SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"15\" height=\"15\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\" style=\"vertical-align:-0.18em\"><path d=\"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2\"/><path d=\"M19 18h2a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.684-.948l-1.923-.641a1 1 0 0 1-.578-.502l-1.539-3.076A1 1 0 0 0 16.382 8H14\"/><path d=\"M9 18h6\"/><path d=\"M9.573 8.057A2.5 2.5 0 1 0 9.573 11.943A2 2 0 1 1 9.573 8.057Z\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/></svg>";
+</script>
+<script>
 // HUSER 13.38: açılır paneller (istasyon / seçim) yukarı açılırken sabit rapor başlığının (yan menü düzeni) altına sığdırılır;
 // pencere katmanı başlığın altında kaldığı için panelin üstü (Temizle / Uygula) başlığın arkasında kalıyordu (telefon).
 function ashiUstSinir() {
@@ -3437,7 +3441,7 @@ function ashiIstUyarLC(q, text) {
       };
     }
     function paint() {
-      btn.innerHTML = '<span class="pk-ik">🚑</span><span class="pk-yz">' + escapeHtml(label()) + '</span><i>▾</i>'; btn.title = label();
+      btn.innerHTML = '<span class="pk-ik">' + HUSER_AMB_SVG + '</span><span class="pk-yz">' + escapeHtml(label()) + '</span><i>▾</i>'; btn.title = label();
       btn.classList.toggle('on', state.set.size > 0 && state.set.size < names().length);
       if (openPop && openPop.wrap === wrap) { state.taslak = null; const top = pop.querySelector('.ist-pk-list'); const st = top ? top.scrollTop : 0; renderPop(); const nl = pop.querySelector('.ist-pk-list'); if (nl) nl.scrollTop = st; }
     }
