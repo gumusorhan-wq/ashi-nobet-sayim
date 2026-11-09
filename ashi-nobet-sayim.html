@@ -6753,8 +6753,9 @@ function ashiIzinTuru(type) {
   if (/refakat/.test(t)) return {kod:'Rİ', alan:S};
   if (/idari/.test(t)) return {kod:'İİ', alan:S};
   if (/sendikal/.test(t)) return {kod:'Sİ', alan:S};
+  if (/mazeret/.test(t)) return {kod:'Mİ', alan:S};   // Sürüm 13.58: resmî cetvelde mazeret izni "Mİ"
   if (/çal[ıi][şs]ma\s*izn|calisma\s*izn/.test(t)) return {kod:'Çİ', alan:'Çalışma İzinli Gün Sayısı'};
-  return {kod:'Sİ', alan:S};   // mazeret vb. diğer sosyal izinler
+  return {kod:'Sİ', alan:S};   // diğer sosyal izinler
 }
 // Günlük izin bilgisi: tam gün izinler ("1 Yİ") ve saatlik izinler ("3 İİ"; mesaiyi bölerek "M" üretir). Muafiyet kayıtları döküme yazılmaz.
 function ashiIzinGunleri(tc, istihdam, info) {
@@ -6798,19 +6799,44 @@ function dokumNightHours(startMs, endMs) {
   }
   return total / EXCEL_HOUR_MS;
 }
-function dokumTatilGunu(ms) { const k = new Date(ms).toISOString().slice(0, 10); if (ASHI_RESMI_TATIL[k] !== undefined) return true; const o = ashiOzelGunler[k]; return !!o && (o.tur === 'bayram' || o.tur === 'resmi'); }
-// Bayram / milli tatil günlerine (arife dahil) düşen gece süresi
+// Sürüm 13.58: bayram / tatil aralıkları. Arife 13:00'te başlar, tatil günleri 00:00–24:00.
+// Milli bayram: 23 Nisan, 19 Mayıs, 30 Ağustos, 29 Ekim (28 Ekim arifesiyle); resmî tatil: 1 Ocak, 1 Mayıs, 15 Temmuz; kalanlar dini bayram.
+const ASHI_MILLI_GUN = ['04-23', '05-19', '08-30', '10-28', '10-29'], ASHI_RESMI_GUN = ['01-01', '05-01', '07-15'];
+// Resmî Döküm Cetveli'nin "Dini / Milli Bayram, Resmi Tatil" saat sütunları bu aralıkları 1 saat erken sayıyor
+// (Ekim 2026 raporu: 28 Ekim 12:00 – 29 Ekim 23:00). Aynı sonucu vermek için bu sütunlarda aralık 1 saat geri kaydırılır.
+const ASHI_TATIL_SUTUN_KAYMA = 1;
+function ashiArifeGunu(ms) { const k = new Date(ms).toISOString().slice(0, 10), o = ashiOzelGunler[k]; return ASHI_RESMI_TATIL[k] === 'A' || (!!o && o.tur === 'yarim'); }
+function ashiTatilAraliklari(y0, y1) {
+  const H = EXCEL_HOUR_MS, out = [], gun = {};
+  Object.entries(ASHI_RESMI_TATIL).forEach(([k, w]) => { gun[k] = w === 'A' ? 'A' : 'T'; });
+  Object.entries(ashiOzelGunler || {}).forEach(([k, o]) => { if (o && (o.tur === 'bayram' || o.tur === 'resmi')) gun[k] = 'T'; });
+  Object.keys(gun).sort().forEach(k => {
+    const y = +k.slice(0, 4); if (y < y0 || y > y1) return;
+    const md = k.slice(5), ds = Date.parse(k + 'T00:00:00Z');
+    const o = ashiOzelGunler[k], tur = ASHI_MILLI_GUN.includes(md) ? 'Milli Bayram' : ASHI_RESMI_GUN.includes(md) || (o && o.tur === 'resmi') ? 'Resmi Tatil' : 'Dini Bayram';
+    const s = ds + (gun[k] === 'A' ? 13 * H : 0), e = ds + 24 * H, son = out[out.length - 1];
+    if (son && son.tur === tur && son.e === s) son.e = e; else out.push({tur, s, e});
+  });
+  return out;
+}
+// Bayram / tatil günlerine (arife 13:00'ten sonrası dahil) düşen gece (20:00–08:00) süresi
 function dokumNightHolidayHours(startMs, endMs) {
   if (!(endMs > startMs)) return 0;
-  const DAY = 24 * EXCEL_HOUR_MS; let total = 0;
-  for (let day = Math.floor(startMs / DAY) * DAY - DAY; day <= endMs; day += DAY) {
-    const x = Math.max(day + 20 * EXCEL_HOUR_MS, startMs), y = Math.min(day + 32 * EXCEL_HOUR_MS, endMs);
-    if (!(y > x)) continue;
-    const m = day + DAY;
-    if (x < m && dokumTatilGunu(day)) total += Math.min(y, m) - x;
-    if (y > m && dokumTatilGunu(m)) total += y - Math.max(x, m);
+  const H = EXCEL_HOUR_MS, y = new Date(startMs).getUTCFullYear(), A = ashiTatilAraliklari(y - 1, y + 1);
+  let total = 0;
+  for (let day = Math.floor(startMs / (24 * H)) * 24 * H - 24 * H; day <= endMs; day += 24 * H) {
+    const x = Math.max(day + 20 * H, startMs), z = Math.min(day + 32 * H, endMs);
+    if (!(z > x)) continue;
+    A.forEach(a => { const o = Math.min(z, a.e) - Math.max(x, a.s); if (o > 0) total += o; });
   }
-  return total / EXCEL_HOUR_MS;
+  return total / H;
+}
+// "Dini Bayram / Milli Bayram / Resmi Tatil" sütunları: bu aralıklarda çalışılan süre (saat; nöbet, mesai ve eğitim)
+function ashiTatilSaatleri(evs, info) {
+  const H = EXCEL_HOUR_MS, kay = ASHI_TATIL_SUTUN_KAYMA * H, A = ashiTatilAraliklari(info.year - 1, info.year + 1), out = {'Dini Bayram':0, 'Milli Bayram':0, 'Resmi Tatil':0};
+  evs.forEach(ev => A.forEach(a => { const o = Math.min(ev.endMs, a.e - kay) - Math.max(ev.startMs, a.s - kay); if (o > 0) out[a.tur] += o / H; }));
+  Object.keys(out).forEach(k => { out[k] = Math.round(out[k] * 100) / 100; });
+  return out;
 }
 // Tüm kaynaklardan (istasyon nöbetleri, Komuta/Başhekimlik, Diğer görev, Mesai, Eğitim, Koordinasyon, izin) kişi bazında olay toplar.
 function ashiDokumTopla(info) {
@@ -6830,7 +6856,18 @@ function ashiDokumTopla(info) {
     let hours = Number(ev.hours); if (!(hours > 0)) hours = (endMs - ev.startMs) / H;
     if (!(hours > 0)) return;
     const k = `${ev.startMs}|${endMs}`; if (x.events.has(k)) return;
-    x.events.set(k, {startMs:ev.startMs, endMs, hours, kind:ev.kind || 'N', mesai:!!ev.mesai});
+    // Sürüm 13.58: aynı görev farklı listelerden (istasyon / Komuta / Diğer / Ay başı) ikinci kez gelirse bir kez yazılır.
+    // Süreleri çakışan iki kayıttan kısa olanın en az yarısı ötekiyle örtüşüyorsa aynı görev sayılır; uzun olan kalır.
+    // (Eğitim ve mesai kayıtları nöbetle çakışsa da ayrı tutulur; resmî cetvelde "6 EGM" + "12 A" ayrı yazılır.)
+    const tur = ev.kind || 'N';
+    if (tur === 'N') for (const [ek, e] of x.events) {
+      if (e.kind !== 'N') continue;
+      const ort = Math.min(e.endMs, endMs) - Math.max(e.startMs, ev.startMs), kisa = Math.min(e.endMs - e.startMs, endMs - ev.startMs);
+      if (!(ort > 0) || ort < kisa * 0.5) continue;
+      if (endMs - ev.startMs <= e.endMs - e.startMs) return;
+      x.events.delete(ek); if (e.ist && x.istCount[e.ist] > 0) x.istCount[e.ist]--;
+    }
+    x.events.set(k, {startMs:ev.startMs, endMs, hours, kind:tur, mesai:!!ev.mesai, ist:ev.kind !== 'EGM' ? ev.ist || '' : ''});
     if (ev.ist && ev.kind !== 'EGM') x.istCount[ev.ist] = (x.istCount[ev.ist] || 0) + 1;
   };
   ['ef','ysp','sur'].forEach(g => (allData[g] || []).forEach(p => {
@@ -6885,16 +6922,26 @@ function ashiDokumSatirHesapla(x, info) {
     ov.forEach(p => { if (p.s > cur) out.push({...ev, startMs:cur, endMs:p.s, hours:(p.s - cur) / H, kind:'M'}); cur = Math.max(cur, p.e); });
     if (ev.endMs > cur) out.push({...ev, startMs:cur, endMs:ev.endMs, hours:(ev.endMs - cur) / H, kind:'M'});
   });
+  // Sürüm 13.58: arife günü (yarım gün) gündüz mesaisi resmî cetvelde nöbet değil "5 M" (arife mesaisi) yazılır
+  out = out.map(ev => {
+    if (ev.kind === 'EGM' || !ashiArifeGunu(ev.startMs) || ev.hours > 9 + 1e-9) return ev;
+    const sa = new Date(ev.startMs).getUTCHours(); if (sa < 7 || sa > 10) return ev;
+    const h = Math.min(ev.hours, ASHI_ARIFE_SAAT); return {...ev, kind:'M', hours:h, endMs:ev.startMs + h * H};
+  });
   // Resmî cetvelde 6 saat ve altındaki kayıtlar nöbet değil "M" (nöbet dışı mesai) olarak yazılır
   out = out.map(ev => ev.kind === 'N' && ev.hours <= 6 + 1e-9 ? {...ev, kind:'M'} : ev);
   evs = out.sort((a, b) => a.startMs - b.startMs);
+  // Sürüm 13.58: 6 saati aşan eğitim kaydı (ör. "8 EGM") resmî cetvelde Nöbet Çalışma Süresi'ne sayılır; 6 saat ve altı nöbet dışı mesaidir
+  const nobetMi = ev => ev.kind === 'N' || (ev.kind === 'EGM' && ev.hours > 6 + 1e-9);
   let nobet = 0, dis = 0, night = 0, egHi = 0, egHs = 0;
   evs.forEach(ev => {
     const txt = ev.kind === 'N' ? dokumCellCode(ev.hours, ev.startMs) : `${dokumFmt(ev.hours)} ${ev.kind}`;
     cells[dayOf(ev.startMs)].push(txt);
-    if (ev.kind === 'N') { nobet += ev.hours; night += dokumNightHours(ev.startMs, ev.endMs); }
-    else { dis += ev.hours; if (ev.kind === 'EGM') { const wd = new Date(ev.startMs).getUTCDay(); if (wd === 0 || wd === 6) egHs += ev.hours; else egHi += ev.hours; } }
+    if (nobetMi(ev)) nobet += ev.hours; else dis += ev.hours;
+    night += dokumNightHours(ev.startMs, ev.endMs);      // 20:00–08:00 süresi: nöbet ve mesai (M) birlikte
+    if (ev.kind === 'EGM') { const wd = new Date(ev.startMs).getUTCDay(); if (wd === 0 || wd === 6) egHs += ev.hours; else egHi += ev.hours; }
   });
+  const tatilSaat = ashiTatilSaatleri(evs, info);
   izg.perDay.forEach((pd, i) => {
     if (pd.full) izinCells[i].push(`1 ${pd.full.kod}`);
     pd.part.forEach(p => izinCells[i].push(`${dokumFmt(p.saat)} ${p.kod}`));
@@ -6904,17 +6951,17 @@ function ashiDokumSatirHesapla(x, info) {
   let cum = 0, post = 0, postBayram = 0;
   evs.forEach(ev => {
     const before = cum; cum += ev.hours;
-    if (ev.kind === 'N' && cum > kadro + 1e-9) {
+    if (nobetMi(ev) && cum > kadro + 1e-9) {
       const p = Math.floor(cum - Math.max(kadro, before) + 1e-9);
       if (p > 0) { post += dokumNightHours(ev.endMs - p * H, ev.endMs); postBayram += dokumNightHolidayHours(ev.endMs - p * H, ev.endMs); }
     }
   });
   const rows = cells.map((c, i) => c.concat(izinCells[i]).join('\n'));
-  return {rows, kadro, nobet, dis, night, egHi, egHs, post, postBayram, counts:izg.counts, calis:nobet + dis};
+  return {rows, kadro, nobet, dis, night, egHi, egHs, post, postBayram, counts:{...izg.counts, ...tatilSaat}, calis:nobet + dis};
 }
 // Sürüm 12.39 (gömülü mod): Planlama'daki (EKİP listesi) çalıştığı birim — 'Geçici Görevli Olduğu Birim' için.
 // Ay (il + YYYY-AA) başına bir kez sunucudan alınır; gelince Döküm Cetveli ekranı açıksa yeniden çizilir.
-const ashiEkipBirim = {anahtar:'', durum:'', birimler:{}, ay:null, bekleyen:[]};
+const ashiEkipBirim = {anahtar:'', durum:'', birimler:{}, kadro:{}, ay:null, bekleyen:[]};
 function ashiEkipBirimAnahtar(info) {
   const E = window.ASHI_ENTEG;
   if (!ashiEnteg() || !E.api || typeof E.api.ekipBirim !== 'function' || !info || !info.year || !info.month) return '';
@@ -6927,18 +6974,43 @@ function ashiEkipBirimIste(info, sonra) {
   if (S.anahtar === a && S.durum === 'tamam') return true;
   if (sonra) S.bekleyen.push(sonra);
   if (S.anahtar === a && S.durum === 'yukleniyor') return false;
-  S.anahtar = a; S.durum = 'yukleniyor'; S.birimler = {}; S.ay = null;
+  S.anahtar = a; S.durum = 'yukleniyor'; S.birimler = {}; S.kadro = {}; S.ay = null;
   const i = a.lastIndexOf('|');
   Promise.resolve().then(() => window.ASHI_ENTEG.api.ekipBirim(a.slice(0, i), a.slice(i + 1)))
-    .then(r => { if (S.anahtar !== a) return; S.birimler = (r && r.birimler) || {}; S.ay = (r && r.ay) || null; })
+    .then(r => { if (S.anahtar !== a) return; S.birimler = (r && r.birimler) || {}; S.kadro = (r && r.kadro) || {}; S.ay = (r && r.ay) || null; })
     .catch(err => { if (S.anahtar === a) { S.birimler = {}; S.ay = null; } console.warn('Planlama (EKİP) birimleri alınamadı:', err && err.message || err); })
     .finally(() => {
       if (S.anahtar !== a) return;
-      S.durum = 'tamam';
+      S.durum = 'tamam'; try { krCache.clear(); } catch (e) {}
       S.bekleyen.splice(0).forEach(f => { try { f(); } catch (e) { console.warn(e); } });
       if (document.getElementById('istasyonPersonelDokum')?.style.display === 'block') ashiDokumEkranCiz();
     });
   return false;
+}
+// Sürüm 13.58: Planlama'daki kadro birimi (o ayın ya da en yakın planın kişi listesi)
+// Kadro birimi ay ay pek değişmez: Kontrol raporundaki arşiv aylarında da son yüklenen (aynı ilin) liste kullanılır.
+function ashiEkipKadro(info, tc) {
+  const S = ashiEkipBirim, a = ashiEkipBirimAnahtar(info);
+  if (!a || S.durum !== 'tamam' || S.anahtar.split('|')[0] !== a.split('|')[0]) return '';
+  return (S.kadro || {})[String(tc || '').replace(/\D/g, '')] || '';
+}
+// Sürüm 13.58: Döküm Cetveli / Kontrol raporu "Kadrosunun Olduğu Birim" ve "Geçici Görevli Olduğu Birim".
+// Kadro: Planlama kadro birimi → İzin raporundaki birim → en çok nöbet tutulan istasyon (eski kural) → Komuta / Başhekimlik.
+// Geçici: Planlama'daki görev yeri; yoksa Komuta / Başhekimlik kaydı; kadro biliniyorsa ve en çok başka istasyonda nöbet tutmuşsa o istasyon.
+function ashiDokumBirimleri(x, info, adaylar) {
+  const cok = Object.keys(x.istCount || {}).sort((a, b) => x.istCount[b] - x.istCount[a])[0] || '';
+  const ik = b => b ? ashiPlanBirimIk(b, adaylar) : '', K = ashiBirimAnahtar;
+  const pk = ashiEkipKadro(info, x.tc), bilinen = ik(pk || x.izinBirim);
+  const kadro = bilinen || ik(x.asilIst || cok) || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
+  if (!kadro) return {kadro:'', gecici:''};
+  const pb = ashiEkipBirimi(info, x.tc);
+  let gecici = '';
+  if (pb) gecici = ik(pb);
+  else if (x.komuta) gecici = ASHI_KOMUTA_BIRIM;
+  else if (x.bashek) gecici = ASHI_BASHEK_BIRIM;
+  else if (bilinen && cok) gecici = ik(cok);
+  if (gecici && K(gecici) === K(kadro)) gecici = '';
+  return {kadro, gecici};
 }
 function ashiEkipBirimi(info, tc) {
   const S = ashiEkipBirim, a = ashiEkipBirimAnahtar(info);
@@ -6972,11 +7044,8 @@ function buildDokumCetveliAoa() {
   const personQ = String(document.getElementById('istasyonPersonelPerson')?.value || '').trim().toLocaleLowerCase('tr-TR');
   const r2 = v => Math.round(v * 100) / 100;
   ashiEkipBirimIste(info);
-  const list = [...ashiDokumTopla(info).values()].map(x => {
-    const own = x.asilIst || Object.keys(x.istCount).sort((a, b) => x.istCount[b] - x.istCount[a])[0] || x.izinBirim || '';
-    const kadroBirim = own || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
-    return {...x, asil:kadroBirim};
-  }).filter(x => x.asil && ashiIstUyarLC(stationQ, x.asil) && (!personQ || `${x.ad} ${x.soyad} ${x.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  const tum = [...ashiDokumTopla(info).values()], adaylar = [...new Set(tum.map(x => x.asilIst).filter(Boolean))];
+  const list = tum.map(x => { const b = ashiDokumBirimleri(x, info, adaylar); return {...x, asil:b.kadro, gecici:b.gecici}; }).filter(x => x.asil && ashiIstUyarLC(stationQ, x.asil) && (!personQ || `${x.ad} ${x.soyad} ${x.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
   list.sort((a, b) => trColl.compare(a.asil, b.asil) || trColl.compare(`${a.ad} ${a.soyad}`.trim(), `${b.ad} ${b.soyad}`.trim()) || trColl.compare(a.tc, b.tc));
   const header = ['Sıra No','TC Kimlik No','Adı Soyadı','İl','Kadrosunun Olduğu Birim','Geçici Görevli Olduğu Birim','Birim Tipi','Kadro Türü','Kadro Unvanı','Branşı'];
   for (let d = 1; d <= days; d++) header.push(`${d} ${DOKUM_AY_ADLARI[month]} ${year} ${DOKUM_GUN_ADLARI[new Date(Date.UTC(year, month - 1, d)).getUTCDay()]}`);
@@ -6994,14 +7063,10 @@ function buildDokumCetveliAoa() {
   };
   const hesap = list.map(x => [x, ashiDokumSatirHesapla(x, info)]).filter(([x, s]) => uyar(x, s));
   list.length = 0; hesap.forEach(([x]) => list.push(x));
-  const asilAdlar = [...new Set(list.map(x => x.asil))];
   hesap.forEach(([x, s], i) => {
-    // Planlama'da (EKİP) çalıştığı birim varsa: kadro birimiyle aynı istasyonsa boş, değilse o birim; yoksa eski Komuta / Başhekimlik kuralı
-    const pb = ashiEkipBirimi(info, x.tc);
-    let gecici = x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : '');
-    if (pb) gecici = ashiBirimAnahtar(pb) === ashiBirimAnahtar(x.asil) ? '' : ashiPlanBirimIk(pb, asilAdlar);
+    const gecici = x.gecici;
     const tip = x.komuta ? 'İASB Komuta Birimi' : (x.bashek ? 'İASB Başhekimlik' : 'İASB İstasyon');
-    const row = [i + 1, x.tc, `${x.ad} ${x.soyad}`.trim(), x.il || 'MANİSA', ashiBirimKodlu(x.asil), gecici && gecici !== x.asil ? ashiBirimKodlu(gecici) : '', tip, x.istihdam, x.unvan, x.ofBrans || x.brans];
+    const row = [i + 1, x.tc, `${x.ad} ${x.soyad}`.trim(), x.il || 'MANİSA', ashiBirimKodlu(x.asil), gecici ? ashiBirimKodlu(gecici) : '', tip, x.istihdam, x.unvan, x.ofBrans || x.brans];
     s.rows.forEach(c => row.push(c));
     const tail = DOKUM_TAIL_HEADERS.map(() => 0);
     tail[ti.kadro] = r2(s.kadro); tail[ti.calis] = r2(s.calis); tail[ti.fark] = r2(s.calis - s.kadro);
@@ -7145,9 +7210,9 @@ async function krAyHesapla(m) {
   const r2 = v => Math.round(v * 100) / 100, out = [];
   try {
     if (!m.cur) { allData = nAll; specialDutyLists = nSpec; izinRaporRecords = nIzin; reportMonthInfo = info; }
-    ashiDokumTopla(info).forEach(x => {
-      const own = x.asilIst || Object.keys(x.istCount).sort((a, b) => x.istCount[b] - x.istCount[a])[0] || x.izinBirim || '';
-      const birim = own || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
+    const tum = [...ashiDokumTopla(info).values()], adaylar = [...new Set(tum.map(x => x.asilIst).filter(Boolean))];
+    tum.forEach(x => {
+      const birim = ashiDokumBirimleri(x, info, adaylar).kadro;      // Döküm Cetveli ile aynı kadro birimi
       if (!birim) return;
       const s = ashiDokumSatirHesapla(x, info), c = s.counts || {};
       out.push({tc:x.tc, ad:`${x.ad} ${x.soyad}`.trim(), birim, istihdam:x.istihdam || '', unvan:x.unvan || '',
@@ -7161,6 +7226,7 @@ async function krAyHesapla(m) {
 }
 async function krHesapla() {
   const seq = ++krSeq, host = document.getElementById('krTablo'); if (!host) return;
+  try { if (reportMonthInfo && !ashiEkipBirimIste(reportMonthInfo, () => krHesapla())) { host.innerHTML = '<div style="padding:24px;color:#64748b;font-size:13px">Planlama kadro birimleri alınıyor…</div>'; return; } } catch (e) {}
   const secili = krAylar.filter(m => krSecili.has(m.key));
   if (!secili.length) { krSonuc = null; krCiz(); return; }
   host.innerHTML = '<div style="padding:24px;color:#64748b;font-size:13px">Hesaplanıyor…</div>';
