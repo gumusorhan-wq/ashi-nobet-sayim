@@ -2022,6 +2022,11 @@ function refreshLoadedReportState() {
   renderArchivePanel();
   autoFillBoundaryFromArchive();
 }
+// Sürüm 13.57: Arşiv listesinden bir ay seçilince ay açılır ve İstasyon Listesi'ne geçilir
+async function ashiArsivAyAc(key, slot) {
+  await loadArchivedMonth(key, slot);
+  if (archiveActiveKey === key) { try { switchGorev('istasyon'); window.scrollTo(0, 0); } catch (e) {} }
+}
 async function loadArchivedMonth(key, slot) {
   try {
     const rec = await archiveGet(key);
@@ -2193,7 +2198,7 @@ function archiveViewHtml(records) {
       const s = rec.slots?.[slot];
       if (!s) return '<span class="arc-miss">—</span>';
       const on = rec.key === archiveActiveKey && slot === archiveActiveSlot ? ' on' : '';
-      return `<span class="arc-slot${on}"><button type="button" class="arc-slot-open" title="${escapeHtml(s.sourceFileName || 'Excel raporu')} · ${escapeHtml(archiveDateLabel(s.savedAt))}${s.anon ? ' · Drive\'dan (TC/ad yıldızlı)' : ''}" onclick="event.stopPropagation();loadArchivedMonth('${k}','${slot}')">${s.anon ? '🔒' : '✓'} ${escapeHtml(archiveShortDate(s.savedAt))}<small>· ${archivePeopleCount(s).toLocaleString('tr-TR')} kişi · ${archiveSlotTotals(s).saat.toLocaleString('tr-TR')} sa · ${Math.round(archiveSlotTotals(s).gun).toLocaleString('tr-TR')} gün</small></button><button type="button" class="arc-x" title="${ASHI_SLOT_LABELS[slot]} kaydını sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}','${slot}')">✕</button></span>`;
+      return `<span class="arc-slot${on}"><button type="button" class="arc-slot-open" title="${escapeHtml(s.sourceFileName || 'Excel raporu')} · ${escapeHtml(archiveDateLabel(s.savedAt))}${s.anon ? ' · Drive\'dan (TC/ad yıldızlı)' : ''}" onclick="event.stopPropagation();ashiArsivAyAc('${k}','${slot}')">${s.anon ? '🔒' : '✓'} ${escapeHtml(archiveShortDate(s.savedAt))}<small>· ${archivePeopleCount(s).toLocaleString('tr-TR')} kişi · ${archiveSlotTotals(s).saat.toLocaleString('tr-TR')} sa · ${Math.round(archiveSlotTotals(s).gun).toLocaleString('tr-TR')} gün</small></button><button type="button" class="arc-x" title="${ASHI_SLOT_LABELS[slot]} kaydını sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}','${slot}')">✕</button></span>`;
     };
     const izinHucre = (izin, part) => `${izin ? `<span class="arc-slot"><span class="arc-izin" title="${escapeHtml(izin.fileName || '')} · ${escapeHtml(archiveDateLabel(izin.savedAt))}${izin.anon ? ' · Drive\'dan (TC/ad yıldızlı)' : ''}">${izin.anon ? '🔒' : '📄'} ${(izin.records || []).length.toLocaleString('tr-TR')} kayıt</span><button type="button" class="arc-x" title="İzin dosyasını sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}','${part}')">✕</button></span>` : '<span class="arc-miss">—</span>'}<button type="button" class="arc-mini" title="${izin ? 'İzin dosyasını değiştir' : 'İzin dosyası yükle'}" onclick="event.stopPropagation();archivePickIzin('${k}','${part === 'izinBasi' ? 'basi' : 'sonu'}')">${izin ? '↻' : '＋ Yükle'}</button>`;
     const yeniIzin = ashiAyIciIzin(rec);
@@ -2206,14 +2211,14 @@ function archiveViewHtml(records) {
     else badge = '<span class="arc-badge off">Yalnız izin</span>';
     if (ashiKayitEski(rec)) badge += ` <span class="arc-badge warn" title="Eski sürümle kaydedilmiş (${escapeHtml([...new Set(Object.values(rec.slots || {}).filter(sl => ashiSlotEski(sl)).map(ashiSlotEksikNe))].join(' / '))} yok): nöbet dosyasını yeniden yükleyip aynı kaydı güncelleyin">⚠ Yeniden yükleyin</span>`;
     const act = rec.key === archiveActiveKey ? ' act' : '';
-    return `<tr class="${act}" onclick="loadArchivedMonth('${k}')">
+    return `<tr class="${act}" onclick="ashiArsivAyAc('${k}')">
       <td class="arc-month">${escapeHtml(archiveMonthLabel(rec.reportMonthInfo))}</td>
       <td>${slotCell('basi')}</td><td>${slotCell('sonu')}</td>
       <td>${izinBasiCell}</td><td>${izinSonuCell}</td>
       <td class="arc-date">${escapeHtml(archiveDateLabel(rec.savedAt))}</td>
       <td>${badge}</td>
       ${ashiDrive.sahip() ? `<td>${ashiDrive.pubMap()[rec.key] === ashiDrive.imza(rec) ? '<span class="arc-badge ok" title="Drive ile aynı">☁ Güncel</span>' : '<span class="arc-badge warn" title="Drive\'a yayınlanmadı / değişti">⬆ Bekliyor</span>'}</td>` : ''}
-      <td class="arc-actions"><button type="button" class="arc-ic" title="Aç" onclick="event.stopPropagation();loadArchivedMonth('${k}')">👁</button><button type="button" class="arc-ic del" title="Ayı tamamen sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}')">🗑</button></td>
+      <td class="arc-actions"><button type="button" class="arc-ic" title="Aç" onclick="event.stopPropagation();ashiArsivAyAc('${k}')">👁</button><button type="button" class="arc-ic del" title="Ayı tamamen sil" onclick="event.stopPropagation();deleteArchivedMonth('${k}')">🗑</button></td>
     </tr>`;
   }).join('');
   return `<div class="arc-card">
@@ -3374,7 +3379,9 @@ function ashiIstUyarLC(q, text) {
   // adı "…BAŞHEKİMLİĞİ" ile başlayan Komuta Kontrol birimi de geliyordu.
   const sade = v => String(v || '').toLocaleLowerCase('tr-TR').replace(/\s*\(?\d{3,7}\)?\s*$/, '').replace(/\s+/g, ' ').trim();
   const t = sade(text);
-  return q.some(x => t === sade(x));
+  // Sürüm 13.57: Başhekimlik / Komuta Kontrol farklı yazımlarla gelir ("MANİSA BAŞHEKİMLİK" ↔ "…AMBULANS SERVİSİ BAŞHEKİMLİĞİ"); birim anahtarıyla eşlenir
+  const oz = v => { const k = ashiBirimAnahtar(v); return k === 'BH' || k === 'KKM' ? k : ''; }, tk = oz(text);
+  return q.some(x => t === sade(x) || (!!tk && tk === oz(x)));
 }
 (function () {
   let openPop = null;
@@ -6995,14 +7002,14 @@ function ashiEkipKadro(info, tc) {
   return (S.kadro || {})[String(tc || '').replace(/\D/g, '')] || '';
 }
 // Sürüm 13.58: Döküm Cetveli / Kontrol raporu "Kadrosunun Olduğu Birim" ve "Geçici Görevli Olduğu Birim".
-// Kadro: Planlama kadro birimi → İzin raporundaki birim → en çok nöbet tutulan istasyon (eski kural) → Komuta / Başhekimlik.
+// Kadro: Planlama kadro birimi → en çok nöbet tutulan istasyon (eski kural) → İzin raporundaki (aktif çalıştığı) birim → Komuta / Başhekimlik.
 // Geçici: kişi Planlama'da varsa yalnız Personel listesindeki "Geçici görev" sütunu (tarihleri o ayı kapsıyorsa; yoksa boş).
 // Planlama'da olmayan kişide eski kural: Komuta / Başhekimlik kaydı ya da kadrosu dışında en çok nöbet tuttuğu istasyon.
 function ashiDokumBirimleri(x, info, adaylar) {
   const cok = Object.keys(x.istCount || {}).sort((a, b) => x.istCount[b] - x.istCount[a])[0] || '';
   const ik = b => b ? ashiPlanBirimIk(b, adaylar) : '', K = ashiBirimAnahtar;
-  const pk = ashiEkipKadro(info, x.tc), bilinen = ik(pk || x.izinBirim);
-  const kadro = bilinen || ik(x.asilIst || cok) || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
+  const pk = ashiEkipKadro(info, x.tc), bilinen = ik(pk);      // İzin raporundaki birim "aktif çalıştığı birim"dir, kadro değil
+  const kadro = bilinen || ik(x.asilIst || cok || x.izinBirim) || (x.komuta ? ASHI_KOMUTA_BIRIM : (x.bashek ? ASHI_BASHEK_BIRIM : ''));
   if (!kadro) return {kadro:'', gecici:''};
   const pb = ashiEkipBirimi(info, x.tc);
   let gecici = '';
@@ -7047,7 +7054,7 @@ function buildDokumCetveliAoa() {
   const r2 = v => Math.round(v * 100) / 100;
   ashiEkipBirimIste(info);
   const tum = [...ashiDokumTopla(info).values()], adaylar = [...new Set(tum.map(x => x.asilIst).filter(Boolean))];
-  const list = tum.map(x => { const b = ashiDokumBirimleri(x, info, adaylar); return {...x, asil:b.kadro, gecici:b.gecici}; }).filter(x => x.asil && ashiIstUyarLC(stationQ, x.asil) && (!personQ || `${x.ad} ${x.soyad} ${x.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  const list = tum.map(x => { const b = ashiDokumBirimleri(x, info, adaylar); return {...x, asil:b.kadro, gecici:b.gecici}; }).filter(x => x.asil && (ashiIstUyarLC(stationQ, x.asil) || (!!x.gecici && ashiIstUyarLC(stationQ, x.gecici))) && (!personQ || `${x.ad} ${x.soyad} ${x.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
   list.sort((a, b) => trColl.compare(a.asil, b.asil) || trColl.compare(`${a.ad} ${a.soyad}`.trim(), `${b.ad} ${b.soyad}`.trim()) || trColl.compare(a.tc, b.tc));
   const header = ['Sıra No','TC Kimlik No','Adı Soyadı','İl','Kadrosunun Olduğu Birim','Geçici Görevli Olduğu Birim','Birim Tipi','Kadro Türü','Kadro Unvanı','Branşı'];
   for (let d = 1; d <= days; d++) header.push(`${d} ${DOKUM_AY_ADLARI[month]} ${year} ${DOKUM_GUN_ADLARI[new Date(Date.UTC(year, month - 1, d)).getUTCDay()]}`);
@@ -7172,7 +7179,7 @@ function exportIstasyonPersonelExcel(sayfa){
 // ===== Kontrol Raporu (resmî döküm cetvelinin sarı/kırmızı sütunları; çoklu ay) =====
 const KR_AYK = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
 const KR_KOLON = [
-  {k:'tc', t:'TC Kimlik No', c:'y'}, {k:'ad', t:'Adı Soyadı', c:'y'}, {k:'birim', t:'Kadrosunun Olduğu Birim', c:''},
+  {k:'tc', t:'TC Kimlik No', c:'y'}, {k:'ad', t:'Adı Soyadı', c:'y'}, {k:'birim', t:'Kadrosunun Olduğu Birim', c:''}, {k:'gecici', t:'Geçici Görevli Olduğu Birim', c:''},
   {k:'istihdam', t:'Kadro Türü', c:'y'}, {k:'unvan', t:'Kadro Unvanı', c:'y'},
   {k:'kadro', t:'Kadro Süresi (*)', c:'y', n:1}, {k:'calis', t:'Çalışma Süresi (*)', c:'y', n:1}, {k:'fark', t:'Fark (*)', c:'y', n:1},
   {k:'yi', t:'Yıllık İzin Gün Sayısı', c:'y', n:1}, {k:'rapor', t:'Raporlu Gün Sayısı', c:'r', n:1}, {k:'sosyal', t:'Sosyal İzinli Gün Sayısı', c:'r', n:1},
@@ -7214,10 +7221,10 @@ async function krAyHesapla(m) {
     if (!m.cur) { allData = nAll; specialDutyLists = nSpec; izinRaporRecords = nIzin; reportMonthInfo = info; }
     const tum = [...ashiDokumTopla(info).values()], adaylar = [...new Set(tum.map(x => x.asilIst).filter(Boolean))];
     tum.forEach(x => {
-      const birim = ashiDokumBirimleri(x, info, adaylar).kadro;      // Döküm Cetveli ile aynı kadro birimi
+      const bb = ashiDokumBirimleri(x, info, adaylar), birim = bb.kadro;      // Döküm Cetveli ile aynı kadro / geçici birim
       if (!birim) return;
       const s = ashiDokumSatirHesapla(x, info), c = s.counts || {};
-      out.push({tc:x.tc, ad:`${x.ad} ${x.soyad}`.trim(), birim, istihdam:x.istihdam || '', unvan:x.unvan || '',
+      out.push({tc:x.tc, ad:`${x.ad} ${x.soyad}`.trim(), birim, gecici:bb.gecici || '', istihdam:x.istihdam || '', unvan:x.unvan || '',
         kadro:r2(s.kadro), calis:r2(s.calis), fark:r2(s.calis - s.kadro),
         yi:c['Yıllık İzin Gün Sayısı'] || 0, rapor:c['Raporlu Gun Sayisi'] || 0, sosyal:c['Sosyal Izinli Gun Sayisi'] || 0,
         egHi:r2(s.egHi), egHs:r2(s.egHs)});
@@ -7245,7 +7252,7 @@ async function krHesapla() {
       const k = r.tc || r.ad; let t = toplam.get(k);
       if (!t) { t = {...r, ayAdet:0, kadro:0, calis:0, fark:0, yi:0, rapor:0, sosyal:0, egHi:0, egHs:0, ayIci:0}; toplam.set(k, t); }
       t.ayAdet++; ['kadro','calis','fark','yi','rapor','sosyal','egHi','egHs','ayIci'].forEach(f => { t[f] += r[f]; });
-      t.birim = r.birim; if (r.istihdam) t.istihdam = r.istihdam; if (r.unvan) t.unvan = r.unvan;
+      t.birim = r.birim; t.gecici = r.gecici || t.gecici || ''; if (r.istihdam) t.istihdam = r.istihdam; if (r.unvan) t.unvan = r.unvan;
     });
   }
   const rows = [...toplam.values()].map(t => { ['kadro','calis','fark','yi','rapor','sosyal','egHi','egHs'].forEach(f => { t[f] = Math.round(t[f] * 100) / 100; }); return t; });
@@ -7265,7 +7272,7 @@ function krFmt(v) { return (Math.round(v * 10) / 10).toLocaleString('tr-TR', {ma
 // Kontrol raporu, üstteki ortak filtreleri (İstasyon seç / Personel adı ile ara) kullanır
 function krAraQ() { return String(document.getElementById('istasyonPersonelPerson')?.value || '').trim().toLocaleLowerCase('tr-TR'); }
 function krIstUyar(birim) { try { return ashiIstUyarLC(ashiIstSecimLC('istasyonPersonelStation'), birim); } catch (e) { return true; } }
-function krSatirUyar(r) { const q = krAraQ(); return (!q || `${r.ad} ${r.tc}`.toLocaleLowerCase('tr-TR').includes(q)) && krIstUyar(r.birim); }
+function krSatirUyar(r) { const q = krAraQ(); return (!q || `${r.ad} ${r.tc}`.toLocaleLowerCase('tr-TR').includes(q)) && (krIstUyar(r.birim) || (!!r.gecici && krIstUyar(r.gecici))); }
 function krFiltreli() {
   if (!krSonuc) return [];
   return krSonuc.rows.filter(krSatirUyar);
@@ -7299,7 +7306,7 @@ function krCiz() {
   if (ozet) ozet.innerHTML = `<b>${krSonuc.aylar.length}</b> ay · <b>${rows.length}</b> kişi · Kadro <b>${krFmt(top('kadro'))}</b> · Çalışma <b>${krFmt(top('calis'))}</b> · Fark <b>${krFmt(top('fark'))}</b> · Yıllık izin <b>${krFmt(top('yi'))}</b> gün · Rapor <b>${krFmt(top('rapor'))}</b> gün · Sosyal izin <b>${krFmt(top('sosyal'))}</b> gün`
     + (eksikIzin.length ? `<div class="kr-warn">⚠ ${escapeHtml(eksikIzin.join(', '))}: izin/rapor dosyası yok; bu aylarda izin günleri 0 görünür ve kadro süresi izin düşülmeden hesaplanır.</div>` : '');
   const th = KR_KOLON.map(c => `<th class="${c.c === 'y' ? 'ky' : (c.c === 'r' ? 'kr' : '')}">${escapeHtml(c.t)}</th>`).join('');
-  const body = rows.slice(0, 1500).map((r, i) => `<tr><td>${i + 1}</td>${KR_KOLON.map(c => { const v = r[c.k]; if (!c.n) return c.k === 'birim' ? `<td title="${escapeHtml(String(v))}">${escapeHtml(ashiIstKisa(String(v)))}</td>` : `<td>${escapeHtml(String(v ?? ''))}</td>`; const cls = c.k === 'fark' ? (v > 0 ? ' kpos' : (v < 0 ? ' kneg' : '')) : ((c.k === 'rapor' || c.k === 'sosyal' || c.k === 'ayIci') && v > 0 ? ' kred' : ''); return `<td class="kn${cls}">${krFmt(v)}</td>`; }).join('')}</tr>`).join('');
+  const body = rows.slice(0, 1500).map((r, i) => `<tr><td>${i + 1}</td>${KR_KOLON.map(c => { const v = r[c.k]; if (!c.n) return c.k === 'birim' || c.k === 'gecici' ? `<td title="${escapeHtml(String(v))}">${escapeHtml(ashiIstKisa(String(v)))}</td>` : `<td>${escapeHtml(String(v ?? ''))}</td>`; const cls = c.k === 'fark' ? (v > 0 ? ' kpos' : (v < 0 ? ' kneg' : '')) : ((c.k === 'rapor' || c.k === 'sosyal' || c.k === 'ayIci') && v > 0 ? ' kred' : ''); return `<td class="kn${cls}">${krFmt(v)}</td>`; }).join('')}</tr>`).join('');
   host.innerHTML = `<table class="kr-table"><thead><tr><th>Sıra</th>${th}</tr></thead><tbody>${body || '<tr><td colspan="14" style="padding:18px;color:#64748b">Kayıt bulunamadı.</td></tr>'}</tbody></table>`;
 }
 function krPickHtml() {
@@ -7335,7 +7342,7 @@ function exportKontrolRaporuExcel() {
     const aoa = [['Sıra No', ...KR_KOLON.map(c => c.t)]];
     rows.forEach((r, i) => aoa.push([i + 1, ...KR_KOLON.map(c => c.n ? (Number(r[c.k]) || 0) : (r[c.k] ?? ''))]));
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [{wch:6}, {wch:13}, {wch:26}, {wch:44}, {wch:30}, {wch:26}, {wch:11}, {wch:11}, {wch:9}, {wch:11}, {wch:11}, {wch:11}, {wch:12}, {wch:12}, {wch:14}];
+    ws['!cols'] = [{wch:6}, {wch:13}, {wch:26}, {wch:44}, {wch:44}, {wch:30}, {wch:26}, {wch:11}, {wch:11}, {wch:9}, {wch:11}, {wch:11}, {wch:11}, {wch:12}, {wch:12}, {wch:14}];
     ws['!rows'] = [{hpt:48}];
     ws['!autofilter'] = {ref:XLSX.utils.encode_range({s:{r:0, c:0}, e:{r:rows.length, c:KR_KOLON.length}})};
     ws['!freeze'] = {xSplit:3, ySplit:1};
