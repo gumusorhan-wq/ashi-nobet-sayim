@@ -1661,7 +1661,7 @@ const LOGO_B64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAHgAAAB4CAIAAAC2
 // ═══════════════════════════════════════════════════════════
 // GLOBAL STATE
 // ═══════════════════════════════════════════════════════════
-const trColl = new Intl.Collator('tr');
+const trColl = new Intl.Collator('tr', {numeric: true});      // Sürüm 13.57: YUNUSEMRE 9 → 10
 let allData   = { ef:[], ysp:[], sur:[] };
 let allCoklu  = { ef:[], ysp:[], sur:[] };
 let specialDutyLists = { komuta:[], bashekimlik:[] };
@@ -3414,7 +3414,7 @@ function ashiIstUyarLC(q, text) {
       const all = names(), T = state.taslak || (state.taslak = new Set(state.set));
       const groups = {};
       all.forEach(n => { (groups[ashiIstIlce(n)] = groups[ashiIstIlce(n)] || []).push(n); });
-      const ilceler = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'tr'));
+      const ilceler = Object.keys(groups).sort((a, b) => trColl.compare(a, b));
       const q = state.q.trim().toLocaleLowerCase('tr-TR');
       const uyar = n => !q || n.toLocaleLowerCase('tr-TR').includes(q) || ashiIstIlce(n).toLocaleLowerCase('tr-TR').includes(q);
       const gor = all.filter(uyar);
@@ -5945,7 +5945,7 @@ function lfOpts(id, vals, all){
   e.innerHTML='<option value="">'+all+'</option>'+vals.map(v=>'<option value="'+escapeHtml(v)+'">'+escapeHtml(v)+'</option>').join('');
   e.value=vals.includes(cur)?cur:'';
 }
-const lfSort=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>x.localeCompare(y,'tr'));
+const lfSort=a=>[...new Set(a.filter(Boolean))].sort((x,y)=>trColl.compare(x,y));
 let _lfSig={};
 function lfSecenek(v){
   const d=allData[activeGorev]||[];
