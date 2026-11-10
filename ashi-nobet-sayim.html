@@ -6532,7 +6532,8 @@ function ashiOzelBirimSatirlari(stationQ){
   if(!stationQ||!stationQ.length)return [];
   const out={};
   ['komuta','bashekimlik'].forEach(k=>((specialDutyLists||{})[k]||[]).forEach(sp=>(sp.records||[]).forEach(n=>{
-    const ist=String(n.ist||'').trim(),h=Number(n.saat)||0;
+    // Mesai (süresi yazılmamış) kayıtları gün başına en çok 8 saat sayılır (Başhekimlik / KKM gündüz mesaisi; Döküm Cetveli ile uyumlu)
+    const ist=String(n.ist||'').trim(),dur=Number.isFinite(n.startMs)&&Number.isFinite(n.endMs)&&n.endMs>n.startMs?(n.endMs-n.startMs)/EXCEL_HOUR_MS:0,h=Number(n.saat)>0?Number(n.saat):Math.min(dur,8);
     if(!ist||!(h>0)||/refakat/i.test(String(n.gorev||''))||!ashiIstUyarLC(stationQ,ist))return;
     const tc=String(n.tc||sp.tc||'').trim(),ad=n.ad||sp.ad||'',soyad=n.soyad||sp.soyad||'',pk='ozel:'+(tc||`${ad}|${soyad}`)+'|'+ist;
     const p=out[pk]||(out[pk]={personKey:pk,tc,ad,soyad,brans:n.brans||sp.kadro_brans||sp.brans||'',istihdam:n.istihdam||sp.istihdam||'',asilIst:ist,duties:[]});
