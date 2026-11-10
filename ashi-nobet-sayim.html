@@ -7301,7 +7301,19 @@ function krIstUyar(birim) { try { return ashiIstUyarLC(ashiIstSecimLC('istasyonP
 function krSatirUyar(r) { const q = krAraQ(); return (!q || `${r.ad} ${r.tc}`.toLocaleLowerCase('tr-TR').includes(q)) && (krIstUyar(r.birim) || (!!r.gecici && krIstUyar(r.gecici)) || (r.istler || []).some(krIstUyar)); }
 function krFiltreli() {
   if (!krSonuc) return [];
-  return krSonuc.rows.filter(krSatirUyar);
+  return krSirala(krSonuc.rows.filter(krSatirUyar));
+}
+function krSirala(L) {
+  if (!ashiIstSecimLC('istasyonPersonelStation').length) return L;
+  // Sürüm 13.57: birim seçiliyken önce kadrosu orada olanlar, en altta geçici görevli / o ay orada nöbet tutanlar;
+  // geçici birimi boş olanlarda Geçici Görevli Olduğu Birim'e seçili birim (o ay nöbet tuttuğu) yazılır
+  const kendi = [], gelen = [];
+  L.forEach(r => {
+    if (krIstUyar(r.birim)) { kendi.push(r); return; }
+    const g = r.gecici && krIstUyar(r.gecici) ? r.gecici : ((r.istler || []).find(krIstUyar) || r.gecici || '');
+    gelen.push(g === r.gecici ? r : {...r, gecici:g});
+  });
+  return kendi.concat(gelen);
 }
 function krAyIciListe() {
   if (!krSonuc) return [];
@@ -7381,7 +7393,7 @@ function exportKontrolRaporuExcel() {
     }
     XLSX.utils.book_append_sheet(wb, ws, ad.slice(0, 31));
   };
-  const sup = list => list.filter(krSatirUyar);
+  const sup = list => krSirala(list.filter(krSatirUyar));
   const coklu = krSonuc.aylar.length > 1;
   yap(sup(krSonuc.rows), coklu ? 'Toplam (' + krSonuc.aylar.length + ' ay)' : 'Kontrol Raporu');
   if (coklu) krSonuc.aylar.forEach(a => yap(sup(a.rows.slice().sort((x, y) => trColl.compare(x.birim, y.birim) || trColl.compare(x.ad, y.ad))), a.key));
