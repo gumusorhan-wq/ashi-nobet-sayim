@@ -2025,7 +2025,7 @@ function refreshLoadedReportState() {
 // Sürüm 13.57: Arşiv listesinden bir ay seçilince ay açılır ve İstasyon Listesi'ne geçilir
 async function ashiArsivAyAc(key, slot) {
   await loadArchivedMonth(key, slot);
-  if (archiveActiveKey === key) { try { switchGorev('istasyon'); window.scrollTo(0, 0); } catch (e) {} }
+  if (archiveActiveKey === key) { try { switchGorev('istasyon'); window.scrollTo(0, 0); if (document.getElementById('krTablo') && document.getElementById('krTablo').offsetParent) showKontrolRaporuModal(); } catch (e) {} }
 }
 async function loadArchivedMonth(key, slot) {
   try {
@@ -6205,7 +6205,14 @@ function ashiKadroSaati(tc, istihdam, info) {
   const tcN = normalizeTcValue(tc);
   const allL = tcN ? (izinRaporRecords || []).filter(r => r.tc === tcN) : [];
   // Nöbet muafiyeti çalışma saatini düşürmez; süt izni günlük mesaiden (8 / işçi 7,5 saat) 1,5 veya 3 saat düşer.
-  const leaves = allL.filter(r => !ashiIzinMuafiyetMi(r.type));
+  // Sürüm 13.57: günlük izin / rapor resmî cetveldeki gibi GÜN bazında düşülür — başladığı gün (saati ne olursa olsun, ör. nöbet
+  // sonrası 23:00'te başlayan rapor) ve bitiş günü tam gündür; bitiş tam gece yarısıysa (00:00) o gün sayılmaz. Saatlik izin (Alınan Saat) saat bazında kalır.
+  const GUN = 86400000;
+  const leaves = allL.filter(r => !ashiIzinMuafiyetMi(r.type)).map(r => {
+    if (Number(r.saat) > 0) return r;
+    const s0 = Math.floor(r.startMs / GUN) * GUN, e0 = r.endMs % GUN === 0 ? r.endMs : Math.ceil(r.endMs / GUN) * GUN;
+    return {...r, startMs:s0, endMs:Math.max(e0, s0 + GUN)};
+  });
   const sutL = allL.filter(r => /s[üu]t\s*izn/.test(String(r.type || '').toLocaleLowerCase('tr-TR'))).map(r => ({...r, sutH: parseFloat((String(r.type).match(/(\d+(?:[.,]\d+)?)\s*saat/i) || [])[1]?.replace(',', '.')) || 0}));
   let total = 0;
   for (let i = 1; i <= days; i++) {
@@ -7187,7 +7194,7 @@ const KR_KOLON = [
   {k:'egHi', t:'Hafta İçi Eğitim Mesaisi Toplamı', c:'y', n:1}, {k:'egHs', t:'Hafta Sonu Eğitim Mesaisi Toplamı', c:'y', n:1},
   {k:'ayIci', t:'Ay İçi Yeni İzin/Rapor (adet)', c:'', n:1}
 ];
-let krSekme = 'ozet', krSecili = new Set(), krAylar = [], krSonuc = null, krCache = new Map(), krYilAcik = {}, krBusy = false, krSeq = 0;
+let krEkranAy = '', krSekme = 'ozet', krSecili = new Set(), krAylar = [], krSonuc = null, krCache = new Map(), krYilAcik = {}, krBusy = false, krSeq = 0;
 async function krAyListesi() {
   let recs = []; try { recs = await archiveGetAll(); } catch (e) { console.warn(e); }
   const list = [];
@@ -7331,7 +7338,10 @@ async function showKontrolRaporuModal() {
   krAylar = await krAyListesi();
   const gecerli = new Set(krAylar.map(x => x.key));
   krSecili = new Set([...krSecili].filter(k => gecerli.has(k)));
-  if (!krSecili.size && reportMonthInfo) krSecili.add(archiveKeyFromInfo(reportMonthInfo));
+  // Sürüm 13.57: ekranda açık ay değiştiyse (ör. arşivden Ekim açıldı) seçim o aya döner; aynı ayda kullanıcının çoklu seçimi korunur
+  const ekran = reportMonthInfo ? archiveKeyFromInfo(reportMonthInfo) : '';
+  if (ekran && ekran !== krEkranAy) { krSecili = new Set(gecerli.has(ekran) ? [ekran] : []); krEkranAy = ekran; }
+  if (!krSecili.size && ekran) krSecili.add(ekran);
   krPickHtml(); krHesapla();
 }
 function exportKontrolRaporuExcel() {
