@@ -6521,7 +6521,24 @@ function ashiOzetGruplari(people, stationQ) {
 function getFilteredIstasyonPersonelRows(){
   const stationQ=ashiIstSecimLC('istasyonPersonelStation');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
-  return getIstasyonPersonelRows().map(p=>({...p,allDuties:p.duties,duties:p.duties.filter(n=>ashiIstUyarLC(stationQ,n.station))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  const base=getIstasyonPersonelRows().map(p=>({...p,allDuties:p.duties,duties:p.duties.filter(n=>ashiIstUyarLC(stationQ,n.station))}));
+  const tcAll=new Map(base.filter(p=>p.tc).map(p=>[p.tc,p.allDuties]));
+  const ozel=ashiOzelBirimSatirlari(stationQ).map(p=>{const d=p.tc&&tcAll.get(p.tc);return d&&d.length?{...p,allDuties:p.duties.concat(d),isMulti:true}:p;});      // istasyonda da nöbeti olan: o saatler "+diğer ist." olarak eklenir
+  return base.concat(ozel).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+}
+// Sürüm 13.57: "Diğer" grubundan Komuta Kontrol / Başhekimlik seçilince o birimlerin nöbetleri de listelenir (yalnız birim seçiliyken;
+// "Tüm istasyonlar" görünümünde ve istasyon toplamlarında yer almaz). Refakatçi kayıtları zaten ashiRefakatExtra ile gelir.
+function ashiOzelBirimSatirlari(stationQ){
+  if(!stationQ||!stationQ.length)return [];
+  const out={};
+  ['komuta','bashekimlik'].forEach(k=>((specialDutyLists||{})[k]||[]).forEach(sp=>(sp.records||[]).forEach(n=>{
+    const ist=String(n.ist||'').trim(),h=Number(n.saat)||0;
+    if(!ist||!(h>0)||/refakat/i.test(String(n.gorev||''))||!ashiIstUyarLC(stationQ,ist))return;
+    const tc=String(n.tc||sp.tc||'').trim(),ad=n.ad||sp.ad||'',soyad=n.soyad||sp.soyad||'',pk='ozel:'+(tc||`${ad}|${soyad}`)+'|'+ist;
+    const p=out[pk]||(out[pk]={personKey:pk,tc,ad,soyad,brans:n.brans||sp.kadro_brans||sp.brans||'',istihdam:n.istihdam||sp.istihdam||'',asilIst:ist,duties:[]});
+    p.duties.push({station:ist,role:k==='komuta'?'Komuta Kontrol':'Başhekimlik',roleKey:k,refakat:false,branch:p.brans,startMs:n.startMs,start:n.basRaw||'—',end:n.bitisRaw||'—',hours:h,duration:n.sure_raw||'—'});
+  })));
+  return Object.values(out).map(p=>{p.duties.sort((a,b)=>(a.startMs||0)-(b.startMs||0));return {...p,allDuties:p.duties,stations:[p.asilIst],isMulti:false};});
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -7430,7 +7447,7 @@ function renderIstasyonPersonelList(){
   }
   const stationQ=ashiIstSecimLC('istasyonPersonelStation');
   const personQ=String(document.getElementById('istasyonPersonelPerson')?.value||'').trim().toLocaleLowerCase('tr-TR');
-  const people=getIstasyonPersonelRows().map(p=>({...p,duties:p.duties.filter(n=>ashiIstUyarLC(stationQ,n.station))})).filter(p=>p.duties.length&&(!personQ||`${p.ad} ${p.soyad} ${p.tc}`.toLocaleLowerCase('tr-TR').includes(personQ)));
+  const people=getFilteredIstasyonPersonelRows();      // Sürüm 13.57: Komuta Kontrol / Başhekimlik seçiminde o birimlerin nöbetleri de
   const groups={};
   people.forEach(p=>p.duties.forEach(n=>{if(!groups[n.station])groups[n.station]={people:{},duties:0};if(!groups[n.station].people[p.personKey])groups[n.station].people[p.personKey]={...p,duties:[]};groups[n.station].people[p.personKey].duties.push(n);groups[n.station].duties++;}));
   const stations=Object.entries(groups).sort((a,b)=>trColl.compare(a[0],b[0]));
@@ -7438,7 +7455,7 @@ function renderIstasyonPersonelList(){
   const duties=allDuties.filter(n=>!n.refakat), refDuties=allDuties.filter(n=>n.refakat);
   summary.innerHTML=`<span class="istasyon-personel-chip">${stations.length} istasyon</span><span class="istasyon-personel-chip">${new Set(people.map(p=>p.personKey)).size} personel</span><span class="istasyon-personel-chip">${duties.length} nöbet</span><span class="istasyon-personel-chip">${duties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</span>${refDuties.length?`<span class="istasyon-personel-chip" title="Refakatçi nöbetleri kişinin toplamına eklenir, istasyon toplamına eklenmez">+ ${refDuties.length} refakatçi nöbeti (${refDuties.reduce((t,n)=>t+(Number(n.hours)||0),0).toLocaleString('tr-TR',{maximumFractionDigits:2})} saat, istasyon toplamı dışı)</span>`:''}`;
   if(!stations.length){list.innerHTML='<div style="padding:30px;text-align:center;color:#64748b;background:#fff;border:1px solid #e2e8f0;border-radius:8px">Filtreye uygun istasyon veya personel bulunamadı.</div>'; if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable(); if(document.getElementById('istasyonPersonelDokum')?.style.display==='block') ashiDokumEkranCiz(); return;}
-  const roleOrder={ef:1,ysp:2,sur:3,ref:4};
+  const roleOrder={ef:1,ysp:2,sur:3,ref:4,komuta:5,bashekimlik:6};
   list.innerHTML=stations.map(([station,g])=>{const stationPeople=Object.values(g.people).sort((a,b)=>trColl.compare(`${a.ad} ${a.soyad}`,`${b.ad} ${b.soyad}`));return `<section class="istasyon-personel-station-group"><div class="istasyon-personel-station-head"><div class="istasyon-personel-station-name">🏥 ${escapeHtml(station)}</div><div class="istasyon-personel-station-meta">${stationPeople.length} personel · ${g.duties} nöbet</div></div>${stationPeople.map(p=>{const total=p.duties.reduce((t,n)=>t+(Number(n.hours)||0),0);const roleGroups={};p.duties.sort((a,b)=>(roleOrder[a.roleKey]||9)-(roleOrder[b.roleKey]||9)||(a.startMs||0)-(b.startMs||0)).forEach(n=>{if(!roleGroups[n.roleKey])roleGroups[n.roleKey]={label:n.role,items:[]};roleGroups[n.roleKey].items.push(n);});return `<div class="istasyon-personel-person-row"><div class="istasyon-personel-person-head"><div><div class="istasyon-personel-name">${escapeHtml(`${p.ad} ${p.soyad}`.trim()||'Ad bilgisi yok')} ${p.isMulti?'<span class="badge b-coklu" title="Birden fazla istasyonda nöbet tutuyor">↔ Çoklu</span>':''}</div><div class="istasyon-personel-meta">${escapeHtml(p.brans||'Branş bilgisi yok')}${p.tc?` · TCKN: ${escapeHtml(p.tc)}`:''}</div></div><div class="istasyon-personel-total">${p.duties.length} nöbet · ${total.toLocaleString('tr-TR',{maximumFractionDigits:2})} saat</div></div>${Object.values(roleGroups).map(r=>`<div class="istasyon-personel-role-line"><span class="istasyon-personel-role-label">${escapeHtml(r.label)}</span><div class="istasyon-personel-role-duties">${r.items.map(n=>`<div class="istasyon-personel-role-duty">${escapeHtml(n.start)}${n.end&&n.end!=='—'?` → ${escapeHtml(n.end)}`:''} · <strong>${escapeHtml(n.duration||`${n.hours||'—'} saat`)}</strong></div>`).join('')}</div></div>`).join('')}</div>`}).join('')}</section>`}).join('');
   if(document.getElementById('istasyonPersonelSummaryTable')?.style.display!=='none') renderIstasyonPersonelSummaryTable();
   if(document.getElementById('istasyonPersonelDokum')?.style.display==='block') ashiDokumEkranCiz();
