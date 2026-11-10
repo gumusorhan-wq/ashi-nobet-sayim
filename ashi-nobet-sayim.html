@@ -6204,16 +6204,16 @@ function ashiKadroSaati(tc, istihdam, info) {
   const days = new Date(Date.UTC(info.year, info.month, 0)).getUTCDate();
   const tcN = normalizeTcValue(tc);
   const allL = tcN ? (izinRaporRecords || []).filter(r => r.tc === tcN) : [];
-  // Nöbet muafiyeti çalışma saatini düşürmez; süt izni günlük mesaiden (8 / işçi 7,5 saat) 1,5 veya 3 saat düşer.
+  // Nöbet muafiyeti ve süt izni çalışma saatini (kadroyu) düşürmez.
   // Sürüm 13.57: günlük izin / rapor resmî cetveldeki gibi GÜN bazında düşülür — başladığı gün (saati ne olursa olsun, ör. nöbet
   // sonrası 23:00'te başlayan rapor) ve bitiş günü tam gündür; bitiş tam gece yarısıysa (00:00) o gün sayılmaz. Saatlik izin (Alınan Saat) saat bazında kalır.
   const GUN = 86400000;
-  const leaves = allL.filter(r => !ashiIzinMuafiyetMi(r.type)).map(r => {
-    if (Number(r.saat) > 0) return r;
+  // Sürüm 13.57: saatlik izin resmî cetveldeki gibi Alınan Saat'in tamamı kadar düşülür (o günün mesaisini aşsa da, ör. arifede 8 saat)
+  const saatlik = allL.filter(r => !ashiIzinMuafiyetMi(r.type) && Number(r.saat) > 0 && Number(r.saat) < 24);
+  const leaves = allL.filter(r => !ashiIzinMuafiyetMi(r.type) && !(Number(r.saat) > 0 && Number(r.saat) < 24)).map(r => {
     const s0 = Math.floor(r.startMs / GUN) * GUN, e0 = r.endMs % GUN === 0 ? r.endMs : Math.ceil(r.endMs / GUN) * GUN;
     return {...r, startMs:s0, endMs:Math.max(e0, s0 + GUN)};
   });
-  const sutL = allL.filter(r => /s[üu]t\s*izn/.test(String(r.type || '').toLocaleLowerCase('tr-TR'))).map(r => ({...r, sutH: parseFloat((String(r.type).match(/(\d+(?:[.,]\d+)?)\s*saat/i) || [])[1]?.replace(',', '.')) || 0}));
   let total = 0;
   for (let i = 1; i <= days; i++) {
     const dayStart = Date.UTC(info.year, info.month - 1, i), dayEnd = dayStart + 86400000;
@@ -6226,8 +6226,8 @@ function ashiKadroSaati(tc, istihdam, info) {
     if (curS !== null) covered += curE - curS;
     const coveredH = covered / 3600000;
     let kalan = coveredH >= 23.9 ? 0 : Math.max(0, hrs - coveredH);
-    const sutH = sutL.reduce((m, r) => r.startMs < dayEnd && r.endMs > dayStart ? Math.max(m, r.sutH) : m, 0);
-    if (sutH && kalan) kalan = Math.max(0, kalan - sutH);
+    // Sürüm 13.57: süt izni kadrodan düşülmez (resmî Döküm Cetveli düşmüyor; Ekim 2026 raporuyla doğrulandı)
+    if (kalan) saatlik.forEach(r => { if (r.startMs >= dayStart && r.startMs < dayEnd) kalan -= Number(r.saat); });
     total += kalan;
   }
   return Math.round(total * 100) / 100;
