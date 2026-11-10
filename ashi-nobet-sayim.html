@@ -7315,7 +7315,7 @@ function krCiz() {
     + (eksikIzin.length ? `<div class="kr-warn">⚠ ${escapeHtml(eksikIzin.join(', '))}: izin/rapor dosyası yok; bu aylarda izin günleri 0 görünür ve kadro süresi izin düşülmeden hesaplanır.</div>` : '');
   const th = KR_KOLON.map(c => `<th class="${c.c === 'y' ? 'ky' : (c.c === 'r' ? 'kr' : '')}">${escapeHtml(c.t)}</th>`).join('');
   const body = rows.slice(0, 1500).map((r, i) => `<tr><td>${i + 1}</td>${KR_KOLON.map(c => { const v = r[c.k]; if (!c.n) return c.k === 'birim' || c.k === 'gecici' ? `<td title="${escapeHtml(String(v))}">${escapeHtml(ashiIstKisa(String(v)))}</td>` : `<td>${escapeHtml(String(v ?? ''))}</td>`; const cls = c.k === 'fark' ? (v > 0 ? ' kpos' : (v < 0 ? ' kneg' : '')) : ((c.k === 'rapor' || c.k === 'sosyal' || c.k === 'ayIci') && v > 0 ? ' kred' : ''); return `<td class="kn${cls}">${krFmt(v)}</td>`; }).join('')}</tr>`).join('');
-  host.innerHTML = `<table class="kr-table"><thead><tr><th>Sıra</th>${th}</tr></thead><tbody>${body || '<tr><td colspan="14" style="padding:18px;color:#64748b">Kayıt bulunamadı.</td></tr>'}</tbody></table>`;
+  host.innerHTML = `<table class="kr-table"><thead><tr><th>Sıra</th>${th}</tr></thead><tbody>${body || `<tr><td colspan="14" style="padding:18px;color:#64748b">Kayıt bulunamadı.${krAraQ() && krSonuc.rows.some(r => (krIstUyar(r.birim) || (!!r.gecici && krIstUyar(r.gecici)) || (r.istler || []).some(krIstUyar))) ? ` Seçili birimlerde kayıt var ama <b>Personel adı ile ara</b> kutusundaki “${escapeHtml(krAraQ())}” aramasıyla eşleşmiyor; aramayı temizleyin.` : !krSonuc.rows.length ? ' Seçili aylar için hesaplanacak kayıt yok.' : ''}</td></tr>`}</tbody></table>`;
 }
 function krPickHtml() {
   const years = [...new Set(krAylar.map(m => m.key.slice(0, 4)))].sort().reverse();
