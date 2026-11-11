@@ -1443,7 +1443,7 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 <!-- NÖBET ANALİZİ MODAL -->
 <div id="nobelAnaliziModal" class="modal-overlay">
   <div class="modal-box analiz-modal-box">
-    <div class="modal-head" style="background:#991b1b">
+    <div class="modal-head" style="background:#0055a4">
       <div>
         <span style="color:#fff;font-weight:700;font-size:15px">⚠️ Branş Nöbet Analizi</span>
         <div style="color:rgba(255,255,255,.7);font-size:11px;margin-top:3px">Seçilen branş için istasyon-gün bazında 09:00–ertesi gün 09:00 penceresi, eksik/fazla süre ve çakışma durumu filtrelenebilir.</div>
@@ -7992,7 +7992,7 @@ function showAnalizModal(gKey) {
     <div style="background:#fff;border:1px solid #fca5a5;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:22px;font-weight:900;color:#dc2626">-${data.missingHourTotal}</div><div style="font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase">Toplam Eksik Saat</div></div>
     <div style="background:#fff;border:1px solid #fed7aa;border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:22px;font-weight:900;color:#c2410c">+${data.excessHourTotal}</div><div style="font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase">Toplam Fazla Saat</div></div>`;
   const modalHead = document.querySelector('#nobelAnaliziModal .modal-head');
-  if (modalHead) modalHead.style.background = gr.renk;
+  if (modalHead) modalHead.style.background = '#0055a4';   // Sürüm 13.62: bütün analiz başlıkları aynı renk (kırmızı başlık hata gibi algılanıyordu)
   const modalTitle = document.querySelector('#nobelAnaliziModal .modal-head span');
   if (modalTitle) modalTitle.textContent = `⚠️ ${gr.label} Nöbet Analizi`;
   const modalSub = document.querySelector('#nobelAnaliziModal .modal-head div div');
