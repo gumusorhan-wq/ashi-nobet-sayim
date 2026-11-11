@@ -170,11 +170,13 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
   .ashi-ana-git svg{width:16px;height:16px;color:#64748b;flex:none}.ashi-ana-git:hover:not([disabled]){border-color:#0055a4;color:#0055a4}.ashi-ana-git[disabled]{opacity:.45;cursor:not-allowed}
   .ist-pk{position:relative;display:inline-block;min-width:170px}
 
-  .kr-table{border-collapse:collapse;font-size:11px;width:100%;table-layout:auto}
+  .kr-table{border-collapse:collapse;font-size:12px;width:100%;table-layout:auto}
   .kr-table th{position:sticky;top:0;z-index:2;background:#f1f5f9;border:1px solid #94a3b8;padding:6px 6px;font-size:11px;line-height:1.2;text-align:center;color:#0f172a}
-  .kr-table th.ky{background:#ffff00}.kr-table th.kr{background:#ff6600;color:#fff}
+  /* Sürüm 13.63: resmî cetvelin sarı / turuncu sütunları uygulamanın renkleriyle açık tonda (koyu sarı-turuncu uyumsuzdu) */
+  .kr-table th.ky{background:#fef9c3;color:#713f12;box-shadow:inset 0 3px 0 #eab308}.kr-table th.kr{background:#ffedd5;color:#9a3412;box-shadow:inset 0 3px 0 #f97316}
   .kr-table td{border:1px solid #e2e8f0;padding:3px 4px;line-height:1.25}
-  .kr-table th{font-size:10px!important;padding:5px 3px!important}
+  .kr-table th{font-size:11px!important;padding:6px 4px!important}
+  .kr-table td:nth-child(3){white-space:nowrap;font-weight:600}
   .kr-table td.kn{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   .kr-table td.kpos{color:#047857;font-weight:700}.kr-table td.kneg{color:#b91c1c;font-weight:700}.kr-table td.kred{background:#ffedd5;font-weight:700;color:#9a3412}
   .kr-table tbody tr:hover{background:#fffbeb}
@@ -915,6 +917,13 @@ body:has(#surucuDuzenModal[style*="block"]) #reportSubtitle,
 body:has(#tumPersonelDuzenModal[style*="block"]) #reportSubtitle,
 body:has(#cokluTumPersonelModal[style*="block"]) #reportSubtitle,
 body:has(#uygunPersonelModal[style*="block"]) #reportSubtitle { visibility:hidden; }
+/* Sürüm 13.63: Kontrol raporu ve Döküm cetveli yalnız yan menüden açılır (sayfa içindeki aynı sekmeler gizli) */
+body.ui-side #istasyonPersonelDokumTab,body.ui-side #istasyonPersonelKontrolTab{display:none!important}
+/* Sürüm 13.63: gömülü düzende analizler sayfa gibi — renkli şerit yerine beyaz başlık (diğer sayfaların başlığıyla aynı), kapatma düğmesi sade */
+body.ui-side #nobelAnaliziModal .modal-head,body.ui-side #cokluModal .modal-head,body.ui-side #boslukModal .modal-head,body.ui-side #surucuDuzenModal .modal-head,body.ui-side #tumPersonelDuzenModal .modal-head,body.ui-side #cokluTumPersonelModal .modal-head,body.ui-side #uygunPersonelModal .modal-head{background:#fff!important;border-bottom:1px solid #e2e8f0;padding:12px 16px!important}
+body.ui-side #nobelAnaliziModal .modal-head span,body.ui-side #cokluModal .modal-head span,body.ui-side #boslukModal .modal-head span,body.ui-side #surucuDuzenModal .modal-head span,body.ui-side #tumPersonelDuzenModal .modal-head span,body.ui-side #cokluTumPersonelModal .modal-head span,body.ui-side #uygunPersonelModal .modal-head span{color:#0f172a!important;font-size:18px!important}
+body.ui-side #nobelAnaliziModal .modal-head div div,body.ui-side #cokluModal .modal-head div div,body.ui-side #boslukModal .modal-head div div,body.ui-side #surucuDuzenModal .modal-head div div,body.ui-side #tumPersonelDuzenModal .modal-head div div,body.ui-side #cokluTumPersonelModal .modal-head div div,body.ui-side #uygunPersonelModal .modal-head div div{color:#64748b!important;font-size:12px!important}
+body.ui-side #nobelAnaliziModal .modal-head .modal-close,body.ui-side #cokluModal .modal-head .modal-close,body.ui-side #boslukModal .modal-head .modal-close,body.ui-side #surucuDuzenModal .modal-head .modal-close,body.ui-side #tumPersonelDuzenModal .modal-head .modal-close,body.ui-side #cokluTumPersonelModal .modal-head .modal-close,body.ui-side #uygunPersonelModal .modal-head .modal-close{background:#fff!important;color:#475569!important;border:1px solid #cbd5e1!important;border-radius:0!important;font-size:13px!important;padding:5px 12px!important}
 </style>
 </head>
 <body>
@@ -941,7 +950,7 @@ body:has(#uygunPersonelModal[style*="block"]) #reportSubtitle { visibility:hidde
   <button type="button" class="an-it" data-ic="ana" id="anAna" onclick="anAnaSayfa()" title="Ön bilgiler ve hızlı erişim"><span class="an-ic"></span><span class="an-tx">Ana Sayfa</span></button>
   <button type="button" class="an-it" data-ic="home" data-g="istasyon" data-need="rep"><span class="an-ic"></span><span class="an-tx">İstasyon listesi</span></button>
   <button type="button" class="an-it" data-ic="doc" id="anKontrol" data-need="rep" onclick="anKontrolAc()"><span class="an-ic"></span><span class="an-tx">Kontrol raporu</span></button>
-  <button type="button" class="an-it" data-ic="grid" data-need="rep" onclick="anNav(function(){anGorevIstasyon();exportDokumCetveliExcel()})"><span class="an-ic"></span><span class="an-tx">Döküm cetveli (Excel)</span></button>
+  <button type="button" class="an-it" data-ic="grid" id="anDokum" data-need="rep" onclick="anNav(function(){anGorevIstasyon();setIstasyonPersonelView('dokum')})" title="Ekranda döküm cetveli; üstündeki düğmeyle Excel olarak indirilir"><span class="an-ic"></span><span class="an-tx">Döküm cetveli</span></button>
   <div class="an-sec">LİSTELER</div>
   <details><summary class="an-it" data-ic="user" data-need="rep"><span class="an-ic"></span><span class="an-tx">Personel listesi</span></summary>
     <div class="an-sub"><button type="button" class="an-it" data-g="ef" data-v="personel" data-need="rep"><span class="an-tx">Ekip Şefi</span></button><button type="button" class="an-it" data-g="ysp" data-v="personel" data-need="rep"><span class="an-tx">Yardımcı Sağlık Personeli</span></button><button type="button" class="an-it" data-g="sur" data-v="personel" data-need="rep"><span class="an-tx">Sürücü</span></button></div></details>
@@ -7439,6 +7448,7 @@ function setIstasyonPersonelView(view){
   document.getElementById('istasyonPersonelSummaryTab')?.classList.toggle('active',view==='summary');
   document.getElementById('istasyonPersonelKontrolTab')?.classList.toggle('active',view==='kontrol');
   if(view==='summary') renderIstasyonPersonelSummaryTable();
+  try { if (typeof ashiNavSenk === 'function') setTimeout(ashiNavSenk, 0); } catch (e) { /* yoksay */ }
 }
 let ashiOzetBrans = {};
 function ashiOzetBransSec(el){ const st = decodeURIComponent(el.dataset.ist), b = decodeURIComponent(el.dataset.b); if (ashiOzetBrans[st] === b) delete ashiOzetBrans[st]; else ashiOzetBrans[st] = b; renderIstasyonPersonelSummaryTable(); }
@@ -9146,6 +9156,7 @@ function ashiNavSenk() {
   const var_ = ashiNavRaporVar(), liste = ['ef', 'ysp', 'sur'].includes(activeGorev);
   nav.querySelectorAll('[data-need="rep"]').forEach(el => { if (el.tagName === 'BUTTON') el.disabled = !var_; });
   const kontrolAcik = var_ && activeGorev === 'istasyon' && document.getElementById('istasyonPersonelKontrol')?.style.display === 'block';
+  const dokumAcik = var_ && activeGorev === 'istasyon' && document.getElementById('istasyonPersonelDokum')?.style.display === 'block';      // Sürüm 13.63
   const acikOv = AN_OVERLAYS.filter(id => { const o = document.getElementById(id); return o && o.style.display !== 'none' && o.style.display !== ''; });
   nav.querySelectorAll('button.an-it').forEach(el => {
     let on = false;
@@ -9153,13 +9164,14 @@ function ashiNavSenk() {
     else if (!acikOv.length && var_) {
       const g = el.dataset.g, v = el.dataset.v;
       if (g && v) on = g === activeGorev && v === activeView;
-      else if (g === 'istasyon') on = activeGorev === 'istasyon' && !kontrolAcik;
+      else if (g === 'istasyon') on = activeGorev === 'istasyon' && !kontrolAcik && !dokumAcik;
       else if (g) on = g === activeGorev;
       else if (v) on = liste && v === activeView;
     }
     el.classList.toggle('on', on);
   });
   document.getElementById('anKontrol')?.classList.toggle('on', !!kontrolAcik && !acikOv.length);
+  document.getElementById('anDokum')?.classList.toggle('on', !!dokumAcik && !acikOv.length);
   { const anaAcik = document.body.classList.contains('ana-acik'); if (anaAcik) nav.querySelectorAll('button.an-it').forEach(e => e.classList.remove('on')); document.getElementById('anAna')?.classList.toggle('on', anaAcik); document.getElementById('anKontrol')?.classList.toggle('on', !anaAcik && !!kontrolAcik && !acikOv.length); }
   nav.querySelectorAll('details').forEach(d => { const k = !!d.querySelector('.an-sub .on'); d.querySelector('summary')?.classList.toggle('has-on', k); if (k) d.open = true; });
   const p = document.getElementById('anPeriod'); if (p) p.textContent = (typeof reportMonthInfo !== 'undefined' && reportMonthInfo) ? archiveMonthLabel(reportMonthInfo) : 'Rapor yüklenmedi';
