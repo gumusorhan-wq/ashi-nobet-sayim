@@ -907,6 +907,14 @@ input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0.01;d
 #uygunPersonelModal .ts-btn{font-size:13px!important;font-weight:600!important;height:36px;padding:0 12px!important;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 #uygunPersonelModal .bosluk-filter:has(#uygunPersonelDate){flex:0 0 auto!important;min-width:0!important;width:auto!important}  /* tarih düğmesi kendi genişliğinde; öteki düğmeler üstüne binmez, sığmazsa alt satıra geçer */
 #uygunPersonelOzet:empty{display:none!important}#uygunPersonelModal div:has(>#uygunPersonelSearchBtn){flex-wrap:wrap!important;row-gap:8px}  /* boş özet yer kaplamasın (telefonda Excel'e Aktar sağdan taşıyordu) */
+/* Sürüm 13.63: analiz penceresi açıkken üstteki 'Sürücü · 20 personel' alt başlığı gizlenir (pencerenin kendi başlığı var; son seçilen branş yanıltıyordu) */
+body:has(#nobelAnaliziModal[style*="block"]) #reportSubtitle,
+body:has(#cokluModal[style*="block"]) #reportSubtitle,
+body:has(#boslukModal[style*="block"]) #reportSubtitle,
+body:has(#surucuDuzenModal[style*="block"]) #reportSubtitle,
+body:has(#tumPersonelDuzenModal[style*="block"]) #reportSubtitle,
+body:has(#cokluTumPersonelModal[style*="block"]) #reportSubtitle,
+body:has(#uygunPersonelModal[style*="block"]) #reportSubtitle { visibility:hidden; }
 </style>
 </head>
 <body>
