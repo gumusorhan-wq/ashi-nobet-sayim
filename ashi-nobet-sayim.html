@@ -919,6 +919,8 @@ body:has(#cokluTumPersonelModal[style*="block"]) #reportSubtitle,
 body:has(#uygunPersonelModal[style*="block"]) #reportSubtitle { visibility:hidden; }
 /* Sürüm 13.63: Kontrol raporu ve Döküm cetveli yalnız yan menüden açılır (sayfa içindeki aynı sekmeler gizli) */
 body.ui-side #istasyonPersonelDokumTab,body.ui-side #istasyonPersonelKontrolTab{display:none!important}
+/* Döküm cetveli / Kontrol raporu yan menüden açıkken Nöbet Detayları ve Personel Özeti düğmeleri de gizlenir (geri dönüş: yan menü › İstasyon listesi) */
+body.ui-side .istasyon-personel-view-tabs.ip-tek-sayfa #istasyonPersonelDetailTab,body.ui-side .istasyon-personel-view-tabs.ip-tek-sayfa #istasyonPersonelSummaryTab{display:none!important}
 /* Sürüm 13.63: gömülü düzende analizler sayfa gibi — renkli şerit yerine beyaz başlık (diğer sayfaların başlığıyla aynı), kapatma düğmesi sade */
 body.ui-side #nobelAnaliziModal .modal-head,body.ui-side #cokluModal .modal-head,body.ui-side #boslukModal .modal-head,body.ui-side #surucuDuzenModal .modal-head,body.ui-side #tumPersonelDuzenModal .modal-head,body.ui-side #cokluTumPersonelModal .modal-head,body.ui-side #uygunPersonelModal .modal-head{background:#fff!important;border-bottom:1px solid #e2e8f0;padding:12px 16px!important}
 body.ui-side #nobelAnaliziModal .modal-head span,body.ui-side #cokluModal .modal-head span,body.ui-side #boslukModal .modal-head span,body.ui-side #surucuDuzenModal .modal-head span,body.ui-side #tumPersonelDuzenModal .modal-head span,body.ui-side #cokluTumPersonelModal .modal-head span,body.ui-side #uygunPersonelModal .modal-head span{color:#0f172a!important;font-size:18px!important}
@@ -7225,6 +7227,7 @@ const KR_KOLON = [
   {k:'tc', t:'TC Kimlik No', c:'y'}, {k:'ad', t:'Adı Soyadı', c:'y'}, {k:'birim', t:'Kadrosunun Olduğu Birim', c:''}, {k:'gecici', t:'Geçici Görevli Olduğu Birim', c:''},
   {k:'istihdam', t:'Kadro Türü', c:'y'}, {k:'unvan', t:'Kadro Unvanı', c:'y'},
   {k:'kadro', t:'Kadro Süresi (*)', c:'y', n:1}, {k:'calis', t:'Çalışma Süresi (*)', c:'y', n:1}, {k:'fark', t:'Fark (*)', c:'y', n:1},
+  {k:'gece', t:'20.00 ile 08.00 Saatleri Arası Çalışma Süresi', c:'', n:1},
   {k:'yi', t:'Yıllık İzin Gün Sayısı', c:'y', n:1}, {k:'rapor', t:'Raporlu Gün Sayısı', c:'r', n:1}, {k:'sosyal', t:'Sosyal İzinli Gün Sayısı', c:'r', n:1},
   {k:'egHi', t:'Hafta İçi Eğitim Mesaisi Toplamı', c:'y', n:1}, {k:'egHs', t:'Hafta Sonu Eğitim Mesaisi Toplamı', c:'y', n:1},
   {k:'ayIci', t:'Ay İçi Yeni İzin/Rapor (adet)', c:'', n:1}
@@ -7268,7 +7271,7 @@ async function krAyHesapla(m) {
       if (!birim) return;
       const s = ashiDokumSatirHesapla(x, info), c = s.counts || {};
       out.push({tc:x.tc, ad:`${x.ad} ${x.soyad}`.trim(), birim, gecici:bb.gecici || '', istler:Object.keys(x.istCount || {}), istSay:{...(x.istCount || {})}, istihdam:x.istihdam || '', unvan:x.unvan || '',
-        kadro:r2(s.kadro), calis:r2(s.calis), fark:r2(s.calis - s.kadro),
+        kadro:r2(s.kadro), calis:r2(s.calis), fark:r2(s.calis - s.kadro), gece:r2(s.night || 0),
         yi:c['Yıllık İzin Gün Sayısı'] || 0, rapor:c['Raporlu Gun Sayisi'] || 0, sosyal:c['Sosyal Izinli Gun Sayisi'] || 0,
         egHi:r2(s.egHi), egHs:r2(s.egHs)});
     });
@@ -7293,12 +7296,12 @@ async function krHesapla() {
     aylar.push({key:m.key, label:archiveMonthLabel(m.info), rows, izin:m.izin, izinBasi:m.izinBasi, izinSonu:m.izinSonu, ayIci});
     rows.forEach(r => {
       const k = r.tc || r.ad; let t = toplam.get(k);
-      if (!t) { t = {...r, ayAdet:0, kadro:0, calis:0, fark:0, yi:0, rapor:0, sosyal:0, egHi:0, egHs:0, ayIci:0}; toplam.set(k, t); }
-      t.ayAdet++; ['kadro','calis','fark','yi','rapor','sosyal','egHi','egHs','ayIci'].forEach(f => { t[f] += r[f]; });
+      if (!t) { t = {...r, ayAdet:0, kadro:0, calis:0, fark:0, gece:0, yi:0, rapor:0, sosyal:0, egHi:0, egHs:0, ayIci:0}; toplam.set(k, t); }
+      t.ayAdet++; ['kadro','calis','fark','gece','yi','rapor','sosyal','egHi','egHs','ayIci'].forEach(f => { t[f] += r[f] || 0; });
       t.birim = r.birim; t.gecici = r.gecici || t.gecici || ''; t.istler = [...new Set([...(t.istler || []), ...(r.istler || [])])]; t.istSay = {...(t.istSay || {})}; Object.entries(r.istSay || {}).forEach(([k, v]) => { t.istSay[k] = (t.istSay[k] || 0) + v; }); if (r.istihdam) t.istihdam = r.istihdam; if (r.unvan) t.unvan = r.unvan;
     });
   }
-  const rows = [...toplam.values()].map(t => { ['kadro','calis','fark','yi','rapor','sosyal','egHi','egHs'].forEach(f => { t[f] = Math.round(t[f] * 100) / 100; }); return t; });
+  const rows = [...toplam.values()].map(t => { ['kadro','calis','fark','gece','yi','rapor','sosyal','egHi','egHs'].forEach(f => { t[f] = Math.round(t[f] * 100) / 100; }); return t; });
   rows.sort((a, b) => trColl.compare(a.birim, b.birim) || trColl.compare(a.ad, b.ad) || trColl.compare(a.tc, b.tc));
   krSonuc = {aylar, rows};
   krCiz();
@@ -7360,11 +7363,11 @@ function krCiz() {
   if (krSekme === 'ayici') { krAyIciCiz(host, ozet); return; }
   const rows = krFiltreli(), eksikIzin = krSonuc.aylar.filter(a => !a.izin).map(a => a.label);
   const top = f => rows.reduce((t, r) => t + (r[f] || 0), 0);
-  if (ozet) ozet.innerHTML = `<b>${krSonuc.aylar.length}</b> ay · <b>${rows.length}</b> kişi · Kadro <b>${krFmt(top('kadro'))}</b> · Çalışma <b>${krFmt(top('calis'))}</b> · Fark <b>${krFmt(top('fark'))}</b> · Yıllık izin <b>${krFmt(top('yi'))}</b> gün · Rapor <b>${krFmt(top('rapor'))}</b> gün · Sosyal izin <b>${krFmt(top('sosyal'))}</b> gün`
+  if (ozet) ozet.innerHTML = `<b>${krSonuc.aylar.length}</b> ay · <b>${rows.length}</b> kişi · Kadro <b>${krFmt(top('kadro'))}</b> · Çalışma <b>${krFmt(top('calis'))}</b> · Fark <b>${krFmt(top('fark'))}</b> · 20–08 arası <b>${krFmt(top('gece'))}</b> · Yıllık izin <b>${krFmt(top('yi'))}</b> gün · Rapor <b>${krFmt(top('rapor'))}</b> gün · Sosyal izin <b>${krFmt(top('sosyal'))}</b> gün`
     + (eksikIzin.length ? `<div class="kr-warn">⚠ ${escapeHtml(eksikIzin.join(', '))}: izin/rapor dosyası yok; bu aylarda izin günleri 0 görünür ve kadro süresi izin düşülmeden hesaplanır.</div>` : '');
   const th = KR_KOLON.map(c => `<th class="${c.c === 'y' ? 'ky' : (c.c === 'r' ? 'kr' : '')}">${escapeHtml(c.t)}</th>`).join('');
   const body = rows.slice(0, 1500).map((r, i) => `<tr><td>${i + 1}</td>${KR_KOLON.map(c => { const v = r[c.k]; if (!c.n) return c.k === 'birim' || c.k === 'gecici' ? `<td title="${escapeHtml(String(v))}">${escapeHtml(ashiIstKisa(String(v)))}</td>` : `<td>${escapeHtml(String(v ?? ''))}</td>`; const cls = c.k === 'fark' ? (v > 0 ? ' kpos' : (v < 0 ? ' kneg' : '')) : ((c.k === 'rapor' || c.k === 'sosyal' || c.k === 'ayIci') && v > 0 ? ' kred' : ''); return `<td class="kn${cls}">${krFmt(v)}</td>`; }).join('')}</tr>`).join('');
-  host.innerHTML = `<table class="kr-table"><thead><tr><th>Sıra</th>${th}</tr></thead><tbody>${body || `<tr><td colspan="14" style="padding:18px;color:#64748b">Kayıt bulunamadı.${krAraQ() && krSonuc.rows.some(r => (krIstUyar(r.birim) || (!!r.gecici && krIstUyar(r.gecici)) || (r.istler || []).some(krIstUyar))) ? ` Seçili birimlerde kayıt var ama <b>Personel adı ile ara</b> kutusundaki “${escapeHtml(krAraQ())}” aramasıyla eşleşmiyor; aramayı temizleyin.` : !krSonuc.rows.length ? ' Seçili aylar için hesaplanacak kayıt yok.' : ''}</td></tr>`}</tbody></table>`;
+  host.innerHTML = `<table class="kr-table"><thead><tr><th>Sıra</th>${th}</tr></thead><tbody>${body || `<tr><td colspan="${KR_KOLON.length + 1}" style="padding:18px;color:#64748b">Kayıt bulunamadı.${krAraQ() && krSonuc.rows.some(r => (krIstUyar(r.birim) || (!!r.gecici && krIstUyar(r.gecici)) || (r.istler || []).some(krIstUyar))) ? ` Seçili birimlerde kayıt var ama <b>Personel adı ile ara</b> kutusundaki “${escapeHtml(krAraQ())}” aramasıyla eşleşmiyor; aramayı temizleyin.` : !krSonuc.rows.length ? ' Seçili aylar için hesaplanacak kayıt yok.' : ''}</td></tr>`}</tbody></table>`;
 }
 function krPickHtml() {
   const years = [...new Set(krAylar.map(m => m.key.slice(0, 4)))].sort().reverse();
@@ -7402,7 +7405,7 @@ function exportKontrolRaporuExcel() {
     const aoa = [['Sıra No', ...KR_KOLON.map(c => c.t)]];
     rows.forEach((r, i) => aoa.push([i + 1, ...KR_KOLON.map(c => c.n ? (Number(r[c.k]) || 0) : (r[c.k] ?? ''))]));
     const ws = XLSX.utils.aoa_to_sheet(aoa);
-    ws['!cols'] = [{wch:6}, {wch:13}, {wch:26}, {wch:44}, {wch:44}, {wch:30}, {wch:26}, {wch:11}, {wch:11}, {wch:9}, {wch:11}, {wch:11}, {wch:11}, {wch:12}, {wch:12}, {wch:14}];
+    ws['!cols'] = [{wch:6}, {wch:13}, {wch:26}, {wch:44}, {wch:44}, {wch:30}, {wch:26}, {wch:11}, {wch:11}, {wch:9}, {wch:13}, {wch:11}, {wch:11}, {wch:11}, {wch:12}, {wch:12}, {wch:14}];
     ws['!rows'] = [{hpt:48}];
     ws['!autofilter'] = {ref:XLSX.utils.encode_range({s:{r:0, c:0}, e:{r:rows.length, c:KR_KOLON.length}})};
     ws['!freeze'] = {xSplit:3, ySplit:1};
@@ -7443,6 +7446,7 @@ function setIstasyonPersonelView(view){
   if(kontrolWrap) kontrolWrap.style.display=view==='kontrol'?'block':'none';
   const dokumWrap=document.getElementById('istasyonPersonelDokum'); if(dokumWrap) dokumWrap.style.display=view==='dokum'?'block':'none';
   document.getElementById('istasyonPersonelDokumTab')?.classList.toggle('active',view==='dokum');
+  document.querySelector('.istasyon-personel-view-tabs')?.classList.toggle('ip-tek-sayfa',view==='dokum'||view==='kontrol');
   if(view==='dokum') ashiDokumEkranCiz();
   document.getElementById('istasyonPersonelDetailTab')?.classList.toggle('active',view==='detail');
   document.getElementById('istasyonPersonelSummaryTab')?.classList.toggle('active',view==='summary');
