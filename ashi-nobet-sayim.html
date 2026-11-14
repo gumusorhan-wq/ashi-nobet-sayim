@@ -936,6 +936,20 @@ body.ui-side #asosDenetimModal .modal-head .modal-close{color:#475569!important;
 #asosDenetimModal .ad-sekler{display:flex;gap:4px;align-items:center;border-bottom:1px solid #e2e8f0;margin-bottom:12px}
 #asosDenetimModal .ad-sek{border:0;background:none;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent}
 #asosDenetimModal .ad-sek.on{color:#0055a4;border-bottom-color:#0055a4}
+#adUstSerit{display:flex;margin:0 14px 0 auto}
+#adUstSerit .ad-no2{color:#fff!important}#adUstSerit .ad-sr-b{color:#0f172a!important}
+#asosDenetimModal .modal-head>div:first-child{min-width:0;overflow:hidden}#asosDenetimModal .modal-head>div:first-child>div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body:has(#asosDenetimModal[style*="block"]) #anDl{display:none!important}  /* denetimin kendi Excel düğmesi var */
+.ad-serit{align-items:center;gap:8px;flex-wrap:nowrap;margin-left:auto;white-space:nowrap;font-size:13px}
+.ad-serit .ad-no2{margin-top:0;width:22px;height:22px;font-size:11px}
+.ad-serit .ad-yi{padding:5px 12px;font-size:13px;border-width:2px}
+.ad-serit .ad-btn{height:34px;font-size:13px;padding:0 12px}
+.ad-sr-b{font-weight:800;color:#0f172a;margin-right:2px}
+.ad-sr-i{flex:none;width:28px;height:28px;border-radius:50%;border:1px solid #94a3b8;background:#fff;color:#475569;font-weight:800;cursor:pointer;padding:0}
+@media(max-width:1500px){#adUstSerit .ad-sr-b{display:none}}
+.ad-sr-g{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+@media(max-width:999px){body.ui-side #asosDenetimModal{padding:0 8px 8px}#asosDenetimModal .ad-sekler .btn-sec{white-space:nowrap;padding:6px 10px}#asosDenetimModal .ad-sek{padding:8px 10px}}
+.ad-serit-ic{display:flex;flex-wrap:wrap;background:#eff6ff;border:1px solid #bfdbfe;padding:8px 10px;margin:0 0 12px;white-space:normal}
 #asosDenetimModal .ad-al{background:#eff6ff;border:1px solid #bfdbfe;padding:12px 14px;font-size:13px;margin-bottom:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px 18px}
 #asosDenetimModal .ad-al-b{grid-column:1/-1;font-weight:800;color:#0f172a;font-size:14px}
 #asosDenetimModal .ad-al>.ad-gri{grid-column:1/-1}
@@ -9828,17 +9842,28 @@ async function adExcel() {
     satirlar: formlar.map(f => [adKisa(f), f, AD_GOREV[turu(f)]]) });
   adYaz(wb, `ASOS_denetim_${gunler[0]}${gunler.length > 1 ? '_' + gunler[gunler.length - 1] : ''}.xlsx`);
 }
-function adAlKutu(yi) {
-  return `<div class="ad-al"><div class="ad-al-b">ASOS’tan veri al</div>
-    <div class="ad-adim"><span class="ad-no2">1</span><div><a href="${yi}" class="ad-yi" title="Tıklamayın; yer imleri çubuğuna sürükleyin" onclick="event.preventDefault();adDurum='Bu düğme tıklanmaz: yer imleri çubuğuna sürükleyin, sonra ASOS’ta Dönem İçi Hareketler ekranında ona basın.';adCiz()">⠿ HUSER imza-form denetimi</a>
-      <div class="ad-gri">Yalnız ilk seferde: bu düğmeyi farenizle tutup tarayıcının yer imleri çubuğuna sürükleyin.</div></div></div>
-    <div class="ad-adim"><span class="ad-no2">2</span><div><button type="button" class="ad-btn ad-btn-ana" onclick="adAsosAc()">🔗 ASOS’u aç</button>
-      <div class="ad-gri">Açılan ASOS sekmesinde yer işaretine basın; tek gün (13.11.2026) ya da aralık (01.11.2026-13.11.2026) yazın. Veriler buraya kendiliğinden gelir.</div></div></div>
-    <div class="ad-adim"><span class="ad-no2">⤓</span><div><label class="ad-btn ad-btn-ikinci">📂 Dosyadan yükle<input type="file" accept=".json" style="display:none" onchange="adDosya(this)"></label>
-      <div class="ad-gri">Yer işareti veriyi dosya olarak indirdiyse buradan ekleyin.</div></div></div>
-    <div class="ad-gri" style="margin-top:6px">Yalnız ASHİ ekipleri okunur. Denetimi nöbetin ertesi sabahı 09:00’dan sonra alın. TC ve telefon okunmaz.</div></div>
-    <div class="ad-suz"><span class="ad-lb">Nöbet günü</span>`;
+const AD_BILGI = 'İlk seferde “⠿ HUSER imza-form denetimi” düğmesini farenizle tutup yer imleri çubuğuna sürükleyin (tıklanmaz). Sonra “ASOS’u aç” deyin, açılan ASOS sekmesinde Dönem İçi Hareketler ekranında yer işaretine basın; tek gün (13.11.2026) ya da aralık (01.11.2026-13.11.2026) yazın, veriler buraya kendiliğinden gelir. Yer işareti veriyi dosya olarak indirdiyse “Dosyadan yükle” ile ekleyin. Yalnız ASHİ ekipleri okunur; denetimi nöbetin ertesi sabahı 09:00’dan sonra alın. TC ve telefon okunmaz.';
+function adSerit(yi) {
+  return `<span class="ad-sr-b">ASOS’tan veri al</span>
+    <span class="ad-sr-g"><span class="ad-no2">1</span><a href="${yi}" class="ad-yi" title="Yalnız ilk seferde: tutup tarayıcının yer imleri çubuğuna sürükleyin (tıklanmaz)" onclick="event.preventDefault();adDurum='Bu düğme tıklanmaz: yer imleri çubuğuna sürükleyin, sonra ASOS’ta Dönem İçi Hareketler ekranında ona basın.';adCiz()">⠿ HUSER imza-form denetimi</a></span>
+    <span class="ad-sr-g"><span class="ad-no2">2</span><button type="button" class="ad-btn ad-btn-ana" title="ASOS’ta yer işaretine basın; tek gün ya da aralık yazın" onclick="adAsosAc()">🔗 ASOS’u aç</button></span>
+    <label class="ad-btn ad-btn-ikinci" title="Yer işareti veriyi dosya olarak indirdiyse buradan ekleyin">📂 Dosyadan yükle<input type="file" accept=".json" style="display:none" onchange="adDosya(this)"></label>
+    <button type="button" class="ad-sr-i" title="Nasıl kullanılır?" aria-label="Nasıl kullanılır?" onclick="adDurum=AD_BILGI;adCiz()">?</button>`;
 }
+// Sürüm 13.74: veri alma adımları "İmza ve form denetimi" başlık satırında, tek satır (satır yüksekliği değişmez); telefonda pencere içinde dar şerit
+function adSeritYerles(yi) {
+  const h = document.querySelector('#asosDenetimModal .modal-head');
+  const ustte = h && window.matchMedia('(min-width:1000px)').matches;
+  let s = document.getElementById('adUstSerit');
+  if (ustte) {
+    if (!s) { s = document.createElement('div'); s.id = 'adUstSerit'; s.className = 'ad-serit'; }
+    if (s.parentNode !== h) h.insertBefore(s, h.querySelector('.modal-close'));
+    s.innerHTML = adSerit(yi); return '';
+  }
+  if (s) s.remove();
+  return `<div class="ad-serit ad-serit-ic">${adSerit(yi)}</div>`;
+}
+try { window.matchMedia('(min-width:1000px)').addEventListener('change', () => { const m = document.getElementById('asosDenetimModal'); if (m && m.style.display === 'block') adCiz(); }); } catch (e) {}
 // İK Ana Sayfa: denetim kutusu (son kayıtlı gün + düğmeler)
 function adAnaEkle() {
   if (!adYetkili()) return;
@@ -9868,7 +9893,7 @@ function adCiz() {
     const ekipler = [...new Set([...adSeciliGun].flatMap(x => adVeri[x] ? (adVeri[x].ekipler || []).map(e => e.ad) : []))].sort(adSira);
     [...adSeciliEkip].forEach(e => { if (!ekipler.includes(e)) ekipler.push(e); });
     const gunSec = adGunler.map(x => ({ v: x.gun, t: adTr(x.gun), e: x.ozet ? `${x.ozet.imzasiz} imzasız · ${x.ozet.form_eksik_kisi} formu eksik` : '' }));
-    ic = adAlKutu(yi) + `${adMs('adMsGun', 'Nöbet günü', 'Gün seçin', gunSec, adSeciliGun)}
+    ic = `<div class="ad-suz"><span class="ad-lb">Nöbet günü</span>${adMs('adMsGun', 'Nöbet günü', 'Gün seçin', gunSec, adSeciliGun)}
       <span class="ad-lb">Ekip</span>${adEkipSecici('adEkipSec', ekipler)}
       <input id="adAra" type="search" placeholder="Ad ara…" oninput="adCiz2()">
       <select id="adGorev" style="width:170px" onchange="adCiz2()"><option value="">Bütün görevler</option><option value="ef">Ekip şefi</option><option value="ysp">YSP</option><option value="sur">Sürücü</option></select>
@@ -9886,7 +9911,7 @@ function adCiz() {
   const kalici = {};
   ['adAra', 'adAra2', 'adGorev'].forEach(i => { const e = document.getElementById(i); if (e) kalici[i] = e.value; });
   ['adSorunlu', 'adSorunlu2'].forEach(i => { const e = document.getElementById(i); if (e) kalici[i] = e.checked; });
-  g.innerHTML = ust + ic;
+  g.innerHTML = adSeritYerles(yi) + ust + ic;
   Object.entries(kalici).forEach(([i, v]) => { const e = document.getElementById(i); if (!e) return; if (typeof v === 'boolean') e.checked = v; else e.value = v; });
   if (adSekme !== 'ayar') adCiz2();
   adEkipGeriYukle();
@@ -9894,7 +9919,6 @@ function adCiz() {
 function adCiz2() { const i = document.getElementById('adIcerik'); if (i) i.innerHTML = adSekme === 'aylik' ? adAylikTablo() : adGunTablo(); }
 document.addEventListener('mousedown', e => { if (adMsAcik && !e.target.closest('#' + adMsAcik)) { const d = document.getElementById(adMsAcik); if (d) d.open = false; adMsAcik = ''; } });
 document.addEventListener('DOMContentLoaded', () => { const b = document.getElementById('anDenetim'), s = document.getElementById('anDenetimSec'); const v = adYetkili(); if (b) b.style.display = v ? '' : 'none'; if (s) s.style.display = v ? '' : 'none'; });
-
 </script>
 </body>
 </html>
