@@ -950,6 +950,7 @@ body:has(#asosDenetimModal[style*="block"]) #anDl{display:none!important}  /* de
 .ad-sr-g{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 @media(max-width:999px){body.ui-side #asosDenetimModal{padding:0 8px 8px}#asosDenetimModal .ad-sekler .btn-sec{white-space:nowrap;padding:6px 10px}#asosDenetimModal .ad-sek{padding:8px 10px}}
 .ad-serit-ic{display:flex;flex-wrap:wrap;background:#eff6ff;border:1px solid #bfdbfe;padding:8px 10px;margin:0 0 12px;white-space:normal}
+.ad-defter-ayar{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}.ad-defter-ayar label{display:flex;flex-direction:column;gap:6px}.ad-defter-ayar textarea{width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #cbd5e1;font:13px/1.4 inherit;resize:vertical}
 #asosDenetimModal .ad-al{background:#eff6ff;border:1px solid #bfdbfe;padding:12px 14px;font-size:13px;margin-bottom:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px 18px}
 #asosDenetimModal .ad-al-b{grid-column:1/-1;font-weight:800;color:#0f172a;font-size:14px}
 #asosDenetimModal .ad-al>.ad-gri{grid-column:1/-1}
@@ -9446,7 +9447,7 @@ const AD_ASOS_URL = 'https://asos.saglik.gov.tr/PersonnelManagement/OnGuardMovem
 const AD_ASOS_ORIGIN = 'https://asos.saglik.gov.tr';
 const AD_GOREV = {ef: 'Ekip şefi', ysp: 'YSP', sur: 'Sürücü', yok: 'Denetlenmez', diger: 'Diğer'};
 let adSekme = 'gunluk', adGunler = [], adVeri = {}, adSeciliGun = new Set(), adSeciliEkip = new Set(), adAyEkipSec = new Set();
-let adAylik = null, adAyar = null, adAyEkip = false, adDurum = '', adMsAcik = '';
+let adAylik = null, adAyar = null, adAyEkip = false, adDurum = '', adMsAcik = '', adGorunum = 'kisi';
 function adApi(y, ek, g) { return window.ASHI_ENTEG.api.denetim(y, ek, g); }
 function adYetkili() { const E = window.ASHI_ENTEG; return !!(E && E.aktif && E.api && E.api.denetim && ['super_admin', 'il_admin'].includes(E.rol)); }
 function adEsc(s) { return escapeHtml(s == null ? '' : String(s)); }
@@ -9487,10 +9488,26 @@ async function asosDenetimIstemci(cfg) {
     };
     let w = null;
     try { if (window.opener && !window.opener.closed) w = window.opener; } catch (e) { w = null; }
-    let ack = 0;
-    addEventListener('message', e => { if (e.origin === O && e.data && e.data.t === 'asos-denetim-ack') ack++; });
+    let ack = 0, sonAck = null;
+    addEventListener('message', e => { if (e.origin === O && e.data && e.data.t === 'asos-denetim-ack') { ack++; sonAck = e.data; } });
     const paketler = [];
     const asi = /ASH[İI]/i;
+    const tarihY = d => p2(d.getDate()) + '.' + p2(d.getMonth() + 1) + '.' + d.getFullYear();
+    const defterAl = async (d1, d2) => {
+      const out = [];
+      for (let sayfa = 1; sayfa <= 20; sayfa++) {
+        const b = new URLSearchParams({ sort: '', page: String(sayfa), pageSize: '500', group: '', filter: '', startDate: tarihY(d1) + ' 00:00:00', endDate: tarihY(d2) + ' 23:59:59', KKMIsApproved: '' });
+        if (tok) b.set('__RequestVerificationToken', tok);
+        const h = { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' };
+        if (tok) h.RequestVerificationToken = tok;
+        const r = await fetch('/Station/WorkBook/GetWorkBookListByFilter', { method: 'POST', credentials: 'include', headers: h, body: b.toString() });
+        if (!r.ok || r.redirected) throw new Error('HTTP ' + r.status);
+        const j = await r.json(), L = Array.isArray(j) ? j : (j.Data || []);
+        L.filter(x => asi.test(String(x.TeamName || ''))).forEach(x => out.push({ ekip_id: String(x.TeamId), ekip_ad: String(x.TeamName || ''), bas: x.StartingDate, bit: x.EndDate, durum: x.StatusGenericLookUpOptionName || '', onay: !!x.IsApproved, kkm: !!x.KKMIsApproved, aciklama: x.Description || '', yazildi: x.CreateDate }));
+        if (L.length < 500 || sayfa * 500 >= (j.Total || 0)) break;
+      }
+      return out;
+    };
     for (let gi = 0; gi < gunler.length; gi++) {
       const d1 = gunler[gi], d2 = new Date(d1.getFullYear(), d1.getMonth(), d1.getDate() + 1);
       const gun = d1.getFullYear() + '-' + p2(d1.getMonth() + 1) + '-' + p2(d1.getDate());
@@ -9515,11 +9532,14 @@ async function asosDenetimIstemci(cfg) {
           if (bitti % 6 === 0) S(etiket + 'ASOS okunuyor… ' + Math.round(100 * bitti / (bitti + isler.length)) + '% (' + ekipler.length + ' ASHİ ekibi)');
         }
       };
+      S(etiket + 'nöbet defteri alınıyor…');
+      let defter = null;
+      try { defter = await defterAl(d1, d2); } catch (e) { hata.push('Nöbet defteri okunamadı: ' + e.message); }
       await Promise.all([1, 2, 3, 4, 5, 6].map(isci));
       if (hata[0] && /oturum/.test(hata[0])) { S(hata[0]); return; }
       const dolu = ekipler.filter(e => e.nobet.length);
       if (!dolu.length) { S(etiket + 'nöbet listesi bulunamadı.'); continue; }
-      const paket = { t: 'asos-denetim', gun, ekipler: dolu, hata: hata.slice(0, 20) };
+      const paket = { t: 'asos-denetim', gun, ekipler: dolu, defter, hata: hata.slice(0, 20) };
       if (!w) { paketler.push(paket); continue; }
       const once = ack;
       S(etiket + 'İK’ya gönderiliyor…');
@@ -9527,9 +9547,35 @@ async function asosDenetimIstemci(cfg) {
       if (ack === once) { S('İK sayfası yanıt vermedi. İK’da İmza ve form denetimi sayfası açık mı?'); return; }
     }
     if (!w) {
-      const ad = 'asos-denetim-' + paketler.map(p => p.gun).join('_').slice(0, 60) + '.json';
-      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(paketler.length === 1 ? paketler[0] : { t: 'asos-denetim-coklu', paketler })], { type: 'application/json' })); a.download = ad; document.body.appendChild(a); a.click(); a.remove();
-      S('ASOS verisi dosya olarak indirildi. İK › İmza ve form denetimi › “Dosyadan yükle” ile ekleyin.'); return;
+      const indir = () => {
+        const ad = 'asos-denetim-' + paketler.map(p => p.gun).join('_').slice(0, 60) + '.json';
+        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(paketler.length === 1 ? paketler[0] : { t: 'asos-denetim-coklu', paketler })], { type: 'application/json' })); a.download = ad; document.body.appendChild(a); a.click(); a.remove();
+        S('ASOS verisi dosya olarak indirildi. İK › İmza ve form denetimi › “Dosyadan yükle” ile ekleyin.');
+      };
+      const secim = metin => {
+        S(metin); const d = document.getElementById('__hd'); const kut = document.createElement('div'); kut.style.cssText = 'display:flex;gap:8px;margin-top:10px;flex-wrap:wrap';
+        const dug = (t, ana, f) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.style.cssText = 'font:700 14px sans-serif;padding:8px 14px;cursor:pointer;border:2px solid #fff;' + (ana ? 'background:#fff;color:#0055a4' : 'background:transparent;color:#fff'); b.onclick = f; kut.appendChild(b); };
+        dug('HUSER’e gönder', true, gonder); dug('Dosya olarak indir', false, indir); d.appendChild(kut);
+      };
+      const gonder = async () => {
+        const r = window.open(O + '/moduller/ashi/asos-al.html', 'huserAsosAl');
+        if (!r) { secim('Açılır pencere engellendi. Tarayıcının adres çubuğundaki uyarıdan bu siteye izin verip yeniden deneyin ya da dosya olarak indirin.'); return; }
+        let hazir = false;
+        addEventListener('message', e => { if (e.origin === O && e.data && e.data.t === 'asos-al-hazir') hazir = true; });
+        S('HUSER sekmesi açılıyor…');
+        for (let i = 0; i < 60 && !hazir; i++) await bekle(500);
+        if (!hazir) { secim('HUSER sekmesine ulaşılamadı. HUSER’e giriş yapılmış mı? Giriş yapıp yeniden deneyin ya da dosya olarak indirin.'); return; }
+        for (let pi = 0; pi < paketler.length; pi++) {
+          const pk = paketler[pi], once = ack;
+          S('HUSER’e gönderiliyor… ' + (pi + 1) + '/' + paketler.length);
+          for (let i = 0; i < 90 && ack === once; i++) { try { r.postMessage(pk, O); } catch (e) {} await bekle(1000); }
+          if (ack === once) { secim('HUSER yanıt vermedi. Yeniden deneyin ya da dosya olarak indirin.'); return; }
+          if (sonAck && sonAck.ok === false) { secim('HUSER kaydetmedi: ' + (sonAck.mesaj || 'bilinmeyen hata')); return; }
+        }
+        S(paketler.length + ' gün HUSER’e kaydedildi ✓ Açılan HUSER sekmesinden İK › İmza ve form denetimine geçebilirsiniz.');
+      };
+      secim('ASOS okundu (' + paketler.length + ' gün). Bu ASOS sekmesi İK’dan açılmadığı için veriyi HUSER’e göndermek gerekiyor.');
+      return;
     }
     S(gunler.length + ' gün İK’ya gönderildi ✓');
     setTimeout(() => { const d = document.getElementById('__hd'); if (d) d.remove(); }, 6000);
@@ -9553,7 +9599,7 @@ async function adPaketYukle(p) {
   if (!p || !p.gun || !Array.isArray(p.ekipler)) { adDurum = 'Dosya ASOS denetim verisi değil.'; adCiz(); return; }
   adDurum = `${adTr(p.gun)} için ${p.ekipler.length} ASHİ ekibi ASOS’tan geldi, hesaplanıyor…`; adSekme = 'gunluk'; adCiz();
   try {
-    adVeri[p.gun] = await adApi('POST', '/gun/' + p.gun, { ekipler: p.ekipler });
+    adVeri[p.gun] = await adApi('POST', '/gun/' + p.gun, { ekipler: p.ekipler, defter: p.defter });
     if (!adYeniSecim) { adSeciliGun = new Set(); adYeniSecim = true; setTimeout(() => { adYeniSecim = false; }, 60000); }
     adSeciliGun.add(p.gun);
     adAylik = null;
@@ -9644,12 +9690,13 @@ function adGunTablo() {
   if (!adSeciliGun.size) return '<div class="ad-bos">Nöbet günü seçin.</div>';
   const eksikGun = [...adSeciliGun].filter(g => !adVeri[g]);
   if (eksikGun.length) return '<div class="ad-bos">Yükleniyor…</div>';
+  if (adGorunum === 'defter') return adDefterTablo();
   const tum = adSecilenKisiler(), L = adSuz(tum), cok = adSeciliGun.size > 1;
   const kart = (b, v, a, c) => `<div class="ad-kart${c ? ' ' + c : ''}"><div class="ad-kb">${b}</div><div class="ad-kv">${v}</div><div class="ad-ka">${a}</div></div>`;
   const ekS = new Set(tum.map(k => k.gun + '|' + k.ekip_ad)).size;
   const imzasiz = tum.filter(k => !k.imza).length, eksikli = tum.filter(k => (k.eksik || []).length).length, eksikForm = tum.reduce((a, k) => a + (k.eksik || []).length, 0);
   const gunYazi = cok ? `${adSeciliGun.size} gün` : adTr([...adSeciliGun][0]) + ' nöbet günü';
-  let h = `<div class="ad-kartlar">${kart(cok ? 'Ekip-gün' : 'Okunan ekip', ekS, adSeciliEkip.size ? adSeciliEkip.size + ' ekip seçili' : 'nöbet listesi olan ASHİ')}${kart('Nöbet', tum.length, gunYazi)}${kart('İmza atmayan', imzasiz, 'nöbet listesinde var, imza yok', imzasiz ? 'kirmizi' : '')}${kart('Formu eksik', eksikli, eksikForm + ' eksik form', eksikli ? 'turuncu' : '')}</div>`;
+  let h = `<div class="ad-kartlar">${kart(cok ? 'Ekip-gün' : 'Okunan ekip', ekS, adSeciliEkip.size ? adSeciliEkip.size + ' ekip seçili' : 'nöbet listesi olan ASHİ')}${kart('Nöbet', tum.length, gunYazi)}${kart('İmza atmayan', imzasiz, 'nöbet listesinde var, imza yok', imzasiz ? 'kirmizi' : '')}${kart('Formu eksik', eksikli, eksikForm + ' eksik form', eksikli ? 'turuncu' : '')}${(() => { const D = adSecilenDefter(); if (!D.L.length) return ''; const o = adDefterOzet(D.L); return `<div class="ad-kart${o.yok ? ' kirmizi' : o.sorun || o.onaysiz ? ' turuncu' : ''}" style="cursor:pointer" title="Nöbet defteri dökümü" onclick="adGorunum='defter';adCiz()"><div class="ad-kb">Nöbet defteri ›</div><div class="ad-kv">${o.yok}</div><div class="ad-ka">yazılmayan · ${o.sorun} sorun · ${o.onaysiz} onaysız</div></div>`; })()}</div>`;
   const erken = [...adSeciliGun].filter(g => adVeri[g] && adVeri[g].erken_alindi);
   if (erken.length) h += `<div class="ad-uyari">${erken.map(adTr).join(', ')} nöbet bitmeden (ertesi sabah 09:00’dan önce) alınmış. Sonuçlar eksik olabilir; ertesi sabah yeniden alın.</div>`;
   if (!cok) { const d = adVeri[[...adSeciliGun][0]]; h += `<div class="ad-alt">ASOS’tan alındı: ${adEsc(new Date(d.alindi).toLocaleString('tr-TR'))} · ${adEsc(d.alan)} · Görünen ${L.length}/${tum.length}</div>`; }
@@ -9665,6 +9712,38 @@ function adGunTablo() {
   });
   return h + '</tbody></table></div>';
 }
+// Sürüm 13.74: nöbet defteri (ASOS İstasyon › Nöbet Defteri) — ekip başına yazılmış / onaylı mı, rutin dışı bildirim
+function adSecilenDefter() {
+  const out = [], okunmadi = [];
+  [...adSeciliGun].sort().reverse().forEach(g => { const d = adVeri[g]; if (!d) return; if (d.defter == null) okunmadi.push(g); else d.defter.forEach(x => out.push(Object.assign({ gun: g }, x))); });
+  return { L: out.filter(x => !adSeciliEkip.size || adSeciliEkip.has(x.ekip_ad)).sort((a, b) => (a.gun < b.gun ? 1 : a.gun > b.gun ? -1 : 0) || adSira(a.ekip_ad, b.ekip_ad) || ((a.bas || '') < (b.bas || '') ? -1 : 1)), okunmadi };
+}
+const adDefterSorunlu = x => x.durum === 'yok' || !x.onay || x.sorun;
+function adDefterOzet(L) { const v = L.filter(x => x.durum === 'var'); return { ekip: new Set(L.map(x => x.gun + '|' + x.ekip_ad)).size, yok: L.filter(x => x.durum === 'yok').length, onaysiz: v.filter(x => !x.onay).length, kkm: v.filter(x => !x.kkm).length, sorun: v.filter(x => x.sorun).length }; }
+function adDefterTablo() {
+  const { L: tum, okunmadi } = adSecilenDefter(), cok = adSeciliGun.size > 1;
+  const q = ((document.getElementById('adAra') || {}).value || '').toLocaleUpperCase('tr-TR');
+  const sorunlu = (document.getElementById('adSorunlu') || { checked: true }).checked;
+  const L = tum.filter(x => (!sorunlu || adDefterSorunlu(x)) && (!q || (x.ekip_ad + ' ' + (x.aciklama || '')).toLocaleUpperCase('tr-TR').includes(q)));
+  const o = adDefterOzet(tum);
+  const kart = (b, v, a, c) => `<div class="ad-kart${c ? ' ' + c : ''}"><div class="ad-kb">${b}</div><div class="ad-kv">${v}</div><div class="ad-ka">${a}</div></div>`;
+  let h = `<div class="ad-kartlar">${kart(cok ? 'Ekip-gün' : 'Nöbetteki ekip', o.ekip, 'nöbet listesi olan ASHİ')}${kart('Defter yazılmayan', o.yok, 'ASOS’ta nöbet defteri yok', o.yok ? 'kirmizi' : '')}${kart('Onaylanmayan', o.onaysiz, `defter var, onay yok · KKM onayı yok: ${o.kkm}`, o.onaysiz ? 'turuncu' : '')}${kart('Sorun bildirilen', o.sorun, 'rutin devir dışında açıklama', o.sorun ? 'turuncu' : '')}</div>`;
+  if (okunmadi.length) h += `<div class="ad-uyari">${okunmadi.map(adTr).join(', ')} için nöbet defteri okunmamış (eski yer işaretiyle alınmış). Yer işaretini yeniden sürükleyip bu günleri yeniden alın.</div>`;
+  h += `<div class="ad-alt">Rutin devir: ASOS durumu “Nöbet Sorunsuz Geçti” ve açıklamada sorun kelimesi yok. Kelimeler Ayarlar’dan değişir. Görünen ${L.length}/${tum.length}</div>`;
+  if (!L.length) return h + '<div class="ad-bos">Süzgece uyan kayıt yok' + (sorunlu && tum.length ? ' — seçilen günlerde nöbet defteri sorunu görünmüyor.' : '.') + '</div>';
+  h += `<div class="ad-tw"><table class="ad-t"><thead><tr>${cok ? '<th>Gün</th>' : ''}<th>İstasyon / ekip</th><th>Nöbet</th><th>Defter</th><th>ASOS durumu</th><th>Onay</th><th>KKM onayı</th><th>Açıklama</th></tr></thead><tbody>`;
+  L.forEach(x => {
+    const var_ = x.durum === 'var';
+    h += `<tr class="ad-ilk">${cok ? `<td style="white-space:nowrap">${adTr(x.gun).slice(0, 5)}</td>` : ''}<td><b>${adEsc(x.ekip_ad)}</b></td>
+      <td style="white-space:nowrap">${var_ ? `${adSaat(x.bas)} → ${adSaat(x.bit)}` : '<span class="ad-gri">—</span>'}</td>
+      <td>${var_ ? `<span class="ad-ok">✓ yazıldı</span>${x.yazildi ? `<div class="ad-gri ad-kucuk">${adSaat(x.yazildi)}</div>` : ''}` : '<span class="ad-no">Yazılmadı</span>'}</td>
+      <td>${var_ ? adEsc(x.asos_durum) : ''}</td>
+      <td>${var_ ? (x.onay ? '<span class="ad-ok">✓</span>' : '<span class="ad-tur">Onay yok</span>') : ''}</td>
+      <td>${var_ ? (x.kkm ? '<span class="ad-ok">✓</span>' : '<span class="ad-gri">yok</span>') : ''}</td>
+      <td>${var_ ? (x.sorun ? `<div class="ad-tur" style="white-space:pre-wrap;max-width:520px">${adEsc(x.aciklama || '(açıklama yok)')}</div>` : '<span class="ad-gri">rutin devir</span>') : ''}</td></tr>`;
+  });
+  return h + '</tbody></table></div>';
+}
 function adAylikTablo() {
   const a = adAylik;
   if (!a || a.yukleniyor) return '<div class="ad-bos">Yükleniyor…</div>';
@@ -9674,9 +9753,13 @@ function adAylikTablo() {
   let h = `<div class="ad-alt">${a.gun_sayisi} günlük kayıt: ${a.gunler.map(g => g.slice(8, 10)).join(', ')}. Kaydı olmayan günler istatistiğe girmez.</div>`;
   if (adAyEkip) {
     const E = a.ekipler.filter(e => ekipUy(e.ad)).sort((x, y) => ((y.imzasiz + y.form_eksik_nobet) - (x.imzasiz + x.form_eksik_nobet)) || adSira(x.ad, y.ad));
-    h += '<div class="ad-tw"><table class="ad-t"><thead><tr><th>İstasyon / ekip</th><th>Nöbet</th><th>İmza yok</th><th>Formu eksik nöbet</th><th>Eksik form</th></tr></thead><tbody>';
-    E.forEach(e => { h += `<tr><td><b>${adEsc(e.ad)}</b></td><td>${e.nobet}</td><td class="${e.imzasiz ? 'ad-no' : ''}">${e.imzasiz}</td><td class="${e.form_eksik_nobet ? 'ad-tur' : ''}">${e.form_eksik_nobet}</td><td>${e.eksik_form}</td></tr>`; });
-    return h + '</tbody></table></div>';
+    const dv = a.defter_gun > 0;
+    h += `<div class="ad-tw"><table class="ad-t"><thead><tr><th>İstasyon / ekip</th><th>Nöbet</th><th>İmza yok</th><th>Formu eksik nöbet</th><th>Eksik form</th>${dv ? '<th>Defter yazılmayan</th><th>Defter onaysız</th><th>Defterde sorun</th>' : ''}</tr></thead><tbody>`;
+    E.forEach(e => { h += `<tr><td><b>${adEsc(e.ad)}</b></td><td>${e.nobet}</td><td class="${e.imzasiz ? 'ad-no' : ''}">${e.imzasiz}</td><td class="${e.form_eksik_nobet ? 'ad-tur' : ''}">${e.form_eksik_nobet}</td><td>${e.eksik_form}</td>${dv ? `<td class="${e.defter_yok ? 'ad-no' : ''}">${e.defter_yok || 0}</td><td class="${e.defter_onaysiz ? 'ad-tur' : ''}">${e.defter_onaysiz || 0}</td><td class="${e.defter_sorun ? 'ad-tur' : ''}">${e.defter_sorun || 0}</td>` : ''}</tr>`; });
+    h += '</tbody></table></div>';
+    const DS = (a.defter_sorunlar || []).filter(x => ekipUy(x.ekip_ad));
+    if (dv) h += `<h4 style="margin:16px 0 6px;font-size:14px">Nöbet defterinde sorun bildirilenler (${DS.length})</h4><div class="ad-alt">${a.defter_gun} günün defteri okunmuş.</div>` + (DS.length ? `<div class="ad-tw"><table class="ad-t"><thead><tr><th>Gün</th><th>İstasyon / ekip</th><th>ASOS durumu</th><th>Açıklama</th></tr></thead><tbody>${DS.map(x => `<tr><td style="white-space:nowrap">${adTr(x.gun).slice(0, 5)}</td><td><b>${adEsc(x.ekip_ad)}</b></td><td>${adEsc(x.asos_durum)}</td><td class="ad-tur" style="white-space:pre-wrap">${adEsc(x.aciklama || '')}</td></tr>`).join('')}</tbody></table></div>` : '<div class="ad-bos">Sorun bildirimi yok.</div>');
+    return h;
   }
   const q = ((document.getElementById('adAra2') || {}).value || '').toLocaleUpperCase('tr-TR');
   const sorun = (document.getElementById('adSorunlu2') || { checked: true }).checked;
@@ -9697,13 +9780,17 @@ function adAyarTablo() {
       <tr class="ad-ilk"><td><input id="adYeniForm" placeholder="ASOS’taki adıyla yeni form (örnek: … KONTROL FORMU)" style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #cbd5e1"></td>
       <td><input id="adYeniEtiket" placeholder="Görünen ad (isteğe bağlı)" maxlength="60" style="width:240px;padding:6px 8px;border:1px solid #cbd5e1"></td>
       <td>${sec('__yeni', 'ysp').replace('data-form="__yeni"', 'id="adYeniGorev"')}</td><td><button type="button" class="ad-btn ad-btn-ana" style="height:30px;padding:0 12px" onclick="adFormEkle()">+ Ekle</button></td></tr></tbody></table></div>
+    <h4 style="margin:18px 0 6px;font-size:14px">Nöbet defteri: rutin devir ve sorun bildirimi</h4>
+    <div class="ad-alt">Bir defter kaydı, ASOS durumu aşağıdaki rutin durumlardan biriyse ve açıklamasında sorun kelimesi geçmiyorsa <b>rutin devir</b> sayılır; açıklaması saklanmaz. Öteki kayıtlar “sorun bildirilen” olarak açıklamasıyla gösterilir. Her satıra bir ifade yazın; büyük-küçük harf fark etmez, kelimenin başı yeter (ARIZA → arızası, arızalı).</div>
+    <div class="ad-defter-ayar">${[['adDefRutin', 'Rutin ASOS durumları', a.defter_rutin], ['adDefKelime', 'Sorun sayılan kelimeler', a.defter_kelime], ['adDefIstisna', 'Sorun sayılmayan kalıplar (önce bunlar çıkarılır)', a.defter_istisna]].map(([id, b, v]) => `<label><span class="ad-lb">${b}</span><textarea id="${id}" rows="8">${adEsc((v || []).join('\n'))}</textarea></label>`).join('')}</div>
     <button type="button" class="ad-btn ad-btn-ana" style="margin-top:12px" onclick="adAyarKaydet()">💾 Ayarları kaydet</button>`;
 }
 function adAyarTopla() {
   const kural = {}, etiket = {};
   document.querySelectorAll('#asosDenetimModal select[data-form]').forEach(s => { kural[s.dataset.form] = s.value; });
   document.querySelectorAll('#asosDenetimModal input.ad-etiket').forEach(i => { if (i.value.trim()) etiket[i.dataset.form] = i.value.trim(); });
-  return { kural, etiket, erken_dk: +(document.getElementById('adErken') || {}).value || 30 };
+  const liste = id => { const e = document.getElementById(id); return e ? e.value.split('\n').map(x => x.trim()).filter(Boolean) : undefined; };
+  return { kural, etiket, erken_dk: +(document.getElementById('adErken') || {}).value || 30, defter_rutin: liste('adDefRutin'), defter_kelime: liste('adDefKelime'), defter_istisna: liste('adDefIstisna') };
 }
 async function adFormEkle() {
   const ad = ((document.getElementById('adYeniForm') || {}).value || '').trim();
@@ -9809,6 +9896,14 @@ async function adExcel() {
         satirlar: [...L.map(k => [k.ad, AD_GOREV[k.tur] || k.gorev, k.nobet, k.imzasiz, k.form_eksik_nobet, k.eksik_form, k.gunler.join('   ')]), ['TOPLAM', '', ...t, '']], toplam: r => r[0] === 'TOPLAM',
         hucre: (v, c) => (c === 3 || c === 4) && v > 0 ? AD_X.yok : null });
     });
+    if (a.defter_gun) {
+      const DT = E.reduce((t, e) => [t[0] + (e.defter_gun || 0), t[1] + (e.defter_yok || 0), t[2] + (e.defter_onaysiz || 0), t[3] + (e.defter_sorun || 0)], [0, 0, 0, 0]);
+      adSayfa(wb, 'Nöbet defteri', { ustBilgi: [`Nöbet defteri — ${a.ay}`, `${a.defter_gun} günün defteri okunmuş · rutin devir dışındaki bildirimler “Defter sorunları” sayfasında`], baslik: ['İstasyon / ekip', 'Defteri okunan nöbet', 'Defter yazılmayan', 'Onaylanmayan', 'Sorun bildirilen'], genislik: [36, 14, 14, 14, 14],
+        satirlar: [...E.map(e => [e.ad, e.defter_gun || 0, e.defter_yok || 0, e.defter_onaysiz || 0, e.defter_sorun || 0]), ['TOPLAM', ...DT]], toplam: r => r[0] === 'TOPLAM', hucre: (v, c) => (c === 2 && v > 0) ? AD_X.yok : null });
+      const DS = (a.defter_sorunlar || []).filter(x => ekipUy(x.ekip_ad));
+      adSayfa(wb, 'Defter sorunları', { ustBilgi: [`Nöbet defterinde sorun bildirilenler — ${a.ay}`], baslik: ['Nöbet günü', 'İstasyon / ekip', 'ASOS durumu', 'Onay', 'KKM onayı', 'Açıklama'], genislik: [12, 32, 22, 8, 10, 100],
+        satirlar: DS.map(x => [adTr(x.gun), x.ekip_ad, x.asos_durum || '', x.onay ? '✓' : 'YOK', x.kkm ? '✓' : 'yok', x.aciklama || '']) });
+    }
     adYaz(wb, `ASOS_denetim_${a.ay}.xlsx`); return;
   }
   if (!adSeciliGun.size) return;
@@ -9837,7 +9932,16 @@ async function adExcel() {
     satirlar: L.map(x => [adTr(x.gun), x.ekip_ad, x.ad, AD_GOREV[x.tur] || x.gorev, `${adSaat(x.bas)} → ${adSaat(x.bit)}`, x.imza ? adSaat(x.imza) : 'İMZA YOK', (x.eksik || []).length,
       ...formlar.map(f => (x.eksik || []).includes(f) ? '✗' : tamamMi(x, f) ? '✓' : '')]),
     hucre: (v, c) => v === 'İMZA YOK' || v === '✗' ? AD_X.yok : v === '✓' ? AD_X.ok : (c === 6 && v > 0 ? AD_X.yok : null) });
-  // 3) Form adları
+  // 3) Nöbet defteri (okunmuşsa; bütün ekipler, süzgeçsiz)
+  const DF = adSecilenDefter().L;
+  if (DF.length) {
+    const o = adDefterOzet(DF);
+    adSayfa(wb, 'Nöbet defteri', { ustBilgi: [`Nöbet defteri — ${gunYazi}`, `${o.ekip} ekip · ${o.yok} defter yazılmadı · ${o.onaysiz} onaysız · ${o.sorun} sorun bildirimi · rutin devirlerin açıklaması alınmaz`],
+      baslik: ['Nöbet günü', 'İstasyon / ekip', 'Nöbet', 'Defter', 'Yazıldı', 'ASOS durumu', 'Onay', 'KKM onayı', 'Açıklama'], genislik: [12, 32, 24, 12, 13, 22, 9, 10, 90],
+      satirlar: DF.map(x => x.durum === 'yok' ? [adTr(x.gun), x.ekip_ad, '', 'YAZILMADI', '', '', '', '', ''] : [adTr(x.gun), x.ekip_ad, `${adSaat(x.bas)} → ${adSaat(x.bit)}`, 'Yazıldı', x.yazildi ? adSaat(x.yazildi) : '', x.asos_durum || '', x.onay ? '✓' : 'YOK', x.kkm ? '✓' : 'yok', x.sorun ? (x.aciklama || '(açıklama yok)') : 'rutin devir']),
+      hucre: (v, c) => v === 'YAZILMADI' || (c === 6 && v === 'YOK') ? AD_X.yok : (v === '✓' ? AD_X.ok : null) });
+  }
+  // 4) Form adları
   adSayfa(wb, 'Form adları', { ustBilgi: ['Form adları'], baslik: ['Görünen ad', 'ASOS’taki tam adı', 'Doldurması gereken'], genislik: [26, 90, 18],
     satirlar: formlar.map(f => [adKisa(f), f, AD_GOREV[turu(f)]]) });
   adYaz(wb, `ASOS_denetim_${gunler[0]}${gunler.length > 1 ? '_' + gunler[gunler.length - 1] : ''}.xlsx`);
@@ -9874,7 +9978,7 @@ function adAnaEkle() {
     const g = adGunler[0], o = g && g.ozet;
     k.innerHTML = `<div class="ad-ana-ust"><div><h3>✍️ İmza ve form denetimi</h3><small>ASOS Dönem İçi Hareketler · yalnız ASHİ ekipleri</small></div>
       <div class="ad-ana-dug"><button type="button" class="ad-btn ad-btn-ana" onclick="adAsosAc()">🔗 ASOS’u aç</button><label class="ad-btn ad-btn-ikinci">📂 Dosyadan yükle<input type="file" accept=".json" style="display:none" onchange="showAsosDenetim();adDosya(this)"></label><button type="button" class="ad-btn ad-btn-ikinci" onclick="anNav(showAsosDenetim)">Denetimi aç ›</button></div></div>
-      ${o ? `<div class="ad-ana-say"><div><span>Son kayıt</span><b>${adTr(g.gun)}</b></div><div><span>İmza atmayan</span><b class="${o.imzasiz ? 'ad-no' : ''}">${o.imzasiz}</b></div><div><span>Formu eksik kişi</span><b class="${o.form_eksik_kisi ? 'ad-tur' : ''}">${o.form_eksik_kisi}</b></div><div><span>Nöbetteki kişi</span><b>${o.kisi}</b></div></div>`
+      ${o ? `<div class="ad-ana-say"><div><span>Son kayıt</span><b>${adTr(g.gun)}</b></div><div><span>İmza atmayan</span><b class="${o.imzasiz ? 'ad-no' : ''}">${o.imzasiz}</b></div><div><span>Formu eksik kişi</span><b class="${o.form_eksik_kisi ? 'ad-tur' : ''}">${o.form_eksik_kisi}</b></div><div><span>Nöbetteki kişi</span><b>${o.kisi}</b></div>${g.defter_ozet ? `<div><span>Defter yazılmayan</span><b class="${g.defter_ozet.yok ? 'ad-no' : ''}">${g.defter_ozet.yok}</b></div><div><span>Defterde sorun</span><b class="${g.defter_ozet.sorun ? 'ad-tur' : ''}">${g.defter_ozet.sorun}</b></div>` : ''}</div>`
         : '<div class="ad-gri" style="margin-top:8px">Henüz denetim kaydı yok. ASOS’u açıp yer işaretiyle ilk günü alın.</div>'}`;
   };
   ciz();
@@ -9895,8 +9999,9 @@ function adCiz() {
     const gunSec = adGunler.map(x => ({ v: x.gun, t: adTr(x.gun), e: x.ozet ? `${x.ozet.imzasiz} imzasız · ${x.ozet.form_eksik_kisi} formu eksik` : '' }));
     ic = `<div class="ad-suz"><span class="ad-lb">Nöbet günü</span>${adMs('adMsGun', 'Nöbet günü', 'Gün seçin', gunSec, adSeciliGun)}
       <span class="ad-lb">Ekip</span>${adEkipSecici('adEkipSec', ekipler)}
-      <input id="adAra" type="search" placeholder="Ad ara…" oninput="adCiz2()">
-      <select id="adGorev" style="width:170px" onchange="adCiz2()"><option value="">Bütün görevler</option><option value="ef">Ekip şefi</option><option value="ysp">YSP</option><option value="sur">Sürücü</option></select>
+      <span class="ad-sw"><button type="button" class="${adGorunum === 'kisi' ? 'on' : ''}" onclick="adGorunum='kisi';adCiz()">Kişiler</button><button type="button" class="${adGorunum === 'defter' ? 'on' : ''}" onclick="adGorunum='defter';adCiz()">Nöbet defteri</button></span>
+      <input id="adAra" type="search" placeholder="${adGorunum === 'defter' ? 'Ekip ya da açıklama ara…' : 'Ad ara…'}" oninput="adCiz2()">
+      ${adGorunum === 'defter' ? '' : `<select id="adGorev" style="width:170px" onchange="adCiz2()"><option value="">Bütün görevler</option><option value="ef">Ekip şefi</option><option value="ysp">YSP</option><option value="sur">Sürücü</option></select>`}
       <label><input id="adSorunlu" type="checkbox" checked onchange="adCiz2()"> Yalnız sorunlular</label>
       ${adSeciliGun.size === 1 ? '<button type="button" class="btn-sec" style="margin-left:auto;color:#b91c1c" onclick="adGunSil()">Bu günü sil</button>' : ''}</div><div id="adIcerik">${adGunTablo()}</div>`;
   } else if (adSekme === 'aylik') {
