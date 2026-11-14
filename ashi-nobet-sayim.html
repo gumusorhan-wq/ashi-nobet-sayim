@@ -936,8 +936,22 @@ body.ui-side #asosDenetimModal .modal-head .modal-close{color:#475569!important;
 #asosDenetimModal .ad-sekler{display:flex;gap:4px;align-items:center;border-bottom:1px solid #e2e8f0;margin-bottom:12px}
 #asosDenetimModal .ad-sek{border:0;background:none;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent}
 #asosDenetimModal .ad-sek.on{color:#0055a4;border-bottom-color:#0055a4}
-#asosDenetimModal .ad-al{background:#eff6ff;border:1px solid #bfdbfe;padding:10px 12px;font-size:13px;line-height:2;margin-bottom:10px}
-#asosDenetimModal .ad-yi{display:inline-block;background:#0055a4;color:#fff!important;padding:2px 10px;text-decoration:none;font-weight:700;line-height:1.6}
+#asosDenetimModal .ad-al{background:#eff6ff;border:1px solid #bfdbfe;padding:12px 14px;font-size:13px;margin-bottom:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px 18px}
+#asosDenetimModal .ad-al-b{grid-column:1/-1;font-weight:800;color:#0f172a;font-size:14px}
+#asosDenetimModal .ad-al>.ad-gri{grid-column:1/-1}
+.ad-adim{display:flex;gap:10px;align-items:flex-start}.ad-adim>div{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.ad-no2{flex:none;width:24px;height:24px;border-radius:50%;background:#0055a4;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:6px}
+.ad-yi{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#0055a4!important;border:2px dashed #0055a4;padding:8px 14px;text-decoration:none;font-weight:800;font-size:14px;cursor:grab}
+.ad-btn{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 16px;font:inherit;font-size:14px;font-weight:700;cursor:pointer;border:1px solid #0055a4;white-space:nowrap;box-sizing:border-box}
+.ad-btn-ana{background:#0055a4;color:#fff}.ad-btn-ana:hover{background:#004080}
+.ad-btn-ikinci{background:#fff;color:#0055a4}.ad-btn-ikinci:hover{background:#eff6ff}
+.ad-ana-kutu{background:#fff;border:1px solid #e2e8f0;border-left:4px solid #0055a4;padding:14px 16px;margin:16px 0}
+.ad-ana-ust{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.ad-ana-ust h3{margin:0;font-size:15px;color:#0f172a}.ad-ana-ust small{color:#64748b;font-size:12px}
+.ad-ana-dug{display:flex;flex-wrap:wrap;gap:8px}
+.ad-ana-say{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}
+.ad-ana-say>div{background:#f8fafc;padding:8px 12px}.ad-ana-say span{display:block;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em}.ad-ana-say b{font-size:22px;color:#0f172a}
+.ad-ana-say b.ad-no{color:#b91c1c}.ad-ana-say b.ad-tur{color:#c2410c}.ad-gri{color:#94a3b8;font-size:12px}
 #asosDenetimModal .ad-suz{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px;font-size:13px}
 #asosDenetimModal .ad-suz input[type=search]{min-width:220px;padding:6px 8px;border:1px solid #cbd5e1}
 #asosDenetimModal .ad-suz select,#asosDenetimModal .ad-suz input[type=month]{padding:6px 8px;border:1px solid #cbd5e1;background:#fff}
@@ -962,19 +976,7 @@ body.ui-side #asosDenetimModal .modal-head .modal-close{color:#475569!important;
 #asosDenetimModal .ad-sw button.on{background:#0055a4;color:#fff;border-color:#0055a4}
 #asosDenetimModal .ad-lb{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:#334155}
 #asosDenetimModal .ad-suz label{display:inline-flex;align-items:center;gap:6px}
-#asosDenetimModal .ad-ms{position:relative}
-#asosDenetimModal .ad-ms>summary{list-style:none;display:flex;align-items:center;gap:8px;min-width:200px;max-width:320px;height:34px;padding:0 10px;border:1px solid #cbd5e1;background:#fff;cursor:pointer;font-size:13px;color:#0f172a;box-sizing:border-box}
-#asosDenetimModal .ad-ms>summary::-webkit-details-marker{display:none}
-#asosDenetimModal .ad-ms>summary i{margin-left:auto;font-style:normal;font-size:10px;color:#64748b}
-#asosDenetimModal .ad-ms.on>summary{border-color:#0055a4;color:#0055a4;font-weight:600}
-#asosDenetimModal .ad-msp{position:absolute;z-index:20;top:38px;left:0;width:340px;background:#fff;border:1px solid #cbd5e1;box-shadow:0 10px 30px rgba(15,23,42,.18);padding:8px}
-#asosDenetimModal .ad-msb{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#475569;padding:2px 4px 6px;border-bottom:1px solid #f1f5f9}
-#asosDenetimModal .ad-msb button{border:0;background:none;padding:0;font:inherit;font-weight:600;color:#0055a4;cursor:pointer}
-#asosDenetimModal .ad-msp input[type=search]{width:100%;box-sizing:border-box;margin:6px 0;padding:6px 8px;border:1px solid #cbd5e1}
-#asosDenetimModal .ad-msl{max-height:300px;overflow:auto}
-#asosDenetimModal .ad-msl label{display:flex!important;align-items:center;gap:8px;padding:5px 6px;font-size:13px;cursor:pointer}
-#asosDenetimModal .ad-msl label:hover{background:#f1f5f9}
-#asosDenetimModal .ad-msl label small{margin-left:auto;color:#94a3b8;font-size:11px}
+#asosDenetimModal .ad-ms>summary{min-width:220px;max-width:340px;height:34px;box-sizing:border-box;overflow:hidden;white-space:nowrap}
 #asosDenetimModal .ad-ana{background:#0055a4!important;color:#fff!important;border-color:#0055a4!important}
 </style>
 </head>
@@ -9436,6 +9438,8 @@ function adYetkili() { const E = window.ASHI_ENTEG; return !!(E && E.aktif && E.
 function adEsc(s) { return escapeHtml(s == null ? '' : String(s)); }
 function adTr(g) { return g ? `${g.slice(8, 10)}.${g.slice(5, 7)}.${g.slice(0, 4)}` : ''; }
 function adSaat(s) { return s ? `${s.slice(8, 10)}.${s.slice(5, 7)} ${s.slice(11, 16)}` : ''; }
+function adSira(a, b) { return String(a || '').localeCompare(String(b || ''), 'tr', { numeric: true, sensitivity: 'base' }); }
+const AD_TUR_SIRA = { ef: 0, ysp: 1, sur: 2 };
 function adDun() { const d = new Date(); d.setDate(d.getDate() - 1); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`; }
 
 // ---- ASOS sayfasında çalışan istemci (yer işareti). Tek başına çalışır; satır içi yorum yok (tek satıra sıkıştırılır). ----
@@ -9490,7 +9494,7 @@ async function asosDenetimIstemci(cfg) {
           try {
             const L = await post(is.u, { StartDate: is.d.toUTCString(), TeamId: is.e.id, UserCityCodeId: '' });
             if (is.u === 'GetPersonnelWorkList') L.forEach(r => is.e.nobet.push({ uid: r.UserId, ad: r.PersonnelFullName || ((r.PersonnelName || '') + ' ' + (r.PersonnelSurname || '')).trim(), gorev: r.Duty, bas: r.DeterminateEnteranceDate, bit: r.DeteminateExitDate }));
-            else if (is.u === 'GetPersonnelSignedList') L.forEach(r => is.e.imza.push({ uid: r.UserId, ad: r.PersonnelFullName, bas: r.DeterminateEnteranceDate, giris: r.EnteranceDate }));
+            else if (is.u === 'GetPersonnelSignedList') L.forEach(r => is.e.imza.push({ uid: r.UserId, ad: r.PersonnelFullName || ((r.PersonnelName || '') + ' ' + (r.PersonnelSurname || '')).trim(), bas: r.DeterminateEnteranceDate, giris: r.EnteranceDate }));
             else L.forEach(r => is.e.formlar.push({ id: r.ControlFormAnswerId, ad: r.Name, tarih: r.ControlDate }));
           } catch (e) { if (/oturum/.test(e.message)) { isler.length = 0; hata.unshift(e.message); } else hata.push(is.e.ad + ': ' + e.message); }
           bitti++;
@@ -9553,7 +9557,7 @@ async function showAsosDenetim() {
   m.style.display = 'block';
   if (!adYetkili()) { document.getElementById('adGovde').innerHTML = '<div class="ad-bos">Bu sayfa İK yükleme yetkisi olan kullanıcılara açıktır.</div>'; return; }
   adCiz();
-  await adGunleriAl();
+  await Promise.all([adGunleriAl(), adAyar ? null : adAyarAl()]);
   if (!adSeciliGun.size && adGunler.length) adSeciliGun = new Set([adGunler[0].gun]);
   await adGunVerisi(adSeciliGun);
   adCiz();
@@ -9563,7 +9567,7 @@ async function adGunDegisti() { adCiz(); await adGunVerisi(adSeciliGun); adCiz()
 async function adGunSil() {
   if (adSeciliGun.size !== 1) return;
   const g = [...adSeciliGun][0];
-  if (!confirm(`${adTr(g)} denetim kaydı silinsin mi? Aylık istatistikten de çıkar.`)) return;
+  if (!(await ashiOnay(`${adTr(g)} denetim kaydı silinsin mi?\n\nAylık istatistikten de çıkar.`))) return;
   try { await adApi('DELETE', '/gun/' + g); delete adVeri[g]; adSeciliGun = new Set(); adAylik = null; await adGunleriAl(); if (adGunler.length) adSeciliGun.add(adGunler[0].gun); await adGunVerisi(adSeciliGun); } catch (e) { adDurum = e.message; }
   adCiz();
 }
@@ -9580,34 +9584,41 @@ async function adAylikAl(ay) {
 }
 async function adAyarAl() { try { adAyar = await adApi('GET', '/ayar'); } catch (e) { adAyar = { hata: e.message }; } adCiz(); }
 async function adAyarKaydet() {
-  const kural = {};
-  document.querySelectorAll('#asosDenetimModal select[data-form]').forEach(s => { kural[s.dataset.form] = s.value; });
-  const erken = +(document.getElementById('adErken') || {}).value || 30;
-  try { adAyar = await adApi('PUT', '/ayar', { kural, erken_dk: erken }); adDurum = 'Ayarlar kaydedildi. Yeni ayar, bundan sonra alınan günlere uygulanır; eski bir günü yeniden hesaplatmak için o günü ASOS’tan yeniden alın.'; } catch (e) { adDurum = 'Kaydedilemedi: ' + e.message; }
+  try { adAyar = await adApi('PUT', '/ayar', adAyarTopla()); adDurum = 'Ayarlar kaydedildi. Görevi değişen form, bundan sonra alınan günlere uygulanır; eski bir günü yeniden hesaplatmak için o günü ASOS’tan yeniden alın. Görünen adlar hemen geçerlidir.'; } catch (e) { adDurum = 'Kaydedilemedi: ' + e.message; }
   adCiz();
 }
-// çoklu seçim kutusu (ortak görünüm: başlık seçili/toplam, ara, Tümü/Temizle)
-function adMs(id, bos, secenekler, secili) {
+// çoklu seçim: İK'nın ortak seçim paneli (lf-ms: başlık, seçili/toplam, Tümü / Temizle, ara)
+function adMs(id, baslik, bos, secenekler, secili) {
   const n = secili.size, top = secenekler.length;
   const yazi = !n ? bos : n === 1 ? (secenekler.find(o => secili.has(o.v)) || { t: '1 seçili' }).t : `${n} seçili`;
-  return `<details class="ad-ms${n ? ' on' : ''}" id="${id}" ${adMsAcik === id ? 'open' : ''} ontoggle="if(this.open)adMsAcik='${id}';else if(adMsAcik==='${id}')adMsAcik=''">
-    <summary>${adEsc(yazi)}<i>▾</i></summary><div class="ad-msp">
-    <div class="ad-msb"><b>${n}/${top} seçili</b><span><button type="button" onclick="adMsTum('${id}',1)">Tümü</button> · <button type="button" onclick="adMsTum('${id}',0)">Temizle</button></span></div>
-    ${top > 8 ? `<input type="search" placeholder="Ara…" oninput="adMsAra(this)">` : ''}
-    <div class="ad-msl">${secenekler.map(o => `<label data-ara="${adEsc(o.t.toLocaleUpperCase('tr-TR'))}"><input type="checkbox" value="${adEsc(o.v)}" ${secili.has(o.v) ? 'checked' : ''} onchange="adMsSec('${id}',this.value,this.checked)"> <span>${adEsc(o.t)}</span>${o.e ? `<small>${adEsc(o.e)}</small>` : ''}</label>`).join('') || '<div class="ad-gri" style="padding:6px">Seçenek yok</div>'}</div></div></details>`;
+  return `<details class="lf-ms ad-ms${n ? ' on' : ''}" id="${id}" ${adMsAcik === id ? 'open' : ''} ontoggle="if(this.open)adMsAcik='${id}';else if(adMsAcik==='${id}')adMsAcik=''">
+    <summary class="lf-sel">${adEsc(yazi)}</summary><div class="lf-ms-p">
+    <div class="lf-ms-bas"><span class="pk-baslik">${adEsc(baslik)}</span><span><span class="pk-say">${n}/${top} seçili</span>&nbsp;<button type="button" onclick="adMsTum('${id}',1)">Tümü</button>&nbsp;<button type="button" onclick="adMsTum('${id}',0)">Temizle</button></span></div>
+    ${top > 8 ? `<input type="search" class="ss-ara" placeholder="Ara…" oninput="adMsAra(this)" onkeydown="if(event.key==='Escape'){this.value='';adMsAra(this)}">` : ''}
+    <div class="lf-ms-lis">${secenekler.map(o => `<label data-ara="${adEsc(o.t.toLocaleUpperCase('tr-TR'))}"><input type="checkbox" value="${adEsc(o.v)}" ${secili.has(o.v) ? 'checked' : ''} onchange="adMsSec('${id}',this.value,this.checked)"> <span>${adEsc(o.t)}</span>${o.e ? `<small class="ad-gri" style="margin-left:auto">${adEsc(o.e)}</small>` : ''}</label>`).join('') || '<div class="ad-gri" style="padding:6px">Seçenek yok</div>'}</div></div></details>`;
+}
+// ekip seçimi: İK'nın ortak istasyon paneli (ilçe düğmeleri, ara, Uygula) — select[data-ist-picker]
+function adEkipSecici(id, ekipler) { return `<select data-ist-picker="1" id="${id}" style="width:280px" onchange="adEkipDegisti(this)"><option value="">Bütün ASHİ ekipleri</option>${ekipler.map(e => `<option value="${adEsc(e)}">${adEsc(e)}</option>`).join('')}</select>`; }
+function adEkipDegisti(sel) { const k = sel.id === 'adEkipSec' ? adSeciliEkip : adAyEkipSec; k.clear(); ashiIstSecim(sel).forEach(v => k.add(v)); adCiz2(); }
+function adEkipGeriYukle() {
+  [['adEkipSec', adSeciliEkip], ['adAyEkipSec', adAyEkipSec]].forEach(([id, k]) => {
+    const sel = document.getElementById(id); if (!sel || !k.size) return;
+    const dene = (n) => { const st = sel.__istPicker; if (!st) { if (n < 20) setTimeout(() => dene(n + 1), 25); return; } k.forEach(v => st.set.add(v)); sel.appendChild(document.createComment('')); };
+    dene(0);
+  });
 }
 function adMsKume(id) { return id === 'adMsGun' ? adSeciliGun : id === 'adMsEkip' ? adSeciliEkip : adAyEkipSec; }
 function adMsSec(id, v, on) { const s = adMsKume(id); if (on) s.add(v); else s.delete(v); if (id === 'adMsGun') adGunDegisti(); else adCiz(); }
 function adMsTum(id, on) {
   const s = adMsKume(id); s.clear();
-  if (on) document.querySelectorAll(`#${id} .ad-msl label:not([hidden]) input`).forEach(i => s.add(i.value));
+  if (on) document.querySelectorAll(`#${id} .lf-ms-lis label:not([hidden]) input`).forEach(i => s.add(i.value));
   if (id === 'adMsGun') adGunDegisti(); else adCiz();
 }
-function adMsAra(inp) { const q = inp.value.toLocaleUpperCase('tr-TR'); inp.closest('.ad-msp').querySelectorAll('.ad-msl label').forEach(l => { l.hidden = !!q && !l.dataset.ara.includes(q); }); }
+function adMsAra(inp) { const q = inp.value.toLocaleUpperCase('tr-TR'); inp.closest('.lf-ms-p').querySelectorAll('.lf-ms-lis label').forEach(l => { l.hidden = !!q && !l.dataset.ara.includes(q); }); }
 function adSecilenKisiler() {
   const out = [];
   [...adSeciliGun].sort().reverse().forEach(g => { const d = adVeri[g]; if (d) (d.kisiler || []).forEach(k => out.push(Object.assign({ gun: g }, k))); });
-  return out.filter(k => !adSeciliEkip.size || adSeciliEkip.has(k.ekip_ad));
+  return out.filter(k => !adSeciliEkip.size || adSeciliEkip.has(k.ekip_ad)).sort((a, b) => (a.gun < b.gun ? 1 : a.gun > b.gun ? -1 : 0) || adSira(a.ekip_ad, b.ekip_ad) || ((AD_TUR_SIRA[a.tur] ?? 3) - (AD_TUR_SIRA[b.tur] ?? 3)) || (a.bas < b.bas ? -1 : a.bas > b.bas ? 1 : 0) || adSira(a.ad, b.ad));
 }
 function adSuz(k) {
   const q = ((document.getElementById('adAra') || {}).value || '').toLocaleUpperCase('tr-TR');
@@ -9636,7 +9647,7 @@ function adGunTablo() {
     const grup = x.gun + '|' + x.ekip_ad, yeni = grup !== son; son = grup;
     h += `<tr class="${yeni ? 'ad-ilk' : ''}">${cok ? `<td style="white-space:nowrap">${yeni ? adTr(x.gun).slice(0, 5) : ''}</td>` : ''}<td>${yeni ? adEsc(x.ekip_ad) : ''}</td><td><b>${adEsc(x.ad)}</b></td><td>${adEsc(AD_GOREV[x.tur] || x.gorev)}</td><td style="white-space:nowrap">${adSaat(x.bas)} → ${adSaat(x.bit)}</td>
       <td>${x.imza ? `<span class="ad-ok">✓ ${adSaat(x.imza).slice(6)}</span>` : '<span class="ad-no">İmza yok</span>'}</td>
-      <td>${(x.eksik || []).length ? (x.eksik || []).map(f => `<div class="ad-f">${adEsc(f)}</div>`).join('') : (x.gerekli ? `<span class="ad-ok">✓ ${x.gerekli} form</span>` : '<span class="ad-gri">—</span>')}</td></tr>`;
+      <td>${(x.eksik || []).length ? (x.eksik || []).map(f => `<div class="ad-f" title="${adEsc(f)}">${adEsc(adAyar && adAyar.etiket && adAyar.etiket[f] ? adAyar.etiket[f] : f)}</div>`).join('') : (x.gerekli ? `<span class="ad-ok">✓ ${x.gerekli} form</span>` : '<span class="ad-gri">—</span>')}</td></tr>`;
   });
   return h + '</tbody></table></div>';
 }
@@ -9648,42 +9659,203 @@ function adAylikTablo() {
   const ekipUy = s => !adAyEkipSec.size || String(s || '').split(', ').some(e => adAyEkipSec.has(e));
   let h = `<div class="ad-alt">${a.gun_sayisi} günlük kayıt: ${a.gunler.map(g => g.slice(8, 10)).join(', ')}. Kaydı olmayan günler istatistiğe girmez.</div>`;
   if (adAyEkip) {
-    const E = a.ekipler.filter(e => ekipUy(e.ad));
+    const E = a.ekipler.filter(e => ekipUy(e.ad)).sort((x, y) => ((y.imzasiz + y.form_eksik_nobet) - (x.imzasiz + x.form_eksik_nobet)) || adSira(x.ad, y.ad));
     h += '<div class="ad-tw"><table class="ad-t"><thead><tr><th>İstasyon / ekip</th><th>Nöbet</th><th>İmza yok</th><th>Formu eksik nöbet</th><th>Eksik form</th></tr></thead><tbody>';
     E.forEach(e => { h += `<tr><td><b>${adEsc(e.ad)}</b></td><td>${e.nobet}</td><td class="${e.imzasiz ? 'ad-no' : ''}">${e.imzasiz}</td><td class="${e.form_eksik_nobet ? 'ad-tur' : ''}">${e.form_eksik_nobet}</td><td>${e.eksik_form}</td></tr>`; });
     return h + '</tbody></table></div>';
   }
   const q = ((document.getElementById('adAra2') || {}).value || '').toLocaleUpperCase('tr-TR');
   const sorun = (document.getElementById('adSorunlu2') || { checked: true }).checked;
-  const L = a.kisiler.filter(k => ekipUy(k.ekipler) && (!sorun || k.imzasiz || k.form_eksik_nobet) && (!q || (k.ad + ' ' + k.ekipler).toLocaleUpperCase('tr-TR').includes(q)));
+  const L = a.kisiler.slice().sort((x, y) => ((y.imzasiz + y.form_eksik_nobet) - (x.imzasiz + x.form_eksik_nobet)) || adSira(x.ad, y.ad)).filter(k => ekipUy(k.ekipler) && (!sorun || k.imzasiz || k.form_eksik_nobet) && (!q || (k.ad + ' ' + k.ekipler).toLocaleUpperCase('tr-TR').includes(q)));
   h += '<div class="ad-tw"><table class="ad-t"><thead><tr><th>Ad Soyad</th><th>Görev</th><th>İstasyon / ekip</th><th>Nöbet</th><th>İmza yok</th><th>Formu eksik nöbet</th><th>Eksik form</th><th>Günler</th></tr></thead><tbody>';
   L.forEach(k => { h += `<tr><td><b>${adEsc(k.ad)}</b></td><td>${adEsc(AD_GOREV[k.tur] || k.gorev)}</td><td>${adEsc(k.ekipler)}</td><td>${k.nobet}</td><td class="${k.imzasiz ? 'ad-no' : ''}">${k.imzasiz}</td><td class="${k.form_eksik_nobet ? 'ad-tur' : ''}">${k.form_eksik_nobet}</td><td>${k.eksik_form}</td><td class="ad-kucuk">${adEsc(k.gunler.join(' · '))}</td></tr>`; });
   return h + (L.length ? '' : '<tr><td colspan="8" class="ad-bos">Süzgece uyan kişi yok.</td></tr>') + '</tbody></table></div>';
 }
 function adAyarTablo() {
   const a = adAyar; if (!a) return '<div class="ad-bos">Yükleniyor…</div>'; if (a.hata) return `<div class="ad-uyari">${adEsc(a.hata)}</div>`;
-  const sec = ad => `<select style="width:200px" data-form="${adEsc(ad)}">${['ef', 'ysp', 'sur', 'yok'].map(g => `<option value="${g}" ${a.kural[ad] === g ? 'selected' : ''}>${AD_GOREV[g]}</option>`).join('')}</select>`;
-  return `<div class="ad-alt">Yalnız ASHİ ekipleri denetlenir (belediye, nakil ve dış kurum ekipleri okunmaz). Her form, seçilen görevdeki kişilerden <b>her birinin kendi nöbet süresi içinde</b> doldurulmuş olmalı. ASOS’ta yeni bir form görülürse buraya kendiliğinden eklenir (varsayılan YSP).</div>
-    <div style="margin:10px 0"><label>Nöbetten önce sayılan süre: <input id="adErken" type="number" min="0" max="180" value="${a.erken_dk}" style="width:70px"> dakika</label> <span class="ad-gri">(09:00 nöbeti için 30 dk → formlar 08:30’dan sayılır)</span></div>
-    <div class="ad-tw"><table class="ad-t"><thead><tr><th>ASOS form adı</th><th>Doldurması gereken</th></tr></thead><tbody>${a.bilinen_formlar.map(f => `<tr><td>${adEsc(f)}</td><td>${sec(f)}</td></tr>`).join('')}</tbody></table></div>
-    <button type="button" class="btn-sec ad-ana" style="margin-top:12px" onclick="adAyarKaydet()">💾 Ayarları kaydet</button>`;
+  const sec = (ad, v) => `<select style="width:180px" data-form="${adEsc(ad)}">${['ef', 'ysp', 'sur', 'yok'].map(g => `<option value="${g}" ${v === g ? 'selected' : ''}>${AD_GOREV[g]}</option>`).join('')}</select>`;
+  const elle = new Set(a.elle || []);
+  return `<div class="ad-alt">Yalnız ASHİ ekipleri denetlenir (belediye, nakil ve dış kurum ekipleri okunmaz). Her form, seçilen görevdeki kişilerden <b>her birinin kendi nöbet süresi içinde</b> doldurulmuş olmalı. ASOS’ta yeni bir form görülürse buraya kendiliğinden eklenir (varsayılan YSP). <b>Görünen ad</b> ekranda ve Excel’de kullanılır; eşleştirme ASOS’taki adla yapılır.</div>
+    <div style="margin:10px 0" class="ad-suz"><label class="ad-lb">Nöbetten önce sayılan süre <input id="adErken" type="number" min="0" max="180" value="${a.erken_dk}" style="width:70px;padding:6px 8px;border:1px solid #cbd5e1"> dakika</label> <span class="ad-gri">(09:00 nöbeti için 30 dk → formlar 08:30’dan sayılır)</span></div>
+    <div class="ad-tw"><table class="ad-t"><thead><tr><th>ASOS’taki form adı</th><th style="width:260px">Görünen ad</th><th style="width:200px">Doldurması gereken</th><th style="width:80px"></th></tr></thead><tbody>${a.bilinen_formlar.map(f => `<tr><td>${adEsc(f)}${elle.has(f) ? ' <span class="ad-gri">(elle eklendi)</span>' : ''}</td>
+      <td><input class="ad-etiket" data-form="${adEsc(f)}" value="${adEsc((a.etiket || {})[f] || '')}" placeholder="${adEsc(adKisaVars(f))}" maxlength="60" style="width:240px;padding:6px 8px;border:1px solid #cbd5e1"></td>
+      <td>${sec(f, a.kural[f])}</td><td>${elle.has(f) ? `<button type="button" class="ad-btn ad-btn-ikinci" style="height:30px;padding:0 10px;color:#b91c1c;border-color:#fca5a5" onclick="adFormSil(this.dataset.f)" data-f="${adEsc(f)}">Kaldır</button>` : ''}</td></tr>`).join('')}
+      <tr class="ad-ilk"><td><input id="adYeniForm" placeholder="ASOS’taki adıyla yeni form (örnek: … KONTROL FORMU)" style="width:100%;box-sizing:border-box;padding:6px 8px;border:1px solid #cbd5e1"></td>
+      <td><input id="adYeniEtiket" placeholder="Görünen ad (isteğe bağlı)" maxlength="60" style="width:240px;padding:6px 8px;border:1px solid #cbd5e1"></td>
+      <td>${sec('__yeni', 'ysp').replace('data-form="__yeni"', 'id="adYeniGorev"')}</td><td><button type="button" class="ad-btn ad-btn-ana" style="height:30px;padding:0 12px" onclick="adFormEkle()">+ Ekle</button></td></tr></tbody></table></div>
+    <button type="button" class="ad-btn ad-btn-ana" style="margin-top:12px" onclick="adAyarKaydet()">💾 Ayarları kaydet</button>`;
 }
-function adExcel() {
+function adAyarTopla() {
+  const kural = {}, etiket = {};
+  document.querySelectorAll('#asosDenetimModal select[data-form]').forEach(s => { kural[s.dataset.form] = s.value; });
+  document.querySelectorAll('#asosDenetimModal input.ad-etiket').forEach(i => { if (i.value.trim()) etiket[i.dataset.form] = i.value.trim(); });
+  return { kural, etiket, erken_dk: +(document.getElementById('adErken') || {}).value || 30 };
+}
+async function adFormEkle() {
+  const ad = ((document.getElementById('adYeniForm') || {}).value || '').trim();
+  if (!ad) { adDurum = 'Yeni formun ASOS’taki adını yazın.'; adCiz(); return; }
+  const b = adAyarTopla(), A = ad.toLocaleUpperCase('tr-TR').replace(/\s+/g, ' ');
+  b.kural[A] = (document.getElementById('adYeniGorev') || {}).value || 'ysp';
+  const et = ((document.getElementById('adYeniEtiket') || {}).value || '').trim(); if (et) b.etiket[A] = et;
+  b.ekle = [A];
+  try { adAyar = await adApi('PUT', '/ayar', b); adDurum = `“${A}” eklendi. ASOS’ta bu adla görünen form, seçilen görevden istenir.`; } catch (e) { adDurum = 'Eklenemedi: ' + e.message; }
+  adCiz();
+}
+async function adFormSil(ad) {
+  if (!(await ashiOnay(`“${ad}” formu listeden kaldırılsın mı?\n\nASOS’ta yeniden görülürse kendiliğinden geri eklenir.`))) return;
+  const b = adAyarTopla(); b.sil = [ad];
+  try { adAyar = await adApi('PUT', '/ayar', b); adDurum = 'Form kaldırıldı.'; } catch (e) { adDurum = 'Kaldırılamadı: ' + e.message; }
+  adCiz();
+}
+// Excel: kişi × form tablosu (✓ dolu, ✗ eksik, boş = görevi değil), özet ve form adları sayfaları
+const AD_KISA = [[/^NARKOT/, 'Narkotik ilaç'], [/^GÜNLÜK ÇEVR/, 'Günlük çevrim'], [/^AMBULANS BAKIM FORMU B BÖL/, 'B bölümü sarf'], [/^AMBULANS BAKIM FORMU$/, 'Ambulans bakım'],
+  [/^VAKA SONRASI/, 'Vaka sonrası temizlik'], [/ASGARİ İLAÇ/, 'Asgari ilaç-serum'], [/ASGARİ TIBBİ/, 'Asgari tıbbi cihaz'], [/ISI-NEM/, 'İstasyon ısı-nem'],
+  [/^TRANSPORT KÜVÖZ GÜNLÜK/, 'Küvöz günlük bakım'], [/^TRANSPORT KÜVÖZ ISI/, 'Küvöz ısı takip']];
+function adKisaVars(ad) { const e = adAyar && adAyar.etiket; if (e && e[ad]) { const t = e[ad]; delete e[ad]; const k = adKisa(ad); e[ad] = t; return k; } return adKisa(ad); }
+function adKisa(ad) {
+  const et = adAyar && adAyar.etiket && adAyar.etiket[ad]; if (et) return et;
+  for (const [r, t] of AD_KISA) if (r.test(ad)) return t;
+  const o = /^OKSİJEN SİSTEMİ NÖBET TESLİM KONTROL FORMU (.*)$/.exec(ad);
+  const bas = s => s.toLocaleLowerCase('tr-TR').replace(/^./, c => c.toLocaleUpperCase('tr-TR'));
+  if (o) return 'O₂ teslim: ' + bas(o[1].replace(/OKSİJEN TÜPÜ ?\/?(TÜPLERİ)?/g, '').replace(/\s+/g, ' ').trim() || 'tüp');
+  const d = /^(SABİT|VENTİLATÖR|PORTATİF) TİP OKSİJEN TÜPÜ DEĞİŞİM/.exec(ad);
+  if (d) return 'O₂ değişim: ' + bas(d[1]);
+  return bas(ad).slice(0, 32);
+}
+// Excel: HUSER ortak düzeni (112 modülleriyle aynı) — üstte başlık ve bilgi satırları, boş satır, gri kalın başlık satırı
+// (ince çerçeve), başlık altından dondurulmuş bölme ve süzgeç; Arial 10; toplam satırı kalın + açık mavi.
+const AD_X = {
+  f: { name: 'Arial', sz: 10 },
+  kenar: { left: { style: 'thin', color: { rgb: '94A3B8' } }, right: { style: 'thin', color: { rgb: '94A3B8' } }, top: { style: 'thin', color: { rgb: '94A3B8' } }, bottom: { style: 'thin', color: { rgb: '94A3B8' } } }
+};
+AD_X.baslik = { font: { name: 'Arial', sz: 12, bold: true } };
+AD_X.bas = { font: { name: 'Arial', sz: 10, bold: true }, fill: { fgColor: { rgb: 'E2E8F0' } }, border: AD_X.kenar, alignment: { wrapText: true, vertical: 'center' } };
+AD_X.toplam = { font: { name: 'Arial', sz: 10, bold: true }, fill: { fgColor: { rgb: 'DBEAFE' } }, border: AD_X.kenar };
+AD_X.yok = { font: { name: 'Arial', sz: 10, bold: true, color: { rgb: 'B91C1C' } }, fill: { fgColor: { rgb: 'FEE2E2' } } };
+AD_X.ok = { font: { name: 'Arial', sz: 10, color: { rgb: '166534' } } };
+AD_X.gri = { font: { name: 'Arial', sz: 10, color: { rgb: 'CBD5E1' } } };
+function adSayfa(wb, ad, { ustBilgi = [], baslik = [], satirlar = [], genislik = [], toplam, hucre }) {
+  const aoa = [...ustBilgi.map(l => [l]), ...(ustBilgi.length ? [[]] : []), baslik, ...satirlar];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const bs = ustBilgi.length ? ustBilgi.length + 1 : 0, ilk = bs + 1, n = Math.max(baslik.length, ...satirlar.map(r => r.length), 1);
+  const stil = (r, c, st) => { const a = XLSX.utils.encode_cell({ r, c }); if (!ws[a]) ws[a] = { t: 's', v: '' }; ws[a].s = st; };
+  for (let r = 0; r < aoa.length; r++) for (let c = 0; c < n; c++) { const a = XLSX.utils.encode_cell({ r, c }); if (ws[a]) ws[a].s = { font: AD_X.f }; }
+  ustBilgi.forEach((_, i) => stil(i, 0, i === 0 ? AD_X.baslik : { font: AD_X.f }));
+  baslik.forEach((_, c) => stil(bs, c, AD_X.bas));
+  satirlar.forEach((row, i) => {
+    const r = ilk + i;
+    if (toplam && toplam(row)) { for (let c = 0; c < n; c++) stil(r, c, AD_X.toplam); return; }
+    if (hucre) row.forEach((v, c) => { const st = hucre(v, c, row); if (st) stil(r, c, st); });
+  });
+  ws['!cols'] = Array.from({ length: n }, (_, c) => ({ wch: genislik[c] || Math.min(60, Math.max(8, ...[baslik, ...satirlar.slice(0, 300)].map(x => String(x[c] ?? '').length + 2))) }));
+  if (satirlar.length) ws['!autofilter'] = { ref: `A${bs + 1}:${XLSX.utils.encode_col(n - 1)}${aoa.length}` };
+  (wb.__donmus = wb.__donmus || []).push(bs + 1);
+  let sad = String(ad).replace(/[\\/?*[\]:]/g, ' ').slice(0, 31).trim() || 'Sayfa';
+  while (wb.SheetNames.includes(sad)) sad = sad.slice(0, 27) + ' ' + (wb.SheetNames.length + 1);
+  XLSX.utils.book_append_sheet(wb, ws, sad);
+}
+// SheetJS bu sürümde dondurulmuş bölme yazmıyor: dosya yazıldıktan sonra sayfa XML'ine eklenir (diğer modüllerdeki gibi başlık sabit)
+function adYaz(wb, ad) {
+  let u = new Uint8Array(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }));
+  try {
+    const z = XLSX.CFB.read(u, { type: 'array' });
+    (wb.__donmus || []).forEach((n, i) => {
+      const k = z.FullPaths.findIndex(p => p.endsWith('xl/worksheets/sheet' + (i + 1) + '.xml')); if (k < 0) return;
+      const e = z.FileIndex[k]; let x = new TextDecoder().decode(e.content);
+      const v = `<sheetViews><sheetView workbookViewId="0"><pane ySplit="${n}" topLeftCell="A${n + 1}" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>`;
+      x = /<sheetViews>[\s\S]*?<\/sheetViews>/.test(x) ? x.replace(/<sheetViews>[\s\S]*?<\/sheetViews>/, v) : x.replace(/(<dimension[^>]*\/>)/, '$1' + v);
+      e.content = new TextEncoder().encode(x); e.size = e.content.length;
+    });
+    u = new Uint8Array(XLSX.CFB.write(z, { fileType: 'zip', type: 'array' }));
+  } catch (e) { console.warn('dondurma eklenemedi', e); }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([u], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })); a.download = ad; document.body.appendChild(a); a.click(); a.remove();
+}
+const adSay = v => (typeof v === 'number' ? v : '');
+async function adExcel() {
   if (typeof XLSX === 'undefined') return;
   const wb = XLSX.utils.book_new();
+  const ilAd = (window.ASHI_ENTEG && window.ASHI_ENTEG.il) || '';
   if (adSekme === 'aylik' && adAylik && adAylik.kisiler) {
     const a = adAylik, ekipUy = s => !adAyEkipSec.size || String(s || '').split(', ').some(e => adAyEkipSec.has(e));
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[`ASOS imza ve form denetimi — ${a.ay} (${a.gun_sayisi} gün)`], [], ['Ad Soyad', 'Görev', 'İstasyon / ekip', 'Nöbet', 'İmza yok', 'Formu eksik nöbet', 'Eksik form', 'Günler'],
-      ...a.kisiler.filter(k => ekipUy(k.ekipler)).map(k => [k.ad, AD_GOREV[k.tur] || k.gorev, k.ekipler, k.nobet, k.imzasiz, k.form_eksik_nobet, k.eksik_form, k.gunler.join(' · ')])]), 'Kişiler');
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['İstasyon / ekip', 'Nöbet', 'İmza yok', 'Formu eksik nöbet', 'Eksik form'], ...a.ekipler.filter(e => ekipUy(e.ad)).map(e => [e.ad, e.nobet, e.imzasiz, e.form_eksik_nobet, e.eksik_form])]), 'İstasyonlar');
-    XLSX.writeFile(wb, `ASOS_denetim_${a.ay}.xlsx`); return;
+    const E = a.ekipler.filter(e => ekipUy(e.ad)).sort((x, y) => adSira(x.ad, y.ad));
+    const top = E.reduce((t, e) => [t[0] + e.nobet, t[1] + e.imzasiz, t[2] + e.form_eksik_nobet, t[3] + e.eksik_form], [0, 0, 0, 0]);
+    const ust = [`ASOS İmza ve Form Denetimi — ${a.ay} aylık`, `${ilAd} · ${a.gun_sayisi} günlük kayıt (${a.gunler.map(g => g.slice(8, 10)).join(', ')}) · kaydı olmayan günler sayılmaz${adAyEkipSec.size ? ' · ' + adAyEkipSec.size + ' ekip seçili' : ''}`];
+    adSayfa(wb, 'Toplam', { ustBilgi: ust, baslik: ['İstasyon / ekip', 'Nöbet', 'İmza atmayan nöbet', 'Formu eksik nöbet', 'Eksik form'], genislik: [36, 10, 14, 14, 12],
+      satirlar: [...E.map(e => [e.ad, e.nobet, e.imzasiz, e.form_eksik_nobet, e.eksik_form]), ['TOPLAM', ...top]], toplam: r => r[0] === 'TOPLAM',
+      hucre: (v, c) => (c === 2 || c === 3) && v > 0 ? AD_X.yok : null });
+    const K = a.kisiler.filter(k => ekipUy(k.ekipler)).sort((x, y) => ((y.imzasiz + y.form_eksik_nobet) - (x.imzasiz + x.form_eksik_nobet)) || adSira(x.ad, y.ad));
+    adSayfa(wb, 'Tüm personel', { ustBilgi: [`Tüm personel — ${a.ay}`], baslik: ['Ad Soyad', 'Görev', 'İstasyon / ekip', 'Nöbet', 'İmza atmadığı nöbet', 'Formu eksik nöbet', 'Eksik form', 'Sorunlu günler'], genislik: [28, 12, 34, 8, 12, 12, 10, 70],
+      satirlar: K.map(k => [k.ad, AD_GOREV[k.tur] || k.gorev, k.ekipler, k.nobet, k.imzasiz, k.form_eksik_nobet, k.eksik_form, k.gunler.join('   ')]),
+      hucre: (v, c) => (c === 4 || c === 5) && v > 0 ? AD_X.yok : null });
+    const EK = a.ekip_kisi || {};
+    E.forEach(e => {
+      const L = EK[e.ad] || [];
+      const t = L.reduce((t, k) => [t[0] + k.nobet, t[1] + k.imzasiz, t[2] + k.form_eksik_nobet, t[3] + k.eksik_form], [0, 0, 0, 0]);
+      adSayfa(wb, e.ad.replace(/ NOLU ASH[İI]$/i, '').replace(/ ASH[İI]$/i, ''), { ustBilgi: [`${e.ad} — ${a.ay}`], baslik: ['Ad Soyad', 'Görev', 'Nöbet', 'İmza atmadığı nöbet', 'Formu eksik nöbet', 'Eksik form', 'Sorunlu günler'], genislik: [28, 12, 8, 12, 12, 10, 70],
+        satirlar: [...L.map(k => [k.ad, AD_GOREV[k.tur] || k.gorev, k.nobet, k.imzasiz, k.form_eksik_nobet, k.eksik_form, k.gunler.join('   ')]), ['TOPLAM', '', ...t, '']], toplam: r => r[0] === 'TOPLAM',
+        hucre: (v, c) => (c === 3 || c === 4) && v > 0 ? AD_X.yok : null });
+    });
+    adYaz(wb, `ASOS_denetim_${a.ay}.xlsx`); return;
   }
-  const L = adSuz(adSecilenKisiler()); if (!L.length && !adSeciliGun.size) return;
-  const gunler = [...adSeciliGun].sort();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[`ASOS imza ve form denetimi — ${gunler.map(adTr).join(', ')}`], [], ['Nöbet günü', 'İstasyon / ekip', 'Ad Soyad', 'Görev', 'Nöbet başlangıç', 'Nöbet bitiş', 'İmza', 'Eksik formlar'],
-    ...L.map(x => [adTr(x.gun), x.ekip_ad, x.ad, AD_GOREV[x.tur] || x.gorev, adSaat(x.bas), adSaat(x.bit), x.imza ? adSaat(x.imza) : 'İMZA YOK', (x.eksik || []).join(' | ')])]), 'Denetim');
-  XLSX.writeFile(wb, `ASOS_denetim_${gunler[0] || ''}${gunler.length > 1 ? '_' + gunler[gunler.length - 1] : ''}.xlsx`);
+  if (!adSeciliGun.size) return;
+  if (!adAyar) await adAyarAl();
+  const kural = (adAyar && adAyar.kural) || {};
+  const L = adSuz(adSecilenKisiler()), tum = adSecilenKisiler(), gunler = [...adSeciliGun].sort();
+  const turu = f => kural[f] || 'ysp';
+  const fSet = new Set();
+  L.forEach(x => { (x.eksik || []).forEach(f => fSet.add(f)); (x.tamam || []).forEach(f => fSet.add(f)); });
+  const SIRA = { ef: 0, sur: 1, ysp: 2 };
+  const formlar = [...fSet].filter(f => turu(f) !== 'yok').sort((a, b) => (SIRA[turu(a)] - SIRA[turu(b)]) || adSira(adKisa(a), adKisa(b)));
+  const tamamMi = (x, f) => x.tamam ? x.tamam.includes(f) : (turu(f) === x.tur && !(x.eksik || []).includes(f));
+  const gunYazi = gunler.map(adTr).join(', ');
+  const ust = [`ASOS İmza ve Form Denetimi — ${gunYazi}`, `${ilAd} · ${tum.length} nöbet · ${tum.filter(k => !k.imza).length} imza yok · ${tum.filter(k => (k.eksik || []).length).length} kişinin formu eksik (${tum.reduce((t, k) => t + (k.eksik || []).length, 0)} form)${adSeciliEkip.size ? ' · ' + adSeciliEkip.size + ' ekip seçili' : ''}`];
+  // 1) Özet
+  const ek = {};
+  tum.forEach(k => { const a = ek[k.gun + '|' + k.ekip_ad] = ek[k.gun + '|' + k.ekip_ad] || [adTr(k.gun), k.ekip_ad, 0, 0, 0, 0]; a[2]++; if (!k.imza) a[3]++; if ((k.eksik || []).length) a[4]++; a[5] += (k.eksik || []).length; });
+  const er = Object.values(ek).sort((a, b) => adSira(a[1], b[1]) || (a[0] < b[0] ? 1 : -1));
+  const t = er.reduce((t, r) => [t[0] + r[2], t[1] + r[3], t[2] + r[4], t[3] + r[5]], [0, 0, 0, 0]);
+  adSayfa(wb, 'Özet', { ustBilgi: ust, baslik: ['Nöbet günü', 'İstasyon / ekip', 'Nöbetteki kişi', 'İmza atmayan', 'Formu eksik kişi', 'Eksik form'], genislik: [12, 36, 12, 12, 14, 11],
+    satirlar: [...er, ['TOPLAM', '', ...t]], toplam: r => r[0] === 'TOPLAM', hucre: (v, c) => (c === 3 || c === 4) && v > 0 ? AD_X.yok : null });
+  // 2) Kişi × form (✓ dolduruldu, ✗ doldurulmadı, boş: görevine ait değil)
+  const bas = ['Nöbet günü', 'İstasyon / ekip', 'Ad Soyad', 'Görev', 'Nöbet', 'İmza', 'Eksik form sayısı', ...formlar.map(f => `${adKisa(f)} (${AD_GOREV[turu(f)]})`)];
+  adSayfa(wb, 'Denetim', { ustBilgi: [`Kişi bazında denetim — ${gunYazi}`, '✓ dolduruldu · ✗ doldurulmadı · boş: kişinin görevine ait değil'], baslik: bas,
+    genislik: [12, 32, 26, 10, 24, 12, 10, ...formlar.map(() => 14)],
+    satirlar: L.map(x => [adTr(x.gun), x.ekip_ad, x.ad, AD_GOREV[x.tur] || x.gorev, `${adSaat(x.bas)} → ${adSaat(x.bit)}`, x.imza ? adSaat(x.imza) : 'İMZA YOK', (x.eksik || []).length,
+      ...formlar.map(f => (x.eksik || []).includes(f) ? '✗' : tamamMi(x, f) ? '✓' : '')]),
+    hucre: (v, c) => v === 'İMZA YOK' || v === '✗' ? AD_X.yok : v === '✓' ? AD_X.ok : (c === 6 && v > 0 ? AD_X.yok : null) });
+  // 3) Form adları
+  adSayfa(wb, 'Form adları', { ustBilgi: ['Form adları'], baslik: ['Görünen ad', 'ASOS’taki tam adı', 'Doldurması gereken'], genislik: [26, 90, 18],
+    satirlar: formlar.map(f => [adKisa(f), f, AD_GOREV[turu(f)]]) });
+  adYaz(wb, `ASOS_denetim_${gunler[0]}${gunler.length > 1 ? '_' + gunler[gunler.length - 1] : ''}.xlsx`);
 }
+function adAlKutu(yi) {
+  return `<div class="ad-al"><div class="ad-al-b">ASOS’tan veri al</div>
+    <div class="ad-adim"><span class="ad-no2">1</span><div><a href="${yi}" class="ad-yi" title="Tıklamayın; yer imleri çubuğuna sürükleyin" onclick="event.preventDefault();adDurum='Bu düğme tıklanmaz: yer imleri çubuğuna sürükleyin, sonra ASOS’ta Dönem İçi Hareketler ekranında ona basın.';adCiz()">⠿ HUSER imza-form denetimi</a>
+      <div class="ad-gri">Yalnız ilk seferde: bu düğmeyi farenizle tutup tarayıcının yer imleri çubuğuna sürükleyin.</div></div></div>
+    <div class="ad-adim"><span class="ad-no2">2</span><div><button type="button" class="ad-btn ad-btn-ana" onclick="adAsosAc()">🔗 ASOS’u aç</button>
+      <div class="ad-gri">Açılan ASOS sekmesinde yer işaretine basın; tek gün (13.11.2026) ya da aralık (01.11.2026-13.11.2026) yazın. Veriler buraya kendiliğinden gelir.</div></div></div>
+    <div class="ad-adim"><span class="ad-no2">⤓</span><div><label class="ad-btn ad-btn-ikinci">📂 Dosyadan yükle<input type="file" accept=".json" style="display:none" onchange="adDosya(this)"></label>
+      <div class="ad-gri">Yer işareti veriyi dosya olarak indirdiyse buradan ekleyin.</div></div></div>
+    <div class="ad-gri" style="margin-top:6px">Yalnız ASHİ ekipleri okunur. Denetimi nöbetin ertesi sabahı 09:00’dan sonra alın. TC ve telefon okunmaz.</div></div>
+    <div class="ad-suz"><span class="ad-lb">Nöbet günü</span>`;
+}
+// İK Ana Sayfa: denetim kutusu (son kayıtlı gün + düğmeler)
+function adAnaEkle() {
+  if (!adYetkili()) return;
+  const a = document.getElementById('ashiAna'); if (!a) return;
+  let k = document.getElementById('anaDenetim');
+  if (!k) { k = document.createElement('div'); k.id = 'anaDenetim'; k.className = 'ad-ana-kutu'; const h = a.querySelector('.ashi-ana-hizli'); if (h) h.before(k); else a.appendChild(k); }
+  const ciz = () => {
+    const g = adGunler[0], o = g && g.ozet;
+    k.innerHTML = `<div class="ad-ana-ust"><div><h3>✍️ İmza ve form denetimi</h3><small>ASOS Dönem İçi Hareketler · yalnız ASHİ ekipleri</small></div>
+      <div class="ad-ana-dug"><button type="button" class="ad-btn ad-btn-ana" onclick="adAsosAc()">🔗 ASOS’u aç</button><label class="ad-btn ad-btn-ikinci">📂 Dosyadan yükle<input type="file" accept=".json" style="display:none" onchange="showAsosDenetim();adDosya(this)"></label><button type="button" class="ad-btn ad-btn-ikinci" onclick="anNav(showAsosDenetim)">Denetimi aç ›</button></div></div>
+      ${o ? `<div class="ad-ana-say"><div><span>Son kayıt</span><b>${adTr(g.gun)}</b></div><div><span>İmza atmayan</span><b class="${o.imzasiz ? 'ad-no' : ''}">${o.imzasiz}</b></div><div><span>Formu eksik kişi</span><b class="${o.form_eksik_kisi ? 'ad-tur' : ''}">${o.form_eksik_kisi}</b></div><div><span>Nöbetteki kişi</span><b>${o.kisi}</b></div></div>`
+        : '<div class="ad-gri" style="margin-top:8px">Henüz denetim kaydı yok. ASOS’u açıp yer işaretiyle ilk günü alın.</div>'}`;
+  };
+  ciz();
+  adGunleriAl().then(ciz);
+}
+if (typeof anAnaSayfa === 'function') { const _adAna = anAnaSayfa; anAnaSayfa = function () { const r = _adAna.apply(this, arguments); try { adAnaEkle(); } catch (e) {} return r; }; }
 function adCiz() {
   const g = document.getElementById('adGovde'); if (!g || !adYetkili()) return;
   const yi = 'javascript:' + encodeURIComponent(asosDenetimYerImi());
@@ -9693,24 +9865,20 @@ function adCiz() {
   if (adDurum) ust += `<div class="ad-uyari">${adEsc(adDurum)}</div>`;
   let ic = '';
   if (adSekme === 'gunluk') {
-    const ekipler = [...new Set([...adSeciliGun].flatMap(x => adVeri[x] ? (adVeri[x].ekipler || []).map(e => e.ad) : []))].sort((a, b) => a.localeCompare(b, 'tr'));
+    const ekipler = [...new Set([...adSeciliGun].flatMap(x => adVeri[x] ? (adVeri[x].ekipler || []).map(e => e.ad) : []))].sort(adSira);
     [...adSeciliEkip].forEach(e => { if (!ekipler.includes(e)) ekipler.push(e); });
     const gunSec = adGunler.map(x => ({ v: x.gun, t: adTr(x.gun), e: x.ozet ? `${x.ozet.imzasiz} imzasız · ${x.ozet.form_eksik_kisi} formu eksik` : '' }));
-    ic = `<div class="ad-al"><div><b>ASOS’tan al:</b> 1) <a href="${yi}" class="ad-yi" title="Tıklamayın; yer imleri çubuğuna sürükleyin" onclick="event.preventDefault();adDurum='Bu düğme tıklanmaz: yer imleri çubuğuna sürükleyin, sonra ASOS’ta Dönem İçi Hareketler ekranında ona basın.';adCiz()">HUSER imza-form denetimi</a> düğmesini bir kez yer imleri çubuğuna sürükleyin.
-      2) <button type="button" class="btn-sec" onclick="adAsosAc()">ASOS’u aç</button> ile açılan sekmede yer işaretine basın; tek gün (13.11.2026) ya da aralık (01.11.2026-13.11.2026) yazın. Veriler buraya kendiliğinden gelir.
-      <label class="btn-sec" style="cursor:pointer">Dosyadan yükle<input type="file" accept=".json" style="display:none" onchange="adDosya(this)"></label></div>
-      <div class="ad-gri">Yalnız ASHİ ekipleri okunur. Denetimi nöbetin ertesi sabahı 09:00’dan sonra alın. TC ve telefon okunmaz.</div></div>
-      <div class="ad-suz"><span class="ad-lb">Nöbet günü</span>${adMs('adMsGun', 'Gün seçin', gunSec, adSeciliGun)}
-      <span class="ad-lb">Ekip</span>${adMs('adMsEkip', 'Bütün ASHİ ekipleri', ekipler.map(e => ({ v: e, t: e })), adSeciliEkip)}
+    ic = adAlKutu(yi) + `${adMs('adMsGun', 'Nöbet günü', 'Gün seçin', gunSec, adSeciliGun)}
+      <span class="ad-lb">Ekip</span>${adEkipSecici('adEkipSec', ekipler)}
       <input id="adAra" type="search" placeholder="Ad ara…" oninput="adCiz2()">
       <select id="adGorev" style="width:170px" onchange="adCiz2()"><option value="">Bütün görevler</option><option value="ef">Ekip şefi</option><option value="ysp">YSP</option><option value="sur">Sürücü</option></select>
       <label><input id="adSorunlu" type="checkbox" checked onchange="adCiz2()"> Yalnız sorunlular</label>
       ${adSeciliGun.size === 1 ? '<button type="button" class="btn-sec" style="margin-left:auto;color:#b91c1c" onclick="adGunSil()">Bu günü sil</button>' : ''}</div><div id="adIcerik">${adGunTablo()}</div>`;
   } else if (adSekme === 'aylik') {
     const ay = (adAylik && adAylik.ay) || ([...adSeciliGun].sort().pop() || new Date().toISOString()).slice(0, 7);
-    const ekipler = adAylik && adAylik.ekipler ? adAylik.ekipler.map(e => e.ad).filter(Boolean).sort((a, b) => a.localeCompare(b, 'tr')) : [];
+    const ekipler = adAylik && adAylik.ekipler ? adAylik.ekipler.map(e => e.ad).filter(Boolean).sort(adSira) : [];
     ic = `<div class="ad-suz"><label class="ad-lb">Ay <input id="adAy" type="month" value="${ay}" onchange="adAylikAl(this.value)"></label>
-      <span class="ad-lb">Ekip</span>${adMs('adMsAyEkip', 'Bütün ASHİ ekipleri', ekipler.map(e => ({ v: e, t: e })), adAyEkipSec)}
+      <span class="ad-lb">Ekip</span>${adEkipSecici('adAyEkipSec', ekipler)}
       <input id="adAra2" type="search" placeholder="Ad ara…" oninput="adCiz2()">
       <label><input id="adSorunlu2" type="checkbox" checked onchange="adCiz2()"> Yalnız sorunlular</label>
       <span class="ad-sw"><button type="button" class="${adAyEkip ? '' : 'on'}" onclick="adAyEkip=false;adCiz()">Kişi</button><button type="button" class="${adAyEkip ? 'on' : ''}" onclick="adAyEkip=true;adCiz()">İstasyon</button></span></div><div id="adIcerik">${adAylikTablo()}</div>`;
@@ -9721,6 +9889,7 @@ function adCiz() {
   g.innerHTML = ust + ic;
   Object.entries(kalici).forEach(([i, v]) => { const e = document.getElementById(i); if (!e) return; if (typeof v === 'boolean') e.checked = v; else e.value = v; });
   if (adSekme !== 'ayar') adCiz2();
+  adEkipGeriYukle();
 }
 function adCiz2() { const i = document.getElementById('adIcerik'); if (i) i.innerHTML = adSekme === 'aylik' ? adAylikTablo() : adGunTablo(); }
 document.addEventListener('mousedown', e => { if (adMsAcik && !e.target.closest('#' + adMsAcik)) { const d = document.getElementById(adMsAcik); if (d) d.open = false; adMsAcik = ''; } });
