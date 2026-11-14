@@ -9966,33 +9966,16 @@ async function adExcel() {
   const formlar = [...fSet].filter(f => turu(f) !== 'yok').sort((a, b) => (SIRA[turu(a)] - SIRA[turu(b)]) || adSira(adKisa(a), adKisa(b)));
   const tamamMi = (x, f) => x.tamam ? x.tamam.includes(f) : (turu(f) === x.tur && !(x.eksik || []).includes(f));
   const gunYazi = gunler.map(adTr).join(', ');
-  const ust = [`ASOS İmza ve Form Denetimi — ${gunYazi}`, `${ilAd} · ${tum.length} nöbet · ${tum.filter(k => !k.imza).length} imza yok · ${tum.filter(k => (k.eksik || []).length).length} kişinin formu eksik (${tum.reduce((t, k) => t + (k.eksik || []).length, 0)} form)${adSeciliEkip.size ? ' · ' + adSeciliEkip.size + ' ekip seçili' : ''}`];
-  // 1) Özet
-  const ek = {};
-  tum.forEach(k => { const a = ek[k.gun + '|' + k.ekip_ad] = ek[k.gun + '|' + k.ekip_ad] || [adTr(k.gun), k.ekip_ad, 0, 0, 0, 0]; a[2]++; if (!k.imza) a[3]++; if ((k.eksik || []).length) a[4]++; a[5] += (k.eksik || []).length; });
-  const er = Object.values(ek).sort((a, b) => adSira(a[1], b[1]) || (a[0] < b[0] ? 1 : -1));
-  const t = er.reduce((t, r) => [t[0] + r[2], t[1] + r[3], t[2] + r[4], t[3] + r[5]], [0, 0, 0, 0]);
-  adSayfa(wb, 'Özet', { ustBilgi: ust, baslik: ['Nöbet günü', 'İstasyon / ekip', 'Nöbetteki kişi', 'İmza atmayan', 'Formu eksik kişi', 'Eksik form'], genislik: [12, 36, 12, 12, 14, 11],
-    satirlar: [...er, ['TOPLAM', '', ...t]], toplam: r => r[0] === 'TOPLAM', hucre: (v, c) => (c === 3 || c === 4) && v > 0 ? AD_X.yok : null });
-  // 2) Kişi × form (✓ dolduruldu, ✗ doldurulmadı, boş: görevine ait değil)
+  // Sürüm 13.74: günlük Excel yalnız ekranda görünen listeyi verir (süzgeç ve kart seçimiyle)
+  const kt = { imzasiz: 'imza atmayanlar', eksik: 'formu eksikler', hepsi: 'bütün nöbetler' }[adKart] || ((document.getElementById('adSorunlu') || {}).checked ? 'yalnız sorunlular' : 'bütün nöbetler');
+  const gr = (document.getElementById('adGorev') || {}).value, q = ((document.getElementById('adAra') || {}).value || '').trim();
+  const suz = [`liste: ${kt}`, gr ? 'görev: ' + AD_GOREV[gr] : '', q ? `arama: “${q}”` : '', adSeciliEkip.size ? adSeciliEkip.size + ' ekip seçili' : ''].filter(Boolean).join(' · ');
   const bas = ['Nöbet günü', 'İstasyon / ekip', 'Ad Soyad', 'Görev', 'Nöbet', 'İmza', 'Eksik form sayısı', ...formlar.map(f => `${adKisa(f)} (${AD_GOREV[turu(f)]})`)];
-  adSayfa(wb, 'Denetim', { ustBilgi: [`Kişi bazında denetim — ${gunYazi}`, '✓ dolduruldu · ✗ doldurulmadı · boş: kişinin görevine ait değil'], baslik: bas,
+  adSayfa(wb, 'Denetim', { ustBilgi: [`ASOS İmza ve Form Denetimi — ${gunYazi}`, `${ilAd} · ${suz} · ${L.length} kişi · ${L.filter(k => !k.imza).length} imza yok · ${L.filter(k => (k.eksik || []).length).length} formu eksik`, '✓ dolduruldu · ✗ doldurulmadı · boş: kişinin görevine ait değil'], baslik: bas,
     genislik: [12, 32, 26, 10, 24, 12, 10, ...formlar.map(() => 14)],
     satirlar: L.map(x => [adTr(x.gun), x.ekip_ad, x.ad, AD_GOREV[x.tur] || x.gorev, `${adSaat(x.bas)} → ${adSaat(x.bit)}`, x.imza ? adSaat(x.imza) : 'İMZA YOK', (x.eksik || []).length,
       ...formlar.map(f => (x.eksik || []).includes(f) ? '✗' : tamamMi(x, f) ? '✓' : '')]),
     hucre: (v, c) => v === 'İMZA YOK' || v === '✗' ? AD_X.yok : v === '✓' ? AD_X.ok : (c === 6 && v > 0 ? AD_X.yok : null) });
-  // 3) Nöbet defteri (okunmuşsa; bütün ekipler, süzgeçsiz)
-  const DF = adSecilenDefter().L;
-  if (DF.length) {
-    const o = adDefterOzet(DF);
-    adSayfa(wb, 'Nöbet defteri', { ustBilgi: [`Nöbet defteri — ${gunYazi}`, `${o.ekip} ekip · ${o.yok} defter yazılmadı · ${o.sorun} bildirim`],
-      baslik: ['Nöbet günü', 'İstasyon / ekip', 'Nöbet', 'Defter', 'Yazıldı', 'ASOS durumu', 'Bildirim', 'Bildirilen durum', 'Açıklama (tamamı)'], genislik: [12, 32, 24, 12, 13, 22, 10, 50, 90],
-      satirlar: DF.map(x => x.durum === 'yok' ? [adTr(x.gun), x.ekip_ad, '', 'YAZILMADI', '', '', '', '', ''] : [adTr(x.gun), x.ekip_ad, `${adSaat(x.bas)} → ${adSaat(x.bit)}`, 'Yazıldı', x.yazildi ? adSaat(x.yazildi) : '', x.asos_durum || '', x.sorun ? 'BİLDİRİM' : '', x.neden === 'durum' ? (x.asos_durum || '') : (x.isaret || []).join(' · '), x.aciklama || '']),
-      hucre: v => v === 'YAZILMADI' || v === 'BİLDİRİM' ? AD_X.yok : (v === 'Yazıldı' ? AD_X.ok : null) });
-  }
-  // 4) Form adları
-  adSayfa(wb, 'Form adları', { ustBilgi: ['Form adları'], baslik: ['Görünen ad', 'ASOS’taki tam adı', 'Doldurması gereken'], genislik: [26, 90, 18],
-    satirlar: formlar.map(f => [adKisa(f), f, AD_GOREV[turu(f)]]) });
   adYaz(wb, `ASOS_denetim_${gunler[0]}${gunler.length > 1 ? '_' + gunler[gunler.length - 1] : ''}.xlsx`);
 }
 const AD_BILGI = 'İlk seferde “⠿ HUSER imza-form denetimi” düğmesini farenizle tutup yer imleri çubuğuna sürükleyin (tıklanmaz). Sonra “ASOS’u aç” deyin, açılan ASOS sekmesinde Dönem İçi Hareketler ekranında yer işaretine basın; tek gün (13.11.2026) ya da aralık (01.11.2026-13.11.2026) yazın, veriler buraya kendiliğinden gelir. Yer işareti veriyi dosya olarak indirdiyse “Dosyadan yükle” ile ekleyin. Yalnız ASHİ ekipleri okunur; denetimi nöbetin ertesi sabahı 09:00’dan sonra alın. TC ve telefon okunmaz.';
