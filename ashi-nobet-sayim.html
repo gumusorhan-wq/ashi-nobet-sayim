@@ -6060,7 +6060,7 @@ function lfSecenek(v){
     else lfMsDoldur('lfOzBrans',br);
   }
 }
-function lfIsaret(){ document.querySelectorAll('select.lf-sel').forEach(e=>e.classList.toggle('on',!!e.value)); document.querySelectorAll('.lf-ms').forEach(e=>e.classList.toggle('on',lfMs(e.id).size>0)); }
+function lfIsaret(){ document.querySelectorAll('select.lf-sel').forEach(e=>e.classList.toggle('on',!!e.value)); document.querySelectorAll('.lf-ms:not(.ad-ms)').forEach(e=>e.classList.toggle('on',lfMs(e.id).size>0)); }
 // Çoklu branş seçimi: işaretli branşlar (boş küme = tüm branşlar)
 function lfMs(id){ const e=lfEl(id); return new Set(e?[...e.querySelectorAll('input[data-v]:checked')].map(x=>x.dataset.v):[]); }
 function lfMsYazi(id){ const e=lfEl(id); if(!e) return; const s=[...lfMs(id)]; e.querySelector('summary').textContent=!s.length?'Tüm branşlar':s.length<=2?s.join(', '):s.length+' branş seçili'; const t=e.querySelector('input[data-tum]'); if(t) t.checked=!s.length; lfMsBas(e); }
@@ -6082,7 +6082,7 @@ document.addEventListener('change', ev=>{
 document.addEventListener('click', ev=>{ const tb=ev.target.closest&&ev.target.closest('[data-ms-temizle]'); if(tb){ ev.preventDefault(); const ms=tb.closest('.lf-ms'); ms.querySelectorAll('input[data-v]').forEach(x=>{x.checked=false;}); lfMsBas(ms); }
   const ub=ev.target.closest&&ev.target.closest('[data-ms-uygula]'); if(ub){ ev.preventDefault(); const ms=ub.closest('.lf-ms'); ms.__uyg=true; ms.removeAttribute('open'); lfMsYazi(ms.id); const fn=window[ms.dataset.on]; if(typeof fn==='function') fn(); } });
 document.addEventListener('click', ev=>{ document.querySelectorAll('.lf-ms[open]').forEach(d=>{ if(!d.contains(ev.target)) d.removeAttribute('open'); }); });
-document.addEventListener('toggle', ev=>{ const ms=ev.target; if(!ms.classList||!ms.classList.contains('lf-ms')) return;
+document.addEventListener('toggle', ev=>{ const ms=ev.target; if(!ms.classList||!ms.classList.contains('lf-ms')||ms.classList.contains('ad-ms')) return;  /* 13.74: denetimin gün seçicisi kendi yazısını tutar ('Tüm branşlar' yazılmasın) */
   if(ms.open){ ms.__snap=[...lfMs(ms.id)]; ms.__uyg=false; lfMsBas(ms); }
   else { if(!ms.__uyg&&ms.__snap){ ms.querySelectorAll('input[data-v]').forEach(x=>{x.checked=ms.__snap.includes(x.dataset.v);}); lfMsYazi(ms.id); } ms.__uyg=false; }
 }, true);
