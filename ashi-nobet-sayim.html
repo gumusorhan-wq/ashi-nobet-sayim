@@ -926,6 +926,43 @@ body.ui-side #nobelAnaliziModal .modal-head,body.ui-side #cokluModal .modal-head
 body.ui-side #nobelAnaliziModal .modal-head span,body.ui-side #cokluModal .modal-head span,body.ui-side #boslukModal .modal-head span,body.ui-side #surucuDuzenModal .modal-head span,body.ui-side #tumPersonelDuzenModal .modal-head span,body.ui-side #cokluTumPersonelModal .modal-head span,body.ui-side #uygunPersonelModal .modal-head span{color:#0f172a!important;font-size:18px!important}
 body.ui-side #nobelAnaliziModal .modal-head div div,body.ui-side #cokluModal .modal-head div div,body.ui-side #boslukModal .modal-head div div,body.ui-side #surucuDuzenModal .modal-head div div,body.ui-side #tumPersonelDuzenModal .modal-head div div,body.ui-side #cokluTumPersonelModal .modal-head div div,body.ui-side #uygunPersonelModal .modal-head div div{color:#64748b!important;font-size:12px!important}
 body.ui-side #nobelAnaliziModal .modal-head .modal-close,body.ui-side #cokluModal .modal-head .modal-close,body.ui-side #boslukModal .modal-head .modal-close,body.ui-side #surucuDuzenModal .modal-head .modal-close,body.ui-side #tumPersonelDuzenModal .modal-head .modal-close,body.ui-side #cokluTumPersonelModal .modal-head .modal-close,body.ui-side #uygunPersonelModal .modal-head .modal-close{background:#fff!important;color:#475569!important;border:1px solid #cbd5e1!important;border-radius:0!important;font-size:13px!important;padding:5px 12px!important}
+/* HUSER 13.74: İmza ve form denetimi */
+body.ui-side #asosDenetimModal{left:var(--an-w);z-index:800;background:#f3f6f4;padding:0 18px 14px;top:62px;bottom:0;overflow:hidden}
+body.ui-side #asosDenetimModal>.modal-box{width:100%!important;max-width:none!important;margin:0;height:100%;max-height:none;display:flex;flex-direction:column;box-sizing:border-box}
+body.ui-side #asosDenetimModal .modal-head{background:#fff!important;border-bottom:1px solid #e2e8f0}
+body.ui-side #asosDenetimModal .modal-head span{color:#0f172a!important}
+body.ui-side #asosDenetimModal .modal-head div div{color:#64748b!important}
+body.ui-side #asosDenetimModal .modal-head .modal-close{color:#475569!important;background:none!important}
+#asosDenetimModal .ad-sekler{display:flex;gap:4px;align-items:center;border-bottom:1px solid #e2e8f0;margin-bottom:12px}
+#asosDenetimModal .ad-sek{border:0;background:none;padding:8px 14px;font:inherit;font-size:13px;font-weight:600;color:#475569;cursor:pointer;border-bottom:2px solid transparent}
+#asosDenetimModal .ad-sek.on{color:#0055a4;border-bottom-color:#0055a4}
+#asosDenetimModal .ad-al{background:#eff6ff;border:1px solid #bfdbfe;padding:10px 12px;font-size:13px;line-height:2;margin-bottom:10px}
+#asosDenetimModal .ad-yi{display:inline-block;background:#0055a4;color:#fff!important;padding:2px 10px;text-decoration:none;font-weight:700;line-height:1.6}
+#asosDenetimModal .ad-suz{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 12px;font-size:13px}
+#asosDenetimModal .ad-suz input[type=search]{min-width:220px;padding:6px 8px;border:1px solid #cbd5e1}
+#asosDenetimModal .ad-suz select,#asosDenetimModal .ad-suz input[type=month]{padding:6px 8px;border:1px solid #cbd5e1;background:#fff}
+#asosDenetimModal .ad-kartlar{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:10px}
+#asosDenetimModal .ad-kart{background:#fff;border:1px solid #e2e8f0;padding:10px 14px}
+#asosDenetimModal .ad-kart.kirmizi{border-left:4px solid #dc2626}#asosDenetimModal .ad-kart.turuncu{border-left:4px solid #ea580c}
+#asosDenetimModal .ad-kb{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.04em}
+#asosDenetimModal .ad-kv{font-size:28px;font-weight:800;color:#0f172a;line-height:1.2}
+#asosDenetimModal .ad-ka{font-size:12px;color:#64748b}
+#asosDenetimModal .ad-alt{font-size:12px;color:#64748b;margin:6px 0}
+#asosDenetimModal .ad-uyari{background:#fef3c7;color:#92400e;padding:8px 12px;font-size:13px;margin:6px 0}
+#asosDenetimModal .ad-bos{padding:24px;text-align:center;color:#64748b;font-size:13px}
+#asosDenetimModal .ad-tw{overflow:auto;border:1px solid #e2e8f0;background:#fff}
+#asosDenetimModal .ad-t{width:100%;border-collapse:collapse;font-size:13px}
+#asosDenetimModal .ad-t th{position:sticky;top:0;background:#f8fafc;text-align:left;padding:8px 10px;font-size:12px;color:#475569;border-bottom:1px solid #e2e8f0;z-index:1}
+#asosDenetimModal .ad-t td{padding:7px 10px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+#asosDenetimModal .ad-t tr.ad-ilk td{border-top:2px solid #e2e8f0}
+#asosDenetimModal .ad-ok{color:#15803d;font-weight:600}#asosDenetimModal .ad-no{color:#b91c1c;font-weight:700}#asosDenetimModal .ad-tur{color:#c2410c;font-weight:700}
+#asosDenetimModal .ad-gri{color:#94a3b8;font-size:12px}#asosDenetimModal .ad-kucuk{font-size:11.5px;color:#475569}
+#asosDenetimModal .ad-f{color:#c2410c;font-size:12.5px}
+#asosDenetimModal .ad-sw button{border:1px solid #cbd5e1;background:#fff;padding:5px 12px;font:inherit;font-size:12.5px;cursor:pointer}
+#asosDenetimModal .ad-sw button.on{background:#0055a4;color:#fff;border-color:#0055a4}
+#asosDenetimModal .ad-lb{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:#334155}
+#asosDenetimModal .ad-suz label{display:inline-flex;align-items:center;gap:6px}
+#asosDenetimModal .ad-ana{background:#0055a4!important;color:#fff!important;border-color:#0055a4!important}
 </style>
 </head>
 <body>
@@ -945,6 +982,18 @@ body.ui-side #nobelAnaliziModal .modal-head .modal-close,body.ui-side #cokluModa
 </div>
 
 
+<div id="asosDenetimModal" class="modal-overlay">
+  <div class="modal-box" style="width:min(96vw,1400px);max-width:1400px">
+    <div class="modal-head" style="background:#0055a4">
+      <div>
+        <span style="color:#fff;font-weight:700;font-size:15px">✍️ İmza ve form denetimi</span>
+        <div style="color:rgba(255,255,255,.78);font-size:11px;margin-top:3px">ASOS Dönem İçi Hareketler: nöbet listesinde olup imza atmayanlar ve kendi formlarını doldurmayanlar.</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('asosDenetimModal').style.display='none'">✕</button>
+    </div>
+    <div class="modal-body" id="adGovde" style="padding:14px 20px;max-height:80vh;overflow:auto"></div>
+  </div>
+</div>
 <button type="button" id="anBurger" onclick="anMenuAc()" aria-label="Menüyü aç" title="Menü">☰</button>
 <nav id="asideNav" aria-label="Ana menü">
   <div class="an-brand"><div class="an-logo"><img id="anLogo" alt="Logo"></div><div class="an-bt"><b>ASHİ Nöbet Sayım</b><small id="anPeriod">Rapor yüklenmedi</small></div></div>
@@ -971,6 +1020,8 @@ body.ui-side #nobelAnaliziModal .modal-head .modal-close,body.ui-side #cokluModa
   <button type="button" class="an-it" data-ic="shield" data-ov="nobelAnaliziModal" data-ag="ef" data-need="rep" onclick="anNav(function(){window.__anG='ef';showAnalizModal('ef')})"><span class="an-ic"></span><span class="an-tx">Ekip Şefi analizi</span></button>
   <button type="button" class="an-it" data-ic="heart" data-ov="nobelAnaliziModal" data-ag="ysp" data-need="rep" onclick="anNav(function(){window.__anG='ysp';showAnalizModal('ysp')})"><span class="an-ic"></span><span class="an-tx">YSP analizi</span></button>
   <button type="button" class="an-it" data-ic="wheel" data-ov="nobelAnaliziModal" data-ag="sur" data-need="rep" onclick="anNav(function(){window.__anG='sur';showAnalizModal('sur')})"><span class="an-ic"></span><span class="an-tx">Sürücü analizi</span></button>
+  <div class="an-sec" id="anDenetimSec" style="display:none">DENETİM</div>
+  <button type="button" class="an-it" data-ic="ucheck" data-ov="asosDenetimModal" id="anDenetim" style="display:none" onclick="anNav(showAsosDenetim)" title="ASOS'tan imza atmayanlar ve formunu doldurmayanlar"><span class="an-ic"></span><span class="an-tx">İmza ve form denetimi</span></button>
   <div class="an-sec">VERİ</div>
   <button type="button" class="an-it" data-ic="box" data-g="arsiv" id="anArsiv"><span class="an-ic"></span><span class="an-tx">Arşiv</span></button>
   <button type="button" class="an-it" data-ic="down" data-need="rep" onclick="anNav(openIzinRaporPicker)"><span class="an-ic"></span><span class="an-tx">İzin / Rapor dosyası</span></button>
@@ -9030,7 +9081,7 @@ async function ashiSonAyiAc() {
 })();
 
 // ===== Yeni görünüm (sol menü) aç/kapat — tercih bu tarayıcıda saklanır; klasik görünüm varsayılan =====
-const AN_OVERLAYS = ['nobelAnaliziModal','cokluModal','boslukModal','surucuDuzenModal','tumPersonelDuzenModal','cokluTumPersonelModal','uygunPersonelModal'];
+const AN_OVERLAYS = ['asosDenetimModal','nobelAnaliziModal','cokluModal','boslukModal','surucuDuzenModal','tumPersonelDuzenModal','cokluTumPersonelModal','uygunPersonelModal'];
 const AN_ICONS = {
   ana:'<path d="M2 7.5L8 2.5l6 5"/><path d="M3.5 6.5V14h3.5v-4h2v4h3.5V6.5"/>',
   home:'<path d="M2 14V6l6-4 6 4v8z"/><path d="M6.5 14v-4h3v4"/>', doc:'<path d="M3 2h7l3 3v9H3z"/><path d="M5.5 8h5M5.5 11h5"/>', grid:'<rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M2 7h12M6 3v10"/>',
@@ -9354,6 +9405,247 @@ function anAnaTazele() { if (!document.body.classList.contains('ana-acik')) retu
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tara);else tara();
   new MutationObserver(function(){tara();}).observe(document.documentElement,{childList:true,subtree:true});
 })();
+</script>
+<script>
+// ═══════════════════════════════════════════════════════════
+// HUSER 13.74 — ASOS İMZA VE FORM DENETİMİ
+// ASOS "Dönem İçi Hareketler" verisi yer işaretiyle (kullanıcının kendi ASOS oturumu) okunur, İK'ya gönderilir;
+// hesap ve kayıt sunucuda (/api/asos-denetim). TC / telefon okunmaz. Yalnız İK yükleme yetkisi olanlar (il admini) görür.
+// ═══════════════════════════════════════════════════════════
+const AD_ASOS_URL = 'https://asos.saglik.gov.tr/PersonnelManagement/OnGuardMovement';
+const AD_ASOS_ORIGIN = 'https://asos.saglik.gov.tr';
+const AD_GOREV = {ef: 'Ekip şefi', ysp: 'YSP', sur: 'Sürücü', yok: 'Denetlenmez', diger: 'Diğer'};
+let adSekme = 'gunluk', adGun = null, adGunler = [], adSonuc = null, adAylik = null, adAyar = null, adAyEkip = false, adDurum = '';
+function adApi(y, ek, g) { return window.ASHI_ENTEG.api.denetim(y, ek, g); }
+function adYetkili() { const E = window.ASHI_ENTEG; return !!(E && E.aktif && E.api && E.api.denetim && ['super_admin', 'il_admin'].includes(E.rol)); }
+function adEsc(s) { return escapeHtml(s == null ? '' : String(s)); }
+function adTr(g) { return g ? `${g.slice(8, 10)}.${g.slice(5, 7)}.${g.slice(0, 4)}` : ''; }
+function adSaat(s) { return s ? `${s.slice(8, 10)}.${s.slice(5, 7)} ${s.slice(11, 16)}` : ''; }
+function adDun() { const d = new Date(); d.setDate(d.getDate() - 1); return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`; }
+
+// ---- ASOS sayfasında çalışan istemci (yer işareti). Tek başına çalışır; satır içi yorum yok (tek satıra sıkıştırılır). ----
+async function asosDenetimIstemci(cfg) {
+  const O = cfg.O;
+  const S = t => { let d = document.getElementById('__hd'); if (!d) { d = document.createElement('div'); d.id = '__hd'; d.style.cssText = 'position:fixed;top:10px;right:10px;z-index:2147483647;background:#0055a4;color:#fff;padding:12px 16px;border-radius:6px;font:700 14px sans-serif;max-width:400px;box-shadow:0 6px 20px rgba(0,0,0,.35)'; document.body.appendChild(d); } d.textContent = t; };
+  const bekle = ms => new Promise(r => setTimeout(r, ms));
+  const p2 = n => String(n).padStart(2, '0');
+  try {
+    if (!cfg.test && location.hostname !== 'asos.saglik.gov.tr') { S('Bu yer işareti ASOS sekmesinde tıklanır. ASOS’ta Dönem İçi Hareketler ekranını açıp yer işaretine basın.'); return; }
+    let gir = cfg.gun;
+    if (gir === undefined) gir = prompt('Hangi nöbet günü denetlensin? (GG.AA.YYYY)\nNöbet o gün 09:00’da başlar, ertesi sabah biter; denetimi ertesi sabah 09:00’dan sonra alın.', cfg.dun || '');
+    if (gir === null) { S('İptal edildi.'); return; }
+    const mm = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(String(gir).trim());
+    if (!mm) { S('Tarih biçimi hatalı (örnek: 13.11.2026).'); return; }
+    const y = +mm[3], m = +mm[2], g = +mm[1];
+    const gun = y + '-' + p2(m) + '-' + p2(g);
+    const d1 = new Date(y, m - 1, g), d2 = new Date(y, m - 1, g + 1);
+    const tok = (document.querySelector('input[name=__RequestVerificationToken]') || {}).value || '';
+    const post = async (yol, prm) => {
+      const b = new URLSearchParams(Object.assign({ sort: '', group: '', filter: '' }, prm));
+      if (tok) b.set('__RequestVerificationToken', tok);
+      const h = { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Requested-With': 'XMLHttpRequest' };
+      if (tok) h.RequestVerificationToken = tok;
+      for (let i = 0; i < 3; i++) {
+        try { const r = await fetch('/PersonnelManagement/OnGuardMovement/' + yol, { method: 'POST', credentials: 'include', headers: h, body: b.toString() }); if (r.status === 401 || r.redirected) throw new Error('ASOS oturumu kapalı; ASOS’a yeniden girin.'); if (!r.ok) throw new Error('HTTP ' + r.status); const j = await r.json(); return Array.isArray(j) ? j : (j.Data || []); }
+        catch (e) { if (i === 2 || /oturum/.test(e.message)) throw e; await bekle(800 * (i + 1)); }
+      }
+    };
+    S('Ekip listesi alınıyor…');
+    const ekL = await post('GetTeamList', { StartDate: d1.toUTCString(), CityCodeId: '', AreaId: '-1', 'TeamTypeCategoryIds[0]': '-1', 'TeamTypeIds[0]': '-1' });
+    if (!ekL.length) { S('ASOS ekip listesi boş geldi. Ekranda Listele’ye basıp tekrar deneyin.'); return; }
+    const isler = [], ekipler = ekL.map(t => ({ id: String(t.TeamId), kod: String(t.TeamCode || ''), ad: String(t.TeamName || ''), nobet: [], imza: [], formlar: [] }));
+    const hata = [];
+    ekipler.forEach(e => [d1, d2].forEach(d => ['GetPersonnelWorkList', 'GetPersonnelSignedList', 'GetControlFormDefintionList'].forEach(u => isler.push({ e, d, u }))));
+    let bitti = 0;
+    const isci = async () => {
+      while (isler.length) {
+        const is = isler.shift();
+        try {
+          const L = await post(is.u, { StartDate: is.d.toUTCString(), TeamId: is.e.id, UserCityCodeId: '' });
+          if (is.u === 'GetPersonnelWorkList') L.forEach(r => is.e.nobet.push({ uid: r.UserId, ad: r.PersonnelFullName || ((r.PersonnelName || '') + ' ' + (r.PersonnelSurname || '')).trim(), gorev: r.Duty, bas: r.DeterminateEnteranceDate, bit: r.DeteminateExitDate }));
+          else if (is.u === 'GetPersonnelSignedList') L.forEach(r => is.e.imza.push({ uid: r.UserId, ad: r.PersonnelFullName, bas: r.DeterminateEnteranceDate, giris: r.EnteranceDate }));
+          else L.forEach(r => is.e.formlar.push({ id: r.ControlFormAnswerId, ad: r.Name, tarih: r.ControlDate }));
+        } catch (e) { if (/oturum/.test(e.message)) { isler.length = 0; hata.unshift(e.message); } else hata.push(is.e.ad + ': ' + e.message); }
+        bitti++;
+        if (bitti % 6 === 0) S('ASOS okunuyor… ' + Math.round(100 * bitti / (bitti + isler.length)) + '% (' + ekipler.length + ' ekip)');
+      }
+    };
+    await Promise.all([1, 2, 3, 4, 5, 6].map(isci));
+    const dolu = ekipler.filter(e => e.nobet.length);
+    if (!dolu.length) { S(hata[0] || 'Bu gün için nöbet listesi bulunamadı.'); return; }
+    const paket = { t: 'asos-denetim', gun, ekipler: dolu, hata: hata.slice(0, 20) };
+    let w = null;
+    try { if (window.opener && !window.opener.closed) w = window.opener; } catch (e) { w = null; }
+    if (!w) {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(paket)], { type: 'application/json' })); a.download = 'asos-denetim-' + gun + '.json'; document.body.appendChild(a); a.click(); a.remove();
+      S('ASOS verisi dosya olarak indirildi (asos-denetim-' + gun + '.json). İK › İmza ve form denetimi › “Dosyadan yükle” ile ekleyin.'); return;
+    }
+    let ok = false;
+    addEventListener('message', e => { if (e.origin === O && e.data && e.data.t === 'asos-denetim-ack') ok = true; });
+    S('İK’nın yanıtı bekleniyor…');
+    for (let i = 0; i < 40 && !ok; i++) { try { w.postMessage(paket, O); } catch (e) {} await bekle(1000); }
+    if (ok) { S(dolu.length + ' ekip İK’ya gönderildi ✓' + (hata.length ? ' (' + hata.length + ' istek alınamadı)' : '')); setTimeout(() => { const d = document.getElementById('__hd'); if (d) d.remove(); }, 6000); }
+    else S('İK sayfası yanıt vermedi. İK’da İmza ve form denetimi sayfası açık mı?');
+  } catch (e) { S('Hata: ' + (e && e.message || e)); }
+}
+function asosDenetimYerImi() { return '(' + asosDenetimIstemci.toString() + ')(' + JSON.stringify({ O: location.origin, dun: adDun() }) + ')'; }
+
+// ---- İK tarafı ----
+window.addEventListener('message', e => {
+  if (e.origin !== AD_ASOS_ORIGIN || !e.data || e.data.t !== 'asos-denetim') return;
+  try { e.source && e.source.postMessage({ t: 'asos-denetim-ack' }, e.origin); } catch (x) {}
+  if (window.__adSonPaket === e.data.gun + '|' + (e.data.ekipler || []).length) return;
+  window.__adSonPaket = e.data.gun + '|' + (e.data.ekipler || []).length;
+  adPaketYukle(e.data);
+});
+async function adPaketYukle(p) {
+  if (!adYetkili()) return;
+  if (!p || !p.gun || !Array.isArray(p.ekipler)) { adDurum = 'Dosya ASOS denetim verisi değil.'; adCiz(); return; }
+  adDurum = `${adTr(p.gun)} için ${p.ekipler.length} ekip ASOS’tan geldi, hesaplanıyor…`; adSekme = 'gunluk'; adCiz();
+  try {
+    adSonuc = await adApi('POST', '/gun/' + p.gun, { ekipler: p.ekipler });
+    adGun = p.gun;
+    adDurum = (p.hata && p.hata.length) ? `Uyarı: ASOS’tan ${p.hata.length} istek alınamadı (${p.hata.slice(0, 3).join(' · ')}). Gerekirse yeniden alın.` : '';
+    await adGunleriAl();
+  } catch (e) { adDurum = 'Kaydedilemedi: ' + e.message; }
+  adCiz();
+}
+async function adGunleriAl() { try { adGunler = await adApi('GET', '/gunler'); } catch (e) { adGunler = []; } }
+async function showAsosDenetim() {
+  const m = document.getElementById('asosDenetimModal');
+  m.style.display = 'block';
+  if (!adYetkili()) { document.getElementById('adGovde').innerHTML = '<div class="ad-bos">Bu sayfa İK yükleme yetkisi olan kullanıcılara açıktır.</div>'; return; }
+  adCiz();
+  await adGunleriAl();
+  if (!adGun && adGunler.length) { adGun = adGunler[0].gun; try { adSonuc = await adApi('GET', '/gun/' + adGun); } catch (e) { adSonuc = null; } }
+  adCiz();
+}
+function adSekmeSec(s) { adSekme = s; if (s === 'aylik' && !adAylik) adAylikAl(); if (s === 'ayar' && !adAyar) adAyarAl(); adCiz(); }
+async function adGunSec(g) { adGun = g; adSonuc = null; adCiz(); try { adSonuc = await adApi('GET', '/gun/' + g); } catch (e) { adDurum = e.message; } adCiz(); }
+async function adGunSil() {
+  if (!adGun || !confirm(`${adTr(adGun)} denetim kaydı silinsin mi? Aylık istatistikten de çıkar.`)) return;
+  try { await adApi('DELETE', '/gun/' + adGun); adSonuc = null; adGun = null; adAylik = null; await adGunleriAl(); if (adGunler.length) await adGunSec(adGunler[0].gun); } catch (e) { adDurum = e.message; }
+  adCiz();
+}
+function adAsosAc() { window.open(AD_ASOS_URL, 'asosDenetim'); }
+function adDosya(inp) {
+  const f = inp.files && inp.files[0]; inp.value = ''; if (!f) return;
+  f.text().then(t => adPaketYukle(JSON.parse(t))).catch(() => { adDurum = 'Dosya okunamadı.'; adCiz(); });
+}
+async function adAylikAl(ay) {
+  const v = ay || (document.getElementById('adAy') || {}).value || (adGun || new Date().toISOString()).slice(0, 7);
+  adAylik = { ay: v, yukleniyor: true }; adCiz();
+  try { adAylik = await adApi('GET', '/aylik/' + v); } catch (e) { adAylik = { ay: v, hata: e.message }; }
+  adCiz();
+}
+async function adAyarAl() { try { adAyar = await adApi('GET', '/ayar'); } catch (e) { adAyar = { hata: e.message }; } adCiz(); }
+async function adAyarKaydet() {
+  const kural = {};
+  document.querySelectorAll('#asosDenetimModal select[data-form]').forEach(s => { kural[s.dataset.form] = s.value; });
+  const erken = +(document.getElementById('adErken') || {}).value || 30;
+  try { adAyar = await adApi('PUT', '/ayar', { kural, erken_dk: erken }); adDurum = 'Ayarlar kaydedildi. Yeni ayar, bundan sonra alınan günlere uygulanır; eski bir günü yeniden hesaplatmak için o günü ASOS’tan yeniden alın.'; } catch (e) { adDurum = 'Kaydedilemedi: ' + e.message; }
+  adCiz();
+}
+function adSuz(k) {
+  const q = ((document.getElementById('adAra') || {}).value || '').toLocaleUpperCase('tr-TR');
+  const sorun = (document.getElementById('adSorunlu') || { checked: true }).checked;
+  const gr = (document.getElementById('adGorev') || {}).value || '';
+  return (k || []).filter(x => (!sorun || !x.imza || (x.eksik || []).length) && (!gr || x.tur === gr) && (!q || (x.ad + ' ' + x.ekip_ad).toLocaleUpperCase('tr-TR').includes(q)));
+}
+function adGunTablo() {
+  const s = adSonuc; if (!s) return '<div class="ad-bos">Bu gün için kayıt yok.</div>';
+  const L = adSuz(s.kisiler);
+  const kart = (b, v, a, c) => `<div class="ad-kart${c ? ' ' + c : ''}"><div class="ad-kb">${b}</div><div class="ad-kv">${v}</div><div class="ad-ka">${a}</div></div>`;
+  const o = s.ozet || {};
+  let h = `<div class="ad-kartlar">${kart('Okunan ekip', o.ekip || 0, 'nöbet listesi olan')}${kart('Nöbetteki kişi', o.kisi || 0, adTr(s.gun) + ' nöbet günü')}${kart('İmza atmayan', o.imzasiz || 0, 'nöbet listesinde var, imza yok', o.imzasiz ? 'kirmizi' : '')}${kart('Formu eksik kişi', o.form_eksik_kisi || 0, (o.eksik_form || 0) + ' eksik form', o.form_eksik_kisi ? 'turuncu' : '')}</div>`;
+  if (s.erken_alindi) h += '<div class="ad-uyari">Bu gün, nöbet bitmeden (ertesi sabah 09:00’dan önce) alınmış. Sonuçlar eksik olabilir; ertesi sabah yeniden alın.</div>';
+  h += `<div class="ad-alt">ASOS’tan alındı: ${adEsc(new Date(s.alindi).toLocaleString('tr-TR'))} · ${adEsc(s.alan)} · Görünen ${L.length}/${(s.kisiler || []).length}</div>`;
+  if (!L.length) return h + '<div class="ad-bos">Süzgece uyan kişi yok' + ((document.getElementById('adSorunlu') || { checked: true }).checked ? ' — bu gün sorun görünmüyor.' : '.') + '</div>';
+  h += '<div class="ad-tw"><table class="ad-t"><thead><tr><th>İstasyon / ekip</th><th>Ad Soyad</th><th>Görev</th><th>Nöbet</th><th>İmza</th><th>Eksik formlar</th></tr></thead><tbody>';
+  let son = '';
+  L.forEach(x => {
+    const yeni = x.ekip_ad !== son; son = x.ekip_ad;
+    h += `<tr class="${yeni ? 'ad-ilk' : ''}"><td>${yeni ? adEsc(x.ekip_ad) : ''}</td><td><b>${adEsc(x.ad)}</b></td><td>${adEsc(AD_GOREV[x.tur] || x.gorev)}</td><td style="white-space:nowrap">${adSaat(x.bas)} → ${adSaat(x.bit)}</td>
+      <td>${x.imza ? `<span class="ad-ok">✓ ${adSaat(x.imza).slice(6)}</span>` : '<span class="ad-no">İmza yok</span>'}</td>
+      <td>${(x.eksik || []).length ? (x.eksik || []).map(f => `<div class="ad-f">${adEsc(f)}</div>`).join('') : (x.gerekli ? `<span class="ad-ok">✓ ${x.gerekli} form</span>` : '<span class="ad-gri">—</span>')}</td></tr>`;
+  });
+  return h + '</tbody></table></div>';
+}
+function adAylikTablo() {
+  const a = adAylik;
+  if (!a || a.yukleniyor) return '<div class="ad-bos">Yükleniyor…</div>';
+  if (a.hata) return `<div class="ad-uyari">${adEsc(a.hata)}</div>`;
+  if (!a.gun_sayisi) return '<div class="ad-bos">Bu ay için kayıtlı gün yok.</div>';
+  let h = `<div class="ad-alt">${a.gun_sayisi} günlük kayıt: ${a.gunler.map(g => g.slice(8, 10)).join(', ')}. Eksik günler istatistiğe girmez.</div>`;
+  if (adAyEkip) {
+    h += '<div class="ad-tw"><table class="ad-t"><thead><tr><th>İstasyon / ekip</th><th>Nöbet</th><th>İmza yok</th><th>Formu eksik nöbet</th><th>Eksik form</th></tr></thead><tbody>';
+    a.ekipler.forEach(e => { h += `<tr><td><b>${adEsc(e.ad)}</b></td><td>${e.nobet}</td><td class="${e.imzasiz ? 'ad-no' : ''}">${e.imzasiz}</td><td class="${e.form_eksik_nobet ? 'ad-tur' : ''}">${e.form_eksik_nobet}</td><td>${e.eksik_form}</td></tr>`; });
+    return h + '</tbody></table></div>';
+  }
+  const q = ((document.getElementById('adAra2') || {}).value || '').toLocaleUpperCase('tr-TR');
+  const sorun = (document.getElementById('adSorunlu2') || { checked: true }).checked;
+  const L = a.kisiler.filter(k => (!sorun || k.imzasiz || k.form_eksik_nobet) && (!q || (k.ad + ' ' + k.ekipler).toLocaleUpperCase('tr-TR').includes(q)));
+  h += '<div class="ad-tw"><table class="ad-t"><thead><tr><th>Ad Soyad</th><th>Görev</th><th>İstasyon / ekip</th><th>Nöbet</th><th>İmza yok</th><th>Formu eksik nöbet</th><th>Eksik form</th><th>Günler</th></tr></thead><tbody>';
+  L.forEach(k => { h += `<tr><td><b>${adEsc(k.ad)}</b></td><td>${adEsc(AD_GOREV[k.tur] || k.gorev)}</td><td>${adEsc(k.ekipler)}</td><td>${k.nobet}</td><td class="${k.imzasiz ? 'ad-no' : ''}">${k.imzasiz}</td><td class="${k.form_eksik_nobet ? 'ad-tur' : ''}">${k.form_eksik_nobet}</td><td>${k.eksik_form}</td><td class="ad-kucuk">${adEsc(k.gunler.join(' · '))}</td></tr>`; });
+  return h + (L.length ? '' : '<tr><td colspan="8" class="ad-bos">Süzgece uyan kişi yok.</td></tr>') + '</tbody></table></div>';
+}
+function adAyarTablo() {
+  const a = adAyar; if (!a) return '<div class="ad-bos">Yükleniyor…</div>'; if (a.hata) return `<div class="ad-uyari">${adEsc(a.hata)}</div>`;
+  const sec = ad => `<select style="width:200px" data-form="${adEsc(ad)}">${['ef', 'ysp', 'sur', 'yok'].map(g => `<option value="${g}" ${a.kural[ad] === g ? 'selected' : ''}>${AD_GOREV[g]}</option>`).join('')}</select>`;
+  return `<div class="ad-alt">Her form, seçilen görevdeki kişilerden <b>her birinin kendi nöbet süresi içinde</b> doldurulmuş olmalı. ASOS’ta yeni bir form görülürse buraya kendiliğinden eklenir (varsayılan YSP).</div>
+    <div style="margin:10px 0"><label>Nöbetten önce sayılan süre: <input id="adErken" type="number" min="0" max="180" value="${a.erken_dk}" style="width:70px"> dakika</label> <span class="ad-gri">(09:00 nöbeti için 30 dk → formlar 08:30’dan sayılır)</span></div>
+    <div class="ad-tw"><table class="ad-t"><thead><tr><th>ASOS form adı</th><th>Doldurması gereken</th></tr></thead><tbody>${a.bilinen_formlar.map(f => `<tr><td>${adEsc(f)}</td><td>${sec(f)}</td></tr>`).join('')}</tbody></table></div>
+    <button type="button" class="btn-sec ad-ana" style="margin-top:12px" onclick="adAyarKaydet()">💾 Ayarları kaydet</button>`;
+}
+function adExcel() {
+  if (typeof XLSX === 'undefined') return;
+  const wb = XLSX.utils.book_new();
+  if (adSekme === 'aylik' && adAylik && adAylik.kisiler) {
+    const a = adAylik;
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[`ASOS imza ve form denetimi — ${a.ay} (${a.gun_sayisi} gün)`], [], ['Ad Soyad', 'Görev', 'İstasyon / ekip', 'Nöbet', 'İmza yok', 'Formu eksik nöbet', 'Eksik form', 'Günler'],
+      ...a.kisiler.map(k => [k.ad, AD_GOREV[k.tur] || k.gorev, k.ekipler, k.nobet, k.imzasiz, k.form_eksik_nobet, k.eksik_form, k.gunler.join(' · ')])]), 'Kişiler');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['İstasyon / ekip', 'Nöbet', 'İmza yok', 'Formu eksik nöbet', 'Eksik form'], ...a.ekipler.map(e => [e.ad, e.nobet, e.imzasiz, e.form_eksik_nobet, e.eksik_form])]), 'İstasyonlar');
+    XLSX.writeFile(wb, `ASOS_denetim_${a.ay}.xlsx`); return;
+  }
+  if (!adSonuc) return;
+  const L = adSuz(adSonuc.kisiler);
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([[`ASOS imza ve form denetimi — ${adTr(adSonuc.gun)} nöbet günü`], [], ['İstasyon / ekip', 'Ad Soyad', 'Görev', 'Nöbet başlangıç', 'Nöbet bitiş', 'İmza', 'Eksik formlar'],
+    ...L.map(x => [x.ekip_ad, x.ad, AD_GOREV[x.tur] || x.gorev, adSaat(x.bas), adSaat(x.bit), x.imza ? adSaat(x.imza) : 'İMZA YOK', (x.eksik || []).join(' | ')])]), 'Denetim');
+  XLSX.writeFile(wb, `ASOS_denetim_${adSonuc.gun}.xlsx`);
+}
+function adCiz() {
+  const g = document.getElementById('adGovde'); if (!g || !adYetkili()) return;
+  const yi = 'javascript:' + encodeURIComponent(asosDenetimYerImi());
+  const sek = (k, t) => `<button type="button" class="ad-sek${adSekme === k ? ' on' : ''}" onclick="adSekmeSec('${k}')">${t}</button>`;
+  let ust = `<div class="ad-sekler">${sek('gunluk', 'Günlük')}${sek('aylik', 'Aylık istatistik')}${sek('ayar', 'Ayarlar')}
+    <span style="flex:1"></span>${adSekme !== 'ayar' ? '<button type="button" class="btn-sec" onclick="adExcel()">📥 Excel’e aktar</button>' : ''}</div>`;
+  if (adDurum) ust += `<div class="ad-uyari">${adEsc(adDurum)}</div>`;
+  let ic = '';
+  if (adSekme === 'gunluk') {
+    ic = `<div class="ad-al"><div><b>ASOS’tan al:</b> 1) <a href="${yi}" class="ad-yi" title="Tıklamayın; yer imleri çubuğuna sürükleyin" onclick="event.preventDefault();adDurum='Bu düğme tıklanmaz: yer imleri çubuğuna sürükleyin, sonra ASOS’ta Dönem İçi Hareketler ekranında ona basın.';adCiz()">HUSER imza-form denetimi</a> düğmesini bir kez yer imleri çubuğuna sürükleyin.
+      2) <button type="button" class="btn-sec" onclick="adAsosAc()">ASOS’u aç</button> ile açılan sekmede yer işaretine basın, nöbet gününü yazın. Veriler buraya kendiliğinden gelir.
+      <label class="btn-sec" style="cursor:pointer">Dosyadan yükle<input type="file" accept=".json" style="display:none" onchange="adDosya(this)"></label></div>
+      <div class="ad-gri">Denetimi nöbetin ertesi sabahı 09:00’dan sonra alın. TC ve telefon okunmaz.</div></div>
+      <div class="ad-suz"><label class="ad-lb">Nöbet günü <select style="width:320px" onchange="adGunSec(this.value)">${adGunler.length ? adGunler.map(x => `<option value="${x.gun}" ${x.gun === adGun ? 'selected' : ''}>${adTr(x.gun)} · ${x.ozet ? x.ozet.imzasiz + ' imzasız, ' + x.ozet.form_eksik_kisi + ' formu eksik' : ''}</option>`).join('') : '<option>Kayıt yok</option>'}</select></label>
+      <input id="adAra" type="search" placeholder="Ad ya da istasyon ara…" oninput="adCiz2()">
+      <select id="adGorev" style="width:170px" onchange="adCiz2()"><option value="">Bütün görevler</option><option value="ef">Ekip şefi</option><option value="ysp">YSP</option><option value="sur">Sürücü</option></select>
+      <label><input id="adSorunlu" type="checkbox" checked onchange="adCiz2()"> Yalnız sorunlular</label>
+      ${adGun ? '<button type="button" class="btn-sec" style="margin-left:auto;color:#b91c1c" onclick="adGunSil()">Bu günü sil</button>' : ''}</div><div id="adIcerik">${adGunTablo()}</div>`;
+  } else if (adSekme === 'aylik') {
+    const ay = (adAylik && adAylik.ay) || (adGun || new Date().toISOString()).slice(0, 7);
+    ic = `<div class="ad-suz"><label class="ad-lb">Ay <input id="adAy" type="month" value="${ay}" onchange="adAylikAl(this.value)"></label>
+      <input id="adAra2" type="search" placeholder="Ad ya da istasyon ara…" oninput="adCiz2()">
+      <label><input id="adSorunlu2" type="checkbox" checked onchange="adCiz2()"> Yalnız sorunlular</label>
+      <span class="ad-sw"><button type="button" class="${adAyEkip ? '' : 'on'}" onclick="adAyEkip=false;adCiz()">Kişi</button><button type="button" class="${adAyEkip ? 'on' : ''}" onclick="adAyEkip=true;adCiz()">İstasyon</button></span></div><div id="adIcerik">${adAylikTablo()}</div>`;
+  } else ic = adAyarTablo();
+  const ara = (document.getElementById('adAra') || {}).value, ara2 = (document.getElementById('adAra2') || {}).value;
+  g.innerHTML = ust + ic;
+  if (ara && document.getElementById('adAra')) document.getElementById('adAra').value = ara;
+  if (ara2 && document.getElementById('adAra2')) document.getElementById('adAra2').value = ara2;
+}
+function adCiz2() { const i = document.getElementById('adIcerik'); if (i) i.innerHTML = adSekme === 'aylik' ? adAylikTablo() : adGunTablo(); }
+document.addEventListener('DOMContentLoaded', () => { const b = document.getElementById('anDenetim'), s = document.getElementById('anDenetimSec'); const v = adYetkili(); if (b) b.style.display = v ? '' : 'none'; if (s) s.style.display = v ? '' : 'none'; });
+
 </script>
 </body>
 </html>
